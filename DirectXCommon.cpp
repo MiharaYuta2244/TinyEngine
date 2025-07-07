@@ -3,6 +3,8 @@
 #include "WinApp.h"
 #include <format>
 
+const uint32_t DirectXCommon::kMaxSRVCount = 512;
+
 using namespace Microsoft::WRL;
 
 DirectXCommon::DirectXCommon() {}
@@ -127,6 +129,10 @@ void DirectXCommon::EndFrame() {
 	assert(SUCCEEDED(hr));
 }
 
+D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::GetSRVCPUDescriptorHandle(uint32_t index) { return GetCPUDescriptorHandle(srvDescriptorHeap_, descriptorSizeSRV_, index); }
+
+D3D12_GPU_DESCRIPTOR_HANDLE DirectXCommon::GetSRVGPUDescriptorHandle(uint32_t index) { return GetGPUDescriptorHandle(srvDescriptorHeap_, descriptorSizeSRV_, index); }
+
 void DirectXCommon::InitializeDXGIDevice() {
 	// HRESULTはWindows系のエラーコードであり、
 	// 関数が成功したかどうかをSUCCEEDEDマクロで判定できる
@@ -144,7 +150,7 @@ void DirectXCommon::InitializeDXGIDevice() {
 		// ソフトウェアアダプタでなければ採用！
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
 			// 採用したアダプタの情報をログに出力。wstringの方なので注意
-			Log(StringUtility::ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
+			Logger::Log(StringUtility::ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
 			break;
 		}
 		useAdapter_ = nullptr; // ソフトウェアアダプタの場合は見なかったことにする
@@ -162,13 +168,13 @@ void DirectXCommon::InitializeDXGIDevice() {
 		// 指定した機能レベルでデバイスが生成できたかを確認
 		if (SUCCEEDED(hr)) {
 			// 生成できたのでログ出力を行ってループを抜ける
-			Log(std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
+			Logger::Log(std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
 			break;
 		}
 	}
 	// デバイスの生成がうまくいかなかったので起動できない
 	assert(device_ != nullptr);
-	Log("Complete create D3D12Device!!!\n"); // 初期化完了のログをだす
+	Logger::Log("Complete create D3D12Device!!!\n"); // 初期化完了のログをだす
 }
 
 void DirectXCommon::CreateCommandObjects() {
@@ -208,10 +214,16 @@ void DirectXCommon::CreateSwapChain() {
 }
 
 void DirectXCommon::CreateDescriptorHeaps() {
+
+	// DescriptorSizeを取得しておく
+	descriptorSizeSRV_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	descriptorSizeRTV_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	descriptorSizeDSV_ = device_->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+
 	// RTV用のディスクリプタの数は2。RTVはShader内で触るものではないので、ShaderVisibleはfalse
 	rtvDescriptorHeap_ = CreateDescripterHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
 	// SRV用のヒープでディスクリプタの数は128。SRVはShader内で触るものなので、ShaderVisibleはtrue
-	srvDescriptorHeap_ = CreateDescripterHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
+	srvDescriptorHeap_ = CreateDescripterHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
 	// DSV用のヒープでディスクリプタの数は1。DSVはShader内で触るものではないので、ShaderVisibleはfalse
 	dsvDescriptorHeap_ = CreateDescripterHeap(device_, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 }
@@ -313,20 +325,13 @@ void DirectXCommon::CreateRootSignature() {
 	ID3DBlob* errorBlob = nullptr;
 	hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
 	if (FAILED(hr)) {
-		Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
+		Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
 		assert(false);
 	}
 	// バイナリを元に生成
 	rootSignature_ = nullptr;
 	hr = device_->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
 	assert(SUCCEEDED(hr));
-
-	if (errorBlob) {
-		errorBlob->Release();
-	}
-
-	// Blob解放
-	signatureBlob->Release();
 }
 
 void DirectXCommon::CreateGraphicsPipeline() {
@@ -418,9 +423,6 @@ void DirectXCommon::CreateGraphicsPipeline() {
 	// 実際に生成
 	hr = device_->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState_));
 	assert(SUCCEEDED(hr));
-
-	vertexShaderBlob->Release();
-	pixelShaderBlob->Release();
 }
 
 void DirectXCommon::CreateViewport() {
@@ -461,8 +463,6 @@ ComPtr<ID3D12DescriptorHeap> DirectXCommon::CreateDescripterHeap(ComPtr<ID3D12De
 	return descriptorHeap;
 }
 
-void DirectXCommon::Log(const std::string& message) { OutputDebugStringA(message.c_str()); }
-
 IDxcBlob* DirectXCommon::CompileShader(
     // CompilerするShaderファイルへのパス
     const std::wstring& filePath,
@@ -471,7 +471,7 @@ IDxcBlob* DirectXCommon::CompileShader(
     // 初期化で生成したものを3つ
     IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler) {
 	// これからシェーダーをコンパイルする旨をログに出す
-	Log(StringUtility::ConvertString(std::format(L"Begin CompileShader, path:{},profile:{}\n", filePath, profile)));
+	Logger::Log(StringUtility::ConvertString(std::format(L"Begin CompileShader, path:{},profile:{}\n", filePath, profile)));
 	// hlslファイルを読む
 	IDxcBlobEncoding* shaderSource = nullptr;
 	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
@@ -503,7 +503,7 @@ IDxcBlob* DirectXCommon::CompileShader(
 	IDxcBlobUtf8* shaderError = nullptr;
 	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
 	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
-		Log(shaderError->GetStringPointer());
+		Logger::Log(shaderError->GetStringPointer());
 		// 警告・エラーダメゼッタイ
 		assert(false);
 	}
@@ -512,7 +512,7 @@ IDxcBlob* DirectXCommon::CompileShader(
 	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
 	assert(SUCCEEDED(hr));
 	// 成功したログを出す
-	Log(StringUtility::ConvertString(std::format(L"Compile Succeeded,path:{}, profile:{}\n", filePath, profile)));
+	Logger::Log(StringUtility::ConvertString(std::format(L"Compile Succeeded,path:{}, profile:{}\n", filePath, profile)));
 	// もう使わないソースを解放
 	shaderSource->Release();
 	shaderResult->Release();
@@ -585,3 +585,15 @@ void DirectXCommon::SetupDebugLayer() {
 	}
 }
 #endif
+
+D3D12_CPU_DESCRIPTOR_HANDLE DirectXCommon::GetCPUDescriptorHandle(ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index) {
+	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	handleCPU.ptr += (descriptorSize * index);
+	return handleCPU;
+}
+
+D3D12_GPU_DESCRIPTOR_HANDLE DirectXCommon::GetGPUDescriptorHandle(ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index) {
+	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
+	handleGPU.ptr += (descriptorSize * index);
+	return handleGPU;
+}

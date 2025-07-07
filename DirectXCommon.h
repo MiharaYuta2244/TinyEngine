@@ -1,11 +1,11 @@
 #pragma once
 class WinApp; // 前方宣言
 #include "WinApp.h"
+#include "Logger.h"
 #include <memory>
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <cassert>
-#include <string>
 #include <wrl.h>
 #pragma comment(lib, "dxguid.lib")
 #include <dxcapi.h>
@@ -28,6 +28,24 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> GetGraphicsPipelineState() { return graphicsPipelineState_; }
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> GetRootSignature() { return rootSignature_; }
 
+	/// <summary>
+	/// SRVの指定番号のCPUディスクリプタハンドルを取得する
+	/// </summary>
+	/// <param name="index">指定番号</param>
+	/// <returns>CPUディスクリプタハンドル</returns>
+	D3D12_CPU_DESCRIPTOR_HANDLE GetSRVCPUDescriptorHandle(uint32_t index);
+
+	/// <summary>
+	/// SRVの指定番号のGPUディスクリプタハンドルを取得する
+	/// </summary>
+	/// <param name="index">指定番号</param>
+	/// <returns>GPUディスクリプタハンドル</returns>
+	D3D12_GPU_DESCRIPTOR_HANDLE GetSRVGPUDescriptorHandle(uint32_t index);
+
+public:
+	// 最大SRV数(最大テクスチャ枚数)
+	static const uint32_t kMaxSRVCount;
+
 private:
 	void InitializeDXGIDevice();
 	void CreateCommandObjects();
@@ -43,12 +61,6 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescripterHeap(Microsoft::WRL::ComPtr<ID3D12Device> device, D3D12_DESCRIPTOR_HEAP_TYPE heapType, UINT numDescriptors, bool shaderVisible);
 
-	/// <summary>
-	/// 文字列を表示する関数
-	/// </summary>
-	/// <param name="message">文字列</param>
-	void Log(const std::string& message);
-
 	IDxcBlob* CompileShader(
 	    // CompilerするShaderファイルへのパス
 	    const std::wstring& filePath,
@@ -58,6 +70,9 @@ private:
 	    IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler);
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateDepthStencilTextureResource(Microsoft::WRL::ComPtr<ID3D12Device> device, int32_t width, int32_t height);
+
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index);
+	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index);
 
 private:
 
@@ -108,6 +123,11 @@ private:
 
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc_;
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc_;
+
+	// DescriptorSize
+	uint32_t descriptorSizeSRV_;
+	uint32_t descriptorSizeRTV_;
+	uint32_t descriptorSizeDSV_;
 
 	// Debug
 	Microsoft::WRL::ComPtr<ID3D12Debug1> debugController_;

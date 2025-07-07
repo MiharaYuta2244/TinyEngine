@@ -200,7 +200,7 @@ void Model::Draw(ComPtr<ID3D12GraphicsCommandList> commandList) {
 	// wvp用のBufferの場所を設定
 	commandList->SetGraphicsRootConstantBufferView(1, wvpResource_->GetGPUVirtualAddress());
 	// SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である。
-	commandList->SetGraphicsRootDescriptorTable(2, useMonsterBall_ ? srvHandle2_ : srvHandle_);
+	//commandList->SetGraphicsRootDescriptorTable(2, useMonsterBall_ ? srvHandle2_ : srvHandle_);
 	// ライティングCBufferの場所を指定
 	commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource_->GetGPUVirtualAddress());
 	// CameraForGPUCBufferの場所を指定

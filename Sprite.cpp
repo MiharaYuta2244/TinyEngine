@@ -1,89 +1,34 @@
 #include "Sprite.h"
 #include "MathUtility.h"
 #include "Matrix4x4.h"
+#include "SpriteCommon.h"
 #include "VertexData.h"
 #include "WinApp.h"
+#include "TextureManager.h"
 #include <cassert>
 
 using namespace Microsoft::WRL;
 
 Sprite::~Sprite() {}
 
-void Sprite::Initialize(ComPtr<ID3D12Device> device) {
-	// スプライトの頂点リソースを作る
-	vertexResource_ = CreateBufferResource(device, sizeof(VertexData) * 4);
-	// インデックスリソースを作る
-	indexResource_ = CreateBufferResource(device, sizeof(uint32_t) * 6);
+void Sprite::Initialize(SpriteCommon* spriteCommon, TextureManager* textureManager, std::string textureFilePath) {
 
-	// リソースの先頭のアドレスから使う
-	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
-	// 使用するリソースのサイズは頂点6つ分のサイズ
-	vertexBufferView_.SizeInBytes = sizeof(VertexData) * 4;
-	// 1頂点あたりのサイズ
-	vertexBufferView_.StrideInBytes = sizeof(VertexData);
+	spriteCommon_ = spriteCommon;
+	textureManager_ = textureManager;
 
-	indexBufferView_ = {};
-	// リソースの先頭のアドレスから使う
-	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
-	// 使用するリソースのサイズはインデックス6つ分のサイズ
-	indexBufferView_.SizeInBytes = sizeof(uint32_t) * 6;
-	// インデックスはuint32_tとする
-	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
+	// 頂点データ作成
+	CreateVertexData();
 
-	// 頂点リソースにデータを書き込む
-	VertexData* vertexData = nullptr;
-	// 書き込むためのアドレスを取得
-	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	// 頂点データ4つで四角形の描画
-	vertexData[0].position = {0.0f, 360.0f, 0.0f, 1.0f}; // 左下
-	vertexData[0].texcoord = {0.0f, 1.0f};
-	vertexData[1].position = {0.0f, 0.0f, 0.0f, 1.0f}; // 左上
-	vertexData[1].texcoord = {0.0f, 0.0f};
-	vertexData[2].position = {640.0f, 360.0f, 0.0f, 1.0f}; // 右下
-	vertexData[2].texcoord = {1.0f, 1.0f};
-	vertexData[3].position = {640.0f, 0.0f, 0.0f, 1.0f}; // 右上
-	vertexData[3].texcoord = {1.0f, 0.0f};
+	// マテリアルデータ作成
+	CreateMaterialData();
 
-	for (uint32_t i = 0; i < 4; ++i) {
-		vertexData[i].normal = {0.0f, 0.0f, -1.0f};
-	}
-
-	// インデックスリソースにデータを書き込む
-	uint32_t* indexData = nullptr;
-	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData));
-	indexData[0] = 0;
-	indexData[1] = 1;
-	indexData[2] = 2;
-	indexData[3] = 1;
-	indexData[4] = 3;
-	indexData[5] = 2;
-
-	// Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
-	transformMatrixResource_ = CreateBufferResource(device, sizeof(TransformationMatrix));
-	// データを書き込む
-	// transformationMatrixData_ = nullptr;
-	// 書き込むためのアドレスを取得
-	transformMatrixResource_->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData_));
-	// 単位行列を書き込んでおく
-	*transformationMatrixData_ = {MathUtility::MakeIdentity4x4(), worldMatrixSprite_};
-
-	// Sprite用のマテリアルリソースを作る
-	materialResourceSprite_ = CreateBufferResource(device, sizeof(Material));
-	materialData_ = nullptr;
-	// Mapしてデータを書き込む
-	materialResourceSprite_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
-	material_.color = {1.0f, 1.0f, 1.0f, 1.0f};
-	material_.enableLighting = false;
-	material_.uvTransform = MathUtility::MakeIdentity4x4();
-	*materialData_ = material_;
-
-	// SpriteはLightingしないのでfalseを設定する
-	materialData_->enableLighting = false;
+	// 座標変換行列データ作成
+	CreateTransformationData();
 
 	transform_ = {
-	    {1.0f, 1.0f, 1.0f},
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f}
+	    {size_.x,     size_.y,     1.0f     },
+        {0.0f,        0.0f,        rotation_},
+        {position_.x, position_.y, 0.0f     }
     };
 
 	uvTransform_ = {
@@ -92,42 +37,122 @@ void Sprite::Initialize(ComPtr<ID3D12Device> device) {
         {0.0f, 0.0f, 0.0f}
     };
 
-	transformMatrixResource_->Unmap(0, nullptr);
-	materialResourceSprite_->Unmap(0, nullptr);
+	textureIndex_ = textureManager_->GetTextureIndexByFilePath(textureFilePath);
 }
 
 void Sprite::Update() {
-	// スプライト
-	worldMatrixSprite_ = MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-	Matrix4x4 viewMatrixSprite = MathUtility::MakeIdentity4x4();
-	Matrix4x4 projectionMatrixSprite = MathUtility::MakeOrthographicMatrix(0.0f, 0.0f, static_cast<float>(WinApp::kClientWidth), static_cast<float>(WinApp::kClientHeight), 0.0f, 100.0f);
-	Matrix4x4 worldViewProjectionMatrixSprite = MathUtility::Multiply(worldMatrixSprite_, MathUtility::Multiply(viewMatrixSprite, projectionMatrixSprite));
-	*transformationMatrixData_ = {worldViewProjectionMatrixSprite, worldMatrixSprite_};
+	// 頂点データ4つで四角形の描画
+	vertexData_[0].position = {0.0f, 1.0f, 0.0f, 1.0f}; // 左下
+	vertexData_[0].texcoord = {0.0f, 1.0f};
+	vertexData_[1].position = {0.0f, 0.0f, 0.0f, 1.0f}; // 左上
+	vertexData_[1].texcoord = {0.0f, 0.0f};
+	vertexData_[2].position = {1.0f, 1.0f, 0.0f, 1.0f}; // 右下
+	vertexData_[2].texcoord = {1.0f, 1.0f};
+	vertexData_[3].position = {1.0f, 0.0f, 0.0f, 1.0f}; // 右上
+	vertexData_[3].texcoord = {1.0f, 0.0f};
 
+	for (uint32_t i = 0; i < 4; ++i) {
+		vertexData_[i].normal = {0.0f, 0.0f, -1.0f};
+	}
+
+	// 書き込むためのアドレスを取得
+	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
+	indexResource_->Unmap(0, nullptr);
+
+	indexData_[0] = 0;
+	indexData_[1] = 1;
+	indexData_[2] = 2;
+	indexData_[3] = 1;
+	indexData_[4] = 3;
+	indexData_[5] = 2;
+
+	// transform
+	transform_ = {
+	    {size_.x,     size_.y,     1.0f     },
+        {0.0f,        0.0f,        rotation_},
+        {position_.x, position_.y, 0.0f     }
+    };
+
+	worldMatrix_ = MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+	Matrix4x4 viewMatrix = MathUtility::MakeIdentity4x4();
+	Matrix4x4 projectionMatrix = MathUtility::MakeOrthographicMatrix(0.0f, 0.0f, static_cast<float>(WinApp::kClientWidth), static_cast<float>(WinApp::kClientHeight), 0.0f, 100.0f);
+	Matrix4x4 worldViewProjectionMatrix = MathUtility::Multiply(worldMatrix_, MathUtility::Multiply(viewMatrix, projectionMatrix));
+	*transformationMatrixData_ = {worldViewProjectionMatrix, worldMatrix_};
+
+	// uvTransform
 	Matrix4x4 uvTransformMatrix = MathUtility::MakeScaleMatrix(uvTransform_.scale);
 	uvTransformMatrix = MathUtility::Multiply(uvTransformMatrix, MathUtility::MakeRollRotateMatrix(uvTransform_.rotate.z));
 	uvTransformMatrix = MathUtility::Multiply(uvTransformMatrix, MathUtility::MakeTranslateMatrix(uvTransform_.translate));
 	materialData_->uvTransform = uvTransformMatrix;
 }
 
-void Sprite::Draw(ComPtr<ID3D12GraphicsCommandList> commandList) {
+void Sprite::Draw() {
 	// Spriteの描画。
-	commandList->IASetVertexBuffers(0, 1, &vertexBufferView_); // VBVを設定
-	commandList->IASetIndexBuffer(&indexBufferView_);          // IBVを設定
+	spriteCommon_->GetDirectXCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView_); // VBVを設定
+	spriteCommon_->GetDirectXCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferView_);          // IBVを設定
 	// TransformationMatrixCBufferの場所を設定
-	commandList->SetGraphicsRootConstantBufferView(1, transformMatrixResource_->GetGPUVirtualAddress());
-	commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite_->GetGPUVirtualAddress());
-	commandList->SetGraphicsRootDescriptorTable(2, srvHandle_);
+	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformMatrixResource_->GetGPUVirtualAddress());
+	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
+	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureManager_->GetSrvHandleGPU(textureIndex_));
 	// 描画! (DrawCall/ドローコール)
-	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+	spriteCommon_->GetDirectXCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+}
+
+void Sprite::CreateVertexData() {
+	// スプライトの頂点リソースを作る
+	vertexResource_ = CreateBufferResource(sizeof(VertexData) * 4);
+	// インデックスリソースを作る
+	indexResource_ = CreateBufferResource(sizeof(uint32_t) * 6);
+
+	// リソースの先頭のアドレスから使う
+	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
+	// 使用するリソースのサイズは頂点6つ分のサイズ
+	vertexBufferView_.SizeInBytes = sizeof(VertexData) * 4;
+	// 1頂点あたりのサイズ
+	vertexBufferView_.StrideInBytes = sizeof(VertexData);
+
+	// リソースの先頭のアドレスから使う
+	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
+	// 使用するリソースのサイズはインデックス6つ分のサイズ
+	indexBufferView_.SizeInBytes = sizeof(uint32_t) * 6;
+	// インデックスはuint32_tとする
+	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
+
+	// 書き込むためのアドレスを取得
+	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
+	vertexResource_->Unmap(0, nullptr);
+}
+
+void Sprite::CreateMaterialData() {
+	// Sprite用のマテリアルリソースを作る
+	materialResource_ = CreateBufferResource(sizeof(Material));
+	materialData_ = nullptr;
+
+	// Mapしてデータを書き込む
+	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
+	materialResource_->Unmap(0, nullptr);
+
+	material_.color = {1.0f, 1.0f, 1.0f, 1.0f};
+	material_.enableLighting = false;
+	material_.uvTransform = MathUtility::MakeIdentity4x4();
+	*materialData_ = material_;
+}
+
+void Sprite::CreateTransformationData() {
+	// Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
+	transformMatrixResource_ = CreateBufferResource(sizeof(TransformationMatrix));
+
+	// 書き込むためのアドレスを取得
+	transformMatrixResource_->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData_));
+	transformMatrixResource_->Unmap(0, nullptr);
+
+	// 単位行列を書き込んでおく
+	*transformationMatrixData_ = {MathUtility::MakeIdentity4x4(), worldMatrix_};
 }
 
 void Sprite::SetSrvHandle(D3D12_GPU_DESCRIPTOR_HANDLE srvHandle) { srvHandle_ = srvHandle; }
 
-ComPtr<ID3D12Resource> Sprite::CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeBytes) {
-	if (!device)
-		return nullptr;
-
+ComPtr<ID3D12Resource> Sprite::CreateBufferResource(size_t sizeBytes) {
 	// 頂点リソース用のヒープの設定
 	D3D12_HEAP_PROPERTIES heapProperties{};
 	heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD; // uploadHeapを使う
@@ -147,7 +172,8 @@ ComPtr<ID3D12Resource> Sprite::CreateBufferResource(ComPtr<ID3D12Device> device,
 	resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 	// 実際に頂点リソースを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(resource.GetAddressOf()));
+	HRESULT hr = spriteCommon_->GetDirectXCommon()->GetDevice()->CreateCommittedResource(
+	    &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(resource.GetAddressOf()));
 	assert(SUCCEEDED(hr));
 
 	return resource;

@@ -1,70 +1,37 @@
 #include "TextureManager.h"
+#include "DirectXCommon.h"
 #include "StringUtility.h"
+
+uint32_t TextureManager::kSRVIndexTop = 1;
 
 using namespace Microsoft::WRL;
 
-TextureManager::~TextureManager() {
-}
+TextureManager::~TextureManager() {}
 
-void TextureManager::Initialize(ComPtr<ID3D12Device> device, ComPtr<ID3D12DescriptorHeap> descriptorHeap, MaterialData& materialData) {
+void TextureManager::Initialize(DirectXCommon* directXCommon) {
+	directXCommon_ = directXCommon;
+
+	// SRVの数と同数
+	textureDatas_.reserve(DirectXCommon::kMaxSRVCount);
+
 	// Textureを読んで転送する
-	mipImage_ = LoadTexture("resources/uvChecker.png");
-	mipImage2_ = LoadTexture(materialData.textureFilePath);
-	mipImage3_ = LoadTexture("resources/white.png");
-	const DirectX::TexMetadata& metadata = mipImage_.GetMetadata();
-	const DirectX::TexMetadata& metadata2 = mipImage2_.GetMetadata();
-	const DirectX::TexMetadata& metadata3 = mipImage3_.GetMetadata();
-	textureResource_ = CreateTextureResource(device, metadata);
-	textureResource2_ = CreateTextureResource(device, metadata2);
-	textureResource3_ = CreateTextureResource(device, metadata3);
-	UploadTextureData(textureResource_, mipImage_);
-	UploadTextureData(textureResource2_, mipImage2_);
-	UploadTextureData(textureResource3_, mipImage3_);
-
-	// metaDataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = metadata.format;
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
-
-	// metaDataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
-	srvDesc2.Format = metadata2.format;
-	srvDesc2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-	srvDesc2.Texture2D.MipLevels = UINT(metadata2.mipLevels);
-
-	// metaDataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc3{};
-	srvDesc3.Format = metadata3.format;
-	srvDesc3.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc3.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
-	srvDesc3.Texture2D.MipLevels = UINT(metadata3.mipLevels);
-
-	// DescriptorSizeを取得しておく
-	const uint32_t descriptorSizeSRV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	const uint32_t descriptorSizeRTV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	const uint32_t descriptorSizeDSV = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-
-	// SRVを作成するDescriptorHeapの場所を決める
-	// 先頭はImGuiが使っているのでその次を使う
-	textureSrvHandleCPU_ = GetCPUDescriptorHandle(descriptorHeap, descriptorSizeSRV, 1);
-	textureSrvHandleGPU_ = GetGPUDescriptorHandle(descriptorHeap, descriptorSizeSRV, 1);
-
-	textureSrvHandleCPU2_ = GetCPUDescriptorHandle(descriptorHeap, descriptorSizeSRV, 2);
-	textureSrvHandleGPU2_ = GetGPUDescriptorHandle(descriptorHeap, descriptorSizeSRV, 2);
-
-	textureSrvHandleCPU3_ = GetCPUDescriptorHandle(descriptorHeap, descriptorSizeSRV, 3);
-	textureSrvHandleGPU3_ = GetGPUDescriptorHandle(descriptorHeap, descriptorSizeSRV, 3);
-
-	// SRVの生成
-	device->CreateShaderResourceView(textureResource_.Get(), &srvDesc, textureSrvHandleCPU_);
-	device->CreateShaderResourceView(textureResource2_.Get(), &srvDesc2, textureSrvHandleCPU2_);
-	device->CreateShaderResourceView(textureResource3_.Get(), &srvDesc3, textureSrvHandleCPU3_);
+	LoadTexture("resources/uvChecker.png");
+	LoadTexture("resources/white.png");
+	LoadTexture("resources/fence.png");
 }
 
-DirectX::ScratchImage TextureManager::LoadTexture(const std::string& filePath) {
+void TextureManager::LoadTexture(const std::string& filePath) {
+	// 読み込み済みテクスチャを検索
+	auto it = std::find_if(textureDatas_.begin(), textureDatas_.end(), [&](TextureData& textureData) { return textureData.filepath == filePath; });
+
+	if (it != textureDatas_.end()) {
+		// 読み込み済みなら早期return
+		return;
+	}
+
+	// テクスチャ枚数上限チェック
+	assert(textureDatas_.size() + kSRVIndexTop < DirectXCommon::kMaxSRVCount);
+
 	// テクスチャファイルを読んでプログラムで扱えるようにする
 	DirectX::ScratchImage image{};
 	std::wstring filePathW = StringUtility::ConvertString(filePath);
@@ -76,23 +43,58 @@ DirectX::ScratchImage TextureManager::LoadTexture(const std::string& filePath) {
 	hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
 	assert(SUCCEEDED(hr));
 
-	// ミニマップ付きのデータを返す
-	return mipImages;
+	// テクスチャデータを追加
+	textureDatas_.resize(textureDatas_.size() + 1);
+	// 追加したテクスチャデータの参照を取得する
+	TextureData& textureData = textureDatas_.back();
+	textureData.filepath = filePath;
+	textureData.metaData = mipImages.GetMetadata();
+	textureData.resource = CreateTextureResource(textureData.metaData);
+
+	// テクスチャデータの要素数番号をSRVvのインデックスとする
+	uint32_t srvIndex = static_cast<uint32_t>(textureDatas_.size()) + kSRVIndexTop;
+
+	// SRVを作成するDescriptorHeapの場所を決める
+	// 先頭はImGuiが使っているのでその次を使う
+	textureData.srvHandleCPU = directXCommon_->GetSRVCPUDescriptorHandle(srvIndex);
+	textureData.srvHandleGPU = directXCommon_->GetSRVGPUDescriptorHandle(srvIndex);
+
+	// SRVの設定を行う
+	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Format = textureData.metaData.format;
+	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D; // 2Dテクスチャ
+	srvDesc.Texture2D.MipLevels = UINT(textureData.metaData.mipLevels);
+
+	// SRVの生成
+	directXCommon_->GetDevice()->CreateShaderResourceView(textureData.resource.Get(), &srvDesc, textureData.srvHandleCPU);
+
+	UploadTextureData(textureData.resource, mipImages);
 }
 
-D3D12_CPU_DESCRIPTOR_HANDLE TextureManager::GetCPUDescriptorHandle(ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index) {
-	D3D12_CPU_DESCRIPTOR_HANDLE handleCPU = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	handleCPU.ptr += (descriptorSize * index);
-	return handleCPU;
+uint32_t TextureManager::GetTextureIndexByFilePath(const std::string& filePath) {
+	// 読み込み済みテクスチャデータを検索
+	auto it = std::find_if(textureDatas_.begin(), textureDatas_.end(), [&](TextureData& textureData) { return textureData.filepath == filePath; });
+	if (it != textureDatas_.end()) {
+		// 読み込み済みなら要素番号を返す
+		uint32_t textureIndex = static_cast<uint32_t>(std::distance(textureDatas_.begin(), it));
+		return textureIndex;
+	}
+
+	assert(0);
+	return 0;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetGPUDescriptorHandle(ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index) { 
-	D3D12_GPU_DESCRIPTOR_HANDLE handleGPU = descriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	handleGPU.ptr += (descriptorSize * index);
-	return handleGPU;
+D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(uint32_t textureIndex) {
+	// 範囲外指定違反チェック
+	assert(textureIndex < textureDatas_.size() + 1);
+
+	// テクスチャデータの参照を取得
+	TextureData& textureData = textureDatas_[textureIndex];
+	return textureData.srvHandleGPU;
 }
 
-ComPtr<ID3D12Resource> TextureManager::CreateTextureResource(ComPtr<ID3D12Device> device, const DirectX::TexMetadata& metadata) {
+ComPtr<ID3D12Resource> TextureManager::CreateTextureResource(const DirectX::TexMetadata& metadata) {
 	// metadataを基にResourceの設定
 	D3D12_RESOURCE_DESC resourceDesc{};
 	resourceDesc.Width = UINT(metadata.width);                             // Textureの幅
@@ -111,7 +113,7 @@ ComPtr<ID3D12Resource> TextureManager::CreateTextureResource(ComPtr<ID3D12Device
 
 	// Resourceの生成
 	ComPtr<ID3D12Resource> resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(
+	HRESULT hr = directXCommon_->GetDevice()->CreateCommittedResource(
 	    &heapProperties,                   // Heapの設定
 	    D3D12_HEAP_FLAG_NONE,              // Heapの特殊な設定。特になし。
 	    &resourceDesc,                     // Resourceの設定
