@@ -8,12 +8,12 @@
 #include "ModelCommon.h"
 #include "Object3d.h"
 #include "Object3dCommon.h"
-#include "SphereMeshGenerator.h"
 #include "Sprite.h"
 #include "SpriteCommon.h"
 #include "TextureManager.h"
 #include "WinApp.h"
 #include "XAudio.h"
+#include "ModelManager.h"
 #include <memory>
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -43,32 +43,45 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 	std::unique_ptr<TextureManager> textureManager_ = std::make_unique<TextureManager>();
 	textureManager_->Initialize(dxCommon.get());
 
-	SphereMeshGenerator sphereMesh(16);
-
 	// Object3dCommon
 	auto object3dCommon = std::make_unique<Object3dCommon>();
 	object3dCommon->Initialize(dxCommon.get());
+
+	// ModelManager
+	auto modelManger = std::make_unique<ModelManager>();
+	modelManger->Initialize(dxCommon.get(), textureManager_.get());
 
 	// Object3d
 	std::vector<std::unique_ptr<Object3d>> object3ds;
 	for (uint32_t i = 0; i < 5; ++i) {
 		auto object3d = std::make_unique<Object3d>();
-		object3d->Initialize(object3dCommon.get(), textureManager_.get());
+		object3d->Initialize(object3dCommon.get(), textureManager_.get(), modelManger.get());
 		object3ds.push_back(std::move(object3d));
 	}
 
-	// ModelCommon
-	auto modelCommon = std::make_unique<ModelCommon>();
-	modelCommon->Initialize(dxCommon.get());
-
-	// Model
-	auto model = std::make_unique<Model>();
-	model->Initialize(modelCommon.get(), textureManager_.get());
+	// .objファイルからモデルを読み込む
+	modelManger->LoadModel("fence.obj");
+	modelManger->LoadModel("plane.obj");
+	modelManger->LoadModel("axis.obj");
+	modelManger->LoadModel("SkySphere.obj");
+	modelManger->LoadModel("skydome.obj");
+	modelManger->LoadModel("Field.obj");
+	modelManger->LoadModel("sphere.obj");
 
 	// modelのポインタを受け取る
-	for (uint32_t i = 0; i < 5; ++i) {
-		object3ds[i]->SetModel(model.get());
-	}
+	object3ds[0]->SetModel("fence.obj");
+	object3ds[1]->SetModel("skydome.obj");
+	object3ds[2]->SetModel("SkySphere.obj");
+	object3ds[3]->SetModel("sphere.obj");
+	object3ds[4]->SetModel("Field.obj");
+
+	object3ds[1]->SetEnableFoging(false);
+	object3ds[2]->SetEnableFoging(false);
+	object3ds[3]->SetEnableFoging(false);
+	object3ds[4]->SetEnableFoging(false);
+
+	object3ds[1]->SetColor({1.0f, 1.0f, 1.0f, 0.5f});
+	object3ds[3]->SetColor({1.0f, 1.0f, 1.0f, 0.5f});
 
 	// Sprite共通部
 	auto spriteCommon = std::make_unique<SpriteCommon>();
@@ -96,7 +109,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 	debugCamera->Initialize();
 
 	// model座標
-	Vector3 translate[5];
+	Transform transform[5];
+
+	// color
+	Vector4 color = {1.0f,1.0f,1.0f,1.0f};
 
 	// 音声再生
 	// audio->SoundPlayWave(audio->GetXAudio2().Get(), audio->GetSound());
@@ -109,20 +125,40 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 		imGuiManager_->BeginFrame();
 
 		debugCamera->Update(*input);
+		for (uint32_t i = 0; i < 5; ++i) {
+			object3ds[i]->SetViewMatrix(debugCamera->GetViewMatrix());
+		}
 
 		for (uint32_t i = 0; i < 5; ++i) {
-			translate[i] = object3ds[i]->GetTranslate();
+			transform[i].translate = object3ds[i]->GetTranslate();
+			transform[i].rotate = object3ds[i]->GetRotate();
+			transform[i].scale = object3ds[i]->GetScale();
 		}
 
 		// ImGui
-		ImGui::DragFloat3("translate0", &translate[0].x, 0.01f);
-		ImGui::DragFloat3("translate1", &translate[1].x, 0.01f);
-		ImGui::DragFloat3("translate2", &translate[2].x, 0.01f);
-		ImGui::DragFloat3("translate3", &translate[3].x, 0.01f);
-		ImGui::DragFloat3("translate4", &translate[4].x, 0.01f);
+		ImGui::DragFloat3("translate0", &transform[0].translate.x, 0.01f);
+		ImGui::DragFloat3("translate1", &transform[1].translate.x, 0.01f);
+		ImGui::DragFloat3("translate2", &transform[2].translate.x, 0.01f);
+		ImGui::DragFloat3("translate3", &transform[3].translate.x, 0.01f);
+		ImGui::DragFloat3("translate4", &transform[4].translate.x, 0.01f);
+		ImGui::DragFloat3("rotate0", &transform[0].rotate.x, 0.01f);
+		ImGui::DragFloat3("rotate1", &transform[1].rotate.x, 0.01f);
+		ImGui::DragFloat3("rotate2", &transform[2].rotate.x, 0.01f);
+		ImGui::DragFloat3("rotate3", &transform[3].rotate.x, 0.01f);
+		ImGui::DragFloat3("rotate4", &transform[4].rotate.x, 0.01f);
+		ImGui::DragFloat3("scale0", &transform[0].scale.x, 0.01f);
+		ImGui::DragFloat3("scale1", &transform[1].scale.x, 0.01f);
+		ImGui::DragFloat3("scale2", &transform[2].scale.x, 0.01f);
+		ImGui::DragFloat3("scale3", &transform[3].scale.x, 0.01f);
+		ImGui::DragFloat3("scale4", &transform[4].scale.x, 0.01f);
+		
+		ImGui::SliderFloat4("color", &color.x, 0.0f, 1.0f);
+		object3ds[3]->SetColor(color);
 
 		for (uint32_t i = 0; i < 5; ++i) {
-			object3ds[i]->SetTranslate(translate[i]);
+			object3ds[i]->SetTranslate(transform[i].translate);
+			object3ds[i]->SetRotate(transform[i].rotate);
+			object3ds[i]->SetScale(transform[i].scale);
 		}
 
 		// object3dUpdate
@@ -159,9 +195,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 		}
 
 		// Sprite描画
-		for (uint32_t i = 0; i < 5; ++i) {
-			sprites[i]->Draw();
-		}
+		//for (uint32_t i = 0; i < 5; ++i) {
+		//	sprites[i]->Draw();
+		//}
 
 		// ImGuiの内部コマンドを生成する
 		imGuiManager_->Render(dxCommon->GetCommandList());

@@ -18,6 +18,10 @@ void TextureManager::Initialize(DirectXCommon* directXCommon) {
 	LoadTexture("resources/uvChecker.png");
 	LoadTexture("resources/white.png");
 	LoadTexture("resources/fence.png");
+	LoadTexture("resources/SkySphere.png");
+	LoadTexture("resources/skydome.png");
+	LoadTexture("resources/Field.png");
+	LoadTexture("resources/sphere.png");
 }
 
 void TextureManager::LoadTexture(const std::string& filePath) {

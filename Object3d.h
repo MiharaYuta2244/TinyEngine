@@ -9,6 +9,7 @@
 #include "TransformationMatrix.h"
 #include "VertexData.h"
 #include "Transform.h"
+#include "ModelManager.h"
 #include <d3d12.h>
 #include <string>
 #include <vector>
@@ -20,11 +21,16 @@ class Model;
 
 class Object3d {
 public:
-	void Initialize(Object3dCommon* modelCommon, TextureManager* textureManager);
+	void Initialize(Object3dCommon* modelCommon, TextureManager* textureManager, ModelManager* modelManager);
 
 	void Update();
 
 	void Draw();
+
+	void SetModel(const std::string& filePath);
+	void SetEnableFoging(const bool enableFoging);
+	void SetEnableLighting(const bool enableLighting);
+	void SetColor(Vector4 color);
 
 	// setter
 	void SetModel(Model* model) { model_ = model; }
@@ -33,11 +39,13 @@ public:
 	void SetScale(const Vector3& scale) { transform_.scale = scale; }
 	void SetRotate(const Vector3& rotate) { transform_.rotate = rotate; }
 	void SetTranslate(const Vector3& translate) { transform_.translate = translate; }
+	void SetViewMatrix(Matrix4x4 viewMatrix) { viewMatrix_ = viewMatrix; }
 
 	// getter
 	const Vector3& GetScale() const { return transform_.scale; }
 	const Vector3& GetRotate() const { return transform_.rotate; }
 	const Vector3& GetTranslate() const { return transform_.translate; }
+	const Vector4& GetColor() const { return material_.color; }
 
 private:
 	// .mtlファイルの読み取り
@@ -76,6 +84,7 @@ private:
 private:
 	Object3dCommon* object3dCommon_ = nullptr;
 	TextureManager* textureManager_ = nullptr;
+	ModelManager* modelManager_ = nullptr;
 	Model* model_ = nullptr;
 
 	// バッファリソース
@@ -108,4 +117,7 @@ private:
 	// 3Dオブジェクト自体とカメラの座標変換行列の元となるTransform
 	Transform transform_;
 	Transform cameraTransform_;
+
+	// ビューマトリックス
+	Matrix4x4 viewMatrix_;
 };

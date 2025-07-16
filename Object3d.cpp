@@ -11,9 +11,10 @@
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-void Object3d::Initialize(Object3dCommon* modelCommon, TextureManager* textureManager) {
+void Object3d::Initialize(Object3dCommon* modelCommon, TextureManager* textureManager, ModelManager* modelManager) {
 	object3dCommon_ = modelCommon;
 	textureManager_ = textureManager;
+	modelManager_ = modelManager;
 
 	// 座標変換行列データ作成
 	CreateTransformationMatrixData();
@@ -53,10 +54,10 @@ void Object3d::Update() {
 	timeParam_.time = totalTime;
 
 	Matrix4x4 worldMatrix = MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-	Matrix4x4 cameraMatrix = MathUtility::MakeAffineMatrix(cameraTransform_.scale, cameraTransform_.rotate, cameraTransform_.translate);
-	Matrix4x4 viewMatrix = MathUtility::Inverse(cameraMatrix);
+	//Matrix4x4 cameraMatrix = MathUtility::MakeAffineMatrix(cameraTransform_.scale, cameraTransform_.rotate, cameraTransform_.translate);
+	//Matrix4x4 viewMatrix = MathUtility::Inverse(cameraMatrix);
 	Matrix4x4 projectionMatrix = MathUtility::MakePerspectiveFovMatrix(0.45f, static_cast<float>(WinApp::kClientWidth) / static_cast<float>(WinApp::kClientHeight), 0.1f, 100.0f);
-	transformMatrixData_->WVP = worldMatrix * viewMatrix * projectionMatrix;
+	transformMatrixData_->WVP = worldMatrix * viewMatrix_ * projectionMatrix;
 	transformMatrixData_->World = worldMatrix;
 
 	*transformMatrixData_ = {transformMatrixData_->WVP, transformMatrixData_->World};
@@ -64,6 +65,10 @@ void Object3d::Update() {
 	*cameraForGPUData_ = cameraForGPU_;
 	*fogParamData_ = fogParam_;
 	*timeParamData_ = timeParam_;
+
+	if (model_) {
+		model_->Update();
+	}
 }
 
 void Object3d::Draw() {
@@ -82,6 +87,29 @@ void Object3d::Draw() {
 	// 3Dモデルが割り当てられれいれば描画する
 	if (model_) {
 		model_->Draw();
+	}
+}
+
+void Object3d::SetModel(const std::string& filePath) {
+	// モデルを検索してセットする
+	model_ = modelManager_->FindModel(filePath);
+}
+
+void Object3d::SetEnableFoging(const bool enableFoging) { 
+	if (model_) {
+		model_->SetEnableFoging(enableFoging);
+	}
+}
+
+void Object3d::SetEnableLighting(const bool enableLighting) { 
+	if (model_) {
+		model_->SetEnableLighting(enableLighting);
+	}
+}
+
+void Object3d::SetColor(Vector4 color) {
+	if (model_) {
+		model_->SetColor(color);
 	}
 }
 

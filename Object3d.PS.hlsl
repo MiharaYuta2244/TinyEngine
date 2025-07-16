@@ -6,6 +6,7 @@ struct Material
     int32_t enableLighting;
     float32_t4x4 uvTransform;
     float32_t shininess;
+    int32_t enableFoging;
 };
 
 struct DirectionalLight
@@ -52,7 +53,7 @@ PixelShaderOutput main(VertexShaderOutput input)
     float32_t4 textureColor = gTexture.Sample(gSampler, transformedUV.xy);
     
     // textureのa値が0のときにPixelを棄却
-    if (textureColor.a <= 0.5)
+    if (textureColor.a < 0.5)
     {
         discard;
     }
@@ -91,19 +92,22 @@ PixelShaderOutput main(VertexShaderOutput input)
         discard;
     }
     
-    // フォグ係数の計算
-    float distToFog = length(input.worldPosition - gFogParam.fogCenter);
-    float fogFactor = saturate(1.0 - (distToFog / gFogParam.radius));
-    fogFactor *= gFogParam.fogIntensity;
+    if (gMaterial.enableFoging != 0) // Fogingする場合
+    {
+        // フォグ係数の計算
+        float distToFog = length(input.worldPosition - gFogParam.fogCenter);
+        float fogFactor = saturate(1.0 - (distToFog / gFogParam.radius));
+        fogFactor *= gFogParam.fogIntensity;
     
-    // ノイズによる揺らぎ追加
-    float32_t2 noiseInput = input.worldPosition.xz * 0.3 + gTimeParam.time * 0.5;
-    float noise = (sin(noiseInput.x) + cos(noiseInput.y)) * 0.5 + 0.5;
-    fogFactor *= noise;
-    fogFactor = lerp(1.0, fogFactor, gFogParam.fogIntensity); // fogIntensity=0で霧なし、1でフル
+        // ノイズによる揺らぎ追加
+        float32_t2 noiseInput = input.worldPosition.xz * 0.3 + gTimeParam.time * 0.5;
+        float noise = (sin(noiseInput.x) + cos(noiseInput.y)) * 0.5 + 0.5;
+        fogFactor *= noise;
+        fogFactor = lerp(1.0, fogFactor, gFogParam.fogIntensity); // fogIntensity=0で霧なし、1でフル
     
-    // フォグ色とのブレンド
-    output.color.rgb = lerp(gFogParam.fogColor, output.color.rgb, fogFactor);
+        // フォグ色とのブレンド
+        output.color.rgb = lerp(gFogParam.fogColor, output.color.rgb, fogFactor);
+    }
     
     return output;
 }

@@ -137,16 +137,6 @@ void Object3dCommon::CreateGraphicsPipeline() {
 	IDxcBlob* pixelShaderBlob = CompileShader(L"Object3d.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(pixelShaderBlob != nullptr);
 
-	//// DepthStencilTextureをウィンドウのサイズで作成
-	//depthStencilResource_ = CreateDepthStencilTextureResource(dxCommon_->GetDevice()/*.Get()*/, WinApp::kClientWidth, WinApp::kClientHeight);
-
-	//// DSVの設定
-	//D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
-	//dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;        // Format。基本的にはResourceに合わせる
-	//dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D; // 2dTexture
-	//// DSVHeapの先頭にDSVをつくる
-	//dxCommon_->GetDevice()->CreateDepthStencilView(depthStencilResource_.Get(), &dsvDesc, dsvDescriptorHeap_->GetCPUDescriptorHandleForHeapStart());
-
 	// DepthStencilStateの設定
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 	// Depthの機能を有効化する

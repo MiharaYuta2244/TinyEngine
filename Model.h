@@ -3,6 +3,8 @@
 #include "MaterialData.h"
 #include "ModelData.h"
 #include "ModelCommon.h"
+#include "MeshData.h"
+#include "IMeshGenerator.h"
 #include <d3d12.h>
 #include <string>
 #include <wrl.h>
@@ -11,9 +13,18 @@ class TextureManager;
 
 class Model {
 public:
-	void Initialize(ModelCommon* modelCommon, TextureManager* textureManager);
+	void Initialize(ModelCommon* modelCommon, TextureManager* textureManager, const std::string& directorypath, const std::string& filename);
 
 	void Draw();
+
+	void Update();
+
+	void SetEnableFoging(bool enableFoging) { material_.enableFoging = enableFoging; }
+
+	void SetEnableLighting(bool enableLighting) { material_.enableLighting = enableLighting; }
+
+	void SetColor(Vector4 color) { material_.color = color; }
+
 
 private:
 	ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
@@ -24,6 +35,11 @@ private:
 	/// 頂点データ作成
 	/// </summary>
 	void CreateVertexData();
+
+	/// <summary>
+	/// インデックスデータ作成
+	/// </summary>
+	void CreateIndexData();
 
 	/// <summary>
 	/// マテリアルデータ作成
@@ -37,16 +53,25 @@ private:
 	// objファイルのデータ
 	ModelData modelData_;
 
+	// メッシュデータ
+	MeshData meshData_;
+
 	// VertexBufferView
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_;
+	D3D12_INDEX_BUFFER_VIEW indexBufferView_;
 
 	// Rsource
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
 
 	// Resourceにデータを書き込むためのポインタ
 	VertexData* vertexData_ = nullptr;
+	uint32_t* indexData_ = nullptr;
 	Material* materialData_ = nullptr;
+
+	// インデックスカウント
+	uint32_t indexCount_;
 
 	// データ変更用の変数
 	Material material_;

@@ -2,21 +2,25 @@
 #include "ModelCommon.h"
 #include "MathUtility.h"
 #include "TextureManager.h"
+#include "SphereMeshGenerator.h"
 #include <assert.h>
 #include <fstream>
 #include <sstream>
 
 using namespace Microsoft::WRL;
 
-void Model::Initialize(ModelCommon* modelCommon, TextureManager* textureManager) { 
+void Model::Initialize(ModelCommon* modelCommon, TextureManager* textureManager, const std::string& directorypath, const std::string& filename) { 
 	modelCommon_ = modelCommon; 
 	textureManager_ = textureManager;
 
 	// モデル読み込み
-	modelData_ = LoadObjFile("resources", "fence.obj");
+	modelData_ = LoadObjFile(directorypath, filename);
 
 	// 頂点データの初期化
 	CreateVertexData();
+
+	// インデックスデータの初期化
+	//CreateIndexData();
 
 	// マテリアルの初期化
 	CreateMaterialData();
@@ -28,16 +32,24 @@ void Model::Initialize(ModelCommon* modelCommon, TextureManager* textureManager)
 	modelData_.material.textureIndex = textureManager_->GetTextureIndexByFilePath(modelData_.material.textureFilePath);
 }
 
+void Model::Update()
+{ *materialData_ = material_; }
+
 void Model::Draw()
 {
+	auto commandList = modelCommon_->GetDxCommon()->GetCommandList();
+
 	// VertexBufferViewを設定
-	modelCommon_->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView_); // VBVを設定
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferView_); // VBVを設定
+	// IndexBufferViewを設定
+	//commandList->IASetIndexBuffer(&indexBufferView_); // IBVを設定
 	// マテリアルCBufferの場所を設定
-	modelCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 	// SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である。
-	modelCommon_->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureManager_->GetSrvHandleGPU(2));
+	commandList->SetGraphicsRootDescriptorTable(2, textureManager_->GetSrvHandleGPU(modelData_.material.textureIndex));
 	// 描画!(DrawCall/ドローコール)。
-	modelCommon_->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData_.vertices.size()), 1, 0, 0);
+	commandList->DrawInstanced(UINT(modelData_.vertices.size()), 1, 0, 0);
+	//modelCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(indexCount_, 1, 0, 0, 0);
 }
 
 ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string& filename) {
@@ -173,6 +185,27 @@ void Model::CreateVertexData() {
 	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
 }
 
+void Model::CreateIndexData() {
+	// 球のメッシュを生成
+	SphereMeshGenerator sphereMesh(16);
+	meshData_ = sphereMesh.GenerateMeshData();
+
+	indexCount_ = static_cast<uint32_t>(meshData_.indices.size());
+
+	// インデックスリソースの作成
+	indexResource_ = CreateBufferResource(modelCommon_->GetDxCommon()->GetDevice(), sizeof(uint32_t) * indexCount_);
+	// リソースの先頭のアドレスから使う
+	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
+	// 使用するリソースのサイズは頂点6つ分のサイズ
+	indexBufferView_.SizeInBytes = sizeof(uint32_t) * indexCount_;
+	// 1頂点あたりのサイズ
+	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
+	// 書き込むためのアドレスを取得
+	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
+	indexResource_->Unmap(0, nullptr);
+	std::memcpy(indexData_, meshData_.vertices.data(), sizeof(uint32_t) * indexCount_);
+}
+
 void Model::CreateMaterialData() {
 	// マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
 	materialResource_ = CreateBufferResource(modelCommon_->GetDxCommon()->GetDevice(), sizeof(Material));
@@ -181,7 +214,8 @@ void Model::CreateMaterialData() {
 	materialResource_->Unmap(0, nullptr);
 	// 三角形の色
 	material_.color = {1.0f, 1.0f, 1.0f, 1.0f};
-	material_.enableLighting = true;
+	material_.enableLighting = false;
+	material_.enableFoging = true;
 	// uvTransformなどのデータを設定
 	material_.uvTransform = MathUtility::MakeIdentity4x4();
 	// 反射強度

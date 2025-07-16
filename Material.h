@@ -8,4 +8,5 @@ struct Material {
 	float padding[3];
 	Matrix4x4 uvTransform;
 	float shininess;
+	int32_t enableFoging;
 };
