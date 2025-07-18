@@ -53,12 +53,12 @@ void Object3d::Update() {
 
 	timeParam_.time = totalTime;
 
-	Matrix4x4 worldMatrix = MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+	worldMatrix_ = MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
 	//Matrix4x4 cameraMatrix = MathUtility::MakeAffineMatrix(cameraTransform_.scale, cameraTransform_.rotate, cameraTransform_.translate);
 	//Matrix4x4 viewMatrix = MathUtility::Inverse(cameraMatrix);
-	Matrix4x4 projectionMatrix = MathUtility::MakePerspectiveFovMatrix(0.45f, static_cast<float>(WinApp::kClientWidth) / static_cast<float>(WinApp::kClientHeight), 0.1f, 100.0f);
-	transformMatrixData_->WVP = worldMatrix * viewMatrix_ * projectionMatrix;
-	transformMatrixData_->World = worldMatrix;
+	projectionMatrix_ = MathUtility::MakePerspectiveFovMatrix(0.45f, static_cast<float>(WinApp::kClientWidth) / static_cast<float>(WinApp::kClientHeight), 0.1f, 100.0f);
+	transformMatrixData_->WVP = worldMatrix_ * viewMatrix_ * projectionMatrix_;
+	transformMatrixData_->World = worldMatrix_;
 
 	*transformMatrixData_ = {transformMatrixData_->WVP, transformMatrixData_->World};
 	*directionalLightData_ = directionalLight_;

@@ -54,6 +54,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <AdditionalIncludeDirectories>C:\Users\yuuta\source\repos\CG2\externals\imgui;C:\Users\yuuta\source\repos\CG2\externals\DirectXTex;C:\Users\yuuta\source\repos\CG2\engine\2d;C:\Users\yuuta\source\repos\CG2\engine\math;C:\Users\yuuta\source\repos\CG2\engine\base;C:\Users\yuuta\source\repos\CG2\engine\input;C:\Users\yuuta\source\repos\CG2\engine\audio;C:\Users\yuuta\source\repos\CG2\externals\imguizmo;C:\Users\yuuta\source\repos\CG2\engine\3d</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -77,6 +78,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>C:\Users\yuuta\source\repos\CG2\externals\imgui;C:\Users\yuuta\source\repos\CG2\externals\DirectXTex;C:\Users\yuuta\source\repos\CG2\engine\2d;C:\Users\yuuta\source\repos\CG2\engine\math;C:\Users\yuuta\source\repos\CG2\engine\base;C:\Users\yuuta\source\repos\CG2\engine\input;C:\Users\yuuta\source\repos\CG2\engine\audio;C:\Users\yuuta\source\repos\CG2\externals\imguizmo;C:\Users\yuuta\source\repos\CG2\engine\3d</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -90,10 +92,10 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="D3DResourceLeakChecker.cpp" />
-    <ClCompile Include="DebugCamera.cpp" />
-    <ClCompile Include="DirectInput.cpp" />
-    <ClCompile Include="DirectXCommon.cpp" />
+    <ClCompile Include="engine\base\D3DResourceLeakChecker.cpp" />
+    <ClCompile Include="engine\base\DebugCamera.cpp" />
+    <ClCompile Include="engine\input\DirectInput.cpp" />
+    <ClCompile Include="engine\base\DirectXCommon.cpp" />
     <ClCompile Include="externals\imgui\imgui.cpp" />
     <ClCompile Include="externals\imgui\imgui_demo.cpp" />
     <ClCompile Include="externals\imgui\imgui_draw.cpp" />
@@ -101,23 +103,24 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="externals\imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="externals\imgui\imgui_tables.cpp" />
     <ClCompile Include="externals\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="ImGuiManager.cpp" />
-    <ClCompile Include="Logger.cpp" />
+    <ClCompile Include="engine\base\ImGuiManager.cpp" />
+    <ClCompile Include="externals\imguizmo\ImGuizmo.cpp" />
+    <ClCompile Include="engine\base\Logger.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MathUtility.cpp" />
-    <ClCompile Include="MeshData.cpp" />
-    <ClCompile Include="Model.cpp" />
-    <ClCompile Include="ModelCommon.cpp" />
-    <ClCompile Include="ModelManager.cpp" />
-    <ClCompile Include="Object3d.cpp" />
-    <ClCompile Include="Object3dCommon.cpp" />
-    <ClCompile Include="SphereMeshGenerator.cpp" />
-    <ClCompile Include="Sprite.cpp" />
-    <ClCompile Include="SpriteCommon.cpp" />
-    <ClCompile Include="StringUtility.cpp" />
-    <ClCompile Include="TextureManager.cpp" />
-    <ClCompile Include="WinApp.cpp" />
-    <ClCompile Include="XAudio.cpp" />
+    <ClCompile Include="engine\math\MathUtility.cpp" />
+    <ClCompile Include="engine\base\MeshData.cpp" />
+    <ClCompile Include="engine\3d\Model.cpp" />
+    <ClCompile Include="engine\3d\ModelCommon.cpp" />
+    <ClCompile Include="engine\3d\ModelManager.cpp" />
+    <ClCompile Include="engine\3d\Object3d.cpp" />
+    <ClCompile Include="engine\3d\Object3dCommon.cpp" />
+    <ClCompile Include="engine\base\SphereMeshGenerator.cpp" />
+    <ClCompile Include="engine\2d\Sprite.cpp" />
+    <ClCompile Include="engine\2d\SpriteCommon.cpp" />
+    <ClCompile Include="engine\base\StringUtility.cpp" />
+    <ClCompile Include="engine\base\TextureManager.cpp" />
+    <ClCompile Include="engine\base\WinApp.cpp" />
+    <ClCompile Include="engine\audio\XAudio.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Object3d.PS.hlsl">
@@ -134,12 +137,12 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CameraForGPU.h" />
-    <ClInclude Include="D3DResourceLeakChecker.h" />
-    <ClInclude Include="DebugCamera.h" />
-    <ClInclude Include="DirectInput.h" />
-    <ClInclude Include="DirectionalLight.h" />
-    <ClInclude Include="DirectXCommon.h" />
+    <ClInclude Include="engine\base\CameraForGPU.h" />
+    <ClInclude Include="engine\base\D3DResourceLeakChecker.h" />
+    <ClInclude Include="engine\base\DebugCamera.h" />
+    <ClInclude Include="engine\input\DirectInput.h" />
+    <ClInclude Include="engine\base\DirectionalLight.h" />
+    <ClInclude Include="engine\base\DirectXCommon.h" />
     <ClInclude Include="externals\imgui\imconfig.h" />
     <ClInclude Include="externals\imgui\imgui.h" />
     <ClInclude Include="externals\imgui\imgui_impl_dx12.h" />
@@ -148,39 +151,40 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="externals\imgui\imstb_rectpack.h" />
     <ClInclude Include="externals\imgui\imstb_textedit.h" />
     <ClInclude Include="externals\imgui\imstb_truetype.h" />
-    <ClInclude Include="FogParam.h" />
-    <ClInclude Include="IMeshGenerator.h" />
-    <ClInclude Include="ImGuiManager.h" />
-    <ClInclude Include="Logger.h" />
-    <ClInclude Include="Material.h" />
-    <ClInclude Include="MaterialData.h" />
-    <ClInclude Include="MathOperator.h" />
-    <ClInclude Include="MathUtility.h" />
-    <ClInclude Include="Matrix3x3.h" />
-    <ClInclude Include="Matrix4x4.h" />
-    <ClInclude Include="MeshData.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="ModelCommon.h" />
-    <ClInclude Include="ModelData.h" />
-    <ClInclude Include="ModelManager.h" />
-    <ClInclude Include="MouseState.h" />
-    <ClInclude Include="Object3d.h" />
-    <ClInclude Include="Object3dCommon.h" />
-    <ClInclude Include="SphereMeshGenerator.h" />
-    <ClInclude Include="Sprite.h" />
-    <ClInclude Include="SpriteCommon.h" />
-    <ClInclude Include="StringUtility.h" />
-    <ClInclude Include="TextureData.h" />
-    <ClInclude Include="TextureManager.h" />
-    <ClInclude Include="TimeParam.h" />
-    <ClInclude Include="Transform.h" />
-    <ClInclude Include="TransformationMatrix.h" />
-    <ClInclude Include="Vector2.h" />
-    <ClInclude Include="Vector3.h" />
-    <ClInclude Include="Vector4.h" />
-    <ClInclude Include="VertexData.h" />
-    <ClInclude Include="WinApp.h" />
-    <ClInclude Include="XAudio.h" />
+    <ClInclude Include="engine\base\FogParam.h" />
+    <ClInclude Include="engine\base\IMeshGenerator.h" />
+    <ClInclude Include="engine\base\ImGuiManager.h" />
+    <ClInclude Include="externals\imguizmo\ImGuizmo.h" />
+    <ClInclude Include="engine\base\Logger.h" />
+    <ClInclude Include="engine\base\Material.h" />
+    <ClInclude Include="engine\base\MaterialData.h" />
+    <ClInclude Include="engine\math\MathOperator.h" />
+    <ClInclude Include="engine\math\MathUtility.h" />
+    <ClInclude Include="engine\base\Matrix3x3.h" />
+    <ClInclude Include="engine\base\Matrix4x4.h" />
+    <ClInclude Include="engine\base\MeshData.h" />
+    <ClInclude Include="engine\3d\Model.h" />
+    <ClInclude Include="engine\3d\ModelCommon.h" />
+    <ClInclude Include="engine\3d\ModelData.h" />
+    <ClInclude Include="engine\3d\ModelManager.h" />
+    <ClInclude Include="engine\3d\MouseState.h" />
+    <ClInclude Include="engine\3d\Object3d.h" />
+    <ClInclude Include="engine\3d\Object3dCommon.h" />
+    <ClInclude Include="engine\base\SphereMeshGenerator.h" />
+    <ClInclude Include="engine\2d\Sprite.h" />
+    <ClInclude Include="engine\2d\SpriteCommon.h" />
+    <ClInclude Include="engine\base\StringUtility.h" />
+    <ClInclude Include="engine\base\TextureData.h" />
+    <ClInclude Include="engine\base\TextureManager.h" />
+    <ClInclude Include="engine\base\TimeParam.h" />
+    <ClInclude Include="engine\base\Transform.h" />
+    <ClInclude Include="engine\base\TransformationMatrix.h" />
+    <ClInclude Include="engine\base\Vector2.h" />
+    <ClInclude Include="engine\base\Vector3.h" />
+    <ClInclude Include="engine\base\Vector4.h" />
+    <ClInclude Include="engine\base\VertexData.h" />
+    <ClInclude Include="engine\base\WinApp.h" />
+    <ClInclude Include="engine\audio\XAudio.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

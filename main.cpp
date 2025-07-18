@@ -14,6 +14,7 @@
 #include "WinApp.h"
 #include "XAudio.h"
 #include "ModelManager.h"
+#include "ImGuizmo.h"
 #include <memory>
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -124,6 +125,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
 		imGuiManager_->BeginFrame();
 
+		ImGuizmo::BeginFrame();
+
+		//ImGui::Begin("transform");
+
+		// ImGuizmoの設定
+		ImGuizmo::SetOrthographic(false);
+		ImGuizmo::SetDrawlist();
+
+		// ウィンドウサイズを取得してImGuizmoに渡す
+		float windowWidth = ImGui::GetWindowWidth();
+		float windowHeight = ImGui::GetWindowHeight();
+		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
 		debugCamera->Update(*input);
 		for (uint32_t i = 0; i < 5; ++i) {
 			object3ds[i]->SetViewMatrix(debugCamera->GetViewMatrix());
@@ -135,7 +149,43 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 			transform[i].scale = object3ds[i]->GetScale();
 		}
 
+		// 転置して列メジャー化
+		float outW[16];
+		float outV[16];
+		float outP[16];
+		for (uint32_t row = 0; row < 4; ++row) {
+			for (uint32_t col = 0; col < 4; ++col) {
+				outW[col * 4 + row] = object3ds[0]->GetWorldMatrix().m[row][col];
+				outV[col * 4 + row] = debugCamera->GetViewMatrix().m[row][col];
+				outP[col * 4 + row] = object3ds[0]->GetProjectionMatrix().m[row][col];
+			}
+		}
+		// 編集対象の行列を渡す
+		float* objectMatrix = outW;
+		float* viewMatrix = outV;
+		float* projectionMatrix = outP;
+
+		//float identityMatrix[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+
+		ImGuizmo::Manipulate(
+		    viewMatrix, projectionMatrix,
+		    ImGuizmo::OPERATION::TRANSLATE, // 操作タイプ(TRANSLATE/ROTATE/SCALE)
+		    ImGuizmo::LOCAL,                // ローカル or ワールド
+		    objectMatrix                  // 編集されるオブジェクトの行列
+		);
+
+		//ImGui::End();
+
+		Matrix4x4 temp;
+		for (uint32_t row = 0; row < 4; ++row) {
+			for (uint32_t col = 0; col < 4; ++col) {
+				temp.m[row][col] = outW[col * 4 + row];
+				object3ds[0]->SetWorldMatrix(temp);
+			}
+		}
+
 		// ImGui
+		ImGui::Begin("Editor");
 		ImGui::DragFloat3("translate0", &transform[0].translate.x, 0.01f);
 		ImGui::DragFloat3("translate1", &transform[1].translate.x, 0.01f);
 		ImGui::DragFloat3("translate2", &transform[2].translate.x, 0.01f);
@@ -151,6 +201,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat3("scale2", &transform[2].scale.x, 0.01f);
 		ImGui::DragFloat3("scale3", &transform[3].scale.x, 0.01f);
 		ImGui::DragFloat3("scale4", &transform[4].scale.x, 0.01f);
+		ImGui::Text("ImGuizmo::IsUsing: %s", ImGuizmo::IsUsing() ? "true" : "false");
 		
 		ImGui::SliderFloat4("color", &color.x, 0.0f, 1.0f);
 		object3ds[3]->SetColor(color);
@@ -180,6 +231,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat2("size", &size.x, 0.1f);
 		sprites[0]->SetSize(size);
 
+		ImGui::End();
+
 		// 描画開始
 		dxCommon->BeginFrame();
 
@@ -193,11 +246,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 		for (uint32_t i = 0; i < 5; ++i) {
 			object3ds[i]->Draw();
 		}
-
-		// Sprite描画
-		//for (uint32_t i = 0; i < 5; ++i) {
-		//	sprites[i]->Draw();
-		//}
 
 		// ImGuiの内部コマンドを生成する
 		imGuiManager_->Render(dxCommon->GetCommandList());

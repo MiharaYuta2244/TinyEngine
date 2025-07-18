@@ -39,13 +39,18 @@ public:
 	void SetScale(const Vector3& scale) { transform_.scale = scale; }
 	void SetRotate(const Vector3& rotate) { transform_.rotate = rotate; }
 	void SetTranslate(const Vector3& translate) { transform_.translate = translate; }
+	void SetWorldMatrix(Matrix4x4 worldMatrix) { worldMatrix_ = worldMatrix; }
 	void SetViewMatrix(Matrix4x4 viewMatrix) { viewMatrix_ = viewMatrix; }
+	void SetProjectionmatrix(Matrix4x4 projectionMatrix) { projectionMatrix_ = projectionMatrix; }
 
 	// getter
 	const Vector3& GetScale() const { return transform_.scale; }
 	const Vector3& GetRotate() const { return transform_.rotate; }
 	const Vector3& GetTranslate() const { return transform_.translate; }
 	const Vector4& GetColor() const { return material_.color; }
+	const Matrix4x4& GetWorldMatrix() const { return worldMatrix_; }
+	const Matrix4x4& GetViewMatrix() const { return viewMatrix_; }
+	const Matrix4x4& GetProjectionMatrix() const { return projectionMatrix_; }
 
 private:
 	// .mtlファイルの読み取り
@@ -120,4 +125,7 @@ private:
 
 	// ビューマトリックス
 	Matrix4x4 viewMatrix_;
+
+	// プロジェクションマトリックス
+	Matrix4x4 projectionMatrix_;
 };

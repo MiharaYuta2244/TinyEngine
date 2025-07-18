@@ -1,5 +1,5 @@
 #pragma once
-#include "externals/DirectXTex/DirectXTex.h"
+#include "DirectXTex.h"
 #include "MaterialData.h"
 #include "TextureData.h"
 #include <d3d12.h>

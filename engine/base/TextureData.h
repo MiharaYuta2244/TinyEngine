@@ -1,5 +1,5 @@
 #pragma once
-#include "externals/DirectXTex/DirectXTex.h"
+#include "DirectXTex.h"
 #include <d3d12.h>
 #include <string>
 #include <wrl.h>
