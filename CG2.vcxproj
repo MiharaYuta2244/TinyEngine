@@ -118,12 +118,15 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <AdditionalIncludeDirectories>C:\Users\yuuta\source\repos\CG2\externals\imgui;C:\Users\yuuta\source\repos\CG2\externals\DirectXTex;C:\Users\yuuta\source\repos\CG2\engine\2d;C:\Users\yuuta\source\repos\CG2\engine\math;C:\Users\yuuta\source\repos\CG2\engine\base;C:\Users\yuuta\source\repos\CG2\engine\input;C:\Users\yuuta\source\repos\CG2\engine\audio;C:\Users\yuuta\source\repos\CG2\externals\imguizmo;C:\Users\yuuta\source\repos\CG2\engine\3d</AdditionalIncludeDirectories>
+      <Optimization>Disabled</Optimization>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <LinkTimeCodeGeneration />
     </Link>
     <PostBuildEvent>
       <Command>copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxcompiler.dll" "$(TargetDir)dxcompiler.dll"
@@ -145,7 +148,10 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="engine\base\ImGuiManager.cpp" />
     <ClCompile Include="externals\imguizmo\ImGuizmo.cpp" />
     <ClCompile Include="engine\base\Logger.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.cpp">
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
+    </ClCompile>
     <ClCompile Include="engine\math\MathUtility.cpp" />
     <ClCompile Include="engine\base\MeshData.cpp" />
     <ClCompile Include="engine\3d\Model.cpp" />
