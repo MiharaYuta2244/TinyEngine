@@ -117,7 +117,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>C:\Users\yuuta\source\repos\CG2\externals\imgui;C:\Users\yuuta\source\repos\CG2\externals\DirectXTex;C:\Users\yuuta\source\repos\CG2\engine\2d;C:\Users\yuuta\source\repos\CG2\engine\math;C:\Users\yuuta\source\repos\CG2\engine\base;C:\Users\yuuta\source\repos\CG2\engine\input;C:\Users\yuuta\source\repos\CG2\engine\audio;C:\Users\yuuta\source\repos\CG2\externals\imguizmo;C:\Users\yuuta\source\repos\CG2\engine\3d</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)engine\2d;$(ProjectDir)engine\math;$(ProjectDir)engine\base;$(ProjectDir)engine\input;$(ProjectDir)engine\audio;$(ProjectDir)externals\imguizmo;$(ProjectDir)engine\3d;$(ProjectDir)resources\shaders</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
@@ -168,7 +168,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="engine\audio\XAudio.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Object3d.PS.hlsl">
+    <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Pixel</ShaderType>
@@ -176,7 +176,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Object3d.VS.hlsl">
+    <FxCompile Include="resources\shaders\Object3d.VS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Development|x64'">Vertex</ShaderType>
@@ -244,7 +244,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Object3d.hlsli" />
+    <None Include="resources\shaders\Object3d.hlsli" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -376,10 +376,10 @@ void DirectXCommon::CreateGraphicsPipeline() {
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	// Shaderをコンパイルする
-	IDxcBlob* vertexShaderBlob = CompileShader(L"Object3d.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* vertexShaderBlob = CompileShader(L"resources/shaders/Object3d.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(vertexShaderBlob != nullptr);
 
-	IDxcBlob* pixelShaderBlob = CompileShader(L"Object3d.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* pixelShaderBlob = CompileShader(L"resources/shaders/Object3d.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilTextureをウィンドウのサイズで作成
