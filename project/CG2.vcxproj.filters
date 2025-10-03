@@ -173,6 +173,8 @@
     <FxCompile Include="resources\shaders\Object3d.VS.hlsl">
       <Filter>shaders</Filter>
     </FxCompile>
+    <FxCompile Include="resources\shaders\Particle.VS.hlsl" />
+    <FxCompile Include="resources\shaders\Particle.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine\base\StringUtility.h">
@@ -332,5 +334,6 @@
     <None Include="resources\shaders\Object3d.hlsli">
       <Filter>shaders</Filter>
     </None>
+    <None Include="resources\shaders\Particle.hlsli" />
   </ItemGroup>
 </Project>

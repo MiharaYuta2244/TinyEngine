@@ -28,6 +28,9 @@ public:
 
 private:
 	ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
+
+	ModelData CreatePrimitiveObj();
+
 	MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeBytes);
 

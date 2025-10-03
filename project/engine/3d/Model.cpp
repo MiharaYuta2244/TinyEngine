@@ -15,6 +15,7 @@ void Model::Initialize(ModelCommon* modelCommon, TextureManager* textureManager,
 
 	// モデル読み込み
 	modelData_ = LoadObjFile(directorypath, filename);
+	//modelData_ = CreatePrimitiveObj();
 
 	// 頂点データの初期化
 	CreateVertexData();
@@ -118,6 +119,24 @@ ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string
 			modelData.material = LoadMaterialTemplateFile(directoryPath, materialFilename);
 		}
 	}
+	return modelData;
+}
+
+ModelData Model::CreatePrimitiveObj() { 
+	ModelData modelData;
+	Vector4 positions; // 位置
+	Vector3 normals;   // 法線
+	Vector2 texcoords; // テクスチャ座標
+
+	modelData.vertices.push_back({positions = {1.0f,1.0f, 0.0f, 1.0f}, texcoords = {0.0f, 0.0f}, normals = {0.0f,0.0f,1.0f}}); // 左上
+	modelData.vertices.push_back({positions = {-1.0f,1.0f, 0.0f, 1.0f}, texcoords = {1.0f, 0.0f}, normals = {0.0f,0.0f,1.0f}}); // 右上
+	modelData.vertices.push_back({positions = {1.0f,-1.0f, 0.0f, 1.0f}, texcoords = {0.0f, 1.0f}, normals = {0.0f,0.0f,1.0f}}); // 左下
+	modelData.vertices.push_back({positions = {1.0f,-1.0f, 0.0f, 1.0f}, texcoords = {0.0f, 1.0f}, normals = {0.0f,0.0f,1.0f}}); // 左下
+	modelData.vertices.push_back({positions = {-1.0f,1.0f, 0.0f, 1.0f}, texcoords = {1.0f, 0.0f}, normals = {0.0f,0.0f,1.0f}}); // 右上
+	modelData.vertices.push_back({positions = {-1.0f,-1.0f, 0.0f, 1.0f}, texcoords = {1.0f, 1.0f}, normals = {0.0f,0.0f,1.0f}}); // 右下
+
+	modelData.material.textureFilePath = "./resources/uvChecker.png";
+
 	return modelData;
 }
 
