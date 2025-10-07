@@ -71,6 +71,12 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <AdditionalIncludeDirectories>
+        C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um;
+        C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared;
+        C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\winrt;
+        %(AdditionalIncludeDirectories)
+      </AdditionalIncludeDirectories>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
