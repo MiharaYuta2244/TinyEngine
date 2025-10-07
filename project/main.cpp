@@ -1,11 +1,3 @@
-#if defined(_MSC_VER) && !defined(_rotr64)
-#include <intrin.h>
-inline unsigned __int64 _rotr64(unsigned __int64 value, unsigned int shift) noexcept {
-	shift &= 63;
-	return (value >> shift) | (value << (64 - shift));
-}
-#endif
-
 #include "Game.h"
 #include "WinApp.h"
 #include <memory>
