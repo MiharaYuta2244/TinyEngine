@@ -7,6 +7,8 @@ on:
 env:
   SOLUTION_FILE_PATH: project/CG2.sln
   CONFIGURATION: Debug
+  WindowsSdkDir: "C:\\Program Files (x86)\\Windows Kits\\10\\"
+  WindowsSdkVersion: "10.0.22621.0\\"
 
 jobs:
   build:
