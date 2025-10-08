@@ -1,12 +1,13 @@
+#include <DirectXMath.h>
+#include <fstream>
+#include <sstream>
 #include "Object3d.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
 #include "Object3dCommon.h"
 #include "TextureManager.h"
 #include "Model.h"
-#include <DirectXMath.h>
-#include <fstream>
-#include <sstream>
+
 
 using namespace Microsoft::WRL;
 using namespace DirectX;

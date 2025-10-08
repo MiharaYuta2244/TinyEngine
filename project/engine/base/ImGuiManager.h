@@ -1,4 +1,5 @@
 #pragma once
+#include <wrl.h>
 #include "Material.h"
 #include "Model.h"
 #include "Transform.h"
@@ -6,7 +7,7 @@
 #include <d3d12.h>
 #include <dxgi1_6.h>
 #include <memory>
-#include <wrl.h>
+
 
 class ImGuiManager {
 public:

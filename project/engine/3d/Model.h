@@ -1,4 +1,6 @@
 #pragma once
+
+#include <wrl.h>
 #include "Material.h"
 #include "MaterialData.h"
 #include "ModelData.h"
@@ -7,7 +9,6 @@
 #include "IMeshGenerator.h"
 #include <d3d12.h>
 #include <string>
-#include <wrl.h>
 
 class TextureManager;
 

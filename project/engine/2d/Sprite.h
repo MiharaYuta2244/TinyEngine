@@ -1,4 +1,6 @@
 #pragma once
+
+#include <wrl.h>
 #include "Material.h"
 #include "Matrix4x4.h"
 #include "Transform.h"
@@ -6,7 +8,6 @@
 #include "VertexData.h"
 #include <d3d12.h>
 #include <memory>
-#include <wrl.h>
 #include <string>
 
 class SpriteCommon;

@@ -10,10 +10,11 @@
 #include "VertexData.h"
 #include "Transform.h"
 #include "ModelManager.h"
+#include <wrl.h>
 #include <d3d12.h>
 #include <string>
 #include <vector>
-#include <wrl.h>
+
 
 class Object3dCommon;
 class TextureManager;
