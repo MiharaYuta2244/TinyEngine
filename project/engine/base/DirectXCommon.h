@@ -1,5 +1,6 @@
 #pragma once
 class WinApp; // 前方宣言
+#include <chrono>
 #include "WinApp.h"
 #include "Logger.h"
 #include <memory>
@@ -73,6 +74,15 @@ private:
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index);
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUDescriptorHandle(Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap, uint32_t descriptorSize, uint32_t index);
+
+	// FPS固定初期化
+	void InitializeFixFPS();
+
+	// FPS固定更新
+	void UpdateFixFPS();
+
+	// 記録時間(FPS固定)
+	std::chrono::steady_clock::time_point reference_;
 
 private:
 
