@@ -1,7 +1,7 @@
 #pragma once
+#include <memory>
 #include "Transform.h"
 #include "Object3d.h"
-#include <memory>
 
 class Actor {
 public:
