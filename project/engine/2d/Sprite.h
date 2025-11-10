@@ -88,6 +88,7 @@ private:
 private:
 	SpriteCommon* spriteCommon_ = nullptr;
 	TextureManager* textureManager_ = nullptr;
+	std::string textureFilePath_;
 
 	// バッファリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;

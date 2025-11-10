@@ -42,12 +42,10 @@ void Object3d::Initialize(Object3dCommon* modelCommon, TextureManager* textureMa
         {0.0f, 0.0f, 0.0f}
     };
 
-	cameraTransform_ = {
-	    {1.0f, 1.0f, 1.0f  },
-        {0.3f, 0.0f, 0.0f  },
-        {0.0f, 4.0f, -10.0f}
-    };
 	worldMatrix_ = MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+
+	// カメラをセットする
+	camera_ = object3dCommon_->GetDefaultCamera();
 }
 
 void Object3d::Update() {
@@ -58,11 +56,16 @@ void Object3d::Update() {
 
 	timeParam_.time = totalTime;
 
-	//Matrix4x4 cameraMatrix = MathUtility::MakeAffineMatrix(cameraTransform_.scale, cameraTransform_.rotate, cameraTransform_.translate);
-	//Matrix4x4 viewMatrix = MathUtility::Inverse(cameraMatrix);
 	worldMatrix_ = MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
-	projectionMatrix_ = MathUtility::MakePerspectiveFovMatrix(0.45f, static_cast<float>(WinApp::kClientWidth) / static_cast<float>(WinApp::kClientHeight), 0.1f, 100.0f);
-	transformMatrixData_->WVP = worldMatrix_ * viewMatrix_ * projectionMatrix_;
+
+	if (camera_) {
+		const Matrix4x4& viewProjectionMatrix = camera_->GetViewProjectionMatrix();
+		worldViewProjectionMatrix_ = MathUtility::Multiply(worldMatrix_, viewProjectionMatrix);
+	} else {
+		worldViewProjectionMatrix_ = worldMatrix_;
+	}
+
+	transformMatrixData_->WVP = worldViewProjectionMatrix_;
 	transformMatrixData_->World = worldMatrix_;
 
 	*transformMatrixData_ = {transformMatrixData_->WVP, transformMatrixData_->World};
@@ -238,10 +241,7 @@ void Object3d::CreateInstancingData() {
 	instancingResource_->Unmap(0, nullptr);
 
 	for (uint32_t index = 0; index < kNumInstance; ++index) {
-		Matrix4x4 worldMatrix = MathUtility::MakeAffineMatrix(transforms[index].scale, transforms[index].rotate, transforms[index].translate);
-		Matrix4x4 viewProjectionMatrix = viewMatrix_ * projectionMatrix_;
-		Matrix4x4 worldViewProjectionMatrix = MathUtility::Multiply(worldMatrix, viewProjectionMatrix);
-		instancingData[index].WVP = worldViewProjectionMatrix;
-		instancingData[index].World = worldMatrix;
+		instancingData[index].WVP = worldViewProjectionMatrix_;
+		instancingData[index].World = worldMatrix_;
 	}
 }

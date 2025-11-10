@@ -53,6 +53,7 @@ private:
 private: 
 	ModelCommon* modelCommon_ = nullptr;
 	TextureManager* textureManager_ = nullptr;
+	std::string filename_;
 
 	// objファイルのデータ
 	ModelData modelData_;

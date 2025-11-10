@@ -1,5 +1,7 @@
 #pragma once
 #include "DirectXCommon.h"
+#include "DebugCamera.h"
+
 class Object3dCommon {
 public:
 	/// <summary>
@@ -9,8 +11,12 @@ public:
 
 	void Initialize(DirectXCommon* dxCommon);
 
+	// setter
+	void SetDefaultCamera(DebugCamera* camera) { defaultCamera_ = camera; }
+
 	// getter
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
+	DebugCamera* GetDefaultCamera() { return defaultCamera_; }
 
 private:
 	/// <summary>
@@ -45,4 +51,7 @@ private:
 	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_;
 	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_;
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_;
+
+	// カメラ
+	DebugCamera* defaultCamera_ = nullptr;
 };

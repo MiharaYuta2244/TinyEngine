@@ -14,9 +14,10 @@ using namespace Microsoft::WRL;
 void Model::Initialize(ModelCommon* modelCommon, TextureManager* textureManager, const std::string& filename) { 
 	modelCommon_ = modelCommon; 
 	textureManager_ = textureManager;
+	filename_ = filename;
 
 	// モデル読み込み
-	modelData_ = LoadObjFile(filename);
+	modelData_ = LoadObjFile(filename_);
 	//modelData_ = CreatePrimitiveObj();
 
 	// 頂点データの初期化
@@ -32,7 +33,7 @@ void Model::Initialize(ModelCommon* modelCommon, TextureManager* textureManager,
 	textureManager_->LoadTexture(modelData_.material.textureFilePath);
 
 	// テクスチャ番号を取得して、メンバ変数に書き込む
-	modelData_.material.textureIndex = textureManager_->GetTextureIndexByFilePath(modelData_.material.textureFilePath);
+	modelData_.material.textureIndex = textureManager_->GetSrvIndex(modelData_.material.textureFilePath);
 }
 
 void Model::Update()
@@ -53,7 +54,7 @@ void Model::Draw()
 	// マテリアルCBufferの場所を設定
 	commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 	// SRVのDescriptorTableの先頭を設定。2はrootParameter[2]である。
-	commandList->SetGraphicsRootDescriptorTable(2, textureManager_->GetSrvHandleGPU(modelData_.material.textureIndex));
+	commandList->SetGraphicsRootDescriptorTable(2, textureManager_->GetSrvHandleGPU(modelData_.material.textureFilePath));
 	// 描画!(DrawCall/ドローコール)。
 	commandList->DrawInstanced(UINT(modelData_.vertices.size()), instanceCount, 0, 0);
 	//modelCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(indexCount_, 1, 0, 0, 0);

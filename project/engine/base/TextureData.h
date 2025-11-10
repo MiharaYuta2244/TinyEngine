@@ -4,9 +4,9 @@
 #include <string>
 #include <wrl.h>
 struct TextureData {
-	std::string filepath;
 	DirectX::TexMetadata metaData;
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource;
+	uint32_t srvIndex;
 	D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU;
 	D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU;
 };

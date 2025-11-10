@@ -10,6 +10,7 @@
 #include "VertexData.h"
 #include "Transform.h"
 #include "ModelManager.h"
+#include "DebugCamera.h"
 #include <wrl.h>
 #include <d3d12.h>
 #include <string>
@@ -39,8 +40,7 @@ public:
 	void SetTranslate(const Vector3& translate) { transform_.translate = translate; }
 	void SetTransform(const Transform& transform) { transform_ = transform; }
 	void SetWorldMatrix(Matrix4x4 worldMatrix) { worldMatrix_ = worldMatrix; }
-	void SetViewMatrix(Matrix4x4 viewMatrix) { viewMatrix_ = viewMatrix; }
-	void SetProjectionmatrix(Matrix4x4 projectionMatrix) { projectionMatrix_ = projectionMatrix; }
+	void SetCamera(DebugCamera* camera) { camera_ = camera; }
 
 	// getter
 	Vector3& GetScale() { return transform_.scale; }
@@ -49,8 +49,6 @@ public:
 	Vector4& GetColor() { return material_.color; }
 
 	Matrix4x4& GetWorldMatrix()  { return worldMatrix_; }
-	Matrix4x4& GetViewMatrix() { return viewMatrix_; }
-	Matrix4x4& GetProjectionMatrix() { return projectionMatrix_; }
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeBytes);
@@ -121,14 +119,12 @@ private:
 
 	// 3Dオブジェクト自体とカメラの座標変換行列の元となるTransform
 	Transform transform_;
-	Transform cameraTransform_;
 
-	// ビューマトリックス
-	Matrix4x4 viewMatrix_;
-
-	// プロジェクションマトリックス
-	Matrix4x4 projectionMatrix_;
+	Matrix4x4 worldViewProjectionMatrix_;
 
 	// 描画する数
 	static const uint32_t kNumInstance = 10;
+
+	// カメラ
+	DebugCamera* camera_ = nullptr;
 };

@@ -6,6 +6,9 @@ void Game::Initialize(HINSTANCE hInstance) {
 	// DirectX12 デバイス初期化
 	dxCommon_->Initialize(winApp_);
 
+	// SrvManager
+	srvManager_->Initialize(dxCommon_.get());
+
 	// ImGuiManager
 	imGuiManager_->Initialize(dxCommon_->GetWinApp()->GetHWND(), dxCommon_->GetDevice(), dxCommon_->GetSwapChainDescBufferCount(), dxCommon_->GetRtvFormat(), dxCommon_->GetSrvDescriptorHeap().Get());
 
@@ -15,7 +18,7 @@ void Game::Initialize(HINSTANCE hInstance) {
 	style.Colors[ImGuiCol_Text] = ImVec4(0.9f, 0.9f, 0.9f, 1.0f);     // 明るいグレー
 
 	// テクスチャマネージャー
-	textureManager_->Initialize(dxCommon_.get());
+	textureManager_->Initialize(dxCommon_.get(), srvManager_.get());
 
 	// Object3dCommon
 	object3dCommon_->Initialize(dxCommon_.get());
@@ -39,21 +42,12 @@ void Game::Initialize(HINSTANCE hInstance) {
 	modelManger_->LoadModel("sphere.obj");
 	modelManger_->LoadModel("Box.obj");
 
-	for (uint16_t i = 0; i < 2; ++i) {
-		auto object3d = std::make_unique<Object3d>();
-		object3d->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get());
-		object3ds_.push_back(std::move(object3d));
-	}
-
 	// modelのポインタを受け取る
-	object3ds_[0]->SetModel("fence.obj");
-	object3ds_[1]->SetModel("axis.obj");
+	// object3ds_[0]->SetModel("fence.obj");
+	// object3ds_[1]->SetModel("axis.obj");
 	// object3ds_[2]->SetModel("SkySphere.obj");
 	// object3ds_[3]->SetModel("sphere.obj");
 	// object3ds_[4]->SetModel("Field.obj");
-
-	object3ds_[0]->SetTranslate({16.0f, 6.0f, 0.0f});
-	object3ds_[1]->SetTranslate({28.0f, 6.0f, 0.0f});
 
 	// Sprite共通部
 	spriteCommon_->Initialize(dxCommon_.get());
@@ -68,6 +62,7 @@ void Game::Initialize(HINSTANCE hInstance) {
 	// DebugCamera
 	debugCamera_->Initialize();
 	debugCamera_->SetTranslation({19.45f, 10.5f, -50.0f});
+	object3dCommon_->SetDefaultCamera(debugCamera_.get());
 
 	// プレイヤー
 	player_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get(), input_.get(), gamePad_.get());
@@ -96,48 +91,6 @@ void Game::Update() {
 
 	// ImGui前処理
 	imGuiManager_->BeginFrame();
-
-	ImGui::Begin("Object3D");
-	for (size_t i = 0; i < object3ds_.size(); ++i) {
-		if (!object3ds_[i])
-			continue;
-
-		std::string labelPrefix = "Model " + std::to_string(i) + " / ";
-
-		ImGui::Text("Model %zu", i);
-		ImGui::DragFloat3((labelPrefix + "Position").c_str(), &object3ds_[i]->GetTranslate().x, 0.01f);
-		ImGui::DragFloat3((labelPrefix + "Size").c_str(), &object3ds_[i]->GetScale().x, 0.1f);
-		ImGui::DragFloat3((labelPrefix + "Rotate").c_str(), &object3ds_[i]->GetRotate().x, 0.01f);
-
-		static const char* modelList[] = {"fence.obj", "axis.obj"};
-
-		// 各スプライトごとに選択状態を保持
-		static std::vector<int> currentItemList;
-		if (currentItemList.size() < object3ds_.size()) {
-			currentItemList.resize(object3ds_.size(), 0);
-		}
-
-		int& currentItem = currentItemList[i];
-
-		if (ImGui::BeginCombo((labelPrefix + "Model").c_str(), modelList[currentItem])) {
-			for (int t = 0; t < IM_ARRAYSIZE(modelList); ++t) {
-				bool isSelected = (currentItem == t);
-				if (ImGui::Selectable(modelList[t], isSelected)) {
-					currentItem = t;
-
-					// モデル変更
-					std::string modelPath = modelList[t];
-					object3ds_[i]->SetModel(modelPath);
-				}
-				if (isSelected)
-					ImGui::SetItemDefaultFocus();
-			}
-			ImGui::EndCombo();
-		}
-
-		ImGui::Separator();
-	}
-	ImGui::End();
 
 	// プレイヤーのimGui
 	player_->UpdateImGui();
@@ -173,16 +126,6 @@ void Game::Update() {
 
 	// デバッグカメラ更新
 	debugCamera_->Update(*input_, *gamePad_);
-	player_->GetObject3d()->SetViewMatrix(debugCamera_->GetViewMatrix());
-	enemy_->GetObject3d()->SetViewMatrix(debugCamera_->GetViewMatrix());
-
-	for (uint32_t i = 0; i < 2; ++i) {
-		object3ds_[i]->SetViewMatrix(debugCamera_->GetViewMatrix());
-	}
-
-	for (auto& block : blocks_) {
-		block->GetObject3d()->SetViewMatrix(debugCamera_->GetViewMatrix());
-	}
 
 	// ImGuizmo::Manipulate(
 	//     *(debugCamera_->GetViewMatrix()).m, *(object3ds_[objIndex_]->GetProjectionMatrix()).m, ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, *(object3ds_[objIndex_]->GetWorldMatrix()).m);
@@ -192,11 +135,6 @@ void Game::Update() {
 
 	// Particle更新
 	// particle_->Update();
-
-	// Object3d
-	for (auto& object : object3ds_) {
-		object->Update();
-	}
 
 	// プレイヤー更新
 	player_->Update(deltaTime_->GetDeltaTime());
@@ -225,11 +163,6 @@ void Game::Draw() {
 
 	// Particle描画
 	// particle_->Draw();
-
-	// Object3d
-	for (auto& object : object3ds_) {
-		object->Draw();
-	}
 
 	// プレイヤー描画
 	player_->Draw();

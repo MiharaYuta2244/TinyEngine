@@ -24,6 +24,7 @@
 #include "Map.h"
 #include "Block.h"
 #include "Enemy.h"
+#include "SrvManager.h"
 #include <memory>
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -63,6 +64,9 @@ private:
 
 	// DirectX12 デバイス初期化
 	std::shared_ptr<DirectXCommon> dxCommon_ = std::make_unique<DirectXCommon>();
+
+	// SRVManager
+	std::unique_ptr<SrvManager> srvManager_ = std::make_unique<SrvManager>();
 
 	// ImGuiManager
 	std::unique_ptr<ImGuiManager> imGuiManager_ = std::make_unique<ImGuiManager>();
