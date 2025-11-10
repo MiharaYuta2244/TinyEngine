@@ -27,6 +27,10 @@ void Player::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, Mo
 void Player::Update(float deltaTime) {
 	gamePad_->Update();
 
+	if (input_->KeyTriggered(DIK_Q)) {
+		object3d_->SetModel("fence.obj");
+	}
+
 	// 経過時間
 	deltaTime_ = deltaTime;
 

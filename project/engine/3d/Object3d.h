@@ -43,14 +43,14 @@ public:
 	void SetProjectionmatrix(Matrix4x4 projectionMatrix) { projectionMatrix_ = projectionMatrix; }
 
 	// getter
-	const Vector3& GetScale() const { return transform_.scale; }
-	const Vector3& GetRotate() const { return transform_.rotate; }
-	const Vector3& GetTranslate() const { return transform_.translate; }
-	const Vector4& GetColor() const { return material_.color; }
+	Vector3& GetScale() { return transform_.scale; }
+	Vector3& GetRotate() { return transform_.rotate; }
+	Vector3& GetTranslate() { return transform_.translate; }
+	Vector4& GetColor() { return material_.color; }
 
 	Matrix4x4& GetWorldMatrix()  { return worldMatrix_; }
-	const Matrix4x4& GetViewMatrix() const { return viewMatrix_; }
-	const Matrix4x4& GetProjectionMatrix() const { return projectionMatrix_; }
+	Matrix4x4& GetViewMatrix() { return viewMatrix_; }
+	Matrix4x4& GetProjectionMatrix() { return projectionMatrix_; }
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeBytes);
