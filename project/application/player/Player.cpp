@@ -3,9 +3,10 @@
 #include "ModelManager.h"
 #include "Object3dCommon.h"
 #include "TextureManager.h"
+#include "SpriteCommon.h"
 #include <numbers>
 
-void Player::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane, DirectInput* input, GamePad* gamePad) {
+void Player::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane, DirectInput* input, GamePad* gamePad, SpriteCommon* spriteCommon, std::string filePath) {
 	// 3Dオブジェクトの生成
 	object3d_ = std::make_unique<Object3d>();
 
@@ -13,16 +14,22 @@ void Player::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, Mo
 	object3d_->Initialize(obj3dCommon, texMane, ModelMane);
 	object3d_->SetColor({1.0f, 0.0f, 0.0f, 1.0f});
 
-	transform_.scale = {3.0f, 3.0f, 3.0f};
+	transform_.scale = {1.0f, 1.0f, 1.0f};
 	transform_.rotate = {0.0f, 0.0f, 0.0f};
 	transform_.translate = {20.0f, 0.0f, 0.0f};
 	size_ = {1.0f, 1.0f, 1.0f};
 	collisionSize = {1.0f, 1.0f, 1.0f};
 	isActive_ = true;
 
-	input_ = input;
+	// 当たり判定位置更新
+	UpdateCollisionPos();
 
+	// 入力
+	input_ = input;
 	gamePad_ = gamePad;
+
+	// HPゲージスプライト(ハート)
+	spriteHeart_->Initialize(spriteCommon, texMane, filePath);
 }
 
 void Player::Update(float deltaTime) {
@@ -60,6 +67,19 @@ void Player::Update(float deltaTime) {
 		isRotate_ = false;
 	}
 
+	// 敵との当たり判定が取れた時にHP減算 & 無敵フラグを立てる
+	SubHp();
+
+	// 無敵時間を更新　上限に達したら無敵フラグを立てる無敵フラグを下ろす
+	FrameCountIsInvincible();
+
+	// 当たり判定位置更新
+	UpdateCollisionPos();
+
+	// HPゲージスプライト(ハート)
+	//spriteHeart_->SetPosition({transform_.translate.x, transform_.translate.y});
+	spriteHeart_->Update();
+
 	// 位置の更新
 	object3d_->SetTransform(transform_);
 
@@ -67,11 +87,21 @@ void Player::Update(float deltaTime) {
 	object3d_->Update();
 }
 
-void Player::Draw() { object3d_->Draw(); }
+void Player::Draw() {
+	// 無敵状態時は点滅
+	if (invincibleFrameCount_ % 2 == 0) {
+		object3d_->Draw();
+	}
+
+	// HPゲージスプライト(ハート)
+	spriteHeart_->Draw();
+}
 
 void Player::UpdateImGui() {
 	ImGui::Begin("Player");
 
+	ImGui::Text("HP : %d", hp_);
+	ImGui::Text("InvincibleFrameCount : %d", invincibleFrameCount_);
 	ImGui::DragFloat3("Position", &transform_.translate.x, 0.01f);
 	ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
 	ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
@@ -79,6 +109,8 @@ void Player::UpdateImGui() {
 	ImGui::DragFloat3("direction", &object3d_->GetDirectionalLight().direction.x, 0.01f);
 	ImGui::DragFloat("intensity", &object3d_->GetDirectionalLight().intensity, 0.01f);
 	ImGui::DragFloat("shininess", &object3d_->GetMaterial().shininess, 0.01f);
+	ImGui::DragFloat2("spritePos", &spriteHeart_->GetPosition().x, 1.0f);
+	ImGui::DragFloat2("spriteSize", &spriteHeart_->GetSize().x, 1.0f);
 
 	ImGui::End();
 }
@@ -139,15 +171,46 @@ void Player::AnimationHipDrop() {
 		return;
 
 	// 回転速度
-	constexpr float baseRotationSpeed = std::numbers::pi_v<float> * 3.0f;
+	constexpr float baseRotationSpeed = std::numbers::pi_v<float> * 6.0f;
 	float rotationSpeed = (direction_ == Direction::RIGHT) ? -baseRotationSpeed : baseRotationSpeed;
 
 	// 時間経過に応じて回転を加算
 	transform_.rotate.z += rotationSpeed * deltaTime_;
 
 	// 0〜2πの範囲に収める
-	if (std::abs(transform_.rotate.z) > std::numbers::pi_v<float>) {
-		transform_.rotate.z = (direction_ == Direction::RIGHT) ? -std::numbers::pi_v<float> : std::numbers::pi_v<float>;
+	if (std::abs(transform_.rotate.z) > std::numbers::pi_v<float> * 2) {
+		transform_.rotate.z = (direction_ == Direction::RIGHT) ? -std::numbers::pi_v<float> * 2 : std::numbers::pi_v<float> * 2;
 		velocity_.y = hipDropPower_; // ヒップドロップ
+	}
+}
+
+void Player::UpdateCollisionPos() {
+	// 当たり判定の更新
+	aabb_.min = {transform_.translate.x - 0.5f, transform_.translate.y - 0.5f, transform_.translate.z - 0.5f};
+	aabb_.max = {transform_.translate.x + 0.5f, transform_.translate.y + 0.5f, transform_.translate.z + 0.5f};
+	sphere_.center = transform_.translate;
+	sphere_.radius = 0.5f;
+}
+
+void Player::SubHp() {
+	if (isHpSub_ && !isInvincible_) {
+		// HP減算
+		hp_--;
+
+		// 無敵フラグを立てる
+		isInvincible_ = true;
+	}
+}
+
+void Player::FrameCountIsInvincible() {
+	if (isInvincible_) {
+		invincibleFrameCount_++;
+
+		// 無敵時間の上限に達したら
+		if (invincibleFrameCount_ >= kInvincibleFrame_) {
+			isHpSub_ = false;      // HP減算フラグを下ろす
+			isInvincible_ = false; // 無敵フラグを下ろす
+			invincibleFrameCount_ = 0;
+		}
 	}
 }

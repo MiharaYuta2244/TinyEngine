@@ -9,6 +9,7 @@ void Enemy::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, Mod
 
 	// Object3dの初期化
 	object3d_->Initialize(obj3dCommon, texMane, ModelMane);
+	object3d_->SetColor({1.0f, 0.0f, 0.0f, 1.0f});
 
 	transform_.scale = {2.0f, 2.0f, 2.0f};
 	transform_.rotate = {0.0f, 0.0f, 0.0f};
@@ -16,11 +17,23 @@ void Enemy::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, Mod
 	size_ = {1.0f, 1.0f, 1.0f};
 	collisionSize = {1.0f, 1.0f, 1.0f};
 	isActive_ = true;
+
+	// 当たり判定の位置更新
+	UpdateCollisionPos();
 }
 
 void Enemy::Update(float deltaTime) {
 	// 経過時間
 	deltaTime_ = deltaTime;
+
+	// 左右移動
+	HorizontalMove();
+
+	// 反転処理
+	DirectionChange();
+
+	// 当たり判定の位置更新
+	UpdateCollisionPos();
 
 	// 位置の更新
 	object3d_->SetTransform(transform_);
@@ -42,5 +55,24 @@ void Enemy::UpdateImGui() {
 }
 
 void Enemy::HorizontalMove() {
+	if (direction_ == Direction::RIGHT) {
+		transform_.translate.x += velocity_.x * deltaTime_;
+	} else if (direction_ == Direction::LEFT) {
+		transform_.translate.x -= velocity_.x * deltaTime_;
+	}
+}
 
+void Enemy::DirectionChange() {
+	if (transform_.translate.x >= 10.0f) {
+		direction_ = Direction::LEFT;
+	} else if (transform_.translate.x <= -10.0f) {
+		direction_ = Direction::RIGHT;
+	}
+}
+
+void Enemy::UpdateCollisionPos() {
+	aabb_.min = {transform_.translate.x - 0.5f, transform_.translate.y - 0.5f, transform_.translate.z - 0.5f};
+	aabb_.max = {transform_.translate.x + 0.5f, transform_.translate.y + 0.5f, transform_.translate.z + 0.5f};
+	sphere_.center = transform_.translate;
+	sphere_.radius = 0.5f;
 }

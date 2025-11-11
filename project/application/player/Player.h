@@ -1,15 +1,17 @@
 #pragma once
 #include "Actor.h"
 #include "DirectInput.h"
+#include "Sprite.h"
 
 class Object3dCommon;
+class SpriteCommon;
 class TextureManager;
 class ModelManager;
 class GamePad;
 
 class Player : public Actor {
 public:
-	void Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane, DirectInput* input, GamePad* gamePad);
+	void Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane, DirectInput* input, GamePad* gamePad, SpriteCommon* spriteCommon, std::string filePath);
 
 	void Update(float deltaTime);
 
@@ -20,6 +22,10 @@ public:
 
 	// Setter
 	void SetModel(const std::string model) { object3d_->SetModel(model); }
+	void SetTranslate(Vector3 translate) { transform_.translate = translate; }
+	void SetVelocity(Vector2 velocity) { velocity_ = velocity; }
+	void SetIsHpSub(bool isHpSub) { isHpSub_ = isHpSub; }
+	void SetIsInvincible(bool isInvincible) { isInvincible_ = isInvincible; }
 
 	// Getter
 	Object3d* GetObject3d() { return object3d_.get(); }
@@ -27,6 +33,9 @@ public:
 	Vector3 GetTranslate() { return transform_.translate; }
 	Vector3 GetRotate() { return transform_.rotate; }
 	Vector3 GetScale() { return transform_.scale; }
+	Vector2 GetVelocity() { return velocity_; }
+	int GetIsHpSub() { return isHpSub_; }
+	bool GetIsInvincible() { return isInvincible_; }
 
 private:
 	enum class Direction {
@@ -46,6 +55,15 @@ private:
 
 	// ヒップドロップアニメーション
 	void AnimationHipDrop();
+
+	// 当たり判定の位置更新
+	void UpdateCollisionPos();
+
+	// HP減算処理
+	void SubHp();
+
+	// 無敵状態フレームカウント
+	void FrameCountIsInvincible();
 
 private:
 	// 入力
@@ -82,4 +100,19 @@ private:
 
 	// HP
 	int hp_ = 5;
+
+	// HP減算フラグ
+	bool isHpSub_ = false;
+
+	// 無敵状態フラグ
+	bool isInvincible_ = false;
+
+	// 無敵時間フレームカウント
+	int invincibleFrameCount_ = 0;
+
+	// 無敵時間上限
+	const int kInvincibleFrame_ = 60;
+
+	// HPゲージスプライト(ハート)
+	std::unique_ptr<Sprite> spriteHeart_ = std::make_unique<Sprite>();
 };

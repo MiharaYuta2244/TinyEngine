@@ -30,6 +30,18 @@ private:
 	// 横移動
 	void HorizontalMove();
 
+	// 反転処理
+	void DirectionChange();
+
+	// 当たり判定の位置更新
+	void UpdateCollisionPos();
+
+private:
+	enum class Direction {
+		RIGHT = 0,
+		LEFT = 1,
+	};
+
 private:
 	// 速度関連
 	Vector2 acceleration_ = {0.0f, -25.0f};
@@ -40,4 +52,7 @@ private:
 
 	// 経過時間
 	float deltaTime_;
+
+	// 方向
+	Direction direction_ = Direction::RIGHT;
 };

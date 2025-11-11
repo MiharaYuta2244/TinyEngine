@@ -55,6 +55,9 @@ private:
 	// デバッグカメラ(ImGui)
 	void ImGuiDebugCamera();
 
+	// 当たり判定(Player, Enemy)
+	void CollisionPlayerEnemy();
+
 private:
 	// リリースリークチェック
 	D3DResourceLeakChecker leakCheck_;

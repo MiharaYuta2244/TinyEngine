@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "Collision.h"
 
 void Game::Initialize(HINSTANCE hInstance) {
 	CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -66,15 +67,15 @@ void Game::Initialize(HINSTANCE hInstance) {
 	//particleCommon_->SetDefaultCamera(debugCamera_.get());
 
 	// プレイヤー
-	player_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get(), input_.get(), gamePad_.get());
-	player_->SetModel("sphere.obj");
+	player_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get(), input_.get(), gamePad_.get(), spriteCommon_.get(), "resources/Heart.png");
+	player_->SetModel("Box.obj");
 
 	// マップ
 	//map_->Initialize();
 
 	// 敵
-	//enemy_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get());
-	//enemy_->SetModel("Box.obj");
+	enemy_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get());
+	enemy_->SetModel("sphere.obj");
 
 	// オブジェクトの配置
 	//SpawnObjectsByMapChip(mapLeftTop_);
@@ -97,7 +98,7 @@ void Game::Update() {
 	player_->UpdateImGui();
 
 	// 敵のImGui
-	//enemy_->UpdateImGui();
+	enemy_->UpdateImGui();
 
 	// フレームレート表示(ImGui)
 	ImGuiFPS();
@@ -137,6 +138,9 @@ void Game::Update() {
 	// Particle更新
 	//particle_->Update();
 
+	// プレイヤーと敵の当たり判定
+	CollisionPlayerEnemy();
+
 	// プレイヤー更新
 	player_->Update(deltaTime_->GetDeltaTime());
 
@@ -146,7 +150,7 @@ void Game::Update() {
 	//}
 
 	// 敵更新
-	//enemy_->Update(deltaTime_->GetDeltaTime());
+	enemy_->Update(deltaTime_->GetDeltaTime());
 }
 
 void Game::Draw() {
@@ -162,7 +166,7 @@ void Game::Draw() {
 	//}
 
 	// 敵描画
-	// enemy_->Draw();
+	enemy_->Draw();
 
 	// Particle描画
 	//particle_->Draw();
@@ -212,4 +216,13 @@ void Game::ImGuiDebugCamera() {
 	ImGui::Begin("DebugCamera");
 	ImGui::DragFloat3("Pos", &debugCamera_->GetTranslation().x, 0.01f);
 	ImGui::End();
+}
+
+void Game::CollisionPlayerEnemy() { 
+	if (Collision::Intersect(player_->GetAABB(), enemy_->GetAABB())) {
+		player_->SetVelocity({player_->GetVelocity().x, 20.0f});
+
+		// HP減算フラグを立てる
+		player_->SetIsHpSub(true);
+	}
 }
