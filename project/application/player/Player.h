@@ -21,19 +21,13 @@ public:
 	void UpdateImGui();
 
 	// Setter
-	void SetModel(const std::string model) { object3d_->SetModel(model); }
-	void SetTranslate(Vector3 translate) { transform_.translate = translate; }
 	void SetVelocity(Vector2 velocity) { velocity_ = velocity; }
 	void SetIsHitEnemy(bool isHpSub) { isHitEnemy_ = isHpSub; }
 	void SetIsInvincible(bool isInvincible) { isInvincible_ = isInvincible; }
 	void SetIsHitEnemyHipDrop(bool isHitEnemyHipDrop) { isHitEnemyHipDrop_ = isHitEnemyHipDrop; }
+	void SetIsPowerUp(bool isPowerUp) { isPowerUp_ = isPowerUp; }
 
 	// Getter
-	Object3d* GetObject3d() { return object3d_.get(); }
-	Transform GetTransform() { return transform_; }
-	Vector3 GetTranslate() { return transform_.translate; }
-	Vector3 GetRotate() { return transform_.rotate; }
-	Vector3 GetScale() { return transform_.scale; }
 	Vector2 GetVelocity() { return velocity_; }
 	int GetIsHpSub() { return isHitEnemy_; }
 	bool GetIsInvincible() { return isInvincible_; }
@@ -126,4 +120,7 @@ private:
 
 	// 敵にヒップドロップを当てた時に立つフラグ
 	bool isHitEnemyHipDrop_ = false;
+
+	// プレイヤーのパワーアップフラグ
+	bool isPowerUp_ = false;
 };

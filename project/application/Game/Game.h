@@ -26,6 +26,7 @@
 #include "TextureManager.h"
 #include "WinApp.h"
 #include "XAudio.h"
+#include "PowerUpItem.h"
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #include <dxgidebug.h>
@@ -60,6 +61,18 @@ private:
 
 	// 当たり判定(Enemy, Player, ヒップドロップ)
 	void CollisionEnemyPlayerHipDrop();
+
+	// プレイヤーとパワーアップアイテムの当たり判定
+	void CollisionPlayerPowerUpItem();
+
+	// モデルを読み込む
+	void AllModelLoader();
+
+	// パワーアップアイテムの生成
+	void CreatePowerUpItem();
+
+	// 指定された範囲でランダムなfloat値を生成
+	float ApplyRandomFloat(float min, float max);
 
 private:
 	// リリースリークチェック
@@ -142,4 +155,16 @@ private:
 
 	// 敵
 	std::unique_ptr<Enemy> enemy_ = std::make_unique<Enemy>();
+
+	// プレイヤーのパワーアップアイテム
+	std::vector<std::unique_ptr<PowerUpItem>> powerUpItems_;
+
+	// パワーアップアイテム生成フレームカウント
+	int powerUpItemCreateFrameCount_ = 0;
+
+	// パワーアップアイテムが生成されるまでの最大フレームカウント
+	const int kPowerUpItemFrameCountMax = 60;
+
+	// パワーアップアイテムの画面上に存在できる最大数
+	const int kPowerUpItemCountMax = 5;
 };

@@ -17,15 +17,9 @@ public:
 	void UpdateImGui();
 
 	// Setter
-	void SetModel(const std::string model) { object3d_->SetModel(model); }
 	void SetIsHitPlayerHipDrop(bool isHitPlayerHipDrop) { isHitPlayerHipDrop_ = isHitPlayerHipDrop; }
 
 	// Getter
-	Object3d* GetObject3d() { return object3d_.get(); }
-	Transform GetTransform() { return transform_; }
-	Vector3 GetTranslate() { return transform_.translate; }
-	Vector3 GetRotate() { return transform_.rotate; }
-	Vector3 GetScale() { return transform_.scale; }
 	AABB GetAABBRightSide() { return collisionRightSide_; }
 	AABB GetAABBLeftSide() { return collisionLeftSide_; }
 

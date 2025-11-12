@@ -1,3 +1,4 @@
+#include <random>
 #include "Game.h"
 #include "Collision.h"
 
@@ -39,14 +40,7 @@ void Game::Initialize(HINSTANCE hInstance) {
 	// particle_->Initialize(particleCommon_.get(), textureManager_.get(), modelManger_.get());
 
 	// .objファイルからモデルを読み込む
-	modelManger_->LoadModel("fence.obj");
-	modelManger_->LoadModel("plane.obj");
-	modelManger_->LoadModel("axis.obj");
-	modelManger_->LoadModel("SkySphere.obj");
-	modelManger_->LoadModel("skydome.obj");
-	modelManger_->LoadModel("Field.obj");
-	modelManger_->LoadModel("sphere.obj");
-	modelManger_->LoadModel("Box.obj");
+	AllModelLoader();
 
 	// XAudio
 	audio_->Initialize();
@@ -66,14 +60,14 @@ void Game::Initialize(HINSTANCE hInstance) {
 	player_->SetModel("Box.obj");
 
 	// マップ
-	// map_->Initialize();
+	map_->Initialize();
 
 	// 敵
 	enemy_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get());
 	enemy_->SetModel("sphere.obj");
 
 	// オブジェクトの配置
-	// SpawnObjectsByMapChip(mapLeftTop_);
+	SpawnObjectsByMapChip(mapLeftTop_);
 }
 
 void Game::Update() {
@@ -129,6 +123,9 @@ void Game::Update() {
 // ImGui::PopStyleColor();
 #endif
 
+	// 一定時間おきにパワーアップアイテム生成
+	CreatePowerUpItem();
+
 	// デバッグカメラ更新
 	debugCamera_->Update(*input_, *gamePad_);
 
@@ -141,16 +138,24 @@ void Game::Update() {
 	// 敵がプレイヤーからヒップドロップを受けた時の当たり判定
 	CollisionEnemyPlayerHipDrop();
 
+	// プレイヤーとパワーアップアイテムの当たり判定
+	CollisionPlayerPowerUpItem();
+
 	// プレイヤー更新
 	player_->Update(deltaTime_->GetDeltaTime());
 
 	// ブロック更新
-	// for (auto& block : blocks_) {
-	//	block->Update();
-	//}
+	for (auto& block : blocks_) {
+		block->Update();
+	}
 
 	// 敵更新
 	enemy_->Update(deltaTime_->GetDeltaTime());
+
+	// パワーアップアイテム更新
+	for (auto& powerUpItem : powerUpItems_) {
+		powerUpItem->Update(deltaTime_->GetDeltaTime());
+	}
 }
 
 void Game::Draw() {
@@ -163,12 +168,17 @@ void Game::Draw() {
 	player_->Draw();
 
 	// ブロック描画
-	// for (auto& block : blocks_) {
-	//	block->Draw();
-	//}
+	for (auto& block : blocks_) {
+		block->Draw();
+	}
 
 	// 敵描画
 	enemy_->Draw();
+
+	// パワーアップアイテム描画
+	for (auto& powerUpItem : powerUpItems_) {
+		powerUpItem->Draw();
+	}
 
 // Particle描画
 // particle_->Draw();
@@ -245,4 +255,69 @@ void Game::CollisionEnemyPlayerHipDrop() {
 			player_->SetIsHitEnemyHipDrop(true);
 		}
 	}
+}
+
+void Game::CollisionPlayerPowerUpItem() {
+	// パワーアップアイテムとの衝突判定と削除
+	powerUpItems_.erase(
+	    std::remove_if(
+	        powerUpItems_.begin(), powerUpItems_.end(),
+	        [this](std::unique_ptr<PowerUpItem>& item) {
+		        if (Collision::Intersect(player_->GetAABB(), item->GetAABB())) {
+			        // プレイヤーのパワーアップフラグを立てる
+			        player_->SetIsPowerUp(true);
+			        return true;
+		        }
+		        return false;
+	        }),
+	    powerUpItems_.end());
+}
+
+void Game::AllModelLoader() {
+	modelManger_->LoadModel("fence.obj");
+	modelManger_->LoadModel("plane.obj");
+	modelManger_->LoadModel("axis.obj");
+	modelManger_->LoadModel("SkySphere.obj");
+	modelManger_->LoadModel("skydome.obj");
+	modelManger_->LoadModel("Field.obj");
+	modelManger_->LoadModel("sphere.obj");
+	modelManger_->LoadModel("Box.obj");
+}
+
+void Game::CreatePowerUpItem() {
+	// パワーアップアイテムの数が最大値に達していたら早期リターン
+	if (powerUpItems_.size() >= kPowerUpItemCountMax)
+		return;
+
+	// フレームカウント加算
+	powerUpItemCreateFrameCount_++;
+
+	// フレームカウントが上限に達したら
+	if (powerUpItemCreateFrameCount_ >= kPowerUpItemFrameCountMax) {
+		// パワーアップアイテム生成
+		auto powerUpItem = std::make_unique<PowerUpItem>();
+		powerUpItem->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get());
+		powerUpItem->SetModel("sphere.obj");
+
+		// ランダムな座標を指定
+		Vector3 pos;
+		pos.x = ApplyRandomFloat(2.0f, 30.0f);
+		pos.y = ApplyRandomFloat(2.0f, 20.0f);
+		pos.z = 0.0f;
+
+		powerUpItem->SetTranslate(pos);
+		powerUpItems_.push_back(std::move(powerUpItem));
+
+		// フレームカウントをリセット
+		powerUpItemCreateFrameCount_ = 0;
+
+		return;
+	}
+}
+
+float Game::ApplyRandomFloat(float min, float max) {
+	static std::random_device rd;
+	static std::mt19937 gen(rd());
+	std::uniform_real_distribution<float> dist(min, max);
+	return dist(gen);
 }
