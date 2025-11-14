@@ -10,6 +10,10 @@ void SrvManager::Initialize(DirectXCommon* dxCommon) {
 
 	// デスクリプタ1個分のサイズを取得して記録
 	descriptorSize_ = dxCommon_->GetDescriptorSizeSRV();
+
+	// 先頭ブロック(インデックス0)はImGuiなどが使っている想定なので、
+	// 実際の割当は1から開始するようにする
+	useIndex = 1;
 }
 
 uint32_t SrvManager::Allocate() {

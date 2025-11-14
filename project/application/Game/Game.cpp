@@ -33,11 +33,8 @@ void Game::Initialize(HINSTANCE hInstance) {
 	// Sprite共通部
 	spriteCommon_->Initialize(dxCommon_.get());
 
-	// ParticleCommon
-	// particleCommon_->Initialize(dxCommon_.get());
-
-	// Particle
-	// particle_->Initialize(particleCommon_.get(), textureManager_.get(), modelManger_.get());
+	// TestParticleCommon
+	testParticleCommon_->Initialize(dxCommon_.get());
 
 	// .objファイルからモデルを読み込む
 	AllModelLoader();
@@ -53,7 +50,10 @@ void Game::Initialize(HINSTANCE hInstance) {
 	debugCamera_->Initialize();
 	debugCamera_->SetTranslation({19.45f, 10.5f, -50.0f});
 	object3dCommon_->SetDefaultCamera(debugCamera_.get());
-	// particleCommon_->SetDefaultCamera(debugCamera_.get());
+	testParticleCommon_->SetDefaultCamera(debugCamera_.get());
+
+	// TestParticle
+	testParticle_->Initialize(testParticleCommon_.get(), textureManager_.get(), modelManger_.get());
 
 	// プレイヤー
 	player_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get(), input_.get(), gamePad_.get(), spriteCommon_.get(), "resources/Heart.png");
@@ -129,8 +129,8 @@ void Game::Update() {
 	// デバッグカメラ更新
 	debugCamera_->Update(*input_, *gamePad_);
 
-	// Particle更新
-	// particle_->Update();
+	// Testparticle
+	testParticle_->Update();
 
 	// プレイヤーと敵の当たり判定
 	CollisionPlayerEnemy();
@@ -165,23 +165,26 @@ void Game::Draw() {
 	srvManager_->PreDraw();
 
 	// プレイヤー描画
-	player_->Draw();
+	//player_->Draw();
 
 	// ブロック描画
-	for (auto& block : blocks_) {
-		block->Draw();
-	}
+	//for (auto& block : blocks_) {
+	//	block->Draw();
+	//}
 
 	// 敵描画
-	enemy_->Draw();
+	//enemy_->Draw();
 
 	// パワーアップアイテム描画
-	for (auto& powerUpItem : powerUpItems_) {
-		powerUpItem->Draw();
-	}
+	//for (auto& powerUpItem : powerUpItems_) {
+	//	powerUpItem->Draw();
+	//}
 
 // Particle描画
-// particle_->Draw();
+//particle_->Draw();
+
+// Testparticle
+testParticle_->Draw();
 
 // ImGuiの内部コマンドを生成する
 #ifdef USE_IMGUI

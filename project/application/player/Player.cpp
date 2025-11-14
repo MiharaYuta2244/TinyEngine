@@ -79,7 +79,7 @@ void Player::Update(float deltaTime) {
 	UpdateCollisionPos();
 
 	// HPゲージスプライト(ハート)
-	//spriteHeart_->SetPosition({transform_.translate.x, transform_.translate.y});
+	spriteHeart_->SetPosition({transform_.translate.x, transform_.translate.y});
 	spriteHeart_->Update();
 
 	// 位置の更新

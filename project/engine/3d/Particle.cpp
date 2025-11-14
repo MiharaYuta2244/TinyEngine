@@ -1,8 +1,8 @@
-#include "Particle.h"
+#include "particle.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
 #include "Model.h"
-#include "ParticleCommon.h"
+#include "particleCommon.h"
 #include "TextureManager.h"
 #include <DirectXMath.h>
 #include <fstream>
@@ -16,70 +16,90 @@ void Particle::Initialize(ParticleCommon* particleCommon, TextureManager* textur
 	textureManager_ = textureManager;
 	modelManager_ = modelManager;
 
-	// 座標変換行列データ作成
-	CreateTransformationMatrixData();
+	// SRVの作成（インスタンシング用）
+	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
+	instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	instancingSrvDesc.Buffer.FirstElement = 0;
+	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+	instancingSrvDesc.Buffer.NumElements = kNumInstance;
+	instancingSrvDesc.Buffer.StructureByteStride = sizeof(TransformationMatrix);
+
+	// CPU/GPUハンドルをクラスメンバへ取得して保存
+	instancingSrvHandleCPU_ = particleCommon_->GetDxCommon()->GetCPUDescriptorHandle(particleCommon_->GetDxCommon()->GetSrvDescriptorHeap(), particleCommon_->GetDxCommon()->GetDescriptorSizeSRV(), 3);
+	instancingSrvHandleGPU_ = particleCommon_->GetDxCommon()->GetGPUDescriptorHandle(particleCommon_->GetDxCommon()->GetSrvDescriptorHeap(), particleCommon_->GetDxCommon()->GetDescriptorSizeSRV(), 3);
+
+	// プリミティブモデルの作成
+	modelData_ = CreatePrimitive();
 
 	// インスタンシングデータ作成
-	CreateInstancingData();
+	CreateInstancingResource();
 
-	// 頂点バッファ作成（ModelDataに基づく6頂点）
-	CreateVertexBuffer();
+	particleCommon_->GetDxCommon()->GetDevice()->CreateShaderResourceView(instancingResource_.Get(), &instancingSrvDesc, instancingSrvHandleCPU_);
 
-	// Transform変数を作る
-	transform_ = {
-	    {1.0f, 1.0f, 1.0f},
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, 0.0f}
-    };
+	// 頂点データの初期化
+	CreateVertexData();
 
-	worldMatrix_ = MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+	// マテリアルの初期化
+	CreateMaterialData();
+
+	// テクスチャ読み込み
+	textureManager_->LoadTexture(modelData_.material.textureFilePath);
+
+	// テクスチャ番号を取得して、メンバ変数に書き込む
+	modelData_.material.textureIndex = textureManager_->GetSrvIndex(modelData_.material.textureFilePath);
+
+	for (uint32_t index = 0; index < kNumInstance; ++index) {
+		transforms_[index].scale = {1.0f, 1.0f, 1.0f};
+		transforms_[index].rotate = {0.0f, 0.0f, 0.0f};
+		transforms_[index].translate = {index * 0.1f, index * 0.1f, index * 0.1f};
+	}
 
 	// カメラをセットする
 	camera_ = particleCommon_->GetDefaultCamera();
 }
 
 void Particle::Update() {
-	worldMatrix_ = MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+	for (uint32_t index = 0; index < kNumInstance; ++index) {
+		worldMatrix_ = MathUtility::MakeAffineMatrix(transforms_[index].scale, transforms_[index].rotate, transforms_[index].translate);
 
-	if (camera_) {
-		const Matrix4x4& viewProjectionMatrix = camera_->GetViewProjectionMatrix();
-		worldViewProjectionMatrix_ = MathUtility::Multiply(worldMatrix_, viewProjectionMatrix);
-	} else {
-		worldViewProjectionMatrix_ = worldMatrix_;
+		if (camera_) {
+			const Matrix4x4& viewProjectionMatrix = camera_->GetViewProjectionMatrix();
+			worldViewProjectionMatrix_ = MathUtility::Multiply(worldMatrix_, viewProjectionMatrix);
+		} else {
+			worldViewProjectionMatrix_ = worldMatrix_;
+		}
+
+		instancingData_[index].WVP = worldViewProjectionMatrix_;
+		instancingData_[index].World = worldMatrix_;
+		instancingData_[index].WorldInverseTranspose = MathUtility::Transpose(worldMatrix_);
 	}
 
-	transformMatrixData_->WVP = worldViewProjectionMatrix_;
-	transformMatrixData_->World = worldMatrix_;
-
-	*transformMatrixData_ = {transformMatrixData_->WVP, transformMatrixData_->World};
+	*materialData_ = material_;
 }
 
 void Particle::Draw() {
-	// Particle描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
+	// 3Dオブジェクト描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
 	particleCommon_->DrawSettingCommon();
 
-	auto cmd = particleCommon_->GetDxCommon()->GetCommandList();
+	auto commandList = particleCommon_->GetDxCommon()->GetCommandList();
 
-	// ルートシグネチャとPSOは既に設定する共通関数があれば呼ぶ
-	particleCommon_->DrawSettingCommon();
+	// wvp用のBufferの場所を設定
+	commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU_);
 
-	// DescriptorHeap をコマンドリストにセット（SRVヒープ）
-	ID3D12DescriptorHeap* heaps[] = {particleCommon_->GetDxCommon()->GetSrvDescriptorHeap().Get()};
-	cmd->SetDescriptorHeaps(_countof(heaps), heaps);
+	// VertexBufferViewを設定
+	commandList->IASetVertexBuffers(0, 1, &vertexBufferView_); // VBVを設定
 
-	// ルートパラメータのバインド
-	// rootParameters[1] が Vertex 用 CBV ならここでバインド（例: インスタンス変換を入れるCB）
-	cmd->SetGraphicsRootConstantBufferView(1, transformConstantBuffer_->GetGPUVirtualAddress());
+	// 描画する数
+	const uint32_t instanceCount = 10;
 
-	// rootParameters[2] にインスタンシング用 SRV テーブルをバインド
-	cmd->SetGraphicsRootDescriptorTable(2, particleCommon_->GetInstancingSrvGpuHandle());
-
-	// 頂点バッファ等の設定（既存の処理）
-	cmd->IASetVertexBuffers(0, 1, &vertexBufferView_);
-
-	// インスタンス数は SRV の要素数（kNumInstance）と合わせる
-	const UINT instanceCount = kNumInstance;
-	cmd->DrawInstanced(UINT(vertexCount_), instanceCount, 0, 0);
+	// マテリアルCBufferの場所を設定
+	commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
+	// SRVのDescriptorTableの先頭を設定。3はrootParameter[3]（Pixel用テクスチャ）である。
+	commandList->SetGraphicsRootDescriptorTable(2, textureManager_->GetSrvHandleGPU(modelData_.material.textureFilePath));
+	// 描画!(DrawCall/ドローコール)。
+	commandList->DrawInstanced(UINT(modelData_.vertices.size()), instanceCount, 0, 0);
 }
 
 ComPtr<ID3D12Resource> Particle::CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeBytes) {
@@ -109,89 +129,91 @@ ComPtr<ID3D12Resource> Particle::CreateBufferResource(ComPtr<ID3D12Device> devic
 	return resource;
 }
 
-void Particle::CreateTransformationMatrixData() {
-	// WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
-	// ここで transformConstantBuffer_ を作成して、transformMatrixData_ をマップする
-	transformConstantBuffer_ = CreateBufferResource(particleCommon_->GetDxCommon()->GetDevice(), sizeof(TransformationMatrix));
-	// 書き込むためのアドレスを取得
-	transformConstantBuffer_->Map(0, nullptr, reinterpret_cast<void**>(&transformMatrixData_));
-	transformConstantBuffer_->Unmap(0, nullptr);
-	// 単位行列を書き込んでおく
-	*transformMatrixData_ = {MathUtility::MakeIdentity4x4(), worldMatrix_};
-}
+ModelData Particle::CreatePrimitive() {
+	ModelData modelData;
 
-void Particle::CreateInstancingData() {
-	Transform transforms[kNumInstance];
-
-	for (uint32_t index = 0; index < kNumInstance; ++index) {
-		transforms[index].scale = {1.0f, 1.0f, 1.0f};
-		transforms[index].rotate = {0.0f, 0.0f, 0.0f};
-		transforms[index].translate = {index * 0.1f, index * 0.1f, index * 0.1f};
-	}
-
-	// Instancing用のTransformationMatrixリソースを作る
-	instancingResource_ = CreateBufferResource(particleCommon_->GetDxCommon()->GetDevice(), sizeof(TransformationMatrix) * kNumInstance);
-
-	// 書き込むためのアドレスを取得
-	TransformationMatrix* instancingData = nullptr;
-	instancingResource_->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
-	instancingResource_->Unmap(0, nullptr);
-
-	for (uint32_t index = 0; index < kNumInstance; ++index) {
-		Matrix4x4 worldMatrix = MathUtility::MakeAffineMatrix(transforms[index].scale, transforms[index].rotate, transforms[index].translate);
-		Matrix4x4 viewProjectionMatrix = viewMatrix_ * projectionMatrix_;
-		Matrix4x4 worldViewProjectionMatrix = MathUtility::Multiply(worldMatrix, viewProjectionMatrix);
-		instancingData[index].WVP = worldViewProjectionMatrix;
-		instancingData[index].World = worldMatrix;
-	}
-}
-
-void Particle::CreateVertexBuffer() {
-	// ModelData に基づく 6 頂点（矩形=三角形2つ）
-	std::vector<VertexData> vertices;
-	vertices.push_back({
+	modelData.vertices.push_back({
 	    .position = {-1.0f, 1.0f, 0.0f, 1.0f},
           .texcoord = {0.0f, 0.0f},
           .normal = {0.0f, 0.0f, 1.0f}
     }); // 左上
-	vertices.push_back({
+	modelData.vertices.push_back({
 	    .position = {1.0f, 1.0f, 0.0f, 1.0f},
           .texcoord = {1.0f, 0.0f},
           .normal = {0.0f, 0.0f, 1.0f}
     }); // 右上
-	vertices.push_back({
+	modelData.vertices.push_back({
 	    .position = {-1.0f, -1.0f, 0.0f, 1.0f},
           .texcoord = {0.0f, 1.0f},
           .normal = {0.0f, 0.0f, 1.0f}
     }); // 左下
-	vertices.push_back({
+	modelData.vertices.push_back({
 	    .position = {-1.0f, -1.0f, 0.0f, 1.0f},
           .texcoord = {0.0f, 1.0f},
           .normal = {0.0f, 0.0f, 1.0f}
     }); // 左下
-	vertices.push_back({
+	modelData.vertices.push_back({
 	    .position = {1.0f, 1.0f, 0.0f, 1.0f},
           .texcoord = {1.0f, 0.0f},
           .normal = {0.0f, 0.0f, 1.0f}
     }); // 右上
-	vertices.push_back({
+	modelData.vertices.push_back({
 	    .position = {1.0f, -1.0f, 0.0f, 1.0f},
           .texcoord = {1.0f, 1.0f},
           .normal = {0.0f, 0.0f, 1.0f}
     }); // 右下
 
-	vertexCount_ = static_cast<uint32_t>(vertices.size());
+	modelData.material.textureFilePath = "resources/uvChecker.png";
 
-	// 頂点バッファリソース作成
-	vertexResource_ = CreateBufferResource(particleCommon_->GetDxCommon()->GetDevice(), sizeof(VertexData) * vertexCount_);
+	return modelData;
+}
 
-	// マップしてデータを書き込む
-	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
-	std::memcpy(vertexData_, vertices.data(), sizeof(VertexData) * vertexCount_);
-	vertexResource_->Unmap(0, nullptr);
-
-	// ビューを作る
+void Particle::CreateVertexData() {
+	// 頂点リソースの作成
+	vertexResource_ = CreateBufferResource(particleCommon_->GetDxCommon()->GetDevice(), sizeof(VertexData) * modelData_.vertices.size());
+	// リソースの先頭のアドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
-	vertexBufferView_.SizeInBytes = static_cast<UINT>(sizeof(VertexData) * vertexCount_);
-	vertexBufferView_.StrideInBytes = static_cast<UINT>(sizeof(VertexData));
+	// 使用するリソースのサイズは頂点6つ分のサイズ
+	vertexBufferView_.SizeInBytes = static_cast<UINT>(sizeof(VertexData) * modelData_.vertices.size());
+	// 1頂点あたりのサイズ
+	vertexBufferView_.StrideInBytes = sizeof(VertexData);
+	// 書き込むためのアドレスを取得
+	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
+	vertexResource_->Unmap(0, nullptr);
+	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
+}
+
+void Particle::CreateMaterialData() {
+	// マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
+	materialResource_ = CreateBufferResource(particleCommon_->GetDxCommon()->GetDevice(), sizeof(Material));
+	// 書き込むためのアドレスを取得
+	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
+	materialResource_->Unmap(0, nullptr);
+	// 三角形の色
+	material_.color = {1.0f, 1.0f, 1.0f, 1.0f};
+	material_.enableLighting = true;
+	material_.enableFoging = false;
+	// uvTransformなどのデータを設定
+	material_.uvTransform = MathUtility::MakeIdentity4x4();
+	// 反射強度
+	material_.shininess = 1.0f;
+	// materialDataに代入
+	*materialData_ = material_;
+}
+
+void Particle::CreateInstancingResource() {
+	const uint32_t kNumInstance = 10;
+
+	// Instancing用のTransformationMatrixリソースを作る
+	instancingResource_ = CreateBufferResource(particleCommon_->GetDxCommon()->GetDevice(), sizeof(TransformationMatrix) * kNumInstance);
+
+	// 書き込むためのアドレス取得
+	instancingResource_->Map(0, nullptr, reinterpret_cast<void**>(&instancingData_));
+	instancingResource_->Unmap(0, nullptr);
+
+	// 単位行列を書き込んでおく
+	for (uint32_t index = 0; index < kNumInstance; ++index) {
+		instancingData_[index].WVP = MathUtility::MakeIdentity4x4();
+		instancingData_[index].World = MathUtility::MakeIdentity4x4();
+	}
 }

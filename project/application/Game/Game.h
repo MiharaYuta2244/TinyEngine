@@ -17,8 +17,6 @@
 #include "ModelManager.h"
 #include "Object3d.h"
 #include "Object3dCommon.h"
-#include "Particle.h"
-#include "ParticleCommon.h"
 #include "Player.h"
 #include "Sprite.h"
 #include "SpriteCommon.h"
@@ -27,6 +25,8 @@
 #include "WinApp.h"
 #include "XAudio.h"
 #include "PowerUpItem.h"
+#include "ParticleCommon.h"
+#include "Particle.h"
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #include <dxgidebug.h>
@@ -134,10 +134,6 @@ private:
 	// スプライト
 	std::array<std::unique_ptr<Sprite>, 2> sprite_;
 
-	// パーティクル
-	std::unique_ptr<ParticleCommon> particleCommon_ = std::make_unique<ParticleCommon>();
-	std::unique_ptr<Particle> particle_ = std::make_unique<Particle>();
-
 	// 経過時間
 	std::unique_ptr<DeltaTime> deltaTime_ = std::make_unique<DeltaTime>();
 
@@ -167,4 +163,10 @@ private:
 
 	// パワーアップアイテムの画面上に存在できる最大数
 	const int kPowerUpItemCountMax = 5;
+
+	// テスト用パーティクルコモン
+	std::unique_ptr<ParticleCommon> testParticleCommon_ = std::make_unique<ParticleCommon>();
+
+	// テスト用パーティクル
+	std::unique_ptr<Particle> testParticle_ = std::make_unique<Particle>();
 };

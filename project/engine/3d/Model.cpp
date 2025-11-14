@@ -30,7 +30,7 @@ void Model::Initialize(ModelCommon* modelCommon, TextureManager* textureManager,
 	CreateMaterialData();
 
 	// テクスチャ読み込み
-	textureManager_->LoadTexture(modelData_.material.textureFilePath);
+	//textureManager_->LoadTexture(modelData_.material.textureFilePath);
 
 	// テクスチャ番号を取得して、メンバ変数に書き込む
 	modelData_.material.textureIndex = textureManager_->GetSrvIndex(modelData_.material.textureFilePath);
@@ -47,16 +47,14 @@ void Model::Draw()
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView_); // VBVを設定
 	// IndexBufferViewを設定
 	//commandList->IASetIndexBuffer(&indexBufferView_); // IBVを設定
-	
-	// 描画する数
-	const uint32_t instanceCount = 1;
+
 
 	// マテリアルCBufferの場所を設定
 	commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 	// SRVのDescriptorTableの先頭を設定。3はrootParameter[3]（Pixel用テクスチャ）である。
 	commandList->SetGraphicsRootDescriptorTable(2, textureManager_->GetSrvHandleGPU(modelData_.material.textureFilePath));
 	// 描画!(DrawCall/ドローコール)。
-	commandList->DrawInstanced(UINT(modelData_.vertices.size()), instanceCount, 0, 0);
+	commandList->DrawInstanced(UINT(modelData_.vertices.size()), 1, 0, 0);
 	//modelCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(indexCount_, 1, 0, 0, 0);
 }
 

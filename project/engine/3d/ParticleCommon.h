@@ -1,6 +1,6 @@
 #pragma once
-#include "DirectXCommon.h"
 #include "DebugCamera.h"
+#include "DirectXCommon.h"
 
 class ParticleCommon {
 public:
@@ -11,15 +11,11 @@ public:
 
 	void Initialize(DirectXCommon* dxCommon);
 
+	// setter
 	void SetDefaultCamera(DebugCamera* camera) { defaultCamera_ = camera; }
 
 	// getter
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
-
-	ID3D12Resource* GetInstancingResource() const { instancingResource_.Get(); }
-
-	D3D12_GPU_DESCRIPTOR_HANDLE GetInstancingSrvGpuHandle() const { return instancingSrvHandleGPU_; }
-
 	DebugCamera* GetDefaultCamera() { return defaultCamera_; }
 
 private:
@@ -55,13 +51,6 @@ private:
 	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_;
 	Microsoft::WRL::ComPtr<IDxcCompiler3> dxcCompiler_;
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_;
-
-	// Resource
-	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource_;
-
-	 // インスタンシング用SRVのDescriptorハンドル
-	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU_ = {};
-	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU_ = {};
 
 	// カメラ
 	DebugCamera* defaultCamera_ = nullptr;
