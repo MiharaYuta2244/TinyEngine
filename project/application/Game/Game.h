@@ -71,9 +71,6 @@ private:
 	// パワーアップアイテムの生成
 	void CreatePowerUpItem();
 
-	// 指定された範囲でランダムなfloat値を生成
-	float ApplyRandomFloat(float min, float max);
-
 private:
 	// リリースリークチェック
 	D3DResourceLeakChecker leakCheck_;
@@ -165,8 +162,8 @@ private:
 	const int kPowerUpItemCountMax = 5;
 
 	// テスト用パーティクルコモン
-	std::unique_ptr<ParticleCommon> testParticleCommon_ = std::make_unique<ParticleCommon>();
+	std::unique_ptr<ParticleCommon> particleCommon_ = std::make_unique<ParticleCommon>();
 
 	// テスト用パーティクル
-	std::unique_ptr<Particle> testParticle_ = std::make_unique<Particle>();
+	std::unique_ptr<Particle> particle_ = std::make_unique<Particle>();
 };

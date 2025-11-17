@@ -83,11 +83,11 @@ private:
 	Matrix4x4 worldMatrix_;
 
 	// 描画する数
-	static const uint32_t kNumMaxInstance = 10;
+	static const uint32_t kNumMaxInstance = 20;
 	uint32_t numInstance_ = 0;
 
 	// 3Dオブジェクト自体とカメラの座標変換行列の元となるTransform
-	ParticleState particles_[kNumMaxInstance];
+	std::list<ParticleState> particles_;
 
 	Matrix4x4 worldViewProjectionMatrix_;
 

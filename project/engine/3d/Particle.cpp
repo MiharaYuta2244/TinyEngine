@@ -51,32 +51,37 @@ void Particle::Initialize(ParticleCommon* particleCommon, TextureManager* textur
 	// テクスチャ番号を取得して、メンバ変数に書き込む
 	modelData_.material.textureIndex = textureManager_->GetSrvIndex(modelData_.material.textureFilePath);
 
-	// Transform等設定
-	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
-		particles_[index] = MakeParticle();
-	}
-
 	// カメラをセットする
 	camera_ = particleCommon_->GetDefaultCamera();
 }
 
 void Particle::Update() {
+	ImGui::Begin("Particle");
+
+	if (ImGui::Button("Add Particle")) {
+		particles_.push_back(MakeParticle());
+		particles_.push_back(MakeParticle());
+		particles_.push_back(MakeParticle());
+	}
+
+	ImGui::End();
+
 	// ビルボードマトリックスの作成
 	Matrix4x4 billboardmatrix = CreateBillboardMatrix();
-
+	
 	numInstance_ = 0;
-	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
-		if (particles_[index].lifeTime <= particles_[index].currentTime) {
-			continue; // 生存時間を過ぎていたら更新せず描画対象にしない
+	for (std::list<ParticleState>::iterator particleIterator = particles_.begin(); particleIterator != particles_.end();) {
+		if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
+			particleIterator = particles_.erase(particleIterator); // 生存期間が過ぎたParticleはlistから消す。戻り値が次のイテレータとなる
 		}
 
 		// 速度を設定
-		particles_[index].transform.translate += particles_[index].velocity * kDeltaTime;
-		particles_[index].currentTime += kDeltaTime;
+		(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
+		(*particleIterator).currentTime += kDeltaTime;
 
 		// ビルボード用
-		Matrix4x4 scaleMatrix = MathUtility::MakeScaleMatrix(particles_[index].transform.scale);
-		Matrix4x4 translateMatrix = MathUtility::MakeTranslateMatrix(particles_[index].transform.translate);
+		Matrix4x4 scaleMatrix = MathUtility::MakeScaleMatrix((*particleIterator).transform.scale);
+		Matrix4x4 translateMatrix = MathUtility::MakeTranslateMatrix((*particleIterator).transform.translate);
 		worldMatrix_ =MathUtility::Multiply(MathUtility::Multiply(scaleMatrix, billboardmatrix),translateMatrix);
 
 		if (camera_) {
@@ -87,15 +92,20 @@ void Particle::Update() {
 		}
 
 		// 透明度の変更
-		float alpha = 1.0f - (particles_[index].currentTime / particles_[index].lifeTime);
+		float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
 
-		instancingData_[index].WVP = worldViewProjectionMatrix_;
-		instancingData_[index].World = worldMatrix_;
-		instancingData_[index].color = particles_[index].color;
-		instancingData_[index].color.w = alpha;
+		if (numInstance_ < kNumMaxInstance) {
+			instancingData_[numInstance_].WVP = worldViewProjectionMatrix_;
+			instancingData_[numInstance_].World = worldMatrix_;
+			instancingData_[numInstance_].color = (*particleIterator).color;
+			instancingData_[numInstance_].color.w = alpha;
 
-		// 生きているParticleの数を1カウントする
-		++numInstance_;
+			// 生きているParticleの数を1カウントする
+			++numInstance_;
+		}
+
+		// 次のイテレータに進める
+		++particleIterator;
 	}
 
 	*materialData_ = material_;
@@ -227,17 +237,15 @@ void Particle::CreateMaterialData() {
 }
 
 void Particle::CreateInstancingResource() {
-	const uint32_t kNumInstance = 10;
-
 	// Instancing用のTransformationMatrixリソースを作る
-	instancingResource_ = CreateBufferResource(particleCommon_->GetDxCommon()->GetDevice(), sizeof(ParticleForGPU) * kNumInstance);
+	instancingResource_ = CreateBufferResource(particleCommon_->GetDxCommon()->GetDevice(), sizeof(ParticleForGPU) * kNumMaxInstance);
 
 	// 書き込むためのアドレス取得
 	instancingResource_->Map(0, nullptr, reinterpret_cast<void**>(&instancingData_));
 	instancingResource_->Unmap(0, nullptr);
 
 	// 単位行列を書き込んでおく
-	for (uint32_t index = 0; index < kNumInstance; ++index) {
+	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
 		instancingData_[index].WVP = MathUtility::MakeIdentity4x4();
 		instancingData_[index].World = MathUtility::MakeIdentity4x4();
 		instancingData_[index].color = {1.0f, 1.0f, 1.0f, 1.0f};
