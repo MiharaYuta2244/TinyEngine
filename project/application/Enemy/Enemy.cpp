@@ -13,7 +13,7 @@ void Enemy::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, Mod
 
 	transform_.scale = {2.0f, 2.0f, 2.0f};
 	transform_.rotate = {0.0f, 0.0f, 0.0f};
-	transform_.translate = {15.0f, 3.0f, 0.0f};
+	transform_.translate = {15.0f, 1.0f, 0.0f};
 	size_ = {1.0f, 1.0f, 1.0f};
 	collisionSize = {1.0f, 1.0f, 1.0f};
 	isActive_ = true;
@@ -89,9 +89,9 @@ void Enemy::HorizontalMove() {
 }
 
 void Enemy::DirectionChange() {
-	if (transform_.translate.x >= 40.0f) {
+	if (transform_.translate.x >= 50.0f) {
 		direction_ = Direction::LEFT;
-	} else if (transform_.translate.x <= 0.0f) {
+	} else if (transform_.translate.x <= -10.0f) {
 		direction_ = Direction::RIGHT;
 	}
 }

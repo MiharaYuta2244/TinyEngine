@@ -2,8 +2,8 @@
 #include "GamePad.h"
 #include "ModelManager.h"
 #include "Object3dCommon.h"
-#include "TextureManager.h"
 #include "SpriteCommon.h"
+#include "TextureManager.h"
 #include <numbers>
 
 void Player::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane, DirectInput* input, GamePad* gamePad, SpriteCommon* spriteCommon) {
@@ -28,8 +28,23 @@ void Player::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, Mo
 	input_ = input;
 	gamePad_ = gamePad;
 
+	// HPゲージスプライトサイズ設定
+	spriteHPGauge_.resize(hp_);
+
 	// HPゲージスプライト
-	spriteHeart_->Initialize(spriteCommon, texMane, "resources/Heart.png");
+	for (int i = 0; i < spriteHPGauge_.size(); ++i) {
+		spriteHPGauge_[i] = std::make_unique<Sprite>();
+		spriteHPGauge_[i]->Initialize(spriteCommon, texMane, "resources/white.png");
+		spriteHPGauge_[i]->SetPosition({70.0f * i + 32.0f, 32.0f});
+		spriteHPGauge_[i]->SetSize({64.0f, 64.0f});
+		spriteHPGauge_[i]->SetColor({0.0f, 1.0f, 0.0f, 1.0f});
+	}
+
+	// HPゲージ背景スプライト
+	spriteHPGaugeBG_->Initialize(spriteCommon, texMane, "resources/white.png");
+	spriteHPGaugeBG_->SetPosition({22.0f, 22.0f});
+	spriteHPGaugeBG_->SetSize({364.0f, 84.0f});
+	spriteHPGaugeBG_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 }
 
 void Player::Update(float deltaTime) {
@@ -79,7 +94,12 @@ void Player::Update(float deltaTime) {
 	UpdateCollisionPos();
 
 	// HPゲージスプライト
-	spriteHeart_->Update();
+	for (auto& hpGauge : spriteHPGauge_) {
+		hpGauge->Update();
+	}
+
+	// HPゲージ背景スプライト
+	spriteHPGaugeBG_->Update();
 
 	// 位置の更新
 	object3d_->SetTransform(transform_);
@@ -94,8 +114,13 @@ void Player::Draw() {
 		object3d_->Draw();
 	}
 
+	// HPゲージ背景スプライト
+	spriteHPGaugeBG_->Draw();
+
 	// HPゲージスプライト
-	spriteHeart_->Draw();
+	for (auto& hpGauge : spriteHPGauge_) {
+		hpGauge->Draw();
+	}
 }
 
 void Player::UpdateImGui() {
@@ -111,8 +136,6 @@ void Player::UpdateImGui() {
 	ImGui::DragFloat3("direction", &object3d_->GetDirectionalLight().direction.x, 0.01f);
 	ImGui::DragFloat("intensity", &object3d_->GetDirectionalLight().intensity, 0.01f);
 	ImGui::DragFloat("shininess", &object3d_->GetMaterial().shininess, 0.01f);
-	ImGui::DragFloat2("spritePos", &spriteHeart_->GetPosition().x, 1.0f);
-	ImGui::DragFloat2("spriteSize", &spriteHeart_->GetSize().x, 1.0f);
 
 	ImGui::End();
 #endif
@@ -197,9 +220,16 @@ void Player::UpdateCollisionPos() {
 }
 
 void Player::HitEnemy() {
+	// HPが0以下の時は早期リターン
+	if (hp_ <= 0)
+		return;
+
 	if (isHitEnemy_ && !isInvincible_) {
 		// HP減算
 		SubHP();
+
+		// HPゲージスプライトのサイズ変更
+		spriteHPGauge_.resize(hp_);
 
 		// 無敵フラグを立てる
 		isInvincible_ = true;
@@ -212,7 +242,7 @@ void Player::FrameCountIsInvincible() {
 
 		// 無敵時間の上限に達したら
 		if (invincibleFrameCount_ >= kInvincibleFrame_) {
-			isHitEnemy_ = false;      // 敵との当たり判定フラグを下ろす
+			isHitEnemy_ = false;   // 敵との当たり判定フラグを下ろす
 			isInvincible_ = false; // 無敵フラグを下ろす
 			invincibleFrameCount_ = 0;
 		}

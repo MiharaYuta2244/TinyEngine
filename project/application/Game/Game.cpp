@@ -48,7 +48,7 @@ void Game::Initialize(HINSTANCE hInstance) {
 
 	// DebugCamera
 	debugCamera_->Initialize();
-	debugCamera_->SetTranslation({19.45f, 10.5f, -50.0f});
+	debugCamera_->SetTranslation({19.45f, 10.5f, -75.0f});
 	object3dCommon_->SetDefaultCamera(debugCamera_.get());
 	particleCommon_->SetDefaultCamera(debugCamera_.get());
 
@@ -65,6 +65,7 @@ void Game::Initialize(HINSTANCE hInstance) {
 	// 敵
 	enemy_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get(), spriteCommon_.get());
 	enemy_->SetModel("sphere.obj");
+	enemy_->SetColor({1.0f, 0.0f, 0.0f, 1.0f});
 
 	// オブジェクトの配置
 	SpawnObjectsByMapChip(mapLeftTop_);
@@ -91,36 +92,10 @@ void Game::Update() {
 	enemy_->UpdateImGui();
 
 	// フレームレート表示(ImGui)
-	ImGuiFPS();
+	//ImGuiFPS();
 
 	// デバッグカメラ(ImGui)
 	ImGuiDebugCamera();
-
-// ImGuiウィンドウ位置、サイズ固定
-// ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
-// ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Always);
-
-// ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0)); // 完全に透明
-// ImGui::Begin("Gizmo", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs);
-// ImGuizmo::BeginFrame();
-
-// ImGuizmoの設定
-// ImGuizmo::SetOrthographic(false);
-// ImGuizmo::Enable(true);
-// ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
-
-// ImGuiIO& io = ImGui::GetIO();
-// float windowWidth = (float)ImGui::GetWindowWidth();
-// float windowHeight = (float)ImGui::GetWindowHeight();
-
-// ウィンドウサイズを取得してImGuizmoに渡す
-// ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
-
-// ImGuizmo::Manipulate(
-//     *(debugCamera_->GetViewMatrix()).m, *(object3ds_[objIndex_]->GetProjectionMatrix()).m, ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, *(object3ds_[objIndex_]->GetWorldMatrix()).m);
-
-// ImGui::End();
-// ImGui::PopStyleColor();
 #endif
 
 	// 一定時間おきにパワーアップアイテム生成
@@ -212,7 +187,7 @@ void Game::SpawnObjectsByMapChip(Vector2 leftTop) {
 				// ブロックの初期化
 				auto block = std::make_unique<Block>();
 				block->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get());
-				block->Spawn({static_cast<float>(x), static_cast<float>(y), 0.0f});
+				block->Spawn({static_cast<float>(x) - 11.0f, static_cast<float>(y) * -1.0f + 19.0f, 0.0f});
 				block->SetModel("Box.obj");
 				block->GetObject3d()->SetColor({0.8f, 0.8f, 0.0f, 1.0f});
 				blocks_.push_back(std::move(block));

@@ -21,6 +21,7 @@ public:
 	void SetTranslate(Vector3 translate) { transform_.translate = translate; }
 	void SetRotate(Vector3 rotate) { transform_.rotate = rotate; }
 	void SetScale(Vector3 scale) { transform_.scale = scale; }
+	void SetColor(Vector4 color) { object3d_->SetColor(color); }
 
 protected:
 	Transform transform_ = {0.0f,0.0f,0.0f};

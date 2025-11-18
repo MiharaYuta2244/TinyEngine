@@ -52,7 +52,7 @@ private:
 private:
 	// 速度関連
 	Vector2 acceleration_ = {0.0f, -25.0f};
-	Vector2 velocity_ = {8.0f, 0.0f};
+	Vector2 velocity_ = {10.0f, 0.0f};
 
 	// HP
 	const int kMaxHP = 10;

@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include "Actor.h"
 #include "DirectInput.h"
 #include "Sprite.h"
@@ -95,7 +96,7 @@ private:
 	bool isRotate_ = false;
 
 	// 地面の高さ
-	float groundPosY_ = 2.0f;
+	float groundPosY_ = 0.0f;
 
 	// プレイヤーの向いている方向
 	Direction direction_ = Direction::RIGHT;
@@ -115,8 +116,11 @@ private:
 	// 無敵時間上限
 	const int kInvincibleFrame_ = 60;
 
-	// HPゲージスプライト(ハート)
-	std::unique_ptr<Sprite> spriteHeart_ = std::make_unique<Sprite>();
+	// HPゲージスプライト
+	std::vector<std::unique_ptr<Sprite>> spriteHPGauge_;
+
+	// HPゲージ背景スプライト
+	std::unique_ptr<Sprite> spriteHPGaugeBG_ = std::make_unique<Sprite>();
 
 	// 敵にヒップドロップを当てた時に立つフラグ
 	bool isHitEnemyHipDrop_ = false;
