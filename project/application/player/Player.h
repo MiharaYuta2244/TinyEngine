@@ -11,7 +11,7 @@ class GamePad;
 
 class Player : public Actor {
 public:
-	void Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane, DirectInput* input, GamePad* gamePad, SpriteCommon* spriteCommon, std::string filePath);
+	void Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane, DirectInput* input, GamePad* gamePad, SpriteCommon* spriteCommon);
 
 	void Update(float deltaTime);
 
@@ -123,4 +123,8 @@ private:
 
 	// プレイヤーのパワーアップフラグ
 	bool isPowerUp_ = false;
+
+	// 仮のHPバー
+	std::unique_ptr<Sprite> spriteHPBar_ = std::make_unique<Sprite>();
+	std::unique_ptr<Sprite> spriteHPBarBG_ = std::make_unique<Sprite>();
 };

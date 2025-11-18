@@ -4,10 +4,10 @@
 #include <memory>
 #include <string>
 #include <wrl.h>
-#include "Material.h"
 #include "Matrix4x4.h"
 #include "Transform.h"
 #include "Vector2.h"
+#include "Vector4.h"
 
 class SpriteCommon;
 class TextureManager;
@@ -70,7 +70,11 @@ private:
 
 	struct TransformationMatrix {
 		Matrix4x4 WVP;
-		Matrix4x4 World;
+	};
+
+	struct Material {
+		Vector4 color;
+		Matrix4x4 uvTransform;
 	};
 
 private:

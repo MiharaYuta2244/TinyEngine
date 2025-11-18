@@ -66,10 +66,6 @@ void Sprite::Update() {
 	vertexData_[2].texcoord = {tex_right_, tex_bottom_};
 	vertexData_[3].texcoord = {tex_right_, tex_top_};
 
-	// 書き込むためのアドレスを取得
-	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
-	indexResource_->Unmap(0, nullptr);
-
 	indexData_[0] = 0;
 	indexData_[1] = 1;
 	indexData_[2] = 2;
@@ -88,7 +84,7 @@ void Sprite::Update() {
 	Matrix4x4 viewMatrix = MathUtility::MakeIdentity4x4();
 	Matrix4x4 projectionMatrix = MathUtility::MakeOrthographicMatrix(0.0f, 0.0f, static_cast<float>(WinApp::kClientWidth), static_cast<float>(WinApp::kClientHeight), 0.0f, 100.0f);
 	Matrix4x4 worldViewProjectionMatrix = MathUtility::Multiply(worldMatrix_, MathUtility::Multiply(viewMatrix, projectionMatrix));
-	*transformationMatrixData_ = {worldViewProjectionMatrix, worldMatrix_};
+	*transformationMatrixData_ = {worldViewProjectionMatrix};
 
 	// uvTransform
 	Matrix4x4 uvTransformMatrix = MathUtility::MakeScaleMatrix(uvTransform_.scale);
@@ -135,6 +131,10 @@ void Sprite::CreateVertexData() {
 	// 書き込むためのアドレスを取得
 	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
 	vertexResource_->Unmap(0, nullptr);
+
+	// 書き込むためのアドレスを取得
+	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
+	indexResource_->Unmap(0, nullptr);
 }
 
 void Sprite::CreateMaterialData() {
@@ -147,7 +147,6 @@ void Sprite::CreateMaterialData() {
 	materialResource_->Unmap(0, nullptr);
 
 	material_.color = {1.0f, 1.0f, 1.0f, 1.0f};
-	material_.enableLighting = false;
 	material_.uvTransform = MathUtility::MakeIdentity4x4();
 	*materialData_ = material_;
 }
@@ -161,7 +160,7 @@ void Sprite::CreateTransformationData() {
 	transformMatrixResource_->Unmap(0, nullptr);
 
 	// 単位行列を書き込んでおく
-	*transformationMatrixData_ = {MathUtility::MakeIdentity4x4(), worldMatrix_};
+	*transformationMatrixData_ = {MathUtility::MakeIdentity4x4()};
 }
 
 void Sprite::SetSrvHandle(D3D12_GPU_DESCRIPTOR_HANDLE srvHandle) { srvHandle_ = srvHandle; }

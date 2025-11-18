@@ -6,7 +6,7 @@
 #include "SpriteCommon.h"
 #include <numbers>
 
-void Player::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane, DirectInput* input, GamePad* gamePad, SpriteCommon* spriteCommon, std::string filePath) {
+void Player::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane, DirectInput* input, GamePad* gamePad, SpriteCommon* spriteCommon) {
 	// 3Dオブジェクトの生成
 	object3d_ = std::make_unique<Object3d>();
 
@@ -29,7 +29,9 @@ void Player::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, Mo
 	gamePad_ = gamePad;
 
 	// HPゲージスプライト(ハート)
-	spriteHeart_->Initialize(spriteCommon, texMane, filePath);
+	spriteHeart_->Initialize(spriteCommon, texMane, "resources/uvChecker.png");
+	spriteHPBar_->Initialize(spriteCommon, texMane, "resources/monsterBall.png");
+	spriteHPBarBG_->Initialize(spriteCommon, texMane, "resources/circle.png");
 }
 
 void Player::Update(float deltaTime) {
@@ -81,6 +83,8 @@ void Player::Update(float deltaTime) {
 	// HPゲージスプライト(ハート)
 	spriteHeart_->SetPosition({transform_.translate.x, transform_.translate.y});
 	spriteHeart_->Update();
+	spriteHPBar_->Update();
+	spriteHPBarBG_->Update();
 
 	// 位置の更新
 	object3d_->SetTransform(transform_);
@@ -96,7 +100,9 @@ void Player::Draw() {
 	}
 
 	// HPゲージスプライト(ハート)
-	spriteHeart_->Draw();
+	//spriteHeart_->Draw();
+	//spriteHPBar_->Draw();
+	//spriteHPBarBG_->Draw();
 }
 
 void Player::UpdateImGui() {

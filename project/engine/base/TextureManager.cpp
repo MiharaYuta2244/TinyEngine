@@ -62,16 +62,16 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	// Resourceの作成
 	textureData.resource = CreateTextureResource(metadata);
 
-	// 実データをGPUに書き込む
-	UploadTextureData(textureData.resource, mipImages);
+	// SRVの設定を行う
+	srvManager_->CreateSRVforTexture2D(textureData.srvIndex, textureData.resource.Get(), textureData.metaData.format, UINT(textureData.metaData.mipLevels));
 
 	// SRVを作成するDescriptorHeapの場所を決める
 	// 先頭はImGuiが使っているのでその次を使う
 	textureData.srvHandleCPU = directXCommon_->GetSRVCPUDescriptorHandle(textureData.srvIndex);
 	textureData.srvHandleGPU = directXCommon_->GetSRVGPUDescriptorHandle(textureData.srvIndex);
 
-	// SRVの設定を行う（ここでは初期化済みの resource と metaData を渡す）
-	srvManager_->CreateSRVforTexture2D(textureData.srvIndex, textureData.resource.Get(), textureData.metaData.format, UINT(textureData.metaData.mipLevels));
+	// 実データをGPUに書き込む
+	UploadTextureData(textureData.resource, mipImages);
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(const std::string& filePath) {

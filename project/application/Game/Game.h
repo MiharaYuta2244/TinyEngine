@@ -128,9 +128,6 @@ private:
 	// プレイヤー
 	std::unique_ptr<Player> player_ = std::make_unique<Player>();
 
-	// スプライト
-	std::array<std::unique_ptr<Sprite>, 2> sprite_;
-
 	// 経過時間
 	std::unique_ptr<DeltaTime> deltaTime_ = std::make_unique<DeltaTime>();
 

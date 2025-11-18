@@ -56,7 +56,7 @@ void Game::Initialize(HINSTANCE hInstance) {
 	particle_->Initialize(particleCommon_.get(), textureManager_.get(), modelManger_.get());
 
 	// プレイヤー
-	player_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get(), input_.get(), gamePad_.get(), spriteCommon_.get(), "resources/Heart.png");
+	player_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get(), input_.get(), gamePad_.get(), spriteCommon_.get());
 	player_->SetModel("Box.obj");
 
 	// マップ
@@ -129,9 +129,6 @@ void Game::Update() {
 	// デバッグカメラ更新
 	debugCamera_->Update(*input_, *gamePad_);
 
-	// Particle
-	particle_->Update();
-
 	// プレイヤーと敵の当たり判定
 	CollisionPlayerEnemy();
 
@@ -156,6 +153,9 @@ void Game::Update() {
 	for (auto& powerUpItem : powerUpItems_) {
 		powerUpItem->Update(deltaTime_->GetDeltaTime());
 	}
+
+	// Particle
+	particle_->Update();
 }
 
 void Game::Draw() {
@@ -165,20 +165,20 @@ void Game::Draw() {
 	srvManager_->PreDraw();
 
 	// プレイヤー描画
-	// player_->Draw();
+	player_->Draw();
 
 	// ブロック描画
-	// for (auto& block : blocks_) {
-	//	block->Draw();
-	//}
+	for (auto& block : blocks_) {
+		block->Draw();
+	}
 
 	// 敵描画
-	// enemy_->Draw();
+	enemy_->Draw();
 
 	// パワーアップアイテム描画
-	// for (auto& powerUpItem : powerUpItems_) {
-	//	powerUpItem->Draw();
-	//}
+	for (auto& powerUpItem : powerUpItems_) {
+		powerUpItem->Draw();
+	}
 
 	// Particle
 	particle_->Draw();
