@@ -1,4 +1,8 @@
 #pragma once
+#include <d3d12.h>
+#include <string>
+#include <vector>
+#include <wrl.h>
 #include "CameraForGPU.h"
 #include "DebugCamera.h"
 #include "DirectionalLight.h"
@@ -7,16 +11,14 @@
 #include "MaterialData.h"
 #include "ModelData.h"
 #include "ModelManager.h"
+#include "ParticleForGPU.h"
+#include "ParticleState.h"
 #include "TimeParam.h"
 #include "Transform.h"
 #include "TransformationMatrix.h"
 #include "VertexData.h"
-#include "ParticleState.h"
-#include "ParticleForGPU.h"
-#include <d3d12.h>
-#include <string>
-#include <vector>
-#include <wrl.h>
+#include "AABB.h"
+#include "DeltaTime.h"
 
 class ParticleCommon;
 class TextureManager;
@@ -43,12 +45,16 @@ public:
 	Material& GetMaterial() { return material_; }
 
 private:
-	struct Emitter
-	{
+	struct Emitter {
 		Transform transform; // エミッタのトランスフォーム
-		uint32_t count; // 発生数
-		float frequency; // 発生頻度
+		uint32_t count;      // 発生数
+		float frequency;     // 発生頻度
 		float frequencyTime; // 頻度用時刻
+	};
+
+	struct AccelerationField {
+		Vector3 acceleration; // 加速度
+		AABB area;            // 範囲
 	};
 
 private:
@@ -67,13 +73,13 @@ private:
 	void CreateInstancingResource();
 
 	// パーティクル生成関数
-	ParticleState MakeParticle();
+	ParticleState MakeParticle(Vector3 translate);
 
 	// BillboardMatrixを作成する
 	Matrix4x4 CreateBillboardMatrix();
 
 	// エミッターを使ってパーティクルの生成
-	std::list<ParticleState> Emit(const Emitter& emitter);
+	std::list<ParticleState> Emit(const Emitter& emitter, Vector3 translate);
 
 private:
 	ParticleCommon* particleCommon_ = nullptr;
@@ -132,4 +138,10 @@ private:
 
 	// エミッタ
 	Emitter emitter{};
+
+	// パーティクルに加速度を与える範囲
+	AccelerationField accelerationField_;
+
+	// 経過時間
+	std::unique_ptr<DeltaTime> deltaTime_ = std::make_unique<DeltaTime>();
 };

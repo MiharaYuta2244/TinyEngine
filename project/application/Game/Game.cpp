@@ -215,9 +215,9 @@ void Game::Draw() {
 		// プレイヤー描画
 		player_->Draw();
 
-		for (auto& model : testModels_) {
-			model->Draw();
-		}
+		//for (auto& model : testModels_) {
+		//	model->Draw();
+		//}
 
 		// ブロック描画
 		// for (auto& block : blocks_) {

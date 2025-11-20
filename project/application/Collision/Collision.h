@@ -12,4 +12,5 @@ template<typename T1, typename T2> bool Intersect(const T1& a, const T2& b) {
 bool Intersect(const Sphere& s1, const Sphere& s2);
 bool Intersect(const AABB& aabb1, const AABB& aabb2);
 bool Intersect(const AABB& aabb, const Sphere& sphere);
+bool Intersect(const AABB& aabb, const Vector3& point);
 }; // namespace Collision

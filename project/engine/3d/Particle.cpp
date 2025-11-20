@@ -1,3 +1,6 @@
+#include <DirectXMath.h>
+#include <fstream>
+#include <sstream>
 #include "particle.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
@@ -5,9 +8,7 @@
 #include "Random.h"
 #include "TextureManager.h"
 #include "particleCommon.h"
-#include <DirectXMath.h>
-#include <fstream>
-#include <sstream>
+#include "Collision.h"
 
 using namespace Microsoft::WRL;
 using namespace DirectX;
@@ -58,19 +59,37 @@ void Particle::Initialize(ParticleCommon* particleCommon, TextureManager* textur
 	emitter.count = 3;
 	emitter.frequency = 0.5f;
 	emitter.frequencyTime = 0.0f;
+	emitter.transform.translate = {0.0f, 0.0f, 0.0f};
+	emitter.transform.rotate = {0.0f, 0.0f, 0.0f};
+	emitter.transform.scale = {1.0f, 1.0f, 1.0f};
+
+	// パーティクルに加速度を与える構造体の設定
+	accelerationField_.acceleration = {15.0f, 0.0f, 0.0f};
+	accelerationField_.area.min = {-1.0f, -1.0f, -1.0f};
+	accelerationField_.area.max = {1.0f, 1.0f, 1.0f};
 }
 
 void Particle::Update() {
+	// 経過時間
+	deltaTime_->Update();
+
+// エミッタのImGui
+#ifdef USE_IMGUI
+	ImGui::Begin("Emitter");
+	ImGui::DragFloat3("Translate", &emitter.transform.translate.x, 0.01f, -100.0f, 100.0f);
+	ImGui::End();
+#endif
+
 	// エミッタの更新処理
-	emitter.frequencyTime += kDeltaTime;
+	emitter.frequencyTime += deltaTime_->GetDeltaTime();
 	if (emitter.frequency <= emitter.frequencyTime) {
-		particles_.splice(particles_.end(), Emit(emitter)); // 発生処理
-		emitter.frequencyTime -= emitter.frequency; // 余計に過ぎた時間も加味して頻度計算する
+		particles_.splice(particles_.end(), Emit(emitter, emitter.transform.translate)); // 発生処理
+		emitter.frequencyTime -= emitter.frequency;                               // 余計に過ぎた時間も加味して頻度計算する
 	}
 
 	// ビルボードマトリックスの作成
 	Matrix4x4 billboardmatrix = CreateBillboardMatrix();
-	
+
 	numInstance_ = 0;
 	for (std::list<ParticleState>::iterator particleIterator = particles_.begin(); particleIterator != particles_.end();) {
 		if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
@@ -78,14 +97,19 @@ void Particle::Update() {
 			continue;
 		}
 
+		// Fieldの範囲内のParticleには加速度を適用する
+		if (Collision::Intersect(accelerationField_.area, (*particleIterator).transform.translate)) {
+			(*particleIterator).velocity += accelerationField_.acceleration * deltaTime_->GetDeltaTime();
+		}
+
 		// 速度を設定
-		(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
-		(*particleIterator).currentTime += kDeltaTime;
+		(*particleIterator).transform.translate += (*particleIterator).velocity * deltaTime_->GetDeltaTime();
+		(*particleIterator).currentTime += deltaTime_->GetDeltaTime();
 
 		// ビルボード用
 		Matrix4x4 scaleMatrix = MathUtility::MakeScaleMatrix((*particleIterator).transform.scale);
 		Matrix4x4 translateMatrix = MathUtility::MakeTranslateMatrix((*particleIterator).transform.translate);
-		worldMatrix_ =MathUtility::Multiply(MathUtility::Multiply(scaleMatrix, billboardmatrix),translateMatrix);
+		worldMatrix_ = MathUtility::Multiply(MathUtility::Multiply(scaleMatrix, billboardmatrix), translateMatrix);
 
 		if (camera_) {
 			const Matrix4x4& viewProjectionMatrix = camera_->GetViewProjectionMatrix();
@@ -255,11 +279,15 @@ void Particle::CreateInstancingResource() {
 	}
 }
 
-ParticleState Particle::MakeParticle() { 
+ParticleState Particle::MakeParticle(Vector3 translate) {
 	ParticleState particle;
 	particle.transform.scale = {1.0f, 1.0f, 1.0f};
 	particle.transform.rotate = {0.0f, 0.0f, 0.0f};
-	particle.transform.translate = {12.0f + RandomUtils::RangeFloat(-1, 1), 10.0f + RandomUtils::RangeFloat(-1, 1), RandomUtils::RangeFloat(-1, 1)};
+
+	// 基準位置を指定してランダムな範囲にパーティクルを生成する
+	Vector3 randomTranslate = {RandomUtils::RangeFloat(-1, 1), RandomUtils::RangeFloat(-1, 1), RandomUtils::RangeFloat(-1, 1)};
+	particle.transform.translate = translate + randomTranslate;
+
 	particle.velocity = {RandomUtils::RangeFloat(-1, 1), RandomUtils::RangeFloat(-1, 1), RandomUtils::RangeFloat(-1, 1)};
 	particle.color = {RandomUtils::RangeFloat(0, 1), RandomUtils::RangeFloat(0, 1), RandomUtils::RangeFloat(0, 1), 1.0f};
 	particle.lifeTime = RandomUtils::RangeFloat(1, 3);
@@ -284,11 +312,11 @@ Matrix4x4 Particle::CreateBillboardMatrix() {
 	return billboardmatrix;
 }
 
-std::list<ParticleState> Particle::Emit(const Emitter& emitter) { 
+std::list<ParticleState> Particle::Emit(const Emitter& emitter, Vector3 translate) {
 	std::list<ParticleState> particles;
 	for (uint32_t count = 0; count < emitter.count; ++count) {
-		particles.push_back(MakeParticle());
+		particles.push_back(MakeParticle(translate));
 	}
 
-	return particles; 
+	return particles;
 }
