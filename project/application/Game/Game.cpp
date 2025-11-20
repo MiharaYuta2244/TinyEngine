@@ -79,11 +79,24 @@ void Game::StartGameScene() {
 
 	// プレイヤー初期化
 	player_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get(), input_.get(), gamePad_.get(), spriteCommon_.get());
-	player_->SetModel("Box.obj");
+	player_->SetModel("Hiyoko.obj");
 
 	// 敵初期化
 	enemy_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get(), spriteCommon_.get());
 	enemy_->SetModel("sphere.obj");
+
+	for (int i = 0; i < testModels_.size(); ++i) {
+		testModels_[i] = std::make_unique<Object3d>();
+		testModels_[i]->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get());
+		testModels_[i]->SetScale({5.0f, 5.0f, 5.0f});
+		testModels_[i]->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
+		testModels_[i]->SetTranslate({i * 8.0f, 0.0f, 0.0f});
+	}
+
+	testModels_[0]->SetModel("Boss.obj");
+	testModels_[1]->SetModel("HiyokoGlass.obj");
+	testModels_[2]->SetModel("HiyokoStudent.obj");
+	testModels_[3]->SetModel("HiyokoAfro.obj");
 
 	// パワーアップアイテム初期化
 	// powerUpItems_.clear();
@@ -137,8 +150,8 @@ void Game::Update() {
 		debugCamera_->Update(*input_, *gamePad_);
 
 		// 当たり判定
-		CollisionPlayerEnemy();
-		CollisionEnemyPlayerHipDrop();
+		// CollisionPlayerEnemy();
+		// CollisionEnemyPlayerHipDrop();
 		// CollisionPlayerPowerUpItem();
 
 		// プレイヤー更新
@@ -151,6 +164,10 @@ void Game::Update() {
 
 		// 敵更新
 		enemy_->Update(deltaTime_->GetDeltaTime());
+
+		for (auto& model : testModels_) {
+			model->Update();
+		}
 
 		// パワーアップアイテム更新
 		// for (auto& powerUpItem : powerUpItems_) {
@@ -196,15 +213,19 @@ void Game::Draw() {
 	// シーンごとの描画
 	if (currentScene_ == Scene::Game) {
 		// プレイヤー描画
-		//player_->Draw();
+		player_->Draw();
+
+		for (auto& model : testModels_) {
+			model->Draw();
+		}
 
 		// ブロック描画
-		//for (auto& block : blocks_) {
+		// for (auto& block : blocks_) {
 		//	block->Draw();
 		//}
 
 		// 敵描画
-		//enemy_->Draw();
+		// enemy_->Draw();
 
 		// パワーアップアイテム描画
 		// for (auto& powerUpItem : powerUpItems_) {
@@ -315,6 +336,11 @@ void Game::AllModelLoader() {
 	modelManger_->LoadModel("Field.obj");
 	modelManger_->LoadModel("sphere.obj");
 	modelManger_->LoadModel("Box.obj");
+	modelManger_->LoadModel("Boss.obj");
+	modelManger_->LoadModel("Hiyoko.obj");
+	modelManger_->LoadModel("HiyokoGlass.obj");
+	modelManger_->LoadModel("HiyokoStudent.obj");
+	modelManger_->LoadModel("HiyokoAfro.obj");
 }
 
 void Game::CreatePowerUpItem() {

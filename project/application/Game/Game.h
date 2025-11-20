@@ -177,4 +177,6 @@ private:
 
 	// テスト用パーティクル
 	std::unique_ptr<Particle> particle_ = std::make_unique<Particle>();
+
+	std::array<std::unique_ptr<Object3d>,4> testModels_;
 };
