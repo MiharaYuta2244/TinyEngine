@@ -268,6 +268,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\Enemy\Enemy.h" />
     <ClInclude Include="application\Collision\Collision.h" />
     <ClInclude Include="application\Enemy\EnemyHPGauge.h" />
+    <ClInclude Include="engine\base\EngineContext.h" />
     <ClInclude Include="engine\base\ParticleForGPU.h" />
     <ClInclude Include="engine\base\ParticleState.h" />
     <ClInclude Include="engine\deltaTime\DeltaTime.h" />

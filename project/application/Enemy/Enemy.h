@@ -1,14 +1,11 @@
 #pragma once
 #include "Actor.h"
 #include "EnemyHPGauge.h"
-
-class Object3dCommon;
-class TextureManager;
-class ModelManager;
+#include "EngineContext.h"
 
 class Enemy : public Actor {
 public:
-	void Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane, SpriteCommon* spriteCommon);
+	void Initialize(EngineContext* ctx);
 
 	void Update(float deltaTime);
 
@@ -87,4 +84,7 @@ private:
 
 	// HPゲージスプライト管理クラス
 	std::unique_ptr<EnemyHPGauge> hpGauge_ = std::make_unique<EnemyHPGauge>();
+
+	// コンテキスト構造体
+	EngineContext* ctx_;
 };

@@ -1,19 +1,16 @@
-#include <cassert>
 #include "Sprite.h"
 #include "MathUtility.h"
 #include "Matrix4x4.h"
-#include "SpriteCommon.h"
-#include "TextureManager.h"
 #include "VertexData.h"
 #include "WinApp.h"
+#include <cassert>
 
 using namespace Microsoft::WRL;
 
 Sprite::~Sprite() {}
 
-void Sprite::Initialize(SpriteCommon* spriteCommon, TextureManager* textureManager, std::string textureFilePath) {
-	spriteCommon_ = spriteCommon;
-	textureManager_ = textureManager;
+void Sprite::Initialize(EngineContext* ctx, std::string textureFilePath) {
+	ctx_ = ctx;
 	textureFilePath_ = textureFilePath;
 
 	// 頂点データ作成
@@ -37,7 +34,7 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, TextureManager* textureManag
         {0.0f, 0.0f, 0.0f}
     };
 
-	textureIndex_ = textureManager_->GetSrvIndex(textureFilePath_);
+	textureIndex_ = ctx_->textureManager->GetSrvIndex(textureFilePath_);
 
 	// テクスチャサイズをイメージに合わせる
 	AdjustTextureSize();
@@ -95,17 +92,18 @@ void Sprite::Update() {
 
 void Sprite::Draw() {
 	// Spriteの描画準備。Spriteの描画に共通のグラフィックスコマンドを積む
-	spriteCommon_->DrawSettingCommon();
+	ctx_->spriteCommon->DrawSettingCommon();
 
-	// Spriteの描画。
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView_); // VBVを設定
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferView_);          // IBVを設定
+	// Spriteの描画
+	auto cmdList = ctx_->spriteCommon->GetDirectXCommon()->GetCommandList();
+	cmdList->IASetVertexBuffers(0, 1, &vertexBufferView_); // VBVを設定
+	cmdList->IASetIndexBuffer(&indexBufferView_);          // IBVを設定
 	// TransformationMatrixCBufferの場所を設定
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformMatrixResource_->GetGPUVirtualAddress());
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureManager_->GetSrvHandleGPU(textureFilePath_));
+	cmdList->SetGraphicsRootConstantBufferView(1, transformMatrixResource_->GetGPUVirtualAddress());
+	cmdList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
+	cmdList->SetGraphicsRootDescriptorTable(2, ctx_->textureManager->GetSrvHandleGPU(textureFilePath_));
 	// 描画! (DrawCall/ドローコール)
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
+	cmdList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
 void Sprite::CreateVertexData() {
@@ -165,7 +163,7 @@ void Sprite::CreateTransformationData() {
 
 void Sprite::SetSrvHandle(D3D12_GPU_DESCRIPTOR_HANDLE srvHandle) { srvHandle_ = srvHandle; }
 
-void Sprite::SetTexture(const std::string texturePath) { textureIndex_ = textureManager_->GetSrvIndex(texturePath); }
+void Sprite::SetTexture(const std::string texturePath) { textureIndex_ = ctx_->textureManager->GetSrvIndex(texturePath); }
 
 ComPtr<ID3D12Resource> Sprite::CreateBufferResource(size_t sizeBytes) {
 	// 頂点リソース用のヒープの設定
@@ -187,7 +185,7 @@ ComPtr<ID3D12Resource> Sprite::CreateBufferResource(size_t sizeBytes) {
 	resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 	// 実際に頂点リソースを作る
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
-	HRESULT hr = spriteCommon_->GetDirectXCommon()->GetDevice()->CreateCommittedResource(
+	HRESULT hr = ctx_->spriteCommon->GetDirectXCommon()->GetDevice()->CreateCommittedResource(
 	    &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(resource.GetAddressOf()));
 	assert(SUCCEEDED(hr));
 
@@ -209,7 +207,7 @@ void Sprite::ApplyFlip() {
 }
 
 void Sprite::TextureRangeSelection() {
-	const DirectX::TexMetadata& metadata = textureManager_->GetMetaData(textureFilePath_);
+	const DirectX::TexMetadata& metadata = ctx_->textureManager->GetMetaData(textureFilePath_);
 	tex_left_ = textureLeftTop_.x / metadata.width;
 	tex_right_ = (textureLeftTop_.x + textureSize_.x) / metadata.width;
 	tex_top_ = textureLeftTop_.y / metadata.height;
@@ -218,7 +216,7 @@ void Sprite::TextureRangeSelection() {
 
 void Sprite::AdjustTextureSize() {
 	// テクスチャデータを取得
-	const DirectX::TexMetadata& metadata = textureManager_->GetMetaData(textureFilePath_);
+	const DirectX::TexMetadata& metadata = ctx_->textureManager->GetMetaData(textureFilePath_);
 
 	textureSize_.x = static_cast<float>(metadata.width);
 	textureSize_.y = static_cast<float>(metadata.height);

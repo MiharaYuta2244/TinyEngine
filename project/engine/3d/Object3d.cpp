@@ -2,8 +2,6 @@
 #include "MathOperator.h"
 #include "MathUtility.h"
 #include "Model.h"
-#include "Object3dCommon.h"
-#include "TextureManager.h"
 #include <DirectXMath.h>
 #include <fstream>
 #include <sstream>
@@ -11,10 +9,8 @@
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-void Object3d::Initialize(Object3dCommon* modelCommon, TextureManager* textureManager, ModelManager* modelManager) {
-	object3dCommon_ = modelCommon;
-	textureManager_ = textureManager;
-	modelManager_ = modelManager;
+void Object3d::Initialize(EngineContext* ctx) {
+	ctx_ = ctx;
 
 	// 座標変換行列データ作成
 	CreateTransformationMatrixData();
@@ -44,7 +40,7 @@ void Object3d::Initialize(Object3dCommon* modelCommon, TextureManager* textureMa
 	worldMatrix_ = MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
 
 	// カメラをセットする
-	camera_ = object3dCommon_->GetDefaultCamera();
+	camera_ = ctx_->object3dCommon->GetDefaultCamera();
 }
 
 void Object3d::Update() {
@@ -85,9 +81,9 @@ void Object3d::Update() {
 
 void Object3d::Draw() {
 	// 3Dオブジェクト描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
-	object3dCommon_->DrawSettingCommon();
+	ctx_->object3dCommon->DrawSettingCommon();
 
-	auto commadList = object3dCommon_->GetDxCommon()->GetCommandList();
+	auto commadList = ctx_->object3dCommon->GetDxCommon()->GetCommandList();
 
 	// commandList->IASetIndexBuffer(&indexBufferView_); // IBVを設定
 	// wvp用のBufferの場所を設定
@@ -111,7 +107,7 @@ void Object3d::Draw() {
 
 void Object3d::SetModel(const std::string& filePath) {
 	// モデルを検索してセットする
-	model_ = modelManager_->FindModel(filePath);
+	model_ = ctx_->modelManager->FindModel(filePath);
 }
 
 void Object3d::SetColor(Vector4 color) {
@@ -148,7 +144,7 @@ ComPtr<ID3D12Resource> Object3d::CreateBufferResource(ComPtr<ID3D12Device> devic
 
 void Object3d::CreateTransformationMatrixData() {
 	// WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
-	wvpResource_ = CreateBufferResource(object3dCommon_->GetDxCommon()->GetDevice(), sizeof(TransformationMatrix));
+	wvpResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(TransformationMatrix));
 	// 書き込むためのアドレスを取得
 	wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&transformMatrixData_));
 	wvpResource_->Unmap(0, nullptr);
@@ -158,7 +154,7 @@ void Object3d::CreateTransformationMatrixData() {
 
 void Object3d::CreateDirectionalLightData() {
 	// 平行光源用のリソースを作る
-	directionalLightResource_ = CreateBufferResource(object3dCommon_->GetDxCommon()->GetDevice(), sizeof(DirectionalLight));
+	directionalLightResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(DirectionalLight));
 	// アドレス取得
 	directionalLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightData_));
 	directionalLightResource_->Unmap(0, nullptr);
@@ -183,7 +179,7 @@ void Object3d::CreateDirectionalLightData() {
 
 void Object3d::CreateCameraForGPUData() {
 	// cameraForGPUのリソースを作る
-	cameraForGPUResource_ = CreateBufferResource(object3dCommon_->GetDxCommon()->GetDevice(), sizeof(CameraForGPU));
+	cameraForGPUResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(CameraForGPU));
 	// アドレス取得
 	cameraForGPUResource_->Map(0, nullptr, reinterpret_cast<void**>(&cameraForGPUData_));
 	cameraForGPUResource_->Unmap(0, nullptr);
@@ -194,7 +190,7 @@ void Object3d::CreateCameraForGPUData() {
 
 void Object3d::CreateFogParamData() {
 	// フォグパラメータのリソースを作る
-	fogParamResource_ = CreateBufferResource(object3dCommon_->GetDxCommon()->GetDevice(), sizeof(FogParam));
+	fogParamResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(FogParam));
 	// アドレス取得
 	fogParamResource_->Map(0, nullptr, reinterpret_cast<void**>(&fogParamData_));
 	fogParamResource_->Unmap(0, nullptr);
@@ -209,7 +205,7 @@ void Object3d::CreateFogParamData() {
 
 void Object3d::CreateTimeParamData() {
 	// タイムパラメータのリソースを作る
-	timeParamResource_ = CreateBufferResource(object3dCommon_->GetDxCommon()->GetDevice(), sizeof(TimeParam));
+	timeParamResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(TimeParam));
 	// アドレス取得
 	timeParamResource_->Map(0, nullptr, reinterpret_cast<void**>(&timeParamData_));
 	timeParamResource_->Unmap(0, nullptr);
@@ -221,7 +217,7 @@ void Object3d::CreateTimeParamData() {
 
 void Object3d::CreateMaterialData() {
 	// マテリアル用のリソースを作る
-	materialResource_ = CreateBufferResource(object3dCommon_->GetDxCommon()->GetDevice(), sizeof(Material));
+	materialResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(Material));
 	// アドレス取得
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 	materialResource_->Unmap(0, nullptr);

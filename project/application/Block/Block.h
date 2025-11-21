@@ -1,13 +1,10 @@
 #pragma once
 #include "Actor.h"
-
-class Object3dCommon;
-class TextureManager;
-class ModelManager;
+#include "EngineContext.h"
 
 class Block : public Actor{
 public:
-	void Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane);
+	void Initialize(EngineContext* ctx);
 
 	void Update();
 
@@ -20,4 +17,8 @@ public:
 
 	// Getter
 	Object3d* GetObject3d() { return object3d_.get(); }
+
+private:
+	// コンテキスト構造体
+	EngineContext* ctx_;
 };

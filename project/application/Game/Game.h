@@ -26,6 +26,7 @@
 #include "TextureManager.h"
 #include "WinApp.h"
 #include "XAudio.h"
+#include "EngineContext.h"
 #include <memory>
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -178,5 +179,9 @@ private:
 	// テスト用パーティクル
 	std::unique_ptr<Particle> particle_ = std::make_unique<Particle>();
 
+	// モデル確認用の配列
 	std::array<std::unique_ptr<Object3d>,4> testModels_;
+
+	// コンテキスト構造体
+	EngineContext engineContext_;
 };

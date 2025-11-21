@@ -1,22 +1,19 @@
 #include "Player.h"
 #include "GamePad.h"
-#include "ModelManager.h"
-#include "Object3dCommon.h"
-#include "SpriteCommon.h"
 #include "TextureManager.h"
 #include "MathUtility.h"
 #include "MathOperator.h"
 #include <numbers>
 
-void Player::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane, DirectInput* input, GamePad* gamePad, SpriteCommon* spriteCommon) {
+void Player::Initialize(EngineContext* ctx, DirectInput* input, GamePad* gamePad) {
+	// コンテキスト構造体
+	ctx_ = ctx;
+
 	// 3Dオブジェクトの生成
 	object3d_ = std::make_unique<Object3d>();
 
-	object3dCommon_ = obj3dCommon;
-
 	// Object3dの初期化
-	object3d_->Initialize(obj3dCommon, texMane, ModelMane);
-	//object3d_->SetColor({1.0f, 0.0f, 0.0f, 1.0f});
+	object3d_->Initialize(ctx_);
 
 	transform_.scale = {1.0f, 1.0f, 1.0f};
 	transform_.rotate = {0.0f, std::numbers::pi_v<float> / 2, 0.0f};
@@ -41,16 +38,16 @@ void Player::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, Mo
 	// HPゲージスプライト
 	for (int i = 0; i < spriteHPGauge_.size(); ++i) {
 		spriteHPGauge_[i] = std::make_unique<Sprite>();
-		spriteHPGauge_[i]->Initialize(spriteCommon, texMane, "resources/white.png");
+		spriteHPGauge_[i]->Initialize(ctx_, "resources/white.png");
 		spriteHPGauge_[i]->SetPosition({70.0f * i + 32.0f, 32.0f});
-		spriteHPGauge_[i]->SetSize({64.0f, 64.0f});
+		spriteHPGauge_[i]->SetSize({24.0f, 32.0f});
 		spriteHPGauge_[i]->SetColor({0.0f, 1.0f, 0.0f, 1.0f});
 	}
 
 	// HPゲージ背景スプライト
-	spriteHPGaugeBG_->Initialize(spriteCommon, texMane, "resources/white.png");
+	spriteHPGaugeBG_->Initialize(ctx_, "resources/white.png");
 	spriteHPGaugeBG_->SetPosition({22.0f, 22.0f});
-	spriteHPGaugeBG_->SetSize({364.0f, 84.0f});
+	spriteHPGaugeBG_->SetSize({120.0f, 32.0f});
 	spriteHPGaugeBG_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 }
 
@@ -100,13 +97,17 @@ void Player::Update(float deltaTime) {
 	// 当たり判定位置更新
 	UpdateCollisionPos();
 
+	// スプライトに変換した座標をセットする
+	for (int i = 0; i < spriteHPGauge_.size(); ++i) {
+		spriteHPGauge_[i]->SetPosition(ScreenToWorldPoint({transform_.translate.x + i * 1.0f, transform_.translate.y, transform_.translate.z}, spriteMargin_));
+	}
+
+	spriteHPGaugeBG_->SetPosition(ScreenToWorldPoint(transform_.translate, spriteMargin_));
+
 	// HPゲージスプライト
 	for (auto& hpGauge : spriteHPGauge_) {
 		hpGauge->Update();
 	}
-
-	// スプライトに変換した座標をセットする
-	spriteHPGaugeBG_->SetPosition(ScreenToWorldPoint(transform_.translate, spriteMargin_));
 
 	// HPゲージ背景スプライト
 	spriteHPGaugeBG_->Update();
@@ -125,7 +126,7 @@ void Player::Draw() {
 	}
 
 	// HPゲージ背景スプライト
-	//spriteHPGaugeBG_->Draw();
+	spriteHPGaugeBG_->Draw();
 
 	// HPゲージスプライト
 	for (auto& hpGauge : spriteHPGauge_) {
@@ -282,10 +283,10 @@ Vector2 Player::ScreenToWorldPoint(Vector3 worldPosition, Vector2 margin) {
 	Matrix4x4 viewportMatrix = MathUtility::MakeViewPortMatrix(0, 0, 1280.0f, 720.0f, 0.0f, 1.0f);
 
 	// カメラのViewProjectionとビューポートを合成してワールド→スクリーン変換行列を作る
-	Matrix4x4 matVPV = MathUtility::Multiply(object3dCommon_->GetDefaultCamera()->GetViewProjectionMatrix(), viewportMatrix);
+	Matrix4x4 matVPV = MathUtility::Multiply(ctx_->object3dCommon->GetDefaultCamera()->GetViewProjectionMatrix(), viewportMatrix);
 
 	// プレイヤーのワールド座標をスクリーン座標に変換
-	Vector3 worldPos = {transform_.translate.x + spriteMargin_.x, transform_.translate.y + spriteMargin_.y, transform_.translate.z};
+	Vector3 worldPos = {worldPosition.x + spriteMargin_.x, worldPosition.y + spriteMargin_.y, worldPosition.z};
 	Vector3 screenPos = MathUtility::Transform(worldPos, matVPV);
 
 	return {screenPos.x, screenPos.y};

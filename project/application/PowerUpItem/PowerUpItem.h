@@ -1,13 +1,10 @@
 #pragma once
 #include "Actor.h"
-
-class Object3dCommon;
-class TextureManager;
-class ModelManager;
+#include "EngineContext.h"
 
 class PowerUpItem : public Actor{
 public:
-	void Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane);
+	void Initialize(EngineContext* ctx);
 
 	void Update(float deltaTime);
 
@@ -18,4 +15,7 @@ public:
 private:
 	// 当たり判定の位置更新
 	void UpdateCollisionPos();
+
+	// コンテキスト構造体
+	EngineContext* ctx_;
 };

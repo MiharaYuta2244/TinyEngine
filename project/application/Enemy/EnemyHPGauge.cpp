@@ -2,9 +2,11 @@
 #include "SpriteCommon.h"
 #include "TextureManager.h"
 
-void EnemyHPGauge::Initialize(SpriteCommon* spriteCommon, TextureManager* textureManager) {
-	spriteHPBar_->Initialize(spriteCommon, textureManager, "resources/white.png");
-	spriteHPBarBG_->Initialize(spriteCommon, textureManager, "resources/white.png");
+void EnemyHPGauge::Initialize(EngineContext* ctx) {
+	ctx_ = ctx;
+
+	spriteHPBar_->Initialize(ctx_, "resources/white.png");
+	spriteHPBarBG_->Initialize(ctx_, "resources/white.png");
 
 	// HPゲージスプライトの初期化
 	spriteHPBar_->SetPosition({140.0f, 668.0f});

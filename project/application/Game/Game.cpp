@@ -33,8 +33,21 @@ void Game::Initialize(HINSTANCE hInstance) {
 	// Sprite共通部
 	spriteCommon_->Initialize(dxCommon_.get());
 
-	// TestParticleCommon
+	// ParticleCommon
 	particleCommon_->Initialize(dxCommon_.get());
+
+	// DebugCamera
+	debugCamera_->Initialize();
+	debugCamera_->SetTranslation({19.45f, 10.5f, -75.0f});
+	object3dCommon_->SetDefaultCamera(debugCamera_.get());
+	particleCommon_->SetDefaultCamera(debugCamera_.get());
+
+	// コンテキスト構造体
+	engineContext_.object3dCommon = object3dCommon_.get();
+	engineContext_.spriteCommon = spriteCommon_.get();
+	engineContext_.modelManager = modelManger_.get();
+	engineContext_.textureManager = textureManager_.get();
+	engineContext_.particleCommon = particleCommon_.get();
 
 	// .objファイルからモデルを読み込む
 	AllModelLoader();
@@ -46,15 +59,10 @@ void Game::Initialize(HINSTANCE hInstance) {
 	// DirectInput
 	input_->Initialize(winApp_.get());
 
-	// DebugCamera
-	debugCamera_->Initialize();
-	debugCamera_->SetTranslation({19.45f, 10.5f, -75.0f});
-	object3dCommon_->SetDefaultCamera(debugCamera_.get());
-	particleCommon_->SetDefaultCamera(debugCamera_.get());
-
 	// Particle
-	particle_->Initialize(particleCommon_.get(), textureManager_.get(), modelManger_.get());
+	particle_->Initialize(&engineContext_, {20.0f, 5.0f, 0.0f});
 
+	// 現在のシーン初期化
 	currentScene_ = Scene::Title;
 }
 
@@ -212,16 +220,16 @@ void Game::StartGameScene() {
 	map_->Initialize();
 
 	// プレイヤー初期化
-	player_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get(), input_.get(), gamePad_.get(), spriteCommon_.get());
+	player_->Initialize(&engineContext_, input_.get(), gamePad_.get());
 	player_->SetModel("Hiyoko.obj");
 
 	// 敵初期化
-	enemy_->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get(), spriteCommon_.get());
+	enemy_->Initialize(&engineContext_);
 	enemy_->SetModel("sphere.obj");
 
 	for (int i = 0; i < testModels_.size(); ++i) {
 		testModels_[i] = std::make_unique<Object3d>();
-		testModels_[i]->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get());
+		testModels_[i]->Initialize(&engineContext_);
 		testModels_[i]->SetScale({5.0f, 5.0f, 5.0f});
 		testModels_[i]->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
 		testModels_[i]->SetTranslate({i * 8.0f, 0.0f, 0.0f});
@@ -259,7 +267,7 @@ void Game::SpawnObjectsByMapChip(Vector2 leftTop) {
 			if (static_cast<TileType>(tile) == TileType::BLOCK) {
 				// ブロックの初期化
 				auto block = std::make_unique<Block>();
-				block->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get());
+				block->Initialize(&engineContext_);
 				block->Spawn({static_cast<float>(x) - 11.0f, static_cast<float>(y) * -1.0f + 19.0f, 0.0f});
 				block->SetModel("Box.obj");
 				blocks_.push_back(std::move(block));
@@ -300,6 +308,9 @@ void Game::CollisionEnemyPlayerHipDrop() {
 		// プレイヤーを反動で打ち上げる
 		if (!player_->GetIsHitEnemyHipDrop()) {
 			player_->SetIsHitEnemyHipDrop(true);
+
+			// ヒップドロップ用のパーティクルの生成
+
 		}
 	}
 }
@@ -349,7 +360,7 @@ void Game::CreatePowerUpItem() {
 	if (powerUpItemCreateFrameCount_ >= kPowerUpItemFrameCountMax) {
 		// パワーアップアイテム生成
 		auto powerUpItem = std::make_unique<PowerUpItem>();
-		powerUpItem->Initialize(object3dCommon_.get(), textureManager_.get(), modelManger_.get());
+		powerUpItem->Initialize(&engineContext_);
 		powerUpItem->SetModel("sphere.obj");
 
 		// ランダムな座標を指定

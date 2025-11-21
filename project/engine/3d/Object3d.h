@@ -15,14 +15,12 @@
 #include "Transform.h"
 #include "TransformationMatrix.h"
 #include "VertexData.h"
-
-class Object3dCommon;
-class TextureManager;
-class Model;
+#include "Model.h"
+#include "EngineContext.h"
 
 class Object3d {
 public:
-	void Initialize(Object3dCommon* modelCommon, TextureManager* textureManager, ModelManager* modelManager);
+	void Initialize(EngineContext* ctx);
 
 	void Update();
 
@@ -87,9 +85,6 @@ private:
 	void CreateMaterialData();
 
 private:
-	Object3dCommon* object3dCommon_ = nullptr;
-	TextureManager* textureManager_ = nullptr;
-	ModelManager* modelManager_ = nullptr;
 	Model* model_ = nullptr;
 
 	// バッファリソース
@@ -132,4 +127,7 @@ private:
 
 	// カメラ
 	DebugCamera* camera_ = nullptr;
+
+	// コンテキスト構造体
+	EngineContext* ctx_;
 };

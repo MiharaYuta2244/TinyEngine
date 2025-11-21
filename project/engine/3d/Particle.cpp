@@ -13,10 +13,8 @@
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-void Particle::Initialize(ParticleCommon* particleCommon, TextureManager* textureManager, ModelManager* modelManager) {
-	particleCommon_ = particleCommon;
-	textureManager_ = textureManager;
-	modelManager_ = modelManager;
+void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos) {
+	ctx_ = ctx;
 
 	// SRVの作成（インスタンシング用）
 	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
@@ -29,8 +27,9 @@ void Particle::Initialize(ParticleCommon* particleCommon, TextureManager* textur
 	instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
 
 	// CPU/GPUハンドルをクラスメンバへ取得して保存
-	instancingSrvHandleCPU_ = particleCommon_->GetDxCommon()->GetCPUDescriptorHandle(particleCommon_->GetDxCommon()->GetSrvDescriptorHeap(), particleCommon_->GetDxCommon()->GetDescriptorSizeSRV(), 3);
-	instancingSrvHandleGPU_ = particleCommon_->GetDxCommon()->GetGPUDescriptorHandle(particleCommon_->GetDxCommon()->GetSrvDescriptorHeap(), particleCommon_->GetDxCommon()->GetDescriptorSizeSRV(), 3);
+	DirectXCommon* dxCommon = ctx_->particleCommon->GetDxCommon();
+	instancingSrvHandleCPU_ = dxCommon->GetCPUDescriptorHandle(dxCommon->GetSrvDescriptorHeap(), dxCommon->GetDescriptorSizeSRV(), 3);
+	instancingSrvHandleGPU_ = dxCommon->GetGPUDescriptorHandle(dxCommon->GetSrvDescriptorHeap(), dxCommon->GetDescriptorSizeSRV(), 3);
 
 	// プリミティブモデルの作成
 	modelData_ = CreatePrimitive();
@@ -38,7 +37,7 @@ void Particle::Initialize(ParticleCommon* particleCommon, TextureManager* textur
 	// インスタンシングデータ作成
 	CreateInstancingResource();
 
-	particleCommon_->GetDxCommon()->GetDevice()->CreateShaderResourceView(instancingResource_.Get(), &instancingSrvDesc, instancingSrvHandleCPU_);
+	dxCommon->GetDevice()->CreateShaderResourceView(instancingResource_.Get(), &instancingSrvDesc, instancingSrvHandleCPU_);
 
 	// 頂点データの初期化
 	CreateVertexData();
@@ -47,19 +46,19 @@ void Particle::Initialize(ParticleCommon* particleCommon, TextureManager* textur
 	CreateMaterialData();
 
 	// テクスチャ読み込み
-	textureManager_->LoadTexture(modelData_.material.textureFilePath);
+	ctx_->textureManager->LoadTexture(modelData_.material.textureFilePath);
 
 	// テクスチャ番号を取得して、メンバ変数に書き込む
-	modelData_.material.textureIndex = textureManager_->GetSrvIndex(modelData_.material.textureFilePath);
+	modelData_.material.textureIndex = ctx_->textureManager->GetSrvIndex(modelData_.material.textureFilePath);
 
 	// カメラをセットする
-	camera_ = particleCommon_->GetDefaultCamera();
+	camera_ = ctx_->particleCommon->GetDefaultCamera();
 
 	// エミッタの設定
-	emitter.count = 3;
+	emitter.count = 10;
 	emitter.frequency = 0.5f;
 	emitter.frequencyTime = 0.0f;
-	emitter.transform.translate = {0.0f, 0.0f, 0.0f};
+	emitter.transform.translate = emitterPos;
 	emitter.transform.rotate = {0.0f, 0.0f, 0.0f};
 	emitter.transform.scale = {1.0f, 1.0f, 1.0f};
 
@@ -67,6 +66,9 @@ void Particle::Initialize(ParticleCommon* particleCommon, TextureManager* textur
 	accelerationField_.acceleration = {15.0f, 0.0f, 0.0f};
 	accelerationField_.area.min = {-1.0f, -1.0f, -1.0f};
 	accelerationField_.area.max = {1.0f, 1.0f, 1.0f};
+
+	// ループフラグ
+	isLoop_ = true;
 }
 
 void Particle::Update() {
@@ -87,9 +89,6 @@ void Particle::Update() {
 		emitter.frequencyTime -= emitter.frequency;                               // 余計に過ぎた時間も加味して頻度計算する
 	}
 
-	// ビルボードマトリックスの作成
-	Matrix4x4 billboardmatrix = CreateBillboardMatrix();
-
 	numInstance_ = 0;
 	for (std::list<ParticleState>::iterator particleIterator = particles_.begin(); particleIterator != particles_.end();) {
 		if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
@@ -106,17 +105,8 @@ void Particle::Update() {
 		(*particleIterator).transform.translate += (*particleIterator).velocity * deltaTime_->GetDeltaTime();
 		(*particleIterator).currentTime += deltaTime_->GetDeltaTime();
 
-		// ビルボード用
-		Matrix4x4 scaleMatrix = MathUtility::MakeScaleMatrix((*particleIterator).transform.scale);
-		Matrix4x4 translateMatrix = MathUtility::MakeTranslateMatrix((*particleIterator).transform.translate);
-		worldMatrix_ = MathUtility::Multiply(MathUtility::Multiply(scaleMatrix, billboardmatrix), translateMatrix);
-
-		if (camera_) {
-			const Matrix4x4& viewProjectionMatrix = camera_->GetViewProjectionMatrix();
-			worldViewProjectionMatrix_ = MathUtility::Multiply(worldMatrix_, viewProjectionMatrix);
-		} else {
-			worldViewProjectionMatrix_ = worldMatrix_;
-		}
+		// 座標変換
+		CoordinateTransformation(particleIterator);
 
 		// 透明度の変更
 		float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
@@ -144,9 +134,9 @@ void Particle::Draw() {
 	}
 
 	// 3Dオブジェクト描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
-	particleCommon_->DrawSettingCommon();
+	ctx_->particleCommon->DrawSettingCommon();
 
-	auto commandList = particleCommon_->GetDxCommon()->GetCommandList();
+	auto commandList = ctx_->particleCommon->GetDxCommon()->GetCommandList();
 
 	// wvp用のBufferの場所を設定
 	commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU_);
@@ -158,7 +148,7 @@ void Particle::Draw() {
 	commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 
 	// SRVのDescriptorTableの先頭を設定。3はrootParameter[3]（Pixel用テクスチャ）である。
-	commandList->SetGraphicsRootDescriptorTable(2, textureManager_->GetSrvHandleGPU(modelData_.material.textureFilePath));
+	commandList->SetGraphicsRootDescriptorTable(2, ctx_->textureManager->GetSrvHandleGPU(modelData_.material.textureFilePath));
 
 	// 描画!(DrawCall/ドローコール)。
 	commandList->DrawInstanced(UINT(modelData_.vertices.size()), numInstance_, 0, 0);
@@ -232,7 +222,7 @@ ModelData Particle::CreatePrimitive() {
 
 void Particle::CreateVertexData() {
 	// 頂点リソースの作成
-	vertexResource_ = CreateBufferResource(particleCommon_->GetDxCommon()->GetDevice(), sizeof(VertexData) * modelData_.vertices.size());
+	vertexResource_ = CreateBufferResource(ctx_->particleCommon->GetDxCommon()->GetDevice(), sizeof(VertexData) * modelData_.vertices.size());
 	// リソースの先頭のアドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
 	// 使用するリソースのサイズは頂点6つ分のサイズ
@@ -247,7 +237,7 @@ void Particle::CreateVertexData() {
 
 void Particle::CreateMaterialData() {
 	// マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
-	materialResource_ = CreateBufferResource(particleCommon_->GetDxCommon()->GetDevice(), sizeof(Material));
+	materialResource_ = CreateBufferResource(ctx_->particleCommon->GetDxCommon()->GetDevice(), sizeof(Material));
 	// 書き込むためのアドレスを取得
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 	materialResource_->Unmap(0, nullptr);
@@ -265,7 +255,7 @@ void Particle::CreateMaterialData() {
 
 void Particle::CreateInstancingResource() {
 	// Instancing用のTransformationMatrixリソースを作る
-	instancingResource_ = CreateBufferResource(particleCommon_->GetDxCommon()->GetDevice(), sizeof(ParticleForGPU) * kNumMaxInstance);
+	instancingResource_ = CreateBufferResource(ctx_->particleCommon->GetDxCommon()->GetDevice(), sizeof(ParticleForGPU) * kNumMaxInstance);
 
 	// 書き込むためのアドレス取得
 	instancingResource_->Map(0, nullptr, reinterpret_cast<void**>(&instancingData_));
@@ -319,4 +309,21 @@ std::list<ParticleState> Particle::Emit(const Emitter& emitter, Vector3 translat
 	}
 
 	return particles;
+}
+
+void Particle::CoordinateTransformation(std::list<ParticleState>::iterator particleIterator) {
+	// ビルボードマトリックスの作成
+	Matrix4x4 billboardmatrix = CreateBillboardMatrix();
+
+	// ビルボード用
+	Matrix4x4 scaleMatrix = MathUtility::MakeScaleMatrix((*particleIterator).transform.scale);
+	Matrix4x4 translateMatrix = MathUtility::MakeTranslateMatrix((*particleIterator).transform.translate);
+	worldMatrix_ = MathUtility::Multiply(MathUtility::Multiply(scaleMatrix, billboardmatrix), translateMatrix);
+
+	if (camera_) {
+		const Matrix4x4& viewProjectionMatrix = camera_->GetViewProjectionMatrix();
+		worldViewProjectionMatrix_ = MathUtility::Multiply(worldMatrix_, viewProjectionMatrix);
+	} else {
+		worldViewProjectionMatrix_ = worldMatrix_;
+	}
 }

@@ -1,14 +1,14 @@
 #include "Enemy.h"
-#include "ModelManager.h"
-#include "Object3dCommon.h"
-#include "TextureManager.h"
 
-void Enemy::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane, SpriteCommon* spriteCommon) {
+void Enemy::Initialize(EngineContext* ctx) {
+	// コンテキスト構造体
+	ctx_ = ctx;
+
 	// 3Dオブジェクトの生成
 	object3d_ = std::make_unique<Object3d>();
 
 	// Object3dの初期化
-	object3d_->Initialize(obj3dCommon, texMane, ModelMane);
+	object3d_->Initialize(ctx_);
 	object3d_->SetColor({0.0f, 0.0f, 1.0f, 1.0f});
 	//object3d_->SetEnableLighting(false);
 
@@ -26,7 +26,7 @@ void Enemy::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, Mod
 	UpdateCollisionPos();
 
 	// HPゲージスプライト管理クラス
-	hpGauge_->Initialize(spriteCommon, texMane);
+	hpGauge_->Initialize(ctx_);
 }
 
 void Enemy::Update(float deltaTime) {

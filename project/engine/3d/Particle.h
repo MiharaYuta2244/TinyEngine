@@ -19,14 +19,11 @@
 #include "VertexData.h"
 #include "AABB.h"
 #include "DeltaTime.h"
-
-class ParticleCommon;
-class TextureManager;
-class Model;
+#include "EngineContext.h"
 
 class Particle {
 public:
-	void Initialize(ParticleCommon* particleCommon, TextureManager* textureManager, ModelManager* modelManager);
+	void Initialize(EngineContext* ctx, Vector3 emitterPos);
 
 	void Update();
 
@@ -81,11 +78,10 @@ private:
 	// エミッターを使ってパーティクルの生成
 	std::list<ParticleState> Emit(const Emitter& emitter, Vector3 translate);
 
-private:
-	ParticleCommon* particleCommon_ = nullptr;
-	TextureManager* textureManager_ = nullptr;
-	ModelManager* modelManager_ = nullptr;
+	// 座標変換
+	void CoordinateTransformation(std::list<ParticleState>::iterator particleIterator);
 
+private:
 	// バッファリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource_;
@@ -144,4 +140,10 @@ private:
 
 	// 経過時間
 	std::unique_ptr<DeltaTime> deltaTime_ = std::make_unique<DeltaTime>();
+
+	// ループ可能かどうか
+	bool isLoop_ = false;
+
+	// コンテキスト構造体
+	EngineContext* ctx_;
 };

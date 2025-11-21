@@ -1,13 +1,11 @@
 #pragma once
 #include <memory>
 #include "Sprite.h"
-
-class SpriteCommon;
-class TextureManager;
+#include "EngineContext.h"
 
 class EnemyHPGauge {
 public:
-	void Initialize(SpriteCommon* spriteCommon, TextureManager* textureManager);
+	void Initialize(EngineContext* ctx);
 
 	void Update();
 
@@ -24,4 +22,7 @@ private:
 	// HPバーのサイズX
 	const float kMaxSpriteHPBarSizeX = 1000.0f;
 	float spriteHPBarSizeX_ = kMaxSpriteHPBarSizeX;
+
+	// コンテキスト構造体
+	EngineContext* ctx_;
 };

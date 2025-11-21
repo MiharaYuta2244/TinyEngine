@@ -8,14 +8,12 @@
 #include "Transform.h"
 #include "Vector2.h"
 #include "Vector4.h"
-
-class SpriteCommon;
-class TextureManager;
+#include "EngineContext.h"
 
 class Sprite {
 public:
 	~Sprite();
-	void Initialize(SpriteCommon* spriteCommon, TextureManager* textureManager, std::string textureFilePath);
+	void Initialize(EngineContext* ctx, std::string textureFilePath);
 
 	void Update();
 
@@ -90,8 +88,6 @@ private:
 	void AdjustTextureSize();
 
 private:
-	SpriteCommon* spriteCommon_ = nullptr;
-	TextureManager* textureManager_ = nullptr;
 	std::string textureFilePath_;
 
 	// バッファリソース
@@ -149,4 +145,7 @@ private:
 
 	// テクスチャ切り出しサイズ
 	Vector2 textureSize_ = {100.0f, 100.0f};
+
+	// コンテキスト構造体
+	EngineContext* ctx_;
 };

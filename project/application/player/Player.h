@@ -2,17 +2,14 @@
 #include "Actor.h"
 #include "DirectInput.h"
 #include "Sprite.h"
+#include "EngineContext.h"
 #include <array>
 
-class Object3dCommon;
-class SpriteCommon;
-class TextureManager;
-class ModelManager;
 class GamePad;
 
 class Player : public Actor {
 public:
-	void Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane, DirectInput* input, GamePad* gamePad, SpriteCommon* spriteCommon);
+	void Initialize(EngineContext* ctx, DirectInput* input, GamePad* gamePad);
 
 	void Update(float deltaTime);
 
@@ -135,8 +132,9 @@ private:
 	// プレイヤーのパワーアップフラグ
 	bool isPowerUp_ = false;
 
-	Object3dCommon* object3dCommon_ = nullptr;
-
 	// HPゲージ用プレイヤーとの距離
-	Vector2 spriteMargin_ = {2.0f, 3.0f};
+	Vector2 spriteMargin_ = {1.0f, 2.0f};
+
+	// コンテキスト構造体
+	EngineContext* ctx_;
 };

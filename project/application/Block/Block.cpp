@@ -1,14 +1,14 @@
 #include "Block.h"
-#include "ModelManager.h"
-#include "Object3dCommon.h"
-#include "TextureManager.h"
 
-void Block::Initialize(Object3dCommon* obj3dCommon, TextureManager* texMane, ModelManager* ModelMane) {
+void Block::Initialize(EngineContext* ctx) {
+	// コンテキスト構造体
+	ctx_ = ctx;
+
 	// 3Dオブジェクトの生成
 	object3d_ = std::make_unique<Object3d>();
 
 	// Object3dの初期化
-	object3d_->Initialize(obj3dCommon, texMane, ModelMane);
+	object3d_->Initialize(ctx_);
 
 	transform_.translate = {0.0f, 0.0f, 0.0f};
 	transform_.rotate = {0.0f, 0.0f, 0.0f};
