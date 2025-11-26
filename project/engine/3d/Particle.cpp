@@ -2,28 +2,28 @@
 #include <fstream>
 #include <sstream>
 #include "particle.h"
+#include "Collision.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
 #include "Model.h"
 #include "Random.h"
 #include "TextureManager.h"
 #include "particleCommon.h"
-#include "Collision.h"
 
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos) {
+void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos, std::string texturePath, UINT srvIndex) {
 	ctx_ = ctx;
 
 	// インスタンシングデータ作成
 	CreateInstancingResource();
 
 	// SRVの作成（インスタンシング用）
-	CreateInstancingSRV(3);
+	CreateInstancingSRV(srvIndex);
 
 	// プリミティブモデルの作成
-	modelData_ = CreatePrimitive();
+	modelData_ = CreatePrimitive(texturePath);
 
 	// 頂点データの初期化
 	CreateVertexData();
@@ -32,10 +32,10 @@ void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos) {
 	CreateMaterialData();
 
 	// テクスチャ読み込み
-	ctx_->textureManager->LoadTexture(modelData_.material.textureFilePath);
+	ctx_->textureManager->LoadTexture(texturePath);
 
 	// テクスチャ番号を取得して、メンバ変数に書き込む
-	modelData_.material.textureIndex = ctx_->textureManager->GetSrvIndex(modelData_.material.textureFilePath);
+	modelData_.material.textureIndex = ctx_->textureManager->GetSrvIndex(texturePath);
 
 	// カメラをセットする
 	camera_ = ctx_->particleCommon->GetDefaultCamera();
@@ -62,7 +62,7 @@ void Particle::Update() {
 	emitter.frequencyTime += deltaTime_->GetDeltaTime();
 	if (emitter.frequency <= emitter.frequencyTime) {
 		particles_.splice(particles_.end(), Emit(emitter, emitter.transform.translate)); // 発生処理
-		emitter.frequencyTime -= emitter.frequency;                               // 余計に過ぎた時間も加味して頻度計算する
+		emitter.frequencyTime -= emitter.frequency;                                      // 余計に過ぎた時間も加味して頻度計算する
 	}
 
 	numInstance_ = 0;
@@ -157,7 +157,7 @@ ComPtr<ID3D12Resource> Particle::CreateBufferResource(ComPtr<ID3D12Device> devic
 	return resource;
 }
 
-ModelData Particle::CreatePrimitive() {
+ModelData Particle::CreatePrimitive(std::string texturePath) {
 	ModelData modelData;
 
 	modelData.vertices.push_back({
@@ -191,7 +191,7 @@ ModelData Particle::CreatePrimitive() {
           .normal = {0.0f, 0.0f, 1.0f}
     }); // 右下
 
-	modelData.material.textureFilePath = "resources/circle.png";
+	modelData.material.textureFilePath = texturePath;
 
 	return modelData;
 }

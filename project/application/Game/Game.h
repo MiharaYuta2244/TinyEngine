@@ -177,7 +177,10 @@ private:
 	std::unique_ptr<ParticleCommon> particleCommon_ = std::make_unique<ParticleCommon>();
 
 	// テスト用パーティクル
-	std::unique_ptr<Particle> particle_ = std::make_unique<Particle>();
+	std::unique_ptr<Particle> particle_;
+
+	// 土埃パーティクル
+	std::unique_ptr<Particle> dustParticle_;
 
 	// モデル確認用の配列
 	std::array<std::unique_ptr<Object3d>,4> testModels_;

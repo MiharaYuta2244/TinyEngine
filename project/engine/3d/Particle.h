@@ -23,7 +23,7 @@
 
 class Particle {
 public:
-	void Initialize(EngineContext* ctx, Vector3 emitterPos);
+	void Initialize(EngineContext* ctx, Vector3 emitterPos, std::string texturePath, UINT srvIndex = 3);
 
 	void Update();
 
@@ -35,6 +35,7 @@ public:
 	void SetWorldMatrix(Matrix4x4 worldMatrix) { worldMatrix_ = worldMatrix; }
 	void SetCamera(DebugCamera* camera) { camera_ = camera; }
 	void SetIsBillboard(bool isBillboard) { isBillboard_ = isBillboard; }
+	void SetTranslate(Vector3 translate) { emitter.transform.translate = translate; }
 
 	// getter
 	Vector4& GetColor() { return material_.color; }
@@ -58,7 +59,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeBytes);
 
 	// 四角形の作成
-	ModelData CreatePrimitive();
+	ModelData CreatePrimitive(std::string texturePath);
 
 	// 頂点データの初期化
 	void CreateVertexData();
