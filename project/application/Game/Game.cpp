@@ -65,11 +65,11 @@ void Game::Initialize(HINSTANCE hInstance) {
 
 	// 土埃パーティクル
 	dustParticle_ = std::make_unique<Particle>();
-	dustParticle_->Initialize(&engineContext_, {30.0f, 10.0f, 0.0f}, "resources/circle.png", 4);
+	dustParticle_->Initialize(&engineContext_, {30.0f, 10.0f, 0.0f}, "resources/circle.png", 4, "Dust");
 
 	// 衝撃波パーティクル
 	shockWaveParticle_ = std::make_unique<Particle>();
-	shockWaveParticle_->Initialize(&engineContext_, {30.0f, 10.0f, 0.0f}, "resources/smoke.png", 5);
+	shockWaveParticle_->Initialize(&engineContext_, {30.0f, 10.0f, 0.0f}, "resources/smoke.png", 5, "ShockWave");
 
 	// 現在のシーン初期化
 	currentScene_ = Scene::Title;
@@ -119,7 +119,10 @@ void Game::Update() {
 
 		// プレイヤー更新
 		player_->Update(deltaTime_->GetDeltaTime());
-		dustParticle_->SetTranslate(player_->GetTranslate());
+
+		// プレイヤーの足元に埃のパーティクルを生成するように位置を設定
+		Vector3 particlePos = {player_->GetTranslate().x, player_->GetTranslate().y - player_->GetScale().y, player_->GetTranslate().z};
+		dustParticle_->SetTranslate(particlePos);
 
 		// ブロック更新
 		for (auto& block : blocks_) {

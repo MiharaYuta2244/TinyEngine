@@ -1,7 +1,6 @@
 #pragma once
 #include "ParticleModule.h"
 
-// 衝撃波：発生時に小さく始まり時間経過でスケールを拡大してフェードアウトする
 class ShockWaveModule : public ParticleModule {
 public:
     ShockWaveModule(float life = 0.6f, float startScale = 0.2f, float endScale = 3.0f)

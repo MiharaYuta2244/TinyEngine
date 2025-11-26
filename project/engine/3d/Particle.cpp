@@ -9,12 +9,27 @@
 #include "Random.h"
 #include "TextureManager.h"
 #include "particleCommon.h"
+#include "ParticleModule.h"
+#include "ShockWaveModule.h"
+#include "DustModule.h"
 
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos, std::string texturePath, UINT srvIndex) {
+void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos, std::string texturePath, UINT srvIndex, const std::string& particleType) {
 	ctx_ = ctx;
+
+	// particleTypeに応じてモジュールを作成
+	if (!particleType.empty()) {
+		if (particleType == "ShockWave") {
+			module_ = std::make_unique<ShockWaveModule>();
+		} else if (particleType == "Dust") {
+			module_ = std::make_unique<DustModule>();
+		}
+		
+	} else {
+		module_.reset();
+	}
 
 	// インスタンシングデータ作成
 	CreateInstancingResource();
@@ -51,7 +66,7 @@ void Particle::Update() {
 	// 経過時間
 	deltaTime_->Update();
 
-// エミッタのImGui
+	// エミッタのImGui
 #ifdef USE_IMGUI
 	ImGui::Begin("Emitter");
 	ImGui::DragFloat3("Translate", &emitter.transform.translate.x, 0.01f, -100.0f, 100.0f);
@@ -81,11 +96,21 @@ void Particle::Update() {
 		(*particleIterator).transform.translate += (*particleIterator).velocity * deltaTime_->GetDeltaTime();
 		(*particleIterator).currentTime += deltaTime_->GetDeltaTime();
 
-		// 座標変換
+		// モジュールがあれば挙動更新を委譲（スケールやアルファなど）
+		if (module_) {
+			module_->Update(*particleIterator, deltaTime_->GetDeltaTime(), ctx_);
+		}
+
+		// 座標変換（モジュールでスケールが変わっていても対応）
 		CoordinateTransformation(particleIterator);
 
-		// 透明度の変更
-		float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
+		// 透明度の変更（モジュールがある場合はモジュール側のcolor.wを優先）
+		float alpha;
+		if (module_) {
+			alpha = (*particleIterator).color.w;
+		} else {
+			alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
+		}
 
 		if (numInstance_ < kNumMaxInstance) {
 			instancingData_[numInstance_].WVP = worldViewProjectionMatrix_;
@@ -247,10 +272,21 @@ void Particle::CreateInstancingResource() {
 
 ParticleState Particle::MakeParticle(Vector3 translate) {
 	ParticleState particle;
+
+	// デフォルト値
 	particle.transform.scale = {1.0f, 1.0f, 1.0f};
 	particle.transform.rotate = {0.0f, 0.0f, 0.0f};
+	particle.transform.translate = translate; // 中心位置をセット
 
-	// 基準位置を指定してランダムな範囲にパーティクルを生成する
+	// モジュールがある場合はモジュール側で初期化をまかせる
+	if (module_) {
+		module_->Initialize(particle, ctx_);
+		// モジュールはtranslateを書き換えない想定だが、念のため中心位置を保持
+		particle.transform.translate = translate;
+		return particle;
+	}
+
+	// 基準位置を指定してランダムな範囲にパーティクルを生成する（既存ロジック）
 	Vector3 randomTranslate = {RandomUtils::RangeFloat(-1, 1), RandomUtils::RangeFloat(-1, 1), RandomUtils::RangeFloat(-1, 1)};
 	particle.transform.translate = translate + randomTranslate;
 
@@ -324,7 +360,7 @@ void Particle::CreateInstancingSRV(UINT srvIndex) {
 
 void Particle::InitializeEmitter(Vector3 emitterPos) {
 	emitter.count = 10;
-	emitter.frequency = 0.5f;
+	emitter.frequency = 0.2f;
 	emitter.frequencyTime = 0.0f;
 	emitter.transform.translate = emitterPos;
 	emitter.transform.rotate = {0.0f, 0.0f, 0.0f};

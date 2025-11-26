@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <wrl.h>
+#include <memory>
 #include "CameraForGPU.h"
 #include "DebugCamera.h"
 #include "DirectionalLight.h"
@@ -20,10 +21,11 @@
 #include "AABB.h"
 #include "DeltaTime.h"
 #include "EngineContext.h"
+#include "ParticleModule.h"
 
 class Particle {
 public:
-	void Initialize(EngineContext* ctx, Vector3 emitterPos, std::string texturePath, UINT srvIndex = 3);
+	void Initialize(EngineContext* ctx, Vector3 emitterPos, std::string texturePath, UINT srvIndex = 3, const std::string& particleType = "");
 
 	void Update();
 
@@ -162,4 +164,7 @@ private:
 
 	// コンテキスト構造体
 	EngineContext* ctx_;
+
+	// 振る舞いモジュール（種類に応じた動き）
+	std::unique_ptr<ParticleModule> module_;
 };

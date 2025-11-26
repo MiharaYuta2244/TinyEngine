@@ -1,5 +1,6 @@
 #pragma once
 #include "Transform.h"
+#include "Vector4.h"
 
 struct ParticleState
 {
