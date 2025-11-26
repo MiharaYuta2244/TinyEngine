@@ -17,27 +17,16 @@ void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos) {
 	ctx_ = ctx;
 
 	// SRVの作成（インスタンシング用）
-	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
-	instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
-	instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-	instancingSrvDesc.Buffer.FirstElement = 0;
-	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	instancingSrvDesc.Buffer.NumElements = kNumMaxInstance;
-	instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
+	CreateInstancingResource();
 
 	// CPU/GPUハンドルをクラスメンバへ取得して保存
-	DirectXCommon* dxCommon = ctx_->particleCommon->GetDxCommon();
-	instancingSrvHandleCPU_ = dxCommon->GetCPUDescriptorHandle(dxCommon->GetSrvDescriptorHeap(), dxCommon->GetDescriptorSizeSRV(), 3);
-	instancingSrvHandleGPU_ = dxCommon->GetGPUDescriptorHandle(dxCommon->GetSrvDescriptorHeap(), dxCommon->GetDescriptorSizeSRV(), 3);
+	CreateInstancingSRV(3);
 
 	// プリミティブモデルの作成
 	modelData_ = CreatePrimitive();
 
 	// インスタンシングデータ作成
 	CreateInstancingResource();
-
-	dxCommon->GetDevice()->CreateShaderResourceView(instancingResource_.Get(), &instancingSrvDesc, instancingSrvHandleCPU_);
 
 	// 頂点データの初期化
 	CreateVertexData();
@@ -54,21 +43,11 @@ void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos) {
 	// カメラをセットする
 	camera_ = ctx_->particleCommon->GetDefaultCamera();
 
-	// エミッタの設定
-	emitter.count = 10;
-	emitter.frequency = 0.5f;
-	emitter.frequencyTime = 0.0f;
-	emitter.transform.translate = emitterPos;
-	emitter.transform.rotate = {0.0f, 0.0f, 0.0f};
-	emitter.transform.scale = {1.0f, 1.0f, 1.0f};
+	// エミッタの初期化
+	InitializeEmitter(emitterPos);
 
-	// パーティクルに加速度を与える構造体の設定
-	accelerationField_.acceleration = {15.0f, 0.0f, 0.0f};
-	accelerationField_.area.min = {-1.0f, -1.0f, -1.0f};
-	accelerationField_.area.max = {1.0f, 1.0f, 1.0f};
-
-	// ループフラグ
-	isLoop_ = true;
+	// パーティクルに加速度を与える構造体の初期化
+	InitializeAccelerationField();
 }
 
 void Particle::Update() {
@@ -326,4 +305,63 @@ void Particle::CoordinateTransformation(std::list<ParticleState>::iterator parti
 	} else {
 		worldViewProjectionMatrix_ = worldMatrix_;
 	}
+}
+
+void Particle::CreateInstancingSRV(UINT srvIndex) {
+	DirectXCommon* dxCommon = ctx_->particleCommon->GetDxCommon();
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
+	instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	instancingSrvDesc.Buffer.FirstElement = 0;
+	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+	instancingSrvDesc.Buffer.NumElements = kNumMaxInstance;
+	instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
+
+	instancingSrvHandleCPU_ = dxCommon->GetCPUDescriptorHandle(dxCommon->GetSrvDescriptorHeap(), dxCommon->GetDescriptorSizeSRV(), srvIndex);
+	instancingSrvHandleGPU_ = dxCommon->GetGPUDescriptorHandle(dxCommon->GetSrvDescriptorHeap(), dxCommon->GetDescriptorSizeSRV(), srvIndex);
+
+	dxCommon->GetDevice()->CreateShaderResourceView(instancingResource_.Get(), &instancingSrvDesc, instancingSrvHandleCPU_);
+}
+
+void Particle::InitializeEmitter(Vector3 emitterPos) {
+	emitter.count = 10;
+	emitter.frequency = 0.5f;
+	emitter.frequencyTime = 0.0f;
+	emitter.transform.translate = emitterPos;
+	emitter.transform.rotate = {0.0f, 0.0f, 0.0f};
+	emitter.transform.scale = {1.0f, 1.0f, 1.0f};
+}
+
+void Particle::InitializeAccelerationField() {
+	accelerationField_.acceleration = {15.0f, 0.0f, 0.0f};
+	accelerationField_.area.min = {-1.0f, -1.0f, -1.0f};
+	accelerationField_.area.max = {1.0f, 1.0f, 1.0f};
+}
+
+void Particle::UpdateEmitter() {
+	emitter.frequencyTime += deltaTime_->GetDeltaTime();
+	if (emitter.frequency <= emitter.frequencyTime) {
+		particles_.splice(particles_.end(), Emit(emitter, emitter.transform.translate));
+		emitter.frequencyTime -= emitter.frequency;
+	}
+}
+
+void Particle::UpdateParticle(std::list<ParticleState>::iterator& itr) {
+	if (Collision::Intersect(accelerationField_.area, itr->transform.translate)) {
+		itr->velocity += accelerationField_.acceleration * deltaTime_->GetDeltaTime();
+	}
+
+	itr->transform.translate += itr->velocity * deltaTime_->GetDeltaTime();
+	itr->currentTime += deltaTime_->GetDeltaTime();
+	CoordinateTransformation(itr);
+}
+
+void Particle::WriteParticleToGPU(const ParticleState& p, uint32_t index) {
+	float alpha = 1.0f - (p.currentTime / p.lifeTime);
+	instancingData_[index].WVP = worldViewProjectionMatrix_;
+	instancingData_[index].World = worldMatrix_;
+	instancingData_[index].color = p.color;
+	instancingData_[index].color.w = alpha;
 }

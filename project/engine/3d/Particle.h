@@ -81,6 +81,24 @@ private:
 	// 座標変換
 	void CoordinateTransformation(std::list<ParticleState>::iterator particleIterator);
 
+	// SRV作成
+	void CreateInstancingSRV(UINT srvIndex);
+	
+	// エミッタの初期化
+	void InitializeEmitter(Vector3 emitterPos);
+
+	// 加速度フィールドの初期化
+	void InitializeAccelerationField();
+
+	// エミッタからパーティクルを生成する処理
+	void UpdateEmitter();
+
+	// パーティクル1つ更新
+	void UpdateParticle(std::list<ParticleState>::iterator& itr);
+
+	// GPU転送データへ書き込み
+	void WriteParticleToGPU(const ParticleState& p, uint32_t index);
+
 private:
 	// バッファリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
@@ -140,9 +158,6 @@ private:
 
 	// 経過時間
 	std::unique_ptr<DeltaTime> deltaTime_ = std::make_unique<DeltaTime>();
-
-	// ループ可能かどうか
-	bool isLoop_ = false;
 
 	// コンテキスト構造体
 	EngineContext* ctx_;
