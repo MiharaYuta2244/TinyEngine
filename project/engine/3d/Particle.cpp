@@ -16,17 +16,14 @@ using namespace DirectX;
 void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos) {
 	ctx_ = ctx;
 
-	// SRVの作成（インスタンシング用）
+	// インスタンシングデータ作成
 	CreateInstancingResource();
 
-	// CPU/GPUハンドルをクラスメンバへ取得して保存
+	// SRVの作成（インスタンシング用）
 	CreateInstancingSRV(3);
 
 	// プリミティブモデルの作成
 	modelData_ = CreatePrimitive();
-
-	// インスタンシングデータ作成
-	CreateInstancingResource();
 
 	// 頂点データの初期化
 	CreateVertexData();
