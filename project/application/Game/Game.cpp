@@ -67,6 +67,10 @@ void Game::Initialize(HINSTANCE hInstance) {
 	dustParticle_ = std::make_unique<Particle>();
 	dustParticle_->Initialize(&engineContext_, {30.0f, 10.0f, 0.0f}, "resources/circle.png", 4);
 
+	// 衝撃波パーティクル
+	shockWaveParticle_ = std::make_unique<Particle>();
+	shockWaveParticle_->Initialize(&engineContext_, {30.0f, 10.0f, 0.0f}, "resources/smoke.png", 5);
+
 	// 現在のシーン初期化
 	currentScene_ = Scene::Title;
 }
@@ -137,6 +141,7 @@ void Game::Update() {
 		// Particle
 		particle_->Update();
 		dustParticle_->Update();
+		shockWaveParticle_->Update();
 
 		// ゲーム終了判定
 		if (player_->GetHP() <= 0 || enemy_->GetHP() <= 0) {
@@ -196,6 +201,7 @@ void Game::Draw() {
 		// Particle
 		particle_->Draw();
 		dustParticle_->Draw();
+		shockWaveParticle_->Draw();
 	} else {
 	}
 
@@ -318,7 +324,7 @@ void Game::CollisionEnemyPlayerHipDrop() {
 			player_->SetIsHitEnemyHipDrop(true);
 
 			// ヒップドロップ用のパーティクルの生成
-
+			shockWaveParticle_->SetTranslate(player_->GetTranslate());
 		}
 	}
 }

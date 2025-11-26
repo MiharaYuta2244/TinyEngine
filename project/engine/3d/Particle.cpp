@@ -255,7 +255,7 @@ ParticleState Particle::MakeParticle(Vector3 translate) {
 	particle.transform.translate = translate + randomTranslate;
 
 	particle.velocity = {RandomUtils::RangeFloat(-1, 1), RandomUtils::RangeFloat(-1, 1), RandomUtils::RangeFloat(-1, 1)};
-	particle.color = {RandomUtils::RangeFloat(0, 1), RandomUtils::RangeFloat(0, 1), RandomUtils::RangeFloat(0, 1), 1.0f};
+	particle.color = {1.0f, 1.0f, 1.0f, 1.0f};
 	particle.lifeTime = RandomUtils::RangeFloat(1, 3);
 	particle.currentTime = 0;
 	return particle;

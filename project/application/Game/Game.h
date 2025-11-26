@@ -182,6 +182,9 @@ private:
 	// 土埃パーティクル
 	std::unique_ptr<Particle> dustParticle_;
 
+	// 衝撃波パーティクル
+	std::unique_ptr<Particle> shockWaveParticle_;
+
 	// モデル確認用の配列
 	std::array<std::unique_ptr<Object3d>,4> testModels_;
 
