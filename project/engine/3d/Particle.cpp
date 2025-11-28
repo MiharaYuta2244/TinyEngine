@@ -12,6 +12,8 @@
 #include "ParticleModule.h"
 #include "ShockWaveModule.h"
 #include "DustModule.h"
+#include "RisingModule.h"
+#include "RadialRingModule.h"
 
 using namespace Microsoft::WRL;
 using namespace DirectX;
@@ -25,6 +27,10 @@ void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos, std::string te
 			module_ = std::make_unique<ShockWaveModule>();
 		} else if (particleType == "Dust") {
 			module_ = std::make_unique<DustModule>();
+		} else if (particleType == "Rising") {
+			module_ = std::make_unique<RisingModule>();
+		} else if (particleType == "RadialRing") {
+			module_ = std::make_unique<RadialRingModule>();
 		}
 		
 	} else {
@@ -55,11 +61,68 @@ void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos, std::string te
 	// カメラをセットする
 	camera_ = ctx_->particleCommon->GetDefaultCamera();
 
-	// エミッタの初期化
-	InitializeEmitter(emitterPos);
+	// エミッタの初期化(モジュール固有の初期化があれば反映)
+	InitializeEmitter(emitterPos, particleType);
 
 	// パーティクルに加速度を与える構造体の初期化
 	InitializeAccelerationField();
+}
+
+void Particle::SetEmitterForModule(const std::string& moduleName, const Emitter& emitter) { emitters_[moduleName] = emitter; }
+
+bool Particle::HasModuleEmitter(const std::string& moduleName) const { return emitters_.find(moduleName) != emitters_.end(); }
+
+void Particle::InitializeEmitter(Vector3 emitterPos) {
+	// 従来のデフォルト初期化
+	emitter.count = 10;
+	emitter.frequency = 0.2f;
+	emitter.frequencyTime = 0.0f;
+	emitter.transform.translate = emitterPos;
+	emitter.transform.rotate = {0.0f, 0.0f, 0.0f};
+	emitter.transform.scale = {1.0f, 1.0f, 1.0f};
+}
+
+void Particle::InitializeEmitter(Vector3 emitterPos, const std::string& particleType) {
+	// まずデフォルトをセット
+	InitializeEmitter(emitterPos);
+
+	// モジュール名が指定されていれば、登録済みのエミッタ設定を優先して使う
+	if (!particleType.empty()) {
+		auto it = emitters_.find(particleType);
+		if (it != emitters_.end()) {
+			emitter = it->second;
+			// 位置だけは呼び出し側のemitterPosを適用しておく
+			emitter.transform.translate = emitterPos;
+			return;
+		}
+
+		// 未登録ならモジュールごとのデフォルトを設定する
+		if (particleType == "ShockWave") {
+			emitter.count = 1;
+			emitter.frequency = 1.0f;
+			emitter.frequencyTime = 0.0f;
+			emitter.transform.translate = emitterPos;
+			emitter.transform.scale = {1.0f, 1.0f, 1.0f};
+		} else if (particleType == "Dust") {
+			emitter.count = 1;
+			emitter.frequency = 0.1f;
+			emitter.frequencyTime = 0.0f;
+			emitter.transform.translate = emitterPos;
+			emitter.transform.scale = {1.0f, 1.0f, 1.0f};
+		} else if (particleType == "Rising") {
+			emitter.count = 10;
+			emitter.frequency = 1.0f;
+			emitter.frequencyTime = 0.0f;
+			emitter.transform.translate = emitterPos + Vector3(20.0f,-15.0f,0);
+			emitter.transform.scale = {30.0f, 10.0f, 10.0f};
+		} else if (particleType == "RadialRing") {
+			emitter.count = 10;
+			emitter.frequency = 1.0f;
+			emitter.frequencyTime = 0.0f;
+			emitter.transform.translate = emitterPos;
+			emitter.transform.scale = {1.0f, 1.0f, 1.0f};
+		}
+	}
 }
 
 void Particle::Update() {
@@ -126,7 +189,7 @@ void Particle::Update() {
 		++particleIterator;
 	}
 
-	*materialData_ = material_;
+	//*materialData_ = material_;
 }
 
 void Particle::Draw() {
@@ -270,25 +333,35 @@ void Particle::CreateInstancingResource() {
 	}
 }
 
-ParticleState Particle::MakeParticle(Vector3 translate) {
+// MakeParticle をエミッタ情報を受け取るよう変更し、エミッタの scale を発生範囲（±scale）としてランダム位置を決定する
+ParticleState Particle::MakeParticle(const Emitter& emitter, Vector3 translate) {
 	ParticleState particle;
 
 	// デフォルト値
 	particle.transform.scale = {1.0f, 1.0f, 1.0f};
 	particle.transform.rotate = {0.0f, 0.0f, 0.0f};
-	particle.transform.translate = translate; // 中心位置をセット
+	particle.transform.translate = translate; // 中心位置をセット（最終的にランダムオフセットを適用）
+
+	// 発生範囲（エミッタの scale を半幅（extent）として扱う）
+	Vector3 extent = emitter.transform.scale;
+
+	// ランダムオフセットを作る（ボックス内）
+	Vector3 randomOffset = {
+		RandomUtils::RangeFloat(-extent.x, extent.x),
+		RandomUtils::RangeFloat(-extent.y, extent.y),
+		RandomUtils::RangeFloat(-extent.z, extent.z)
+	};
 
 	// モジュールがある場合はモジュール側で初期化をまかせる
 	if (module_) {
 		module_->Initialize(particle, ctx_);
-		// モジュールはtranslateを書き換えない想定だが、念のため中心位置を保持
-		particle.transform.translate = translate;
+		// モジュールはtranslateを書き換えない想定だが、発生位置はエミッタ内ランダム位置へ設定する
+		particle.transform.translate = translate + randomOffset;
 		return particle;
 	}
 
-	// 基準位置を指定してランダムな範囲にパーティクルを生成する（既存ロジック）
-	Vector3 randomTranslate = {RandomUtils::RangeFloat(-1, 1), RandomUtils::RangeFloat(-1, 1), RandomUtils::RangeFloat(-1, 1)};
-	particle.transform.translate = translate + randomTranslate;
+	// 基準位置を指定してランダムな範囲にパーティクルを生成する（既存ロジックをエミッタスケールに対応）
+	particle.transform.translate = translate + randomOffset;
 
 	particle.velocity = {RandomUtils::RangeFloat(-1, 1), RandomUtils::RangeFloat(-1, 1), RandomUtils::RangeFloat(-1, 1)};
 	particle.color = {1.0f, 1.0f, 1.0f, 1.0f};
@@ -317,7 +390,7 @@ Matrix4x4 Particle::CreateBillboardMatrix() {
 std::list<ParticleState> Particle::Emit(const Emitter& emitter, Vector3 translate) {
 	std::list<ParticleState> particles;
 	for (uint32_t count = 0; count < emitter.count; ++count) {
-		particles.push_back(MakeParticle(translate));
+		particles.push_back(MakeParticle(emitter, translate));
 	}
 
 	return particles;
@@ -356,15 +429,6 @@ void Particle::CreateInstancingSRV(UINT srvIndex) {
 	instancingSrvHandleGPU_ = dxCommon->GetGPUDescriptorHandle(dxCommon->GetSrvDescriptorHeap(), dxCommon->GetDescriptorSizeSRV(), srvIndex);
 
 	dxCommon->GetDevice()->CreateShaderResourceView(instancingResource_.Get(), &instancingSrvDesc, instancingSrvHandleCPU_);
-}
-
-void Particle::InitializeEmitter(Vector3 emitterPos) {
-	emitter.count = 10;
-	emitter.frequency = 0.2f;
-	emitter.frequencyTime = 0.0f;
-	emitter.transform.translate = emitterPos;
-	emitter.transform.rotate = {0.0f, 0.0f, 0.0f};
-	emitter.transform.scale = {1.0f, 1.0f, 1.0f};
 }
 
 void Particle::InitializeAccelerationField() {

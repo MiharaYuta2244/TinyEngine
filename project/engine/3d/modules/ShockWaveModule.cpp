@@ -7,7 +7,7 @@ void ShockWaveModule::Initialize(ParticleState& particle, EngineContext* /*ctx*/
     particle.currentTime = 0.0f;
     particle.transform.scale = {startScale_, startScale_, startScale_};
     particle.velocity = {0.0f, 0.0f, 0.0f};
-    particle.color = {1.0f, 0.95f, 0.8f, 1.0f};
+    particle.color = {1.0f, 0.4f, 0.1f, 1.0f};
 }
 
 void ShockWaveModule::Update(ParticleState& particle, float /*deltaTime*/, EngineContext* /*ctx*/) {

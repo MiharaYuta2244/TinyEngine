@@ -28,6 +28,10 @@ public:
 
 	SrvManager* GetSrvManager() { return srvManager_; }
 
+public:
+	// SRVインデックスの開始番号
+	static uint32_t kSRVIndexTop;
+
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
 	void UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
@@ -39,7 +43,4 @@ private:
 
 	// srvManager
 	SrvManager* srvManager_;
-
-	// SRVインデックスの開始番号
-	static uint32_t kSRVIndexTop;
 };

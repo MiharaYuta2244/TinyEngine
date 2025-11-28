@@ -163,6 +163,9 @@ void Player::HorizontalMove() {
 	if (isRightInput) {
 		transform_.translate.x += velocity_.x * deltaTime_;
 
+		// モデルの向きを変更
+		transform_.rotate.y = std::numbers::pi_v<float> / 2;
+
 		// ヒップドロップアニメーション中は方向を変えられないようにする
 		if (!isRotate_) {
 			direction_ = Direction::RIGHT;
@@ -172,6 +175,9 @@ void Player::HorizontalMove() {
 	// 左移動
 	if (isLeftInput) {
 		transform_.translate.x -= velocity_.x * deltaTime_;
+
+		// モデルの向きを変更
+		transform_.rotate.y = -std::numbers::pi_v<float> / 2;
 
 		// ヒップドロップアニメーション中は方向を変えられないようにする
 		if (!isRotate_) {

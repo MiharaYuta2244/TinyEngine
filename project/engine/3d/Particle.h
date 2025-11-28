@@ -4,6 +4,7 @@
 #include <vector>
 #include <wrl.h>
 #include <memory>
+#include <unordered_map>
 #include "CameraForGPU.h"
 #include "DebugCamera.h"
 #include "DirectionalLight.h"
@@ -24,6 +25,19 @@
 #include "ParticleModule.h"
 
 class Particle {
+private:
+	struct Emitter {
+		Transform transform; // エミッタのトランスフォーム
+		uint32_t count;      // 発生数
+		float frequency;     // 発生頻度
+		float frequencyTime; // 頻度用時刻
+	};
+
+	struct AccelerationField {
+		Vector3 acceleration; // 加速度
+		AABB area;            // 範囲
+	};
+
 public:
 	void Initialize(EngineContext* ctx, Vector3 emitterPos, std::string texturePath, UINT srvIndex = 3, const std::string& particleType = "");
 
@@ -39,23 +53,14 @@ public:
 	void SetIsBillboard(bool isBillboard) { isBillboard_ = isBillboard; }
 	void SetTranslate(Vector3 translate) { emitter.transform.translate = translate; }
 
+	// モジュールごとのエミッタを登録する
+	void SetEmitterForModule(const std::string& moduleName, const Emitter& emitter);
+	bool HasModuleEmitter(const std::string& moduleName) const;
+
 	// getter
 	Vector4& GetColor() { return material_.color; }
 	Matrix4x4& GetWorldMatrix() { return worldMatrix_; }
 	Material& GetMaterial() { return material_; }
-
-private:
-	struct Emitter {
-		Transform transform; // エミッタのトランスフォーム
-		uint32_t count;      // 発生数
-		float frequency;     // 発生頻度
-		float frequencyTime; // 頻度用時刻
-	};
-
-	struct AccelerationField {
-		Vector3 acceleration; // 加速度
-		AABB area;            // 範囲
-	};
 
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeBytes);
@@ -73,7 +78,7 @@ private:
 	void CreateInstancingResource();
 
 	// パーティクル生成関数
-	ParticleState MakeParticle(Vector3 translate);
+	ParticleState MakeParticle(const Emitter& emitter, Vector3 translate);
 
 	// BillboardMatrixを作成する
 	Matrix4x4 CreateBillboardMatrix();
@@ -87,8 +92,9 @@ private:
 	// SRV作成
 	void CreateInstancingSRV(UINT srvIndex);
 	
-	// エミッタの初期化
+	// エミッタの初期化（モジュール名指定オーバーロードあり）
 	void InitializeEmitter(Vector3 emitterPos);
+	void InitializeEmitter(Vector3 emitterPos, const std::string& particleType);
 
 	// 加速度フィールドの初期化
 	void InitializeAccelerationField();
@@ -147,14 +153,14 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU_;
 	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU_;
 
-	// Δt
-	const float kDeltaTime = 1.0f / 60.0f;
-
 	// ビルボードするかどうか
 	bool isBillboard_ = true;
 
-	// エミッタ
+	// デフォルトエミッタ
 	Emitter emitter{};
+
+	// モジュールごとのエミッタ設定
+	std::unordered_map<std::string, Emitter> emitters_;
 
 	// パーティクルに加速度を与える範囲
 	AccelerationField accelerationField_;
@@ -165,6 +171,6 @@ private:
 	// コンテキスト構造体
 	EngineContext* ctx_;
 
-	// 振る舞いモジュール（種類に応じた動き）
+	// 挙動モジュール
 	std::unique_ptr<ParticleModule> module_;
 };

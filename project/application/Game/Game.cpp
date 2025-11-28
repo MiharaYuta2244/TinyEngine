@@ -48,6 +48,7 @@ void Game::Initialize(HINSTANCE hInstance) {
 	engineContext_.modelManager = modelManger_.get();
 	engineContext_.textureManager = textureManager_.get();
 	engineContext_.particleCommon = particleCommon_.get();
+	engineContext_.srvManager = srvManager_.get();
 
 	// .objファイルからモデルを読み込む
 	AllModelLoader();
@@ -59,17 +60,39 @@ void Game::Initialize(HINSTANCE hInstance) {
 	// DirectInput
 	input_->Initialize(winApp_.get());
 
-	// Particle
-	particle_ = std::make_unique<Particle>();
-	particle_->Initialize(&engineContext_, {20.0f, 5.0f, 0.0f}, "resources/uvChecker.png", 3);
+	// 土埃パーティクル プレイヤー用
+	particleDustPlayer_ = std::make_unique<Particle>();
+	particleDustPlayer_->Initialize(&engineContext_, {30.0f, 10.0f, 0.0f}, "resources/smoke.png", 3, "Dust");
 
-	// 土埃パーティクル
-	dustParticle_ = std::make_unique<Particle>();
-	dustParticle_->Initialize(&engineContext_, {30.0f, 10.0f, 0.0f}, "resources/circle.png", 4, "Dust");
+	// 土埃パーティクル 敵用
+	particleDustEnemy_ = std::make_unique<Particle>();
+	particleDustEnemy_->Initialize(&engineContext_, {30.0f, 10.0f, 0.0f}, "resources/smoke.png", 4, "Dust");
 
 	// 衝撃波パーティクル
-	shockWaveParticle_ = std::make_unique<Particle>();
-	shockWaveParticle_->Initialize(&engineContext_, {30.0f, 10.0f, 0.0f}, "resources/smoke.png", 5, "ShockWave");
+	particleShockWave_ = std::make_unique<Particle>();
+	particleShockWave_->Initialize(&engineContext_, {30.0f, 10.0f, 0.0f}, "resources/smoke.png", 5, "ShockWave");
+	isActiveShockParticle_ = false;
+
+	// タイトル用パーティクル
+	particleTitle_ = std::make_unique<Particle>();
+	particleTitle_->Initialize(&engineContext_, {0.0f, 0.0f, 0.0f}, "resources/circle.png", 6, "Rising");
+
+	// アイテムゲットパーティクル
+	particleItemGet_ = std::make_unique<Particle>();
+	particleItemGet_->Initialize(&engineContext_, {0.0f, 0.0f, 0.0f}, "resources/circle.png", 7, "RadialRing");
+	isActiveRingParticle_ = false;
+
+	// タイトルテキストモデル
+	titleText_ = std::make_unique<Object3d>();
+	titleText_->Initialize(&engineContext_);
+	titleText_->SetModel("Title.obj");
+	titleText_->SetScale({7.0f, 7.0f, 7.0f});
+	titleRotateY_ = std::numbers::pi_v<float>;
+	titleText_->SetRotate({0.0f, titleRotateY_, 0.0f});
+	titleText_->SetTranslate({20.0f, 8.0f, 0.0f});
+
+	// シェイクフラグ
+	isShake_ = false;
 
 	// 現在のシーン初期化
 	currentScene_ = Scene::Title;
@@ -94,11 +117,37 @@ void Game::Update() {
 		ImGui::TextWrapped("Title Scene");
 		ImGui::TextWrapped("Press Space or GamePad A to Start");
 		ImGui::End();
+
+		ImGui::Begin("TitleModel");
+		ImGui::DragFloat3("Position", &titleText_->GetTranslate().x, 0.01f);
+		ImGui::End();
 #endif
 		bool startInput = input_->KeyTriggered(DIK_SPACE) || gamePad_->GetState().buttonsPressed.a;
 		if (startInput) {
 			ChangeScene(Scene::Game);
 		}
+
+		// タイトルテキストモデル
+		titleRotateY_ += 0.02f;
+
+		// 周期的な上下動
+		float bounceY = 8.0f + sinf(titleRotateY_) * 1.0f;
+
+		// スケールの脈動
+		float scalePulse = 7.0f + 0.5f * sinf(titleRotateY_ * 2.0f);
+
+		// 複合回転（X軸に小さな揺れ）
+		float rotateX = sinf(titleRotateY_ * 0.5f) * 0.1f;
+
+		// 反映
+		titleText_->SetTranslate({20.0f, bounceY, 0.0f});
+		titleText_->SetRotate({rotateX, titleRotateY_, 0.0f});
+		titleText_->SetScale({scalePulse, scalePulse, scalePulse});
+		titleText_->Update();
+
+
+		// タイトル用パーティクル
+		particleTitle_->Update();
 
 	} else if (currentScene_ == Scene::Game) {
 		// ゲームシーン
@@ -122,7 +171,11 @@ void Game::Update() {
 
 		// プレイヤーの足元に埃のパーティクルを生成するように位置を設定
 		Vector3 particlePos = {player_->GetTranslate().x, player_->GetTranslate().y - player_->GetScale().y, player_->GetTranslate().z};
-		dustParticle_->SetTranslate(particlePos);
+		particleDustPlayer_->SetTranslate(particlePos);
+
+		// 敵の足元に埃のパーティクルを生成するように位置を設定
+		particlePos = {enemy_->GetTranslate().x, enemy_->GetTranslate().y - enemy_->GetScale().y, enemy_->GetTranslate().z};
+		particleDustEnemy_->SetTranslate(particlePos);
 
 		// ブロック更新
 		for (auto& block : blocks_) {
@@ -141,10 +194,34 @@ void Game::Update() {
 			powerUpItem->Update(deltaTime_->GetDeltaTime());
 		}
 
+		// カメラシェイク
+		ShakeCamera();
+
 		// Particle
-		particle_->Update();
-		dustParticle_->Update();
-		shockWaveParticle_->Update();
+		particleDustPlayer_->Update();
+		particleDustEnemy_->Update();
+
+		if (isActiveShockParticle_) {
+			currentTimeShockWaveParticle_ += deltaTime_->GetDeltaTime();
+
+			if (currentTimeShockWaveParticle_ >= kTimeLimitShockWaveParticle_) {
+				currentTimeShockWaveParticle_ = 0.0f;
+				isActiveShockParticle_ = false;
+			}
+
+			particleShockWave_->Update();
+		}
+
+		if (isActiveRingParticle_) {
+			currentTimeRingParticle_ += deltaTime_->GetDeltaTime();
+
+			if (currentTimeRingParticle_ >= kTimeLimitRingParticle_) {
+				currentTimeRingParticle_ = 0.0f;
+				isActiveRingParticle_ = false;
+			}
+
+			particleItemGet_->Update();
+		}
 
 		// ゲーム終了判定
 		if (player_->GetHP() <= 0 || enemy_->GetHP() <= 0) {
@@ -180,7 +257,13 @@ void Game::Draw() {
 	srvManager_->PreDraw();
 
 	// シーンごとの描画
-	if (currentScene_ == Scene::Game) {
+	if (currentScene_ == Scene::Title) {
+		// タイトルテキストモデル
+		titleText_->Draw();
+
+		// タイトル用パーティクル
+		particleTitle_->Draw();
+	} else if (currentScene_ == Scene::Game) {
 		// プレイヤー描画
 		player_->Draw();
 
@@ -202,9 +285,17 @@ void Game::Draw() {
 		}
 
 		// Particle
-		particle_->Draw();
-		dustParticle_->Draw();
-		shockWaveParticle_->Draw();
+		particleDustPlayer_->Draw();
+		particleDustEnemy_->Draw();
+
+		if (isActiveShockParticle_) {
+			particleShockWave_->Draw();
+		}
+
+		if (isActiveRingParticle_) {
+			particleItemGet_->Draw();
+		}
+
 	} else {
 	}
 
@@ -327,7 +418,11 @@ void Game::CollisionEnemyPlayerHipDrop() {
 			player_->SetIsHitEnemyHipDrop(true);
 
 			// ヒップドロップ用のパーティクルの生成
-			shockWaveParticle_->SetTranslate(player_->GetTranslate());
+			particleShockWave_->SetTranslate(player_->GetTranslate());
+			isActiveShockParticle_ = true;
+
+			// シェイクフラグを立てる
+			StartShake(30, 0.5f);
 		}
 	}
 }
@@ -341,6 +436,10 @@ void Game::CollisionPlayerPowerUpItem() {
 		        if (Collision::Intersect(player_->GetAABB(), item->GetAABB())) {
 			        // プレイヤーのパワーアップフラグを立てる
 			        player_->SetIsPowerUp(true);
+
+					// パーティクルフラグを立てる
+			        isActiveRingParticle_ = true;
+			        particleItemGet_->SetTranslate(player_->GetTranslate());
 
 			        return true;
 		        }
@@ -363,6 +462,7 @@ void Game::AllModelLoader() {
 	modelManger_->LoadModel("HiyokoGlass.obj");
 	modelManger_->LoadModel("HiyokoStudent.obj");
 	modelManger_->LoadModel("HiyokoAfro.obj");
+	modelManger_->LoadModel("Title.obj");
 }
 
 void Game::CreatePowerUpItem() {
@@ -393,5 +493,37 @@ void Game::CreatePowerUpItem() {
 		powerUpItemCreateFrameCount_ = 0;
 
 		return;
+	}
+}
+
+void Game::StartShake(int frames, float magnitude) {
+	isShake_ = true;
+	shakeFrames_ = frames;
+	currentFrame_ = 0;
+	magnitude_ = magnitude;
+	originalPos_ = debugCamera_->GetTranslation();
+}
+
+void Game::ShakeCamera() {
+	if (!isShake_)
+		return;
+
+	// 減衰率（指数的に収束）
+	const float decay = 0.9f;
+
+	// ランダムオフセット
+	float offsetX = RandomUtils::RangeFloat(-1, 1) * magnitude_;
+	float offsetY = RandomUtils::RangeFloat(-1, 1) * magnitude_;
+
+	debugCamera_->SetTranslation({originalPos_.x + offsetX, originalPos_.y + offsetY, originalPos_.z});
+
+	// 減衰
+	magnitude_ *= decay;
+	currentFrame_++;
+
+	// 規定フレーム経過したら終了
+	if (currentFrame_ >= shakeFrames_) {
+		debugCamera_->SetTranslation(originalPos_);
+		isShake_ = false;
 	}
 }

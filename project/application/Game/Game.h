@@ -83,6 +83,12 @@ private:
 	// パワーアップアイテムの生成
 	void CreatePowerUpItem();
 
+	// シェイク初期設定用
+	void StartShake(int frames, float magnitude);
+
+	// シェイク関数
+	void ShakeCamera();
+
 private:
 	// 現在のシーン
 	Scene currentScene_ = Scene::Game;
@@ -173,21 +179,49 @@ private:
 	// パワーアップアイテムの画面上に存在できる最大数
 	const int kPowerUpItemCountMax = 5;
 
-	// テスト用パーティクルコモン
+	// パーティクルコモン
 	std::unique_ptr<ParticleCommon> particleCommon_ = std::make_unique<ParticleCommon>();
 
-	// テスト用パーティクル
-	std::unique_ptr<Particle> particle_;
+	// 土埃パーティクル プレイヤー用
+	std::unique_ptr<Particle> particleDustPlayer_;
 
-	// 土埃パーティクル
-	std::unique_ptr<Particle> dustParticle_;
+	// 土埃パーティクル 敵用
+	std::unique_ptr<Particle> particleDustEnemy_;
 
 	// 衝撃波パーティクル
-	std::unique_ptr<Particle> shockWaveParticle_;
+	std::unique_ptr<Particle> particleShockWave_;
+
+	// アイテム取得時パーティクル
+	std::unique_ptr<Particle> particleItemGet_;
+
+	// パーティクル タイトル用
+	std::unique_ptr<Particle> particleTitle_;
 
 	// モデル確認用の配列
 	std::array<std::unique_ptr<Object3d>,4> testModels_;
 
 	// コンテキスト構造体
 	EngineContext engineContext_;
+
+	// 衝撃波パーティクル関連
+	float currentTimeShockWaveParticle_ = 0.0f;
+	const float kTimeLimitShockWaveParticle_ = 1.0f;// 衝撃波パーティクルが存在する時間(秒)
+	bool isActiveShockParticle_ = false;
+
+	// アイテムゲットパーティクル関連
+	float currentTimeRingParticle_ = 0.0f;
+	const float kTimeLimitRingParticle_ = 1.0f; // アイテムゲットパーティクルが存在する時間(秒)
+	bool isActiveRingParticle_ = false;
+
+	// タイトルテキストモデル
+	std::unique_ptr<Object3d> titleText_;
+
+	float titleRotateY_ = 0.0f;
+
+	// シェイクフラグ
+	bool isShake_ = false;
+	int shakeFrames_ = 0;
+	int currentFrame_ = 0;
+	float magnitude_ = 0.0f;
+	Vector3 originalPos_;
 };

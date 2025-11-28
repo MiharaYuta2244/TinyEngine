@@ -4,6 +4,7 @@
 #include "TextureManager.h"
 #include "ModelManager.h"
 #include "ParticleCommon.h"
+#include "SrvManager.h"
 
 struct EngineContext {
 	Object3dCommon* object3dCommon = nullptr;
@@ -11,4 +12,5 @@ struct EngineContext {
 	TextureManager* textureManager = nullptr;
 	ModelManager* modelManager = nullptr;
 	ParticleCommon* particleCommon = nullptr;
+	SrvManager* srvManager = nullptr;
 };
