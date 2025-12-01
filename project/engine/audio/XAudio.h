@@ -8,28 +8,10 @@
 
 #pragma comment(lib, "xaudio2.lib")
 
-// チャンクヘッダ
-struct ChunkHeader {
-	char id[4];   // チャンク毎のID
-	int32_t size; // チャンクサイズ
-};
-
-// RIFFヘッダチャンク
-struct RiffHeader {
-	ChunkHeader chunk; // "RIFF"
-	char type[4];      // "WAVE"
-};
-
-// FMTチャンク
-struct FormatChunk {
-	ChunkHeader chunk;          // "fmt"
-	std::array<BYTE, 40> fmt{}; // 波形フォーマット
-};
-
 // 音声データ
 struct SoundData {
 	// 波形フォーマット
-	WAVEFORMATEX wfex;
+	WAVEFORMATEXTENSIBLE wfex;
 	// バッファ
 	std::vector<BYTE> buffer;
 };
@@ -39,9 +21,7 @@ public:
 	~XAudio();
 	void Initialize();
 	void SoundsAllLoad();
-	void SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData);
-	Microsoft::WRL::ComPtr<IXAudio2> GetXAudio2() { return xAudio2_; }
-	SoundData GetSound() { return soundData_; }
+	void SoundPlayWave();
 
 private:
 	void SoundLoadFile(const std::string& filename);

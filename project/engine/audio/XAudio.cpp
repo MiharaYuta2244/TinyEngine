@@ -36,7 +36,7 @@ void XAudio::Initialize() {
 	assert(SUCCEEDED(result));
 }
 
-void XAudio::SoundsAllLoad() { SoundLoadFile("resources/Title.wav"); }
+void XAudio::SoundsAllLoad() { SoundLoadFile("resources/Test.mp3"); }
 
 void XAudio::SoundLoadFile(const std::string& filename) {
 	// フルパスをワイド文字列に変換
@@ -62,12 +62,11 @@ void XAudio::SoundLoadFile(const std::string& filename) {
 
 	// Waveフォーマットを取得する
 	WAVEFORMATEX* waveFormat = nullptr;
-	result = MFCreateWaveFormatExFromMFMediaType(pOutType.Get(), &waveFormat, nullptr);
-	assert(SUCCEEDED(result));
+	MFCreateWaveFormatExFromMFMediaType(pOutType.Get(), &waveFormat, nullptr);
 
 	// コンテナに格納する音声データ
 	SoundData soundData = {};
-	soundData.wfex = *waveFormat;
+	soundData.wfex = *(WAVEFORMATEXTENSIBLE*)waveFormat;
 
 	// 生成したwaveフォーマットを開放
 	CoTaskMemFree(waveFormat);
@@ -101,18 +100,18 @@ void XAudio::SoundLoadFile(const std::string& filename) {
 	soundData_ = soundData;
 }
 
-void XAudio::SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
+void XAudio::SoundPlayWave() {
 	HRESULT result;
 
 	// 波形フォーマットを基にSourceVoiceの生成
 	IXAudio2SourceVoice* pSourceVoice = nullptr;
-	result = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
+	result = xAudio2_->CreateSourceVoice(&pSourceVoice, &soundData_.wfex.Format);
 	assert(SUCCEEDED(result));
 
 	// 再生する波形データの設定
 	XAUDIO2_BUFFER buf{};
-	buf.pAudioData = soundData.buffer.empty() ? nullptr : soundData.buffer.data();
-	buf.AudioBytes = static_cast<UINT32>(soundData.buffer.size());
+	buf.pAudioData = soundData_.buffer.empty() ? nullptr : soundData_.buffer.data();
+	buf.AudioBytes = static_cast<UINT32>(soundData_.buffer.size());
 	buf.Flags = XAUDIO2_END_OF_STREAM;
 
 	// 音声データの再生
@@ -120,6 +119,9 @@ void XAudio::SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
 	assert(SUCCEEDED(result));
 	result = pSourceVoice->Start();
 	assert(SUCCEEDED(result));
+
+	// 音量調整
+	pSourceVoice->SetVolume(0.1f);
 }
 
 void XAudio::SoundUnLoad(SoundData* soundData) {
