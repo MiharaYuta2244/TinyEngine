@@ -10,21 +10,14 @@
 
 using namespace Microsoft::WRL;
 
-namespace {
-// MFStartupの呼び出し状態を保持
-bool g_mfInitialized = false;
-} // namespace
-
 XAudio::~XAudio() {
-	// Windows Media Foundationの終了
-	if (g_mfInitialized) {
-		MFShutdown();
-		g_mfInitialized = false;
-	}
+	HRESULT result;
+
+	result = MFShutdown();
+	assert(SUCCEEDED(result));
 
 	xAudio2_.Reset();
 	SoundUnLoad(&soundData_);
-	SoundUnLoad(&sound_);
 }
 
 void XAudio::Initialize() {
@@ -41,7 +34,6 @@ void XAudio::Initialize() {
 	// Windows Media FoundationNo初期化(ローカルファイル版)
 	result = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
 	assert(SUCCEEDED(result));
-	g_mfInitialized = true;
 }
 
 void XAudio::SoundsAllLoad() { SoundLoadFile("resources/Title.wav"); }
@@ -70,15 +62,15 @@ void XAudio::SoundLoadFile(const std::string& filename) {
 
 	// Waveフォーマットを取得する
 	WAVEFORMATEX* waveFormat = nullptr;
-	MFCreateWaveFormatExFromMFMediaType(pOutType.Get(), &waveFormat, nullptr);
+	result = MFCreateWaveFormatExFromMFMediaType(pOutType.Get(), &waveFormat, nullptr);
+	assert(SUCCEEDED(result));
 
 	// コンテナに格納する音声データ
 	SoundData soundData = {};
-	soundData_.wfex = *reinterpret_cast<WAVEFORMATEXTENSIBLE*>(waveFormat);
+	soundData.wfex = *waveFormat;
 
 	// 生成したwaveフォーマットを開放
 	CoTaskMemFree(waveFormat);
-	soundData_.buffer.clear();
 
 	// PCMデータのバッファを構築
 	while (true) {
@@ -105,6 +97,8 @@ void XAudio::SoundLoadFile(const std::string& filename) {
 			pBuffer->Unlock();
 		}
 	}
+
+	soundData_ = soundData;
 }
 
 void XAudio::SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
@@ -112,7 +106,7 @@ void XAudio::SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
 
 	// 波形フォーマットを基にSourceVoiceの生成
 	IXAudio2SourceVoice* pSourceVoice = nullptr;
-	result = xAudio2->CreateSourceVoice(&pSourceVoice, reinterpret_cast<const WAVEFORMATEX*>(&soundData.wfex.Format));
+	result = xAudio2->CreateSourceVoice(&pSourceVoice, &soundData.wfex);
 	assert(SUCCEEDED(result));
 
 	// 再生する波形データの設定
@@ -124,7 +118,7 @@ void XAudio::SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData) {
 	// 音声データの再生
 	result = pSourceVoice->SubmitSourceBuffer(&buf);
 	assert(SUCCEEDED(result));
-	result = pSourceVoice->Start(0);
+	result = pSourceVoice->Start();
 	assert(SUCCEEDED(result));
 }
 

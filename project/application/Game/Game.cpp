@@ -56,6 +56,7 @@ void Game::Initialize(HINSTANCE hInstance) {
 	// XAudio
 	audio_->Initialize();
 	audio_->SoundsAllLoad();
+	audio_->SoundPlayWave(audio_->GetXAudio2().Get(), audio_->GetSound());
 
 	// DirectInput
 	input_->Initialize(winApp_.get());

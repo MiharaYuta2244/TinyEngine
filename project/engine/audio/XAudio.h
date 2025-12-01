@@ -6,6 +6,8 @@
 #include <wrl.h>
 #include <xaudio2.h>
 
+#pragma comment(lib, "xaudio2.lib")
+
 // チャンクヘッダ
 struct ChunkHeader {
 	char id[4];   // チャンク毎のID
@@ -27,7 +29,7 @@ struct FormatChunk {
 // 音声データ
 struct SoundData {
 	// 波形フォーマット
-	WAVEFORMATEXTENSIBLE wfex;
+	WAVEFORMATEX wfex;
 	// バッファ
 	std::vector<BYTE> buffer;
 };
@@ -37,16 +39,15 @@ public:
 	~XAudio();
 	void Initialize();
 	void SoundsAllLoad();
-	void SoundLoadFile(const std::string& filename);
 	void SoundPlayWave(IXAudio2* xAudio2, const SoundData& soundData);
 	Microsoft::WRL::ComPtr<IXAudio2> GetXAudio2() { return xAudio2_; }
-	SoundData GetSound() { return sound_; }
+	SoundData GetSound() { return soundData_; }
 
 private:
+	void SoundLoadFile(const std::string& filename);
 	void SoundUnLoad(SoundData* soundData);
 
 private:
 	Microsoft::WRL::ComPtr<IXAudio2> xAudio2_;
 	SoundData soundData_;
-	SoundData sound_;
 };
