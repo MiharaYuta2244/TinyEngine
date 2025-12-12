@@ -119,6 +119,21 @@ private:
 	// タイトルテキストモデル
 	std::unique_ptr<Object3d> titleText_;
 
+	// 木のモデル
+	std::array<std::unique_ptr<Object3d>, 10> treeModels_;
+
+	// はじめるモデル
+	std::unique_ptr<Object3d> startModel_;
+
+	// おわるモデル
+	std::unique_ptr<Object3d> endModel_;
+
+	// さいかいモデル
+	std::unique_ptr<Object3d> restartModel_;
+
+	// たいとるへモデル
+	std::unique_ptr<Object3d> toTitleModel_;
+
 	float titleRotateY_ = 0.0f;
 
 	// シェイクフラグ
@@ -127,4 +142,8 @@ private:
 	int currentFrame_ = 0;
 	float magnitude_ = 0.0f;
 	Vector3 originalPos_;
+
+	float t_ = 0.0f;
+	const float kTimer = 2.0f;
+	float timer_ = 0.0f;
 };

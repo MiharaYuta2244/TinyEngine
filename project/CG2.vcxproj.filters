@@ -171,7 +171,7 @@
     <ClCompile Include="engine\input\GamePad.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="engine\deltaTime\DeltaTime.cpp">
+    <ClCompile Include="engine\base\utility\deltaTime\DeltaTime.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="application\Map\Map.cpp">
@@ -198,7 +198,7 @@
     <ClCompile Include="engine\3d\ParticleCommon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="engine\base\random\Random.cpp">
+    <ClCompile Include="engine\base\utility\random\Random.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="application\Enemy\EnemyHPGauge.cpp">
@@ -217,6 +217,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="engine\Framework\Framework.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\base\utility\easing\Easing.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -389,7 +392,7 @@
     <ClInclude Include="engine\input\GamePad.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="engine\deltaTime\DeltaTime.h">
+    <ClInclude Include="engine\base\utility\deltaTime\DeltaTime.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="application\Map\Map.h">
@@ -425,7 +428,7 @@
     <ClInclude Include="engine\base\ParticleState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="engine\base\random\Random.h">
+    <ClInclude Include="engine\base\utility\random\Random.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="engine\base\ParticleForGPU.h">
@@ -456,6 +459,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="engine\base\PointLight.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\base\utility\easing\Easing.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

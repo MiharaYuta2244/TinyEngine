@@ -145,4 +145,10 @@ void Framework::AllModelLoader() {
 	modelManger_->LoadModel("HiyokoAfro.obj");
 	modelManger_->LoadModel("Title.obj");
 	modelManger_->LoadModel("HiyokoPropeller.obj");
+	modelManger_->LoadModel("ClimbDrop.obj");
+	modelManger_->LoadModel("tree.obj");
+	modelManger_->LoadModel("saikai.obj");
+	modelManger_->LoadModel("ToTitle2.obj");
+	modelManger_->LoadModel("start.obj");
+	modelManger_->LoadModel("end.obj");
 }

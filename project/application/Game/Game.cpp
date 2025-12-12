@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Collision.h"
+#include "Easing.h"
 #include "Random.h"
 
 void Game::Initialize() {
@@ -17,7 +18,7 @@ void Game::Initialize() {
 	// タイトルテキストモデル
 	titleText_ = std::make_unique<Object3d>();
 	titleText_->Initialize(&GetEngineContext());
-	titleText_->SetModel("Title.obj");
+	titleText_->SetModel("ClimbDrop.obj");
 	titleText_->SetScale({7.0f, 7.0f, 7.0f});
 	titleRotateY_ = std::numbers::pi_v<float>;
 	titleText_->SetRotate({0.0f, titleRotateY_, 0.0f});
@@ -38,6 +39,61 @@ void Game::Initialize() {
 	fadeSprite_->SetColor({0.0f, 0.0f, 0.0f, 0.0f});
 	fadeState_ = FadeState::None;
 	fadeTimer_ = 0.0f;
+
+	// 木のモデル
+	{
+		for (int i = 0; i < treeModels_.size(); i++) {
+			auto tree = std::make_unique<Object3d>();
+			tree->Initialize(&GetEngineContext());
+			tree->SetModel("tree.obj");
+			tree->SetTranslate({i * 5.5f - 5.0f, 0.0f, 5.0f});
+			tree->SetScale({3.0f, 3.0f, 3.0f});
+
+			tree->Update();
+
+			treeModels_[i] = std::move(tree);
+		}
+	}
+
+	// はじめるモデル
+	{
+		startModel_ = std::make_unique<Object3d>();
+		startModel_->Initialize(&GetEngineContext());
+		startModel_->SetModel("start.obj");
+		startModel_->SetTranslate({20.0f, 2.0f, 0.0f});
+		startModel_->SetScale({5.0f, 5.0f, 5.0f});
+		startModel_->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
+	}
+
+	// おわるモデル
+	{
+		endModel_ = std::make_unique<Object3d>();
+		endModel_->Initialize(&GetEngineContext());
+		endModel_->SetModel("end.obj");
+		endModel_->SetTranslate({20.0f, -2.0f, 0.0f});
+		endModel_->SetScale({5.0f, 5.0f, 5.0f});
+		endModel_->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
+	}
+
+	// さいかいモデル
+	{
+		restartModel_ = std::make_unique<Object3d>();
+		restartModel_->Initialize(&GetEngineContext());
+		restartModel_->SetModel("saikai.obj");
+		restartModel_->SetTranslate({5.0f, 0.0f, 0.0f});
+		restartModel_->SetScale({5.0f, 5.0f, 5.0f});
+		restartModel_->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
+	}
+
+	// たいとるへモデル
+	{
+		toTitleModel_ = std::make_unique<Object3d>();
+		toTitleModel_->Initialize(&GetEngineContext());
+		toTitleModel_->SetModel("ToTitle2.obj");
+		toTitleModel_->SetTranslate({35.0f, 0.0f, 0.0f});
+		toTitleModel_->SetScale({5.0f, 5.0f, 5.0f});
+		toTitleModel_->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
+	}
 }
 
 void Game::Update() {
@@ -94,22 +150,9 @@ void Game::Update() {
 		}
 
 		// タイトルテキストモデル
-		titleRotateY_ += 0.02f;
-
-		// 周期的な上下動
-		float bounceY = 8.0f + sinf(titleRotateY_) * 1.0f;
-
-		// スケールの脈動
-		float scalePulse = 7.0f + 0.5f * sinf(titleRotateY_ * 2.0f);
-
-		// 複合回転（X軸に小さな揺れ）
-		float rotateX = sinf(titleRotateY_ * 0.5f) * 0.1f;
-
-		// 反映
-		titleText_->SetTranslate({20.0f, bounceY, 0.0f});
-		titleText_->SetRotate({rotateX, titleRotateY_, 0.0f});
-		titleText_->SetScale({scalePulse, scalePulse, scalePulse});
 		titleText_->Update();
+		startModel_->Update();
+		endModel_->Update();
 
 	} else if (currentScene_ == Scene::Game) {
 		// ゲームシーン
@@ -152,6 +195,25 @@ void Game::Update() {
 			powerUpItem->Update(GetTimeManager()->GetDeltaTime());
 		}
 
+		// 木のモデル
+		{
+			timer_ += GetTimeManager()->GetDeltaTime();
+			t_ = timer_ / kTimer;
+
+			t_ = std::clamp(t_, 0.0f, 1.0f);
+
+			float x = Easing::easeInOutBack(t_) * 5.0f;
+
+			for (auto& tree : treeModels_) {
+				tree->SetScale({x + 1.0f, x + 1.0f, x + 1.0f});
+				tree->SetRotate({0.0f, x * std::numbers::pi_v<float> * 2.0f, 0.0f});
+			}
+
+			for (auto& tree : treeModels_) {
+				tree->Update();
+			}
+		}
+
 		// カメラシェイク
 		ShakeCamera();
 
@@ -171,6 +233,10 @@ void Game::Update() {
 		ImGui::TextWrapped("Press Space or GamePad A to Return to Title");
 		ImGui::End();
 #endif
+
+		restartModel_->Update();
+		toTitleModel_->Update();
+
 		bool backInput = GetKeyboard()->KeyTriggered(DIK_SPACE) || GetGamePad()->GetState().buttonsPressed.a;
 		if (backInput) {
 			ChangeScene(Scene::Title);
@@ -190,6 +256,8 @@ void Game::Draw() {
 	if (currentScene_ == Scene::Title) {
 		// タイトルテキストモデル
 		titleText_->Draw();
+		startModel_->Draw();
+		endModel_->Draw();
 
 	} else if (currentScene_ == Scene::Game) {
 		// プレイヤー描画
@@ -208,11 +276,18 @@ void Game::Draw() {
 			powerUpItem->Draw();
 		}
 
+		// 木のモデル
+		for (auto& tree : treeModels_) {
+			tree->Draw();
+		}
+
 		// Particle
 		particleDustPlayer_->Draw();
 		particleDustEnemy_->Draw();
 
-	} else {
+	} else if (currentScene_ == Scene::Result) {
+		restartModel_->Draw();
+		toTitleModel_->Draw();
 	}
 
 	// フェードスプライトを上書きで描画（常に最後に）
