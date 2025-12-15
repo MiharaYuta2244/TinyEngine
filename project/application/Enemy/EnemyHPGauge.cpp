@@ -9,11 +9,11 @@ void EnemyHPGauge::Initialize(EngineContext* ctx) {
 	spriteHPBarBG_->Initialize(ctx_, "resources/white.png");
 
 	// HPゲージスプライトの初期化
-	spriteHPBar_->SetPosition({140.0f, 668.0f});
-	spriteHPBarBG_->SetPosition({135.0f, 663.0f});
+	spriteHPBar_->SetPosition({340.0f, 668.0f});
+	spriteHPBarBG_->SetPosition({335.0f, 663.0f});
 
 	spriteHPBar_->SetSize({spriteHPBarSizeX_, 32.0f});
-	spriteHPBarBG_->SetSize({1010.0f, 42.0f});
+	spriteHPBarBG_->SetSize({610.0f, 42.0f});
 
 	spriteHPBar_->SetColor({0.69f, 0.13f, 0.1f, 1.0f});
 	spriteHPBarBG_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});

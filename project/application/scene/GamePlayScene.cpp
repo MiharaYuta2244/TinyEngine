@@ -1,8 +1,8 @@
 #include "GamePlayScene.h"
-#include "SceneManager.h"
 #include "Collision.h"
 #include "Easing.h"
 #include "Random.h"
+#include "SceneManager.h"
 #include <algorithm>
 
 void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, DebugCamera* debugCamera, DeltaTime* timeManager, SceneManager* sceneManager) {
@@ -43,6 +43,16 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	terrainModel_->SetTranslate({20.0f, 0.0f, 0.0f});
 	terrainModel_->SetScale({1.0f, 1.0f, 1.0f});
 	terrainModel_->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
+
+	// 画面両端の幕
+	rightCurtain_ = std::make_unique<BothCurtain>();
+	rightCurtain_->Initialize(ctx);
+	leftCurtain_ = std::make_unique<BothCurtain>();
+	leftCurtain_->Initialize(ctx);
+
+	// ヒップドロップゲージ
+	hipDropGauge_ = std::make_unique<PlayerGauge>();
+	hipDropGauge_->Initialize(ctx);
 
 	// ゲームシーン開始
 	StartGameScene();
@@ -108,6 +118,13 @@ void GamePlayScene::Update() {
 	particleDustPlayer_->Update();
 	particleDustEnemy_->Update();
 
+	// 画面両端の幕
+	rightCurtain_->Update();
+	leftCurtain_->Update();
+
+	// ヒップドロップゲージ
+	hipDropGauge_->Update();
+
 	// ゲーム終了判定
 	if (player_->GetHP() <= 0 || enemy_->GetHP() <= 0) {
 		sceneManager_->ChangeScene("Result");
@@ -167,6 +184,13 @@ void GamePlayScene::Draw() {
 	// Particle
 	particleDustPlayer_->Draw();
 	particleDustEnemy_->Draw();
+
+	// 画面両端の幕
+	rightCurtain_->Draw();
+	leftCurtain_->Draw();
+
+	// ヒップドロップゲージ
+	hipDropGauge_->Draw();
 }
 
 void GamePlayScene::Finalize() {
@@ -262,7 +286,7 @@ void GamePlayScene::CollisionPlayerPowerUpItem() {
 	        [this](std::unique_ptr<PowerUpItem>& item) {
 		        if (Collision::Intersect(player_->GetAABB(), item->GetAABB())) {
 			        player_->SetIsPowerUp(true);
-			   return true;
+			        return true;
 		        }
 		        return false;
 	        }),

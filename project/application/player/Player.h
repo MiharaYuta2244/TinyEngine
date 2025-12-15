@@ -3,6 +3,7 @@
 #include "DirectInput.h"
 #include "Sprite.h"
 #include "EngineContext.h"
+#include "PlayerGauge.h"
 #include <array>
 
 class GamePad;

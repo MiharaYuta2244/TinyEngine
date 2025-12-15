@@ -8,6 +8,7 @@
 #include "Particle.h"
 #include "Object3d.h"
 #include "Sprite.h"
+#include "BothCurtain.h"
 #include <memory>
 #include <vector>
 #include <array>
@@ -94,6 +95,13 @@ private:
 
 	// 地形モデル
 	std::unique_ptr<Object3d> terrainModel_;
+
+	// 画面両端の幕
+	std::unique_ptr<BothCurtain> rightCurtain_;
+	std::unique_ptr<BothCurtain> leftCurtain_;
+
+	// ヒップドロップゲージ
+	std::unique_ptr<PlayerGauge> hipDropGauge_;
 
 	// シェイクフラグ
 	bool isShake_ = false;

@@ -1,8 +1,8 @@
 #include "Player.h"
 #include "GamePad.h"
-#include "TextureManager.h"
-#include "MathUtility.h"
 #include "MathOperator.h"
+#include "MathUtility.h"
+#include "TextureManager.h"
 #include <numbers>
 
 void Player::Initialize(EngineContext* ctx, DirectInput* input, GamePad* gamePad) {
@@ -126,7 +126,7 @@ void Player::Draw() {
 	}
 
 	// HPゲージ背景スプライト
-	//spriteHPGaugeBG_->Draw();
+	// spriteHPGaugeBG_->Draw();
 
 	// HPゲージスプライト
 	for (auto& hpGauge : spriteHPGauge_) {
@@ -284,7 +284,7 @@ void Player::AfterHipDrop() {
 	}
 }
 
-Vector2 Player::ScreenToWorldPoint(Vector3 worldPosition, Vector2 margin) { 
+Vector2 Player::ScreenToWorldPoint(Vector3 worldPosition, Vector2 margin) {
 	// ビューポートマトリックス
 	Matrix4x4 viewportMatrix = MathUtility::MakeViewPortMatrix(0, 0, 1280.0f, 720.0f, 0.0f, 1.0f);
 

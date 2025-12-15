@@ -20,7 +20,7 @@ private:
 	std::unique_ptr<Sprite> spriteHPBarBG_ = std::make_unique<Sprite>();
 
 	// HPバーのサイズX
-	const float kMaxSpriteHPBarSizeX = 1000.0f;
+	const float kMaxSpriteHPBarSizeX = 600.0f;
 	float spriteHPBarSizeX_ = kMaxSpriteHPBarSizeX;
 
 	// コンテキスト構造体
