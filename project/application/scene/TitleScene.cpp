@@ -16,13 +16,8 @@ void TitleScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* 
 	AllModelLoad();
 
 	// タイトルテキストモデル
-	titleText_ = std::make_unique<Object3d>();
+	titleText_ = std::make_unique<TitleText>();
 	titleText_->Initialize(engineContext_);
-	titleText_->SetModel("ClimbDrop.obj");
-	titleText_->SetScale({7.0f, 7.0f, 7.0f});
-	titleRotateY_ = std::numbers::pi_v<float>;
-	titleText_->SetRotate({0.0f, titleRotateY_, 0.0f});
-	titleText_->SetTranslate({20.0f, 8.0f, 0.0f});
 
 	// はじめるモデル
 	startModel_ = std::make_unique<Object3d>();
@@ -53,7 +48,7 @@ void TitleScene::Update() {
 
 	float x = Easing::easeInOutBack(t_) * 5.0f;
 
-	titleText_->Update();
+	titleText_->Update(timeManager_->GetDeltaTime());
 	startModel_->Update();
 	endModel_->Update();
 

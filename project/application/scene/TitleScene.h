@@ -2,6 +2,7 @@
 #include "BaseScene.h"
 #include "Object3d.h"
 #include "Sprite.h"
+#include "TitleText.h"
 #include <memory>
 #include <array>
 
@@ -20,7 +21,7 @@ private:
 
 private:
 	// タイトルテキストモデル
-	std::unique_ptr<Object3d> titleText_;
+	std::unique_ptr<TitleText> titleText_;
 
 	// はじめるモデル
 	std::unique_ptr<Object3d> startModel_;
