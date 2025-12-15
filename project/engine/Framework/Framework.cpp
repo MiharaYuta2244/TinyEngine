@@ -48,14 +48,6 @@ void Framework::Initialize() {
 	engineContext_.particleCommon = particleCommon_.get();
 	engineContext_.srvManager = srvManager_.get();
 
-	// .objファイルからモデルを読み込む
-	AllModelLoader();
-
-	// XAudio
-	audio_->Initialize();
-	audio_->SoundsAllLoad();
-	// audio_->SoundPlayWave();
-
 	// DirectInput
 	input_->Initialize(winApp_.get());
 }
@@ -127,28 +119,4 @@ void Framework::PostDraw() {
 
 	// 描画終了
 	dxCommon_->EndFrame();
-}
-
-void Framework::AllModelLoader() {
-	modelManger_->LoadModel("fence.obj");
-	modelManger_->LoadModel("plane.obj");
-	modelManger_->LoadModel("axis.obj");
-	modelManger_->LoadModel("SkySphere.obj");
-	modelManger_->LoadModel("skydome.obj");
-	modelManger_->LoadModel("Field.obj");
-	modelManger_->LoadModel("sphere.obj");
-	modelManger_->LoadModel("Box.obj");
-	modelManger_->LoadModel("Boss.obj");
-	modelManger_->LoadModel("Hiyoko.obj");
-	modelManger_->LoadModel("HiyokoGlass.obj");
-	modelManger_->LoadModel("HiyokoStudent.obj");
-	modelManger_->LoadModel("HiyokoAfro.obj");
-	modelManger_->LoadModel("Title.obj");
-	modelManger_->LoadModel("HiyokoPropeller.obj");
-	modelManger_->LoadModel("ClimbDrop.obj");
-	modelManger_->LoadModel("tree.obj");
-	modelManger_->LoadModel("saikai.obj");
-	modelManger_->LoadModel("ToTitle2.obj");
-	modelManger_->LoadModel("start.obj");
-	modelManger_->LoadModel("end.obj");
 }

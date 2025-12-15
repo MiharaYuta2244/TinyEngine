@@ -18,6 +18,12 @@ void Object3d::Initialize(EngineContext* ctx) {
 	// 平行光源データ作成
 	CreateDirectionalLightData();
 
+	// ポイントライトデータ作成
+	CreatePointLightData();
+
+	// スポットライトデータ作成
+	CreateSpotLightData();
+
 	// CameraForGPU
 	CreateCameraForGPUData();
 
@@ -66,6 +72,8 @@ void Object3d::Update() {
 
 	*transformMatrixData_ = {transformMatrixData_->WVP, transformMatrixData_->World, transformMatrixData_->WorldInverseTranspose};
 	*directionalLightData_ = directionalLight_;
+	*pointLightData_ = pointLight_;
+	*spotLightData_ = spotLight_;
 	*cameraForGPUData_ = cameraForGPU_;
 	*fogParamData_ = fogParam_;
 	*timeParamData_ = timeParam_;
@@ -98,8 +106,12 @@ void Object3d::Draw() {
 	commadList->SetGraphicsRootConstantBufferView(5, fogParamResource_->GetGPUVirtualAddress());
 	// TimeParamCBufferの場所を指定
 	commadList->SetGraphicsRootConstantBufferView(6, timeParamResource_->GetGPUVirtualAddress());
+	// ポイントライトCBufferの場所を指定
+	commadList->SetGraphicsRootConstantBufferView(7, pointLightResource_->GetGPUVirtualAddress());
+	// スポットライトCBufferの場所を指定
+	commadList->SetGraphicsRootConstantBufferView(8, spotLightResource_->GetGPUVirtualAddress());
 
-	// 3Dモデルが割り当てられれいれば描画する
+	// 3Dモデルが割り当てられれば描画する
 	if (model_) {
 		model_->Draw();
 	}
@@ -161,7 +173,7 @@ void Object3d::CreateDirectionalLightData() {
 	// 初期化
 	directionalLight_.color = {1.0f, 1.0f, 1.0f, 1.0f};
 	directionalLight_.direction = {0.0f, -1.0f, 0.0f};
-	directionalLight_.intensity = 1.0f;
+	directionalLight_.intensity = 0.0f;
 
 	// Vector3 → XMVECTOR 変換
 	XMVECTOR dirVec = XMVectorSet(
@@ -213,6 +225,40 @@ void Object3d::CreateTimeParamData() {
 	timeParam_.time = 1.0f / 60.0f;
 	// timeParamDataへの書き込み
 	*timeParamData_ = timeParam_;
+}
+
+void Object3d::CreatePointLightData() {
+	// ポイントライト用のリソースを作る
+	pointLightResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(PointLight));
+	// アドレス取得
+	pointLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData_));
+	pointLightResource_->Unmap(0, nullptr);
+	// 初期化
+	pointLight_.color = {1.0f, 1.0f, 1.0f, 1.0f};
+	pointLight_.position = {0.0f, 5.0f, 0.0f};
+	pointLight_.intensity = 0.0f;
+	pointLight_.radius = 10.0f;
+	pointLight_.decay = 1.0f;
+	// pointLightDataへの書き込み
+	*pointLightData_ = pointLight_;
+}
+
+void Object3d::CreateSpotLightData() {
+	// スポットライト用のリソースを作る
+	spotLightResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(SpotLight));
+	// アドレス取得
+	spotLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData_));
+	spotLightResource_->Unmap(0, nullptr);
+	// 初期化
+	spotLight_.color = {1.0f, 1.0f, 1.0f, 1.0f};
+	spotLight_.position = {0.0f, 10.0f, 0.0f};
+	spotLight_.intensity = 2.0f;
+	spotLight_.direction = {0.0f, -1.0f, 0.0f};
+	spotLight_.distance = 20.0f;
+	spotLight_.decay = 1.0f;
+	spotLight_.cosAngle = 0.707f; // 約45度のコサイン値
+	// spotLightDataへの書き込み
+	*spotLightData_ = spotLight_;
 }
 
 void Object3d::CreateMaterialData() {

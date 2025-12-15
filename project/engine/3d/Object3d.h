@@ -17,6 +17,8 @@
 #include "VertexData.h"
 #include "Model.h"
 #include "EngineContext.h"
+#include "PointLight.h"
+#include "SpotLight.h"
 
 class Object3d {
 public:
@@ -38,6 +40,18 @@ public:
 	void SetTransform(const Transform& transform) { transform_ = transform; }
 	void SetWorldMatrix(Matrix4x4 worldMatrix) { worldMatrix_ = worldMatrix; }
 	void SetCamera(DebugCamera* camera) { camera_ = camera; }
+	void SetPointLightPosition(const Vector3& position) { pointLight_.position = position; }
+	void SetPointLightColor(const Vector4& color) { pointLight_.color = color; }
+	void SetPointLightIntensity(float intensity) { pointLight_.intensity = intensity; }
+	void SetPointLightRadius(float radius) { pointLight_.radius = radius; }
+	void SetPointLightDecay(float decay) { pointLight_.decay = decay; }
+	void SetSpotLightPosition(const Vector3& position) { spotLight_.position = position; }
+	void SetSpotLightColor(const Vector4& color) { spotLight_.color = color; }
+	void SetSpotLightIntensity(float intensity) { spotLight_.intensity = intensity; }
+	void SetSpotLightDirection(const Vector3& direction) { spotLight_.direction = direction; }
+	void SetSpotLightDistance(float distance) { spotLight_.distance = distance; }
+	void SetSpotLightDecay(float decay) { spotLight_.decay = decay; }
+	void SetSpotLightCosAngle(float cosAngle) { spotLight_.cosAngle = cosAngle; }
 
 	// getter
 	Vector3& GetScale() { return transform_.scale; }
@@ -48,9 +62,12 @@ public:
 	Matrix4x4& GetWorldMatrix() { return worldMatrix_; }
 
 	DirectionalLight& GetDirectionalLight() { return directionalLight_; }
+	
+	PointLight& GetPointLight() { return pointLight_; }
+	
+	SpotLight& GetSpotLight() { return spotLight_; }
 
 	Material& GetMaterial() { return material_; }
-
 private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeBytes);
 
@@ -63,6 +80,16 @@ private:
 	/// 平行光源データ作成
 	/// </summary>
 	void CreateDirectionalLightData();
+
+	/// <summary>
+	/// ポイントライトデータ作成
+	/// </summary>
+	void CreatePointLightData();
+
+	/// <summary>
+	/// スポットライトデータ作成
+	/// </summary>
+	void CreateSpotLightData();
 
 	/// <summary>
 	/// CameraForGPUデータの作成
@@ -91,6 +118,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> indexResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> spotLightResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> cameraForGPUResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> fogParamResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> timeParamResource_;
@@ -101,6 +130,8 @@ private:
 	uint32_t* indexData_ = nullptr;
 	TransformationMatrix* transformMatrixData_ = nullptr;
 	DirectionalLight* directionalLightData_ = nullptr;
+	PointLight* pointLightData_ = nullptr;
+	SpotLight* spotLightData_ = nullptr;
 	CameraForGPU* cameraForGPUData_ = nullptr;
 	FogParam* fogParamData_ = nullptr;
 	TimeParam* timeParamData_ = nullptr;
@@ -113,6 +144,8 @@ private:
 	Material material_;
 	Matrix4x4 worldMatrix_;
 	DirectionalLight directionalLight_;
+	PointLight pointLight_;
+	SpotLight spotLight_;
 	CameraForGPU cameraForGPU_;
 	FogParam fogParam_;
 	TimeParam timeParam_;
