@@ -62,6 +62,11 @@ void GamePlayScene::Update() {
 	// 一定時間おきにパワーアップアイテム生成
 	CreatePowerUpItem();
 
+	// 一定時間おきにフルーツ生成
+	CreateGrape();
+	CreateApple();
+	CreateOrange();
+
 	// 当たり判定
 	CollisionPlayerEnemy();
 	CollisionEnemyPlayerHipDrop();
@@ -87,8 +92,23 @@ void GamePlayScene::Update() {
 	enemy_->Update(timeManager_->GetDeltaTime());
 
 	// パワーアップアイテム更新
-	for (auto& powerUpItem : powerUpItems_) {
+	/*for (auto& powerUpItem : powerUpItems_) {
 		powerUpItem->Update(timeManager_->GetDeltaTime());
+	}*/
+
+	// ブドウ更新
+	for (auto& grape : grapes_) {
+		grape->Update(timeManager_->GetDeltaTime());
+	}
+
+	// リンゴ更新
+	for (auto& apple : apples_) {
+		apple->Update(timeManager_->GetDeltaTime());
+	}
+
+	// オレンジ更新
+	for (auto& orange : oranges_) {
+		orange->Update(timeManager_->GetDeltaTime());
 	}
 
 	// 木のモデル
@@ -170,8 +190,23 @@ void GamePlayScene::Draw() {
 	enemy_->Draw();
 
 	// パワーアップアイテム描画
-	for (auto& powerUpItem : powerUpItems_) {
+	/*for (auto& powerUpItem : powerUpItems_) {
 		powerUpItem->Draw();
+	}*/
+
+	// ブドウ描画
+	for (auto& grape : grapes_) {
+		grape->Draw();
+	}
+
+	// リンゴ描画
+	for (auto& apple : apples_) {
+		apple->Draw();
+	}
+
+	// オレンジ描画
+	for (auto& orange : oranges_) {
+		orange->Draw();
 	}
 
 	// 木のモデル
@@ -303,7 +338,6 @@ void GamePlayScene::CreatePowerUpItem() {
 	if (powerUpItemCreateFrameCount_ >= kPowerUpItemFrameCountMax) {
 		auto powerUpItem = std::make_unique<PowerUpItem>();
 		powerUpItem->Initialize(engineContext_);
-		powerUpItem->SetModel("sphere.obj");
 
 		Vector3 pos;
 		pos.x = RandomUtils::RangeFloat(2.0f, 30.0f);
@@ -314,7 +348,75 @@ void GamePlayScene::CreatePowerUpItem() {
 		powerUpItems_.push_back(std::move(powerUpItem));
 
 		powerUpItemCreateFrameCount_ = 0;
+	}
+}
+
+void GamePlayScene::CreateGrape() {
+	if (grapes_.size() >= grapeGenarator_.kCount)
 		return;
+
+	// 生成タイマーカウント
+	grapeGenarator_.genarateTimer += timeManager_->GetDeltaTime();
+
+	if (grapeGenarator_.genarateTimer >= grapeGenarator_.kGenarateTimer) {
+		auto grape = std::make_unique<Grape>();
+		grape->Initialize(engineContext_);
+
+		Vector3 pos;
+		pos.x = RandomUtils::RangeFloat(2.0f, 30.0f);
+		pos.y = RandomUtils::RangeFloat(2.0f, 20.0f);
+		pos.z = 0.0f;
+
+		grape->SetTranslate(pos);
+		grapes_.push_back(std::move(grape));
+
+		grapeGenarator_.genarateTimer = 0.0f;
+	}
+}
+
+void GamePlayScene::CreateApple() {
+	if (grapes_.size() >= appleGenarator_.kCount)
+		return;
+
+	// 生成タイマーカウント
+	appleGenarator_.genarateTimer += timeManager_->GetDeltaTime();
+
+	if (appleGenarator_.genarateTimer >= appleGenarator_.kGenarateTimer) {
+		auto apple = std::make_unique<Apple>();
+		apple->Initialize(engineContext_);
+
+		Vector3 pos;
+		pos.x = RandomUtils::RangeFloat(2.0f, 30.0f);
+		pos.y = RandomUtils::RangeFloat(2.0f, 20.0f);
+		pos.z = 0.0f;
+
+		apple->SetTranslate(pos);
+		apples_.push_back(std::move(apple));
+
+		appleGenarator_.genarateTimer = 0.0f;
+	}
+}
+
+void GamePlayScene::CreateOrange() {
+	if (grapes_.size() >= orangeGenarator_.kCount)
+		return;
+
+	// 生成タイマーカウント
+	orangeGenarator_.genarateTimer += timeManager_->GetDeltaTime();
+
+	if (orangeGenarator_.genarateTimer >= orangeGenarator_.kGenarateTimer) {
+		auto orange = std::make_unique<Orange>();
+		orange->Initialize(engineContext_);
+
+		Vector3 pos;
+		pos.x = RandomUtils::RangeFloat(2.0f, 30.0f);
+		pos.y = RandomUtils::RangeFloat(2.0f, 20.0f);
+		pos.z = 0.0f;
+
+		orange->SetTranslate(pos);
+		oranges_.push_back(std::move(orange));
+
+		orangeGenarator_.genarateTimer = 0.0f;
 	}
 }
 

@@ -1,17 +1,20 @@
 #pragma once
+#include "Apple.h"
 #include "BaseScene.h"
-#include "Player.h"
-#include "Enemy.h"
 #include "Block.h"
-#include "Map.h"
-#include "PowerUpItem.h"
-#include "Particle.h"
-#include "Object3d.h"
-#include "Sprite.h"
 #include "BothCurtain.h"
+#include "Enemy.h"
+#include "Grape.h"
+#include "Map.h"
+#include "Object3d.h"
+#include "Orange.h"
+#include "Particle.h"
+#include "Player.h"
+#include "PowerUpItem.h"
+#include "Sprite.h"
+#include <array>
 #include <memory>
 #include <vector>
-#include <array>
 
 class GamePlayScene : public BaseScene {
 public:
@@ -42,6 +45,15 @@ private:
 	// パワーアップアイテムの生成
 	void CreatePowerUpItem();
 
+	// ブドウの生成
+	void CreateGrape();
+
+	// リンゴの生成
+	void CreateApple();
+
+	// オレンジの生成
+	void CreateOrange();
+
 	// シェイク初期設定用
 	void StartShake(int frames, float magnitude);
 
@@ -55,6 +67,13 @@ private:
 	// デバッグカメラ
 	void ImGuiDebugCamera();
 #endif
+
+private:
+	struct FruitGenarator {
+		float genarateTimer;
+		const float kGenarateTimer;
+		int kCount;
+	};
 
 private:
 	// プレイヤー
@@ -102,6 +121,36 @@ private:
 
 	// ヒップドロップゲージ
 	std::unique_ptr<PlayerGauge> hipDropGauge_;
+
+	// ブドウ
+	std::vector<std::unique_ptr<Grape>> grapes_;
+
+	// リンゴ
+	std::vector<std::unique_ptr<Apple>> apples_;
+
+	// オレンジ
+	std::vector<std::unique_ptr<Orange>> oranges_;
+
+	// ブドウの生成構造体
+	FruitGenarator grapeGenarator_ = {
+	    .genarateTimer = 0.0f,
+	    .kGenarateTimer = 1.0f,
+	    .kCount = 5,
+	};
+
+	// リンゴの生成構造体
+	FruitGenarator appleGenarator_ = {
+	    .genarateTimer = 0.0f,
+	    .kGenarateTimer = 1.0f,
+	    .kCount = 5,
+	};
+
+	// オレンジの生成構造体
+	FruitGenarator orangeGenarator_ = {
+	    .genarateTimer = 0.0f,
+	    .kGenarateTimer = 1.0f,
+	    .kCount = 5,
+	};
 
 	// シェイクフラグ
 	bool isShake_ = false;

@@ -10,6 +10,7 @@ void PowerUpItem::Initialize(EngineContext* ctx) {
 	// Object3dの初期化
 	object3d_->Initialize(ctx_);
 	object3d_->SetColor({1.0f, 0.0f, 0.0f, 1.0f});
+	object3d_->SetModel("sphere.obj");
 
 	transform_.scale = {1.0f, 1.0f, 1.0f};
 	transform_.rotate = {0.0f, 0.0f, 0.0f};
