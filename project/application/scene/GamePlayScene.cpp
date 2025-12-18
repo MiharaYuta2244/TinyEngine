@@ -71,6 +71,7 @@ void GamePlayScene::Update() {
 	CollisionPlayerEnemy();
 	CollisionEnemyPlayerHipDrop();
 	CollisionPlayerPowerUpItem();
+	CollisionPlayerFruits();
 
 	// プレイヤー更新
 	player_->Update(timeManager_->GetDeltaTime());
@@ -327,6 +328,44 @@ void GamePlayScene::CollisionPlayerPowerUpItem() {
 		        return false;
 	        }),
 	    powerUpItems_.end());
+}
+
+void GamePlayScene::CollisionPlayerFruits() {
+	grapes_.erase(
+	    std::remove_if(
+	        grapes_.begin(), grapes_.end(),
+	        [this](std::unique_ptr<Grape>& grape) {
+		        if (Collision::Intersect(player_->GetAABB(), grape->GetAABB())) {
+			        player_->SetIsPowerUp(true);
+			        return true;
+		        }
+		        return false;
+	        }),
+	    grapes_.end());
+
+	apples_.erase(
+	    std::remove_if(
+	        apples_.begin(), apples_.end(),
+	        [this](std::unique_ptr<Apple>& apple) {
+		        if (Collision::Intersect(player_->GetAABB(), apple->GetAABB())) {
+			        player_->SetIsPowerUp(true);
+			        return true;
+		        }
+		        return false;
+	        }),
+	    apples_.end());
+
+	oranges_.erase(
+	    std::remove_if(
+	        oranges_.begin(), oranges_.end(),
+	        [this](std::unique_ptr<Orange>& orange) {
+		        if (Collision::Intersect(player_->GetAABB(), orange->GetAABB())) {
+			        player_->SetIsPowerUp(true);
+			        return true;
+		        }
+		        return false;
+	        }),
+	    oranges_.end());
 }
 
 void GamePlayScene::CreatePowerUpItem() {

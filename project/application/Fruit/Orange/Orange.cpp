@@ -20,6 +20,10 @@ void Orange::Update(float deltaTime) {
 	// 位置の更新
 	object3d_->SetTransform(transform_);
 
+	// 当たり判定の更新
+	aabb_.min = {transform_.translate.x - 0.5f, transform_.translate.y - 0.5f, transform_.translate.z - 0.5f};
+	aabb_.max = {transform_.translate.x + 0.5f, transform_.translate.y + 0.5f, transform_.translate.z + 0.5f};
+
 	object3d_->Update();
 }
 

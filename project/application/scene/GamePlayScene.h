@@ -42,6 +42,9 @@ private:
 	// プレイヤーとパワーアップアイテムの当たり判定
 	void CollisionPlayerPowerUpItem();
 
+	// プレイヤーとフルーツの当たり判定
+	void CollisionPlayerFruits();
+
 	// パワーアップアイテムの生成
 	void CreatePowerUpItem();
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "EngineContext.h"
 #include "Object3d.h"
+#include "AABB.h"
 #include <memory>
 #include <string>
 
@@ -16,6 +17,7 @@ public:
 	Vector3 GetRotate() { return transform_.rotate; }
 	Vector3 GetScale() { return transform_.scale; }
 	Transform GetTransform() { return transform_; }
+	AABB GetAABB(){return aabb_;}
 
 	// Setter
 	void SetTranslate(Vector3 translate) { transform_.translate = translate; }
@@ -29,4 +31,6 @@ protected:
 	std::string fruitName_{}; // 種類を判別するための名前
 
 	Transform transform_{};
+
+	AABB aabb_{};
 };
