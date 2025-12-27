@@ -1,10 +1,11 @@
 #pragma once
 #include "BaseScene.h"
+#include "EndModel.h"
 #include "Object3d.h"
 #include "Sprite.h"
-#include "TitleText.h"
 #include "StartModel.h"
-#include "EndModel.h"
+#include "TitleText.h"
+#include "StageModel.h"
 #include <array>
 #include <memory>
 
@@ -19,14 +20,34 @@ public:
 	void Finalize() override;
 
 private:
-	// 必要なモデルの読み込み
-	void AllModelLoad();
-
 	// シーン切り替え処理
 	void ChangeScene();
 
+	// タイトルの状態遷移
+	void StateChange();
+
+	// タイトル1更新処理
+	void Title1Update();
+
+	// タイトル1更新処理
+	void Title2Update();
+
+	// タイトル1の描画
+	void Title1Draw();
+
+	// タイトル2の描画
+	void Title2Draw();
+
 private:
-	enum class TitleState { START = 0, END = 1 };
+	enum class TitleState { START, END, BACK_SCENE, STAGE1, STAGE2, STAGE3, CHARACTER_SELECT };
+
+	enum class TitleNumber { TITLE1, TITLE2 };
+
+	struct StateTransition {
+		TitleState left;
+		TitleState right;
+		std::function<void()> onDecide;
+	};
 
 private:
 	// タイトルテキストモデル
@@ -38,6 +59,15 @@ private:
 	// おわるモデル
 	std::unique_ptr<EndModel> endModel_;
 
+	// ステージ1モデル
+	std::unique_ptr<StageModel> stage1Model_;
+
 	// タイトルの状態
 	TitleState titleState_ = TitleState::START;
+
+	// タイトルシーン1か2か
+	TitleNumber titleNumber_ = TitleNumber::TITLE1;
+
+	// キャラクターセレクト画面かどうか
+	bool isCharacterSelection_ = false;
 };

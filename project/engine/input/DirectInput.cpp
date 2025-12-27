@@ -88,3 +88,16 @@ bool DirectInput::MouseButtonTriggered(uint8_t button) const {
 bool DirectInput::MouseButtonReleased(uint8_t button) const { 
 	return (preMouseState_.rgbButtons[button] & 0x80) && !(mouseState_.rgbButtons[button] & 0x80);
 }
+
+void DirectInput::Reset() {
+
+	// キーボードの現在状態を前回状態にコピー
+	memcpy(preKey_, key_, sizeof(key_));
+
+	// マウスの現在状態を前回状態にコピー
+	preMouseState_ = mouseState_;
+
+	// マウス移動量もリセット
+	accumX_ = 0;
+	accumY_ = 0;
+}

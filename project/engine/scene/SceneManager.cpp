@@ -6,6 +6,9 @@ void SceneManager::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad
 	gamePad_ = gamePad;
 	debugCamera_ = debugCamera;
 	timeManager_ = timeManager;
+
+	// モデルの読み込み
+	AllModelLoad();
 }
 
 void SceneManager::AddScene(const std::string& sceneName, std::unique_ptr<BaseScene> scene) {
@@ -71,4 +74,31 @@ void SceneManager::Finalize() {
 
 	scenes_.clear();
 	currentScene_ = nullptr;
+}
+
+void SceneManager::AllModelLoad() {
+	engineContext_->modelManager->LoadModel("fence.obj");
+	engineContext_->modelManager->LoadModel("plane.obj");
+	engineContext_->modelManager->LoadModel("axis.obj");
+	engineContext_->modelManager->LoadModel("SkySphere.obj");
+	engineContext_->modelManager->LoadModel("skydome.obj");
+	engineContext_->modelManager->LoadModel("Field.obj");
+	engineContext_->modelManager->LoadModel("sphere.obj");
+	engineContext_->modelManager->LoadModel("Box.obj");
+	engineContext_->modelManager->LoadModel("Boss.obj");
+	engineContext_->modelManager->LoadModel("Hiyoko.obj");
+	engineContext_->modelManager->LoadModel("HiyokoGlass.obj");
+	engineContext_->modelManager->LoadModel("HiyokoStudent.obj");
+	engineContext_->modelManager->LoadModel("HiyokoAfro.obj");
+	engineContext_->modelManager->LoadModel("Title.obj");
+	engineContext_->modelManager->LoadModel("HiyokoPropeller.obj");
+	engineContext_->modelManager->LoadModel("ClimbDrop.obj");
+	engineContext_->modelManager->LoadModel("tree.obj");
+	engineContext_->modelManager->LoadModel("saikai.obj");
+	engineContext_->modelManager->LoadModel("ToTitle2.obj");
+	engineContext_->modelManager->LoadModel("start.obj");
+	engineContext_->modelManager->LoadModel("end.obj");
+	engineContext_->modelManager->LoadModel("grape.obj");
+	engineContext_->modelManager->LoadModel("apple.obj");
+	engineContext_->modelManager->LoadModel("orange.obj");
 }

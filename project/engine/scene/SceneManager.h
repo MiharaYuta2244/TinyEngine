@@ -1,8 +1,8 @@
 #pragma once
 #include "BaseScene.h"
+#include <functional>
 #include <memory>
 #include <unordered_map>
-#include <functional>
 
 class SceneManager {
 public:
@@ -32,6 +32,9 @@ public:
 
 	// 終了処理
 	void Finalize();
+
+private:
+	void AllModelLoad();
 
 private:
 	// シーンマップ

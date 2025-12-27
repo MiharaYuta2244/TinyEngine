@@ -33,6 +33,9 @@ public:
 	float GetMouseDeltaY() const { return static_cast<float>(mouseState_.lY); }
 	float GetMouseWheel() const { return static_cast<float>(mouseState_.lZ); }
 
+	// 入力状態をリセット
+	void Reset();
+
 private:
 	ComPtr<IDirectInput8> directInput_;
 	ComPtr<IDirectInputDevice8> keyboard_;
