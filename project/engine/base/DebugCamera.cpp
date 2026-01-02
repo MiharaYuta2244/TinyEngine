@@ -6,22 +6,31 @@
 DebugCamera::DebugCamera()
     : transform_({
           {1.0f, 1.0f, -50.0f},
-          {0.0f, 0.0f, 0.0f},
-          {0.0f, 0.0f, 0.0f}
+          {0.0f, 0.0f, 0.0f  },
+          {0.0f, 0.0f, 0.0f  }
 }),
       fovY_(0.45f), aspectRatio_(float(WinApp::kClientWidth) / float(WinApp::kClientHeight)), nearClip_(0.1f), farClip_(1000.0f),
       worldMatrix_(MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate)), viewMatrix_(MathUtility::Inverse(worldMatrix_)),
       projectionMatrix_(MathUtility::MakePerspectiveFovMatrix(fovY_, aspectRatio_, nearClip_, farClip_)), viewProjectionMatrix_(MathUtility::Multiply(viewMatrix_, projectionMatrix_)),
       orientation_(MathUtility::MakeIdentity4x4()), pivot_({0.0f, 0.0f, 0.0f}) {}
 
-void DebugCamera::Initialize() {
-	UpdateViewMatrix();
-}
+void DebugCamera::Initialize() { UpdateViewMatrix(); }
 
 void DebugCamera::SetPivot(const Vector3& p) {
 	Vector3 offset = MathUtility::Subtract(transform_.translate, pivot_);
 	pivot_ = p;
 	transform_.translate = MathUtility::Add(pivot_, offset);
+}
+
+void DebugCamera::SetRotate(const Vector3& rotate) {
+	transform_.rotate = rotate;
+	// 回転行列を再計算
+	orientation_ = MathUtility::MakeIdentity4x4();
+	Matrix4x4 rotX = MathUtility::MakeRollRotateMatrix(rotate.x);
+	Matrix4x4 rotY = MathUtility::MakeYawRotateMatrix(rotate.y);
+	Matrix4x4 rotZ = MathUtility::MakePitchRotateMatrix(rotate.z);
+	orientation_ = MathUtility::Multiply(rotX, MathUtility::Multiply(rotY, rotZ));
+	UpdateViewMatrix();
 }
 
 void DebugCamera::Update(const DirectInput& input, const GamePad& gamePad) {
@@ -76,7 +85,7 @@ void DebugCamera::Update(const DirectInput& input, const GamePad& gamePad) {
 		float dy = input.GetMouseDeltaY() * 0.1f;
 
 		// マウス移動量に応じた連続的な移動
-		Vector3 moveVec = {-dx, dy, 0.0f};  // マウスX移動で左右、Y移動で上下
+		Vector3 moveVec = {-dx, dy, 0.0f}; // マウスX移動で左右、Y移動で上下
 		Vector3 world = MathUtility::MultiplyVector(moveVec, orientation_);
 		transform_.translate = MathUtility::Add(transform_.translate, world);
 		pivot_ = MathUtility::Add(pivot_, world);

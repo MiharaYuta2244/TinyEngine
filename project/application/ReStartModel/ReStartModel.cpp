@@ -7,7 +7,7 @@ void ReStartModel::Initialize(EngineContext* ctx) {
 	reStartModel_ = std::make_unique<Object3d>();
 	reStartModel_->Initialize(ctx);
 	reStartModel_->SetModel("saikai.obj");
-	reStartModel_->SetTranslate({5.0f, 0.0f, 0.0f});
+	reStartModel_->SetTranslate({6.0f, 0.0f, 0.0f});
 	reStartModel_->SetScale(baseScale_);
 	reStartModel_->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
 }

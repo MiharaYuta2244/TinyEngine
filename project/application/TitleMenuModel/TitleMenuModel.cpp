@@ -1,6 +1,6 @@
+#include "TitleMenuModel.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
-#include "TitleMenuModel.h"
 #include <numbers>
 
 void TitleMenuModel::Initialize(EngineContext* ctx, Vector3 pos) {
@@ -10,6 +10,11 @@ void TitleMenuModel::Initialize(EngineContext* ctx, Vector3 pos) {
 	stageModel_->SetTranslate(pos);
 	stageModel_->SetScale(baseScale_);
 	stageModel_->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
+	stageModel_->SetColor(notSelectColor_);
+	stageModel_->SetEnableLighting(true);
+	stageModel_->GetDirectionalLight().intensity = 4.0f;
+	stageModel_->GetDirectionalLight().direction = {-1.0f, -0.6f, -0.2f};
+	stageModel_->GetMaterial().shininess = 64.0f;
 }
 
 void TitleMenuModel::Update(float deltaTime) {
@@ -27,16 +32,21 @@ void TitleMenuModel::Update(float deltaTime) {
 void TitleMenuModel::Draw() { stageModel_->Draw(); }
 
 void TitleMenuModel::Animation(float deltaTime) {
-	if (!isSelected_)
-		return;
+	if (stageModel_->GetColor().x == notSelectColor_.x && isSelected_) {
+		stageModel_->SetColor(baseColor_);
+	} else if (stageModel_->GetColor().x == 1.0f && !isSelected_) {
+		stageModel_->SetColor(notSelectColor_);
+	}
 
-	animationTime_ += deltaTime * animationSpeed_;
+	if (isSelected_) {
+		animationTime_ += deltaTime * animationSpeed_;
 
-	// サイン波で拡縮を繰り返す（0～1を往復）
-	float t = (sin(animationTime_) + 1.0f) * 0.5f;
+		// サイン波で拡縮を繰り返す（0～1を往復）
+		float t = (sin(animationTime_) + 1.0f) * 0.5f;
 
-	// 補間して新しいスケールを計算
-	Vector3 newScale = MathUtility::Lerp(baseScale_, targetScale_, t);
+		// 補間して新しいスケールを計算
+		Vector3 newScale = MathUtility::Lerp(baseScale_, targetScale_, t);
 
-	stageModel_->SetScale(newScale);
+		stageModel_->SetScale(newScale);
+	}
 }

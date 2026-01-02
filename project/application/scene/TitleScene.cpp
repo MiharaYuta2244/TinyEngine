@@ -1,5 +1,6 @@
 #include "TitleScene.h"
 #include "Easing.h"
+#include "MathUtility.h"
 #include "SceneManager.h"
 #include <algorithm>
 #include <numbers>
@@ -11,6 +12,9 @@ void TitleScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* 
 	debugCamera_ = debugCamera;
 	timeManager_ = timeManager;
 	sceneManager_ = sceneManager;
+
+	debugCamera_->SetTranslation({19.45f, 28.0f, -75.0f});
+	debugCamera_->SetRotate({0.0f, 0.0f, 0.2f});
 
 	// タイトルテキストモデル
 	titleText_ = std::make_unique<TitleText>();
@@ -46,8 +50,8 @@ void TitleScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* 
 	titleMenuModels_[3]->SetModel("stage1.obj");
 	titleMenuModels_[4]->SetModel("charaSelect.obj");
 
-	titleMenuModels_[2]->SetColor({1.0f, 0.0f, 0.0f, 1.0f});
-	titleMenuModels_[3]->SetColor({0.0f, 0.0f, 1.0f, 1.0f});
+	// ひとつだけ選択状態にする
+	titleMenuModels_[0]->SetSelected(true);
 
 	// タイトルの状態
 	titleState_ = TitleState::START;
@@ -57,6 +61,11 @@ void TitleScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* 
 
 	// スプライトの生成&初期化
 	CreateAndInitializeSprites();
+
+	// イージング初期化
+	for (auto& easing : easingMoves_) {
+		easing.isMoving = false;
+	}
 }
 
 void TitleScene::Update() {
@@ -73,8 +82,23 @@ void TitleScene::Update() {
 	// タイトルの状態切り替え
 	StateChange();
 
+	// イージング更新
+	UpdateEasing();
+
 	// シーン切り替え処理
 	ChangeScene();
+
+#ifdef USE_IMGUI
+	for (auto& model : titleMenuModels_) {
+		ImGui::Begin("Model");
+
+		ImGui::DragFloat3("direction", &model->GetDirectionalLight().direction.x, 0.01f);
+		ImGui::DragFloat("intensity", &model->GetDirectionalLight().intensity, 0.01f);
+		ImGui::DragFloat("shininess", &model->GetMaterial().shininess, 0.01f);
+
+		ImGui::End();
+	}
+#endif
 }
 
 void TitleScene::Draw() {
@@ -120,8 +144,8 @@ void TitleScene::ChangeScene() {
 	// ゲーム開始入力
 	bool startInput = keyboard_->KeyTriggered(DIK_SPACE) || gamePad_->GetState().buttonsPressed.a;
 	if (startInput && titleState_ == TitleState::START) {
-		titleNumber_ = TitleNumber::TITLE2;   // タイトル2へ
-		titleState_ = TitleState::BACK_SCENE; // タイトルの状態をバックシーンに変更
+		titleNumber_ = TitleNumber::TITLE2; // タイトル2へ
+		titleState_ = TitleState::STAGE1;   // タイトルの状態をステージ1に変更
 	} else if (startInput && titleState_ == TitleState::END) {
 		PostQuitMessage(0); // ゲーム終了
 	}
@@ -183,9 +207,18 @@ void TitleScene::Title1Update() {
 void TitleScene::Title2Update() {
 	if (titleNumber_ == TitleNumber::TITLE2) {
 		for (auto& model : titleMenuModels_) {
+			// 選択状況に応じてモデルの状態を変更
+			if (model->GetTranslate() == positions_[0]) {
+				model->SetSelected(true);
+			} else {
+				model->SetSelected(false);
+			}
+
 			model->Update(timeManager_->GetDeltaTime());
 		}
 
+		menuBackSprite_->Update();
+		selectBackSprite_->Update();
 		selectSprite_->Update();
 		selectIconSprite_->Update();
 		menuSprite_->Update();
@@ -207,6 +240,8 @@ void TitleScene::Title2Draw() {
 		}
 	}
 
+	menuBackSprite_->Draw();
+	selectBackSprite_->Draw();
 	selectSprite_->Draw();
 	selectIconSprite_->Draw();
 	menuSprite_->Draw();
@@ -216,7 +251,13 @@ void TitleScene::ApplyMenuLayout() {
 	const auto& layout = menuLayouts.at(titleState_);
 
 	for (size_t i = 0; i < titleMenuModels_.size(); i++) {
-		titleMenuModels_[i]->SetTranslate(layout.positions[i]);
+		// 現在の位置を開始位置に設定
+		easingMoves_[i].start = titleMenuModels_[i]->GetTranslate();
+		// ターゲット位置を設定
+		easingMoves_[i].target = layout.positions[i];
+		// イージングを開始
+		easingMoves_[i].elapsed = 0.0f;
+		easingMoves_[i].isMoving = true;
 	}
 }
 
@@ -230,6 +271,34 @@ void TitleScene::InitMenuLayouts() {
 		}
 
 		menuLayouts[state] = layout;
+	}
+}
+
+void TitleScene::UpdateEasing() {
+	for (size_t i = 0; i < easingMoves_.size(); i++) {
+		if (!easingMoves_[i].isMoving) {
+			continue;
+		}
+
+		// 経過時間を増加
+		easingMoves_[i].elapsed += timeManager_->GetDeltaTime();
+
+		// 進行度を0～1で計算
+		float progress = std::clamp(easingMoves_[i].elapsed / easingMoves_[i].duration, 0.0f, 1.0f);
+
+		// イージング関数を適用（easeOutCubicを使用）
+		float easeProgress = Easing::easeOutCubic(progress);
+
+		// 補間計算
+		Vector3 easedPosition = MathUtility::Lerp(easingMoves_[i].start, easingMoves_[i].target, easeProgress);
+
+		// モデルの位置を更新
+		titleMenuModels_[i]->SetTranslate(easedPosition);
+
+		// アニメーション完了時
+		if (progress >= 1.0f) {
+			easingMoves_[i].isMoving = false;
+		}
 	}
 }
 
@@ -248,4 +317,14 @@ void TitleScene::CreateAndInitializeSprites() {
 	menuSprite_->Initialize(engineContext_, "resources/menu.png");
 	menuSprite_->GetPosition() = {200.0f, 50.0f};
 	menuSprite_->SetSize({256.0f, 64.0f});
+
+	selectBackSprite_ = std::make_unique<Sprite>();
+	selectBackSprite_->Initialize(engineContext_, "resources/selectBG.png");
+	selectBackSprite_->GetPosition() = {160.0f, 612.0f};
+	selectBackSprite_->SetSize({240, 48.0f});
+
+	menuBackSprite_ = std::make_unique<Sprite>();
+	menuBackSprite_->Initialize(engineContext_, "resources/menuBG.png");
+	menuBackSprite_->GetPosition() = {160.0f, 34.0f};
+	menuBackSprite_->SetSize({416.0f, 96.0f});
 }

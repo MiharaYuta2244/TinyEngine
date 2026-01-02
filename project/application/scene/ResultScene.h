@@ -3,6 +3,7 @@
 #include "Object3d.h"
 #include "ReStartModel.h"
 #include "ToTitleModel.h"
+#include "BothCurtain.h"
 #include <memory>
 
 class ResultScene : public BaseScene {
@@ -21,4 +22,8 @@ private:
 
 	// たいとるへモデル
 	std::unique_ptr<ToTitleModel> toTitleModel_;
+
+	// 画面両端の幕
+	std::unique_ptr<BothCurtain> rightCurtain_;
+	std::unique_ptr<BothCurtain> leftCurtain_;
 };

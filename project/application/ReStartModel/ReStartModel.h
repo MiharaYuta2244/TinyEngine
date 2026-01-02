@@ -9,6 +9,8 @@ public:
 	void Update(float deltaTime);
 	void Draw();
 
+	bool GetSelected() const { return isSelected_; }
+
 	void SetSelected(bool isSelected) { isSelected_ = isSelected; }
 
 private:
@@ -18,7 +20,7 @@ private:
 	std::unique_ptr<Object3d> reStartModel_;
 
 	// 選択状態かどうか
-	bool isSelected_ = true;
+	bool isSelected_ = false;
 
 	float animationTime_ = 0.0f;
 	float animationSpeed_ = 2.0f;                     // ゆっくり動かすための速度係数

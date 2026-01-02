@@ -3,6 +3,7 @@
 #include "Matrix4x4.h"
 #include "DirectInput.h"
 #include "GamePad.h"
+#include "MathUtility.h"
 #include <Transform.h>
 
 class DebugCamera {
@@ -23,6 +24,7 @@ public:
 	
 	// Setter
 	void SetTranslation(Vector3 translation) { transform_.translate = translation; }
+	void SetRotate(const Vector3& rotate);
 	void SetFovY(float fovY) { fovY_ = fovY; }
 	void SetAspectRatio(float aspectRatio) { aspectRatio_ = aspectRatio; }
 	void SetNearClip(float nearClip) { nearClip_ = nearClip; }

@@ -9,6 +9,8 @@ public:
 	void Update(float deltaTime);
 	void Draw();
 
+	bool GetSelected() const { return isSelected_; }
+
 	void SetSelected(bool isSelected) { isSelected_ = isSelected; }
 
 private:

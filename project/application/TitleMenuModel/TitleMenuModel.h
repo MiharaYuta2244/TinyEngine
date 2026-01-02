@@ -9,6 +9,13 @@ public:
 	void Update(float deltaTime);
 	void Draw();
 
+	// Getter
+	Vector3 GetTranslate() const { return stageModel_->GetTranslate(); }
+	bool GetSelected() const { return isSelected_; }
+	PointLight& GetPointLight() { return stageModel_->GetPointLight(); }
+	DirectionalLight& GetDirectionalLight() { return stageModel_->GetDirectionalLight(); }
+	Material& GetMaterial() { return stageModel_->GetMaterial(); }
+
 	// Setter
 	void SetSelected(bool isSelected) { isSelected_ = isSelected; }
 	void SetTranslate(Vector3 translate) { stageModel_->SetTranslate(translate); }
@@ -22,10 +29,13 @@ private:
 	std::unique_ptr<Object3d> stageModel_;
 
 	// 選択状態かどうか
-	bool isSelected_ = true;
+	bool isSelected_ = false;
 
 	float animationTime_ = 0.0f;
 	float animationSpeed_ = 2.0f;                     // ゆっくり動かすための速度係数
-	Vector3 baseScale_ = Vector3(5.0f, 5.0f, 5.0f);   // 初期スケール
-	Vector3 targetScale_ = Vector3(5.5f, 5.5f, 5.5f); // 拡縮の最大値
+	Vector3 baseScale_ = Vector3(10.0f, 10.0f, 10.0f);   // 初期スケール
+	Vector3 targetScale_ = Vector3(12.0f, 12.0f, 12.0f); // 拡縮の最大値
+
+	Vector4 baseColor_ = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	Vector4 notSelectColor_ = Vector4(0.1f, 0.1f, 0.1f, 1.0f);
 };

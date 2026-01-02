@@ -7,7 +7,7 @@ void ToTitleModel::Initialize(EngineContext* ctx) {
 	toTitleModel_ = std::make_unique<Object3d>();
 	toTitleModel_->Initialize(ctx);
 	toTitleModel_->SetModel("ToTitle2.obj");
-	toTitleModel_->SetTranslate({35.0f, 0.0f, 0.0f});
+	toTitleModel_->SetTranslate({30.0f, 0.0f, 0.0f});
 	toTitleModel_->SetScale(baseScale_);
 	toTitleModel_->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
 }

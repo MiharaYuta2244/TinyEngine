@@ -36,6 +36,8 @@ void TextureManager::Initialize(DirectXCommon* directXCommon, SrvManager* srvMan
 	LoadTexture("resources/select.png");
 	LoadTexture("resources/selectIcon.png");
 	LoadTexture("resources/menu.png");
+	LoadTexture("resources/menuBG.png");
+	LoadTexture("resources/selectBG.png");
 }
 
 void TextureManager::LoadTexture(const std::string& filePath) {

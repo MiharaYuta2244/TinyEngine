@@ -48,6 +48,9 @@ private:
 	// スプライトの生成&初期化
 	void CreateAndInitializeSprites();
 
+	// イージング更新処理
+	void UpdateEasing();
+
 private:
 	enum class TitleState { START, END, BACK_SCENE, STAGE1, STAGE2, STAGE3, CHARACTER_SELECT };
 
@@ -61,6 +64,14 @@ private:
 
 	struct MenuLayout {
 		std::array<Vector3, 5> positions;
+	};
+
+	struct EasingMove {
+		Vector3 start;
+		Vector3 target;
+		float elapsed = 0.0f;
+		float duration = 0.3f; // 移動時間（秒）
+		bool isMoving = false;
 	};
 
 private:
@@ -88,8 +99,14 @@ private:
 	// せんたくアイコン画像
 	std::unique_ptr<Sprite> selectIconSprite_;
 
+	// せんたく背景画像
+	std::unique_ptr<Sprite> selectBackSprite_;
+
 	// めにゅー画像
 	std::unique_ptr<Sprite> menuSprite_;
+
+	// めにゅー背景画像
+	std::unique_ptr<Sprite> menuBackSprite_;
 
 	// 画面両端の幕
 	std::unique_ptr<BothCurtain> rightCurtain_;
@@ -120,4 +137,7 @@ private:
 
 	// 1フレーム前のタイトルの状態
 	TitleState prevState_;
+
+	// イージング用データ
+	std::array<EasingMove, 5> easingMoves_;
 };
