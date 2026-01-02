@@ -54,6 +54,12 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	hipDropGauge_ = std::make_unique<PlayerGauge>();
 	hipDropGauge_->Initialize(ctx);
 
+	// 雲
+	for(auto& cloud:clouds_) {
+		cloud = std::make_unique<Cloud>();
+		cloud->Initialize(engineContext_);
+	}
+
 	// ゲームシーン開始
 	StartGameScene();
 }
@@ -96,6 +102,11 @@ void GamePlayScene::Update() {
 	/*for (auto& powerUpItem : powerUpItems_) {
 		powerUpItem->Update(timeManager_->GetDeltaTime());
 	}*/
+
+	// 雲
+	for (auto& cloud : clouds_) {
+		cloud->Update(timeManager_->GetDeltaTime());
+	}
 
 	// ブドウ更新
 	for (auto& grape : grapes_) {
@@ -194,6 +205,11 @@ void GamePlayScene::Draw() {
 	/*for (auto& powerUpItem : powerUpItems_) {
 		powerUpItem->Draw();
 	}*/
+
+	// 雲
+	for (auto& cloud : clouds_) {
+		cloud->Draw();
+	}
 
 	// ブドウ描画
 	for (auto& grape : grapes_) {

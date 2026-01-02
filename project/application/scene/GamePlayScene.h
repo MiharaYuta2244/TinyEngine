@@ -12,6 +12,7 @@
 #include "Player.h"
 #include "PowerUpItem.h"
 #include "Sprite.h"
+#include "Cloud.h"
 #include <array>
 #include <memory>
 #include <vector>
@@ -121,6 +122,9 @@ private:
 	// 画面両端の幕
 	std::unique_ptr<BothCurtain> rightCurtain_;
 	std::unique_ptr<BothCurtain> leftCurtain_;
+
+	// 雲
+	std::array<std::unique_ptr<Cloud>,10> clouds_;
 
 	// ヒップドロップゲージ
 	std::unique_ptr<PlayerGauge> hipDropGauge_;
