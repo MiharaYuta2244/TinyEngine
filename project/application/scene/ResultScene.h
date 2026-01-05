@@ -4,6 +4,7 @@
 #include "ReStartModel.h"
 #include "ToTitleModel.h"
 #include "BothCurtain.h"
+#include "ResultModel.h"
 #include <memory>
 
 class ResultScene : public BaseScene {
@@ -17,6 +18,10 @@ public:
 	void Finalize() override;
 
 private:
+	// リザルト文字列を読み込み
+	std::string LoadResultStatus();
+
+private:
 	// さいかいモデル
 	std::unique_ptr<ReStartModel> restartModel_;
 
@@ -26,4 +31,7 @@ private:
 	// 画面両端の幕
 	std::unique_ptr<BothCurtain> rightCurtain_;
 	std::unique_ptr<BothCurtain> leftCurtain_;
+
+	// リザルトモデル
+	std::unique_ptr<ResultModel> resultModel_;
 };

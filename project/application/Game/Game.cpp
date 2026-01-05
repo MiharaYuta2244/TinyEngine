@@ -18,7 +18,7 @@ void Game::Initialize() {
 	sceneManager_->AddScene("Result", std::make_unique<ResultScene>());
 
 	// 最初のシーンを初期化
-	sceneManager_->ChangeScene("Title");
+	sceneManager_->ChangeScene("Result");
 
 	// フェード用スプライト初期化
 	fadeSprite_ = std::make_unique<Sprite>();
@@ -29,11 +29,20 @@ void Game::Initialize() {
 	fadeSprite_->SetColor({0.0f, 0.0f, 0.0f, 0.0f});
 	fadeState_ = FadeState::None;
 	fadeTimer_ = 0.0f;
+	lastSceneName_ = "";
 }
 
 void Game::Update() {
 	// 基底クラスの更新処理
 	Framework::Update();
+
+	// シーンの切り替わりを検知してフェード処理を開始
+	const std::string& currentSceneName = sceneManager_->GetCurrentSceneName();
+	if (lastSceneName_ != currentSceneName && fadeState_ == FadeState::None) {
+		fadeState_ = FadeState::FadeOut;
+		fadeTimer_ = 0.0f;
+		lastSceneName_ = currentSceneName;
+	}
 
 	// フェード更新（優先して処理）
 	if (fadeState_ != FadeState::None) {
@@ -72,7 +81,7 @@ void Game::Draw() {
 	// シーン描画
 	sceneManager_->Draw();
 
-	// フェードスプライトを上書きで描画（常に最後に）
+	// フェードスプライトを上書きで描画
 	if (fadeSprite_) {
 		fadeSprite_->Update();
 		fadeSprite_->Draw();

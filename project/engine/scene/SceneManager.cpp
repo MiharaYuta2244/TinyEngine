@@ -105,4 +105,7 @@ void SceneManager::AllModelLoad() {
 	engineContext_->modelManager->LoadModel("stage1.obj");
 	engineContext_->modelManager->LoadModel("charaSelect.obj");
 	engineContext_->modelManager->LoadModel("Cloud2.obj");
+	engineContext_->modelManager->LoadModel("StageClear.obj");
+	engineContext_->modelManager->LoadModel("GameOver2.obj");
+	engineContext_->modelManager->LoadModel("field1.obj");
 }

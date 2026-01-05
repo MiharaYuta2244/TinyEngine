@@ -27,9 +27,12 @@ private:
 
 	// フェード管理
 	FadeState fadeState_ = FadeState::None;
-	float fadeDuration_ = 0.4f; // フェード時間（秒）
+	float fadeDuration_ = 1.0f; // フェード時間（秒）
 	float fadeTimer_ = 0.0f;
 
 	// シーンマネージャー
 	std::unique_ptr<SceneManager> sceneManager_ = std::make_unique<SceneManager>();
+
+	// 現在のシーン名を記録（変更検知用）
+	std::string lastSceneName_;
 };

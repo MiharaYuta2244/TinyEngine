@@ -58,6 +58,7 @@ public:
 	Vector3& GetRotate() { return transform_.rotate; }
 	Vector3& GetTranslate() { return transform_.translate; }
 	Vector4& GetColor() { return material_.color; }
+	Transform& GetTransform() { return transform_; }
 
 	Matrix4x4& GetWorldMatrix() { return worldMatrix_; }
 

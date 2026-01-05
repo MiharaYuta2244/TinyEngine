@@ -4,6 +4,7 @@
 #include "Random.h"
 #include "SceneManager.h"
 #include <algorithm>
+#include <fstream>
 
 void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, DebugCamera* debugCamera, DeltaTime* timeManager, SceneManager* sceneManager) {
 	engineContext_ = ctx;
@@ -54,8 +55,16 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	hipDropGauge_ = std::make_unique<PlayerGauge>();
 	hipDropGauge_->Initialize(ctx);
 
+	// フィールドモデル
+	/*fieldModel_ = std::make_unique<Object3d>();
+	fieldModel_->Initialize(engineContext_);
+	fieldModel_->SetModel("field1.obj");
+	fieldModel_->SetTranslate({20.0f, 0.0f, 0.0f});
+	fieldModel_->SetScale({4.0f, 4.0f, 4.0f});
+	fieldModel_->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});*/
+
 	// 雲
-	for(auto& cloud:clouds_) {
+	for (auto& cloud : clouds_) {
 		cloud = std::make_unique<Cloud>();
 		cloud->Initialize(engineContext_);
 	}
@@ -98,9 +107,12 @@ void GamePlayScene::Update() {
 	// 敵更新
 	enemy_->Update(timeManager_->GetDeltaTime());
 
+	// フィールドモデル
+	// fieldModel_->Update();
+
 	// パワーアップアイテム更新
 	/*for (auto& powerUpItem : powerUpItems_) {
-		powerUpItem->Update(timeManager_->GetDeltaTime());
+	    powerUpItem->Update(timeManager_->GetDeltaTime());
 	}*/
 
 	// 雲
@@ -159,6 +171,15 @@ void GamePlayScene::Update() {
 
 	// ゲーム終了判定
 	if (player_->GetHP() <= 0 || enemy_->GetHP() <= 0) {
+		std::string resultStatus;
+		if (player_->GetHP() <= 0) {
+			resultStatus = "GameOver2.obj";
+		} else if (enemy_->GetHP() <= 0) {
+			resultStatus = "StageClear.obj";
+		}
+
+		// 結果文字列をファイルに保存
+		SaveResultStatus(resultStatus);
 		sceneManager_->ChangeScene("Result");
 	}
 
@@ -201,9 +222,12 @@ void GamePlayScene::Draw() {
 	// 敵描画
 	enemy_->Draw();
 
+	// フィールドモデル
+	// fieldModel_->Draw();
+
 	// パワーアップアイテム描画
 	/*for (auto& powerUpItem : powerUpItems_) {
-		powerUpItem->Draw();
+	    powerUpItem->Draw();
 	}*/
 
 	// 雲
@@ -500,5 +524,13 @@ void GamePlayScene::ShakeCamera() {
 	if (currentFrame_ >= shakeFrames_) {
 		debugCamera_->SetTranslation(originalPos_);
 		isShake_ = false;
+	}
+}
+
+void GamePlayScene::SaveResultStatus(const std::string& status) {
+	std::ofstream file("resources/result_status.txt");
+	if (file.is_open()) {
+		file << status;
+		file.close();
 	}
 }

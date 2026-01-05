@@ -1,5 +1,6 @@
 #include "TitleScene.h"
 #include "Easing.h"
+#include "MathOperator.h"
 #include "MathUtility.h"
 #include "SceneManager.h"
 #include <algorithm>
@@ -66,9 +67,20 @@ void TitleScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* 
 	for (auto& easing : easingMoves_) {
 		easing.isMoving = false;
 	}
+
+	// イージング回転初期化
+	for (auto& easing : easingMoveRotates_) {
+		easing.isActive = false;
+	}
 }
 
 void TitleScene::Update() {
+	if (prevState_ != titleState_) {
+		for (auto& model : titleMenuModels_) {
+			model->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
+		}
+	}
+
 	// モデルの更新　タイトル1
 	Title1Update();
 
@@ -85,8 +97,17 @@ void TitleScene::Update() {
 	// イージング更新
 	UpdateEasing();
 
+	for (size_t i = 0; i < titleMenuModels_.size(); i++) {
+		// 位置と回転のイージング更新
+		Transform& transform = titleMenuModels_[i]->GetTransform();
+		UpdateMoveRotateY(easingMoveRotates_[i], transform, timeManager_->GetDeltaTime());
+	}
+
 	// シーン切り替え処理
 	ChangeScene();
+
+	// タイトル番号の記録
+	prevTitleNumber_=titleNumber_;
 
 #ifdef USE_IMGUI
 	for (auto& model : titleMenuModels_) {
@@ -165,17 +186,15 @@ void TitleScene::StateChange() {
 	// 状態遷移テーブル
 	static const std::unordered_map<TitleState, StateTransition> transitions = {
 	    {TitleState::BACK_SCENE,
-	     {TitleState::CHARACTER_SELECT,           // left
-	      TitleState::STAGE1,                     // right
-	      [this]() {                              // decide
-		      keyboard_->Reset();                 // 入力状態をリセット
-		      titleNumber_ = TitleNumber::TITLE1; // タイトル番号を元に戻す
-		      titleState_ = TitleState::START;    // タイトルの状態も初期状態元に戻す
-	      }}	                                                                                                                               },
-	    {TitleState::STAGE1,           {TitleState::BACK_SCENE, TitleState::STAGE2, [this]() { sceneManager_->ChangeScene("GamePlay"); }}      }, // ステージ1へ
-	    {TitleState::STAGE2,           {TitleState::STAGE1, TitleState::STAGE3, [this]() { sceneManager_->ChangeScene("GamePlay"); }}          }, // ステージ2へ
-	    {TitleState::STAGE3,           {TitleState::STAGE2, TitleState::CHARACTER_SELECT, [this]() { sceneManager_->ChangeScene("GamePlay"); }}}, // ステージ3へ
-	    {TitleState::CHARACTER_SELECT, {TitleState::STAGE3, TitleState::BACK_SCENE, [this]() { isCharacterSelection_ = true; }}                }, // キャラクターセレクトへ
+	     {TitleState::CHARACTER_SELECT, // left
+	      TitleState::STAGE1,           // right
+	      [this]() {                    // decide
+		      OnMenuDecide();
+	      }}	                                                                                                       },
+	    {TitleState::STAGE1,           {TitleState::BACK_SCENE, TitleState::STAGE2, [this]() { OnMenuDecide(); }}      }, // ステージ1へ
+	    {TitleState::STAGE2,           {TitleState::STAGE1, TitleState::STAGE3, [this]() { OnMenuDecide(); }}          }, // ステージ2へ
+	    {TitleState::STAGE3,           {TitleState::STAGE2, TitleState::CHARACTER_SELECT, [this]() { OnMenuDecide(); }}}, // ステージ3へ
+	    {TitleState::CHARACTER_SELECT, {TitleState::STAGE3, TitleState::BACK_SCENE, [this]() { OnMenuDecide(); }}      }, // キャラクターセレクトへ
 	};
 
 	const auto& t = transitions.at(titleState_);
@@ -188,12 +207,41 @@ void TitleScene::StateChange() {
 		t.onDecide();
 
 	// 選択状態に応じてモデルの座標変更
-	if (prevState_ != titleState_) {
+	if (prevState_ != titleState_ && titleNumber_ == TitleNumber::TITLE2) {
 		ApplyMenuLayout();
 	}
 
 	// タイトルの状態を記録
 	prevState_ = titleState_;
+}
+
+void TitleScene::OnMenuDecide() {
+	// 選択されたモデルのインデックスを取得
+	int selectedIndex = shiftTable.at(titleState_);
+
+	// 画面中央の目標座標
+	Vector3 centerPos = {20.0f, 2.0f, 30.0f};
+
+	// 画面外の目標座標（左右で分け、円形に配置）
+	std::array<Vector3, 5> offscreenPositions = {
+	    Vector3{-50.0f, 2.0f, 30.0f }, // 左奥
+	    Vector3{90.0f,  2.0f, 30.0f }, // 右奥
+	    Vector3{70.0f,  2.0f, 30.0f }, // 右奥
+	    Vector3{20.0f,  2.0f, -50.0f}, // 手前
+	    Vector3{50.0f,  2.0f, -30.0f}, // 手前右
+	};
+
+	// 各モデルのイージング移動と回転を開始
+	for (size_t i = 0; i < titleMenuModels_.size(); i++) {
+		// ターゲット座標を決定
+		Vector3 targetPos = (static_cast<int>(i) == selectedIndex) ? centerPos : offscreenPositions[i];
+
+		// 現在のトランスフォームを取得
+		Transform& transform = titleMenuModels_[i]->GetTransform();
+
+		// イージング回転と移動を開始
+		StartMoveRotateY(easingMoveRotates_[i], transform, targetPos, 1.0f, 2);
+	}
 }
 
 void TitleScene::Title1Update() {
@@ -298,6 +346,79 @@ void TitleScene::UpdateEasing() {
 		// アニメーション完了時
 		if (progress >= 1.0f) {
 			easingMoves_[i].isMoving = false;
+		}
+	}
+}
+
+void TitleScene::StartMoveRotateY(EasingMoveRotate& move, const Transform& transform, const Vector3& targetPos, float duration, int rotationCount) {
+	move.startPos = transform.translate;
+	move.targetPos = targetPos;
+
+	// 現在のY回転
+	move.startYaw = transform.rotate.y;
+
+	// ターゲット方向ベクトル
+	Vector3 dir = targetPos - transform.translate;
+
+	// Y軸回転
+	move.targetYaw = atan2f(dir.x, dir.z);
+
+	move.elapsed = 0.0f;
+	move.duration = duration;
+	move.isActive = true;
+	move.rotationCount = rotationCount;
+}
+
+void TitleScene::UpdateMoveRotateY(EasingMoveRotate& move, Transform& transform, float deltaTime) {
+	if (!move.isActive)
+		return;
+
+	move.elapsed += deltaTime;
+	float t = move.elapsed / move.duration;
+	t = std::clamp(t, 0.0f, 1.0f);
+
+	float eased = Easing::easeOutCubic(t);
+
+	// 位置補間
+	transform.translate = {std::lerp(move.startPos.x, move.targetPos.x, eased), std::lerp(move.startPos.y, move.targetPos.y, eased), std::lerp(move.startPos.z, move.targetPos.z, eased)};
+
+	// Y軸回転補間（最短回転）
+	float deltaYaw = move.targetYaw - move.startYaw;
+	while (deltaYaw > std::numbers::pi_v<float>)
+		deltaYaw -= std::numbers::pi_v<float> * 2.0f;
+	while (deltaYaw < -std::numbers::pi_v<float>)
+		deltaYaw += std::numbers::pi_v<float> * 2.0f;
+
+	// 追加回転数
+	float extraRotations = move.rotationCount * (std::numbers::pi_v<float> * 2.0f);
+
+	// eased補間に追加
+	transform.rotate.y = move.startYaw + (deltaYaw + extraRotations) * eased;
+
+	// 終了処理
+	if (t >= 1.0f) {
+		transform.translate = move.targetPos;
+		transform.rotate.y = move.targetYaw;
+		move.isActive = false;
+
+		switch (titleState_) {
+		case TitleState::BACK_SCENE:
+			keyboard_->Reset();                 // 入力状態をリセット
+			titleNumber_ = TitleNumber::TITLE1; // タイトル番号を元に戻す
+			titleState_ = TitleState::START;    // タイトルの状態も初期状態元に戻す
+			break;
+		case TitleState::STAGE1:
+			sceneManager_->ChangeScene("GamePlay"); // ステージ1へ
+			break;
+		case TitleState::STAGE2:
+			sceneManager_->ChangeScene("GamePlay"); // ステージ2へ
+			break;
+		case TitleState::STAGE3:
+			sceneManager_->ChangeScene("GamePlay"); // ステージ3へ
+			break;
+		case TitleState::CHARACTER_SELECT:
+			isCharacterSelection_ = true; // キャラクターセレクト画面へ
+			break;
 		}
 	}
 }

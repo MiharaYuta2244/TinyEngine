@@ -64,6 +64,9 @@ private:
 	// シェイク関数
 	void ShakeCamera();
 
+	// リザルト文字列を保存
+	void SaveResultStatus(const std::string& status);
+
 #ifdef USE_IMGUI
 	// フレームレートの表示
 	void ImGuiFPS();
@@ -122,6 +125,9 @@ private:
 	// 画面両端の幕
 	std::unique_ptr<BothCurtain> rightCurtain_;
 	std::unique_ptr<BothCurtain> leftCurtain_;
+
+	// フィールドモデル
+	std::unique_ptr<Object3d> fieldModel_;
 
 	// 雲
 	std::array<std::unique_ptr<Cloud>,10> clouds_;

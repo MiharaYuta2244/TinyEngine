@@ -21,6 +21,43 @@ public:
 	void Finalize() override;
 
 private:
+	enum class TitleState { START, END, BACK_SCENE, STAGE1, STAGE2, STAGE3, CHARACTER_SELECT };
+
+	enum class TitleNumber { TITLE1, TITLE2 };
+
+	struct StateTransition {
+		TitleState left;
+		TitleState right;
+		std::function<void()> onDecide;
+	};
+
+	struct MenuLayout {
+		std::array<Vector3, 5> positions;
+	};
+
+	struct EasingMove {
+		Vector3 start;
+		Vector3 target;
+		float elapsed = 0.0f;
+		float duration = 0.3f; // 移動時間（秒）
+		bool isMoving = false;
+	};
+
+	struct EasingMoveRotate {
+		Vector3 startPos;
+		Vector3 targetPos;
+
+		float startYaw;
+		float targetYaw;
+
+		float elapsed = 0.0f;
+		float duration = 1.0f;
+
+		bool isActive = false;
+		int rotationCount;
+	};
+
+private:
 	// シーン切り替え処理
 	void ChangeScene();
 
@@ -51,28 +88,14 @@ private:
 	// イージング更新処理
 	void UpdateEasing();
 
-private:
-	enum class TitleState { START, END, BACK_SCENE, STAGE1, STAGE2, STAGE3, CHARACTER_SELECT };
+	// Y軸回転しながら移動するイージング開始
+	void StartMoveRotateY(EasingMoveRotate& move, const Transform& transform, const Vector3& targetPos, float duration, int rotationCount);
 
-	enum class TitleNumber { TITLE1, TITLE2 };
+	// Y軸回転しながら移動するイージング更新
+	void UpdateMoveRotateY(EasingMoveRotate& move, Transform& transform, float deltaTime);
 
-	struct StateTransition {
-		TitleState left;
-		TitleState right;
-		std::function<void()> onDecide;
-	};
-
-	struct MenuLayout {
-		std::array<Vector3, 5> positions;
-	};
-
-	struct EasingMove {
-		Vector3 start;
-		Vector3 target;
-		float elapsed = 0.0f;
-		float duration = 0.3f; // 移動時間（秒）
-		bool isMoving = false;
-	};
+	// Space キーが押されたときの処理
+	void OnMenuDecide();
 
 private:
 	// タイトルテキストモデル
@@ -140,4 +163,10 @@ private:
 
 	// イージング用データ
 	std::array<EasingMove, 5> easingMoves_;
+
+	// イージング移動回転用データ
+	std::array<EasingMoveRotate, 5> easingMoveRotates_;
+
+	// 1フレーム前のタイトル番号
+	TitleNumber prevTitleNumber_;
 };

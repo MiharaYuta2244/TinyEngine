@@ -15,12 +15,14 @@ public:
 	PointLight& GetPointLight() { return stageModel_->GetPointLight(); }
 	DirectionalLight& GetDirectionalLight() { return stageModel_->GetDirectionalLight(); }
 	Material& GetMaterial() { return stageModel_->GetMaterial(); }
+	Transform& GetTransform() { return stageModel_->GetTransform(); }
 
 	// Setter
 	void SetSelected(bool isSelected) { isSelected_ = isSelected; }
 	void SetTranslate(Vector3 translate) { stageModel_->SetTranslate(translate); }
 	void SetModel(std::string filepath) { stageModel_->SetModel(filepath); }
 	void SetColor(Vector4 color) { stageModel_->SetColor(color); }
+	void SetRotate(const Vector3& rotate) { stageModel_->SetRotate(rotate); }
 
 private:
 	void Animation(float deltaTime);
