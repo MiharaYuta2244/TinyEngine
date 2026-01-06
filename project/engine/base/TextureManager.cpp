@@ -43,6 +43,17 @@ void TextureManager::Initialize(DirectXCommon* directXCommon, SrvManager* srvMan
 	LoadTexture("resources/grape.png");
 	LoadTexture("resources/rule1.png");
 	LoadTexture("resources/rule2.png");
+	LoadTexture("resources/0.png");
+	LoadTexture("resources/1.png");
+	LoadTexture("resources/2.png");
+	LoadTexture("resources/3.png");
+	LoadTexture("resources/4.png");
+	LoadTexture("resources/5.png");
+	LoadTexture("resources/6.png");
+	LoadTexture("resources/7.png");
+	LoadTexture("resources/8.png");
+	LoadTexture("resources/9.png");
+	LoadTexture("resources/attackAmount.png");
 }
 
 void TextureManager::LoadTexture(const std::string& filePath) {

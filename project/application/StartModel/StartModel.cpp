@@ -7,9 +7,12 @@ void StartModel::Initialize(EngineContext* ctx) {
 	startModel_ = std::make_unique<Object3d>();
 	startModel_->Initialize(ctx);
 	startModel_->SetModel("start.obj");
-	startModel_->SetTranslate({20.0f, 2.0f, 0.0f});
+	startModel_->SetTranslate({32.0f, 3.35f, 0.0f});
 	startModel_->SetScale(baseScale_);
-	startModel_->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
+	startModel_->SetRotate({0.0f, 3.6f, 0.0f});
+	startModel_->SetEnableLighting(true);
+	startModel_->GetDirectionalLight().direction = {3.0f, -1.0f, 0.0f};
+	startModel_->GetDirectionalLight().intensity = 1.0f;
 }
 
 void StartModel::Update(float deltaTime) {

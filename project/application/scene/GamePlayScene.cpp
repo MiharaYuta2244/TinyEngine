@@ -88,8 +88,26 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	// ゲームシーン開始
 	StartGameScene();
 
+	// 数字画像集
+	for (int i = 0; i < numberSprites_.size(); i++) {
+		numberSprites_[i] = std::make_unique<Sprite>();
+		numberSprites_[i]->Initialize(engineContext_, "resources/" + std::to_string(i) + ".png");
+	}
+
 	// BGM再生
 
+	// ヒップドロップダメージ表示用スプライトの初期化
+	for (int i = 0; i < hipDropDamageSprites_.size(); ++i) {
+		hipDropDamageSprites_[i] = std::make_unique<Sprite>();
+		hipDropDamageSprites_[i]->Initialize(engineContext_, "resources/1.png");
+		hipDropDamageSprites_[i]->SetSize({30.0f, 50.0f});
+		hipDropDamageSprites_[i]->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+	}
+
+	// プレイヤーのヒップドロップパワースプライト
+	hipDropPowerSprite_ = std::make_unique<Sprite>();
+	hipDropPowerSprite_->Initialize(engineContext_, "resources/attackAmount.png");
+	hipDropPowerSprite_->SetPosition({1140.0f, 50.0f});
 }
 
 void GamePlayScene::Update() {
@@ -192,6 +210,29 @@ void GamePlayScene::Update() {
 	hipDropGauge_->Update();
 
 	// ゲーム終了判定
+	// ヒップドロップダメージ表示の更新
+	{
+		int hipDropDamage = player_->GetHipDropPowerLevel();
+		// 10の位
+		int digit10 = hipDropDamage / 10;
+		// 1の位
+		int digit1 = hipDropDamage % 10;
+
+		if (digit10 > 0) { // 10の位がある場合のみ表示
+			hipDropDamageSprites_[0]->SetTexture("resources/" + std::to_string(digit10) + ".png");
+			hipDropDamageSprites_[0]->SetPosition({1150.0f, 100.0f}); // 位置調整
+			hipDropDamageSprites_[0]->SetSize({30.0f, 50.0f});
+			hipDropDamageSprites_[0]->Update();
+		} else {
+			hipDropDamageSprites_[0]->SetSize({0.0f, 0.0f}); // 10の位が0の場合は表示しない
+		}
+
+		hipDropDamageSprites_[1]->SetTexture("resources/" + std::to_string(digit1) + ".png");
+		hipDropDamageSprites_[1]->SetPosition({1180.0f, 100.0f}); // 位置調整
+		hipDropDamageSprites_[1]->Update();
+	}
+
+	// ゲーム終了判定
 	if (player_->GetHP() <= 0 || enemy_->GetHP() <= 0) {
 		std::string resultStatus;
 		if (player_->GetHP() <= 0) {
@@ -204,6 +245,8 @@ void GamePlayScene::Update() {
 		SaveResultStatus(resultStatus);
 		RequestSceneChange("Result");
 	}
+
+	hipDropPowerSprite_->Update();
 
 #ifdef USE_IMGUI
 	player_->UpdateImGui();
@@ -290,6 +333,13 @@ void GamePlayScene::Draw() {
 	// 画面両端の幕
 	rightCurtain_->Draw();
 	leftCurtain_->Draw();
+
+	// ヒップドロップダメージの描画
+	for (auto& sprite : hipDropDamageSprites_) {
+		sprite->Draw();
+	}
+
+	hipDropPowerSprite_->Draw();
 }
 
 void GamePlayScene::Finalize() {

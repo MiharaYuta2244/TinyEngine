@@ -7,9 +7,12 @@ void EndModel::Initialize(EngineContext* ctx) {
 	endModel_ = std::make_unique<Object3d>();
 	endModel_->Initialize(ctx);
 	endModel_->SetModel("end.obj");
-	endModel_->SetTranslate({20.0f, -3.0f, 0.0f});
+	endModel_->SetTranslate({32.0f, -1.5f, 0.0f});
 	endModel_->SetScale(baseScale_);
-	endModel_->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
+	endModel_->SetRotate({0.0f, 3.6f, 0.0f});
+	endModel_->SetEnableLighting(true);
+	endModel_->GetDirectionalLight().direction = {3.0f, -1.0f, 0.0f};
+	endModel_->GetDirectionalLight().intensity = 1.0f;
 }
 
 void EndModel::Update(float deltaTime) {

@@ -1,13 +1,20 @@
 #pragma once
-#include <memory>
 #include "EngineContext.h"
 #include "Object3d.h"
+#include <memory>
 
 class TitleText {
 public:
 	void Initialize(EngineContext* ctx);
 	void Update(float deltaTime);
 	void Draw();
+
+	Vector3& GetTranslate() { return textModel_->GetTranslate(); }
+	Vector3& GetRotate() { return textModel_->GetRotate(); }
+	Vector3& GetScale() { return textModel_->GetScale(); }
+	DirectionalLight& GetDirectLight() { return textModel_->GetDirectionalLight(); }
+	Material& GetMaterial(){return textModel_->GetMaterial();}
+	Vector4& GetColor(){return textModel_->GetColor();}
 
 private:
 	std::unique_ptr<Object3d> textModel_;

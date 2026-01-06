@@ -11,6 +11,11 @@ public:
 
 	void SetSelected(bool isSelected) { isSelected_ = isSelected; }
 
+	Transform& GetTransform() { return startModel_->GetTransform(); }
+	DirectionalLight& GetDirectLight() { return startModel_->GetDirectionalLight(); }
+	Material& GetMaterial() { return startModel_->GetMaterial(); }
+	Vector4& GetColor() { return startModel_->GetColor(); }
+
 private:
 	void Animation(float deltaTime);
 

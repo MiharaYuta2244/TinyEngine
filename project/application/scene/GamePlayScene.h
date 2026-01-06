@@ -195,4 +195,13 @@ private:
 
 	// 目標フルーツの最大数
 	const int kMaxFruitCount_= 10;
+
+	// 数字画像集
+	std::array<std::unique_ptr<Sprite>,10> numberSprites_;
+
+	// ヒップドロップダメージ表示用スプライト
+	std::array<std::unique_ptr<Sprite>, 2> hipDropDamageSprites_;
+
+	// プレイヤーのヒップドロップパワースプライト
+	std::unique_ptr<Sprite> hipDropPowerSprite_;
 };

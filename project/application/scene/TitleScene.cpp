@@ -89,7 +89,7 @@ void TitleScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* 
 	ruleSprite1_->GetSize() = {275.0f, 35.0f};
 	ruleSprite2_ = std::make_unique<Sprite>();
 	ruleSprite2_->Initialize(engineContext_, "resources/rule2.png");
-	ruleSprite2_->GetPosition() = {200.0f, 65.0f};
+	ruleSprite2_->GetPosition() = {200.0f, 75.0f};
 	ruleSprite2_->GetSize() = {555.0f, 35.0f};
 
 	// イージング初期化
@@ -152,6 +152,41 @@ void TitleScene::Update() {
 
 		ImGui::End();
 	}
+
+	ImGui::Begin("Title");
+	ImGui::DragFloat3("position", &titleText_->GetTranslate().x, 0.01f);
+	ImGui::DragFloat3("rotate", &titleText_->GetRotate().x, 0.01f);
+	ImGui::DragFloat3("scale", &titleText_->GetScale().x, 0.01f);
+	ImGui::DragFloat3("direction", &titleText_->GetDirectLight().direction.x, 0.01f);
+	ImGui::DragFloat("intensity", &titleText_->GetDirectLight().intensity, 0.01f);
+	ImGui::DragFloat("shininess", &titleText_->GetMaterial().shininess, 0.01f);
+	ImGui::ColorEdit4("color", &titleText_->GetColor().x);
+	ImGui::End();
+
+	ImGui::Begin("Camera");
+	ImGui::DragFloat3("position", &debugCamera_->GetTranslation().x, 0.01f);
+	ImGui::DragFloat3("rotate", &debugCamera_->GetRotate().x, 0.01f);
+	ImGui::End();
+
+	ImGui::Begin("StartModel");
+	ImGui::DragFloat3("position", &startModel_->GetTransform().translate.x, 0.01f);
+	ImGui::DragFloat3("rotate", &startModel_->GetTransform().rotate.x, 0.01f);
+	ImGui::DragFloat3("scale", &startModel_->GetTransform().scale.x, 0.01f);
+	ImGui::DragFloat3("direction", &startModel_->GetDirectLight().direction.x, 0.01f);
+	ImGui::DragFloat("intensity", &startModel_->GetDirectLight().intensity, 0.01f);
+	ImGui::DragFloat("shininess", &startModel_->GetMaterial().shininess, 0.01f);
+	ImGui::ColorEdit4("color", &startModel_->GetColor().x);
+	ImGui::End();
+
+	ImGui::Begin("EndModel");
+	ImGui::DragFloat3("position", &endModel_->GetTransform().translate.x, 0.01f);
+	ImGui::DragFloat3("rotate", &endModel_->GetTransform().rotate.x, 0.01f);
+	ImGui::DragFloat3("scale", &endModel_->GetTransform().scale.x, 0.01f);
+	ImGui::DragFloat3("direction", &endModel_->GetDirectLight().direction.x, 0.01f);
+	ImGui::DragFloat("intensity", &endModel_->GetDirectLight().intensity, 0.01f);
+	ImGui::DragFloat("shininess", &endModel_->GetMaterial().shininess, 0.01f);
+	ImGui::ColorEdit4("color", &endModel_->GetColor().x);
+	ImGui::End();
 #endif
 }
 
@@ -283,7 +318,7 @@ void TitleScene::OnMenuDecide() {
 	    Vector3{-50.0f, 2.0f,  30.0f }, // 左奥
 	    Vector3{90.0f,  2.0f,  30.0f }, // 右奥
 	    Vector3{20.0f,  40.0f, 0.0f  }, // 上
-	    Vector3{20.0f,  2.0f,  -50.0f}, // 手前                                                                                                          
+	    Vector3{20.0f,  2.0f,  -50.0f}, // 手前
 	    Vector3{50.0f,  2.0f,  -30.0f}, // 手前右
 	};
 

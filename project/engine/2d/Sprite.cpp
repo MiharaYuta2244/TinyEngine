@@ -163,7 +163,10 @@ void Sprite::CreateTransformationData() {
 
 void Sprite::SetSrvHandle(D3D12_GPU_DESCRIPTOR_HANDLE srvHandle) { srvHandle_ = srvHandle; }
 
-void Sprite::SetTexture(const std::string texturePath) { textureIndex_ = ctx_->textureManager->GetSrvIndex(texturePath); }
+void Sprite::SetTexture(const std::string texturePath) {
+	textureFilePath_ = texturePath;
+	textureIndex_ = ctx_->textureManager->GetSrvIndex(texturePath);
+}
 
 ComPtr<ID3D12Resource> Sprite::CreateBufferResource(size_t sizeBytes) {
 	// 頂点リソース用のヒープの設定
