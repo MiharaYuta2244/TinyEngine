@@ -6,11 +6,11 @@
 #include "TransformationMatrix.h"
 #include <Transform.h>
 #include <assert.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <fstream>
 #include <sstream>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 using namespace Microsoft::WRL;
 
@@ -20,13 +20,10 @@ void Model::Initialize(ModelCommon* modelCommon, TextureManager* textureManager,
 	filename_ = filename;
 
 	// モデル読み込み
-	modelData_ = LoadObjFile(filename_);
+	modelData_ = LoadModelFile(filename_);
 
 	// 頂点データの初期化
 	CreateVertexData();
-
-	// インデックスデータの初期化
-	// CreateIndexData();
 
 	// テクスチャ読み込み
 	textureManager_->LoadTexture(modelData_.material.textureFilePath);
@@ -42,82 +39,21 @@ void Model::Draw() {
 
 	// VertexBufferViewを設定
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView_); // VBVを設定
-	// IndexBufferViewを設定
-	// commandList->IASetIndexBuffer(&indexBufferView_); // IBVを設定
-
 	// SRVのDescriptorTableの先頭を設定。3はrootParameter[3]（Pixel用テクスチャ）である。
 	commandList->SetGraphicsRootDescriptorTable(2, textureManager_->GetSrvHandleGPU(modelData_.material.textureFilePath));
 	// 描画!(DrawCall/ドローコール)。
 	commandList->DrawInstanced(UINT(modelData_.vertices.size()), 1, 0, 0);
-	// modelCommon_->GetDxCommon()->GetCommandList()->DrawIndexedInstanced(indexCount_, 1, 0, 0, 0);
 }
 
-ModelData Model::LoadObjFile(const std::string& filename) {
+ModelData Model::LoadModelFile(const std::string& filename) {
 	ModelData modelData;            // 構築するModelData
 	std::vector<Vector4> positions; // 位置
 	std::vector<Vector3> normals;   // 法線
 	std::vector<Vector2> texcoords; // テクスチャ座標
 	std::string line;               // ファイルから読んだ1行を格納するもの
 
-	//std::ifstream file("resources/model/" + filename); // ファイルを開く
-	//assert(file.is_open());                            // とりあえず開けなかったら止める
-
-	//while (std::getline(file, line)) {
-	//	std::string identifier;
-	//	std::istringstream s(line);
-	//	s >> identifier; // 先頭の識別子を読む
-
-	//	// identifierに応じた処理
-	//	if (identifier == "v") {
-	//		Vector4 position;
-	//		s >> position.x >> position.y >> position.z;
-	//		position.x *= -1.0f;
-	//		position.w = 1.0f;
-	//		positions.push_back(position);
-	//	} else if (identifier == "vt") {
-	//		Vector2 texcoord;
-	//		s >> texcoord.x >> texcoord.y;
-	//		texcoord.y = 1.0f - texcoord.y;
-	//		texcoords.push_back(texcoord);
-	//	} else if (identifier == "vn") {
-	//		Vector3 normal;
-	//		s >> normal.x >> normal.y >> normal.z;
-	//		normal.x *= -1.0f;
-	//		normals.push_back(normal);
-	//	} else if (identifier == "f") {
-	//		VertexData triangle[3];
-	//		// 面は三角形限定。その他は未対応
-	//		for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
-	//			std::string vertexDefinition;
-	//			s >> vertexDefinition;
-	//			// 頂点の要素へのIndexは「位置/UV/法線」で格納されているので、分解してi\Indexを取得する
-	//			std::istringstream v(vertexDefinition);
-	//			uint32_t elementIndices[3];
-	//			for (int32_t element = 0; element < 3; ++element) {
-	//				std::string index;
-	//				std::getline(v, index, '/'); // 区切りでインデックスを読んでいく
-	//				elementIndices[element] = std::stoi(index);
-	//			}
-	//			// 要素へのIndexから、実際の要素の値を取得して、頂点を構築する
-	//			Vector4 position = positions[elementIndices[0] - 1];
-	//			Vector2 texcoord = texcoords[elementIndices[1] - 1];
-	//			Vector3 normal = normals[elementIndices[2] - 1];
-	//			VertexData vertex = {position, texcoord, normal};
-	//			modelData.vertices.push_back(vertex);
-	//			triangle[faceVertex] = {position, texcoord, normal};
-	//		}
-	//		// 頂点を逆順で登録することで、周り順を逆にする
-	//		modelData.vertices.push_back(triangle[2]);
-	//		modelData.vertices.push_back(triangle[1]);
-	//		modelData.vertices.push_back(triangle[0]);
-	//	} else if (identifier == "mtllib") {
-	//		// materialTemplateLibraryファイルの名前を取得する
-	//		std::string materialFilename;
-	//		s >> materialFilename;
-	//		// 基本的にobjファイルと同一階層にmtlは存在させるので、ディレクトリ名とファイル名を渡す
-	//		modelData.material = LoadMaterialTemplateFile(materialFilename);
-	//	}
-	//}
+	// デフォルトのテクスチャパスを事前に設定
+	modelData.material.textureFilePath = "resources/model/white.png";
 
 	Assimp::Importer importer;
 	std::string filePath = "resources/model/" + filename;
@@ -159,7 +95,14 @@ ModelData Model::LoadObjFile(const std::string& filename) {
 		if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0) {
 			aiString textureFilePath;
 			material->GetTexture(aiTextureType_DIFFUSE, 0, &textureFilePath);
-			modelData.material.textureFilePath = "resources/model/" + std::string(textureFilePath.C_Str());
+
+			// ファイルパス長さ最低値
+			size_t filePathMinLength = 17; // "resources/model/"の長さ
+
+			// テクスチャファイルの指定がないときはwhite.pngを使う
+			if (textureFilePath.length > filePathMinLength) { 
+				modelData.material.textureFilePath = "resources/model/" + std::string(textureFilePath.C_Str());
+			}
 		}
 	}
 

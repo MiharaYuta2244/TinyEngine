@@ -6,7 +6,7 @@
 void TitleText::Initialize(EngineContext* ctx) {
 	textModel_ = std::make_unique<Object3d>();
 	textModel_->Initialize(ctx);
-	textModel_->SetModel("ClimbDrop.obj");
+	textModel_->SetModel("AirplaneLow.glb");
 	textModel_->SetTranslate({21.68f, 13.39f, 12.76f});
 	textModel_->SetRotate({-0.72f, 2.612f, 0.2f});
 	textModel_->SetScale({15.0f, 15.0f, 6.0f});
