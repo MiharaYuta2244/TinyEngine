@@ -1,7 +1,10 @@
 #pragma once
 #include "EngineContext.h"
 #include "Object3d.h"
+#include "Random.h"
+#include "TurretBullet.h"
 #include <memory>
+#include <array>
 
 class GunTurret {
 public:
@@ -13,12 +16,18 @@ public:
 
 private:
 	enum class State {
-		Hidden,       // 隠れる
-		Appearing,    // 出現
-		Aiming,       // 狙い
-		Charging,     // タメ
-		Firing,       // 発射
-		Disappearing, // 退場
+		HIDDEN,       // 隠れる
+		APPEARING,    // 出現
+		AIMING,       // 狙い
+		CHARGING,     // タメ
+		SHOT,         // 発射
+		DISAPPEARING, // 退場
+	};
+
+	enum class RandomPos {
+		TOP,   // 上
+		RIGHT, // 右
+		LEFT   // 左
 	};
 
 private:
@@ -26,7 +35,7 @@ private:
 	void Hide();
 
 	// ランダムな位置に出現
-	void RandomAppear();
+	void Appear();
 
 	// ターゲットに狙いを定める
 	void AimAtTarget();
@@ -47,14 +56,20 @@ private:
 	void ChargeAnimation();
 
 	// イージング移動
-	void EasingMove(const Vector3 startPos, const Vector3 endPos);
+	Vector3 EasingVector3(const Vector3 start, const Vector3 end);
+
+	// 生成位置テーブルを更新
+	void UpdateRandomGeneratePosTable();
+
+	// 退避位置テーブルを更新
+	void UpdateRandomEscapePosTable();
 
 private:
 	// 砲台モデル
 	std::unique_ptr<Object3d> gunTurretModel_;
 
 	// 砲台の状態
-	State state_ = State::Hidden; // 初期状態は隠れる
+	State state_ = State::HIDDEN; // 初期状態は隠れる
 
 	// 経過時間計測
 	float timer_ = 0.0f;
@@ -79,10 +94,48 @@ private:
 
 	// イージング終了判定
 	bool isEasingComplete_ = false;
-	
+
 	// イージング開始時に現在の座標を保存するための変数
 	Vector3 startPos_{};
 
 	// 開始座標保存用のフラグ
-	bool isStartPosSaved_=false;
+	bool isStartPosSaved_ = false;
+
+	// スケールアニメーション開始フラグ
+	bool isScaleAnimation_ = false;
+
+	// 初期スケール
+	Vector3 startScale_{};
+
+	// 目標スケール
+	Vector3 endScale_ = {2.0f, 2.0f, 2.0f};
+
+	// 砲台の弾
+	std::vector<std::unique_ptr<TurretBullet>> bullets_;
+
+	// エンジン機能
+	EngineContext* ctx_ = nullptr;
+
+	// 弾の向かう方向
+	Vector3 bulletDirection_ = {};
+
+	// 砲台の生成位置
+	Vector3 generatePos_{};
+
+	// 退避座標
+	Vector3 escapePos_{};
+
+	// 生成位置テーブル
+	std::array<Vector3, 3> kGeneratePosTable = {
+	    Vector3{RandomUtils::RangeFloat(0.0f, 8.0f),                        8.0f,  0.0f}, // TOP
+	    Vector3{8.0f,	                     RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // RIGHT
+	    Vector3{0.0f,	                     RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // LEFT
+	};
+
+	// 退避位置テーブル
+	std::array<Vector3, 3> kEscapePosTable = {
+	    Vector3{RandomUtils::RangeFloat(0.0f, 8.0f),                        32.0f,  0.0f}, // TOP
+	    Vector3{32.0f,	                     RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // RIGHT
+	    Vector3{-16.0f,	                     RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // LEFT
+	};
 };

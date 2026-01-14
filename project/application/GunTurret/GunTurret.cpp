@@ -1,16 +1,18 @@
 #include "GunTurret.h"
 #include "Easing.h"
 #include "MathOperator.h"
-#include "Random.h"
 #include <numbers>
 
 void GunTurret::Initialize(EngineContext* ctx) {
 	gunTurretModel_ = std::make_unique<Object3d>();
 	gunTurretModel_->Initialize(ctx);
-	gunTurretModel_->SetModel("Hiyoko.obj");
+	gunTurretModel_->SetModel("Cube.obj");
 	gunTurretModel_->SetTranslate({0.0f, 0.0f, 0.0f});
 	gunTurretModel_->SetScale({1.0f, 1.0f, 1.0f});
 	gunTurretModel_->SetRotate({0.0f, std::numbers::pi_v<float>, 0.0f});
+
+	// エンジン機能のポインタを保存
+	ctx_ = ctx;
 }
 
 void GunTurret::Update(float deltaTime) {
@@ -18,67 +20,85 @@ void GunTurret::Update(float deltaTime) {
 
 	switch (state_) {
 		// 隠れる
-	case State::Hidden:
+	case State::HIDDEN:
 		Hide();
 		break;
 		// 出現
-	case State::Appearing:
-		RandomAppear();
+	case State::APPEARING:
+		Appear();
 		break;
 		// 狙い
-	case State::Aiming:
+	case State::AIMING:
 		AimAtTarget();
 		break;
 		// タメ
-	case State::Charging:
+	case State::CHARGING:
 		Charge();
 		break;
 		// 発射
-	case State::Firing:
+	case State::SHOT:
 		Shot();
 		break;
 		// 退場
-	case State::Disappearing:
+	case State::DISAPPEARING:
 		Disappear();
 		break;
+	}
+
+	// 弾の更新
+	for (auto& bullet : bullets_) {
+		bullet->Update(deltaTime, bulletDirection_);
 	}
 
 	// Object3dの更新
 	gunTurretModel_->Update();
 }
 
-void GunTurret::Draw() { gunTurretModel_->Draw(); }
+void GunTurret::Draw() {
+	// 砲台モデルの描画
+	gunTurretModel_->Draw();
+
+	// 弾の描画
+	for (auto& bullet : bullets_) {
+		bullet->Draw();
+	}
+}
 
 void GunTurret::Hide() {
 	if (timer_ >= kAppearDelay) {
-		state_ = State::Appearing; // 状態遷移
+		state_ = State::APPEARING; // 状態遷移
 		ResetTimer();              // タイマーリセット
 	}
 }
 
-void GunTurret::RandomAppear() {
-	Vector3 randomTargetPos = {RandomUtils::RangeFloat(0.0f, 1.0f), RandomUtils::RangeFloat(0.0f, 1.0f), RandomUtils::RangeFloat(0.0f, 1.0f)};
-
-	// 開始位置を保存
+void GunTurret::Appear() {
+	// 開始位置と生成位置を保存
 	if (!isStartPosSaved_) {
-		startPos_ = gunTurretModel_->GetTranslate();
+		startPos_ = gunTurretModel_->GetTranslate();                        // 開始位置保存
+		UpdateRandomGeneratePosTable();                                     // 生成位置テーブル更新
+		generatePos_ = kGeneratePosTable[static_cast<int>(RandomPos::TOP)]; // ランダムに生成位置を決定
 		isStartPosSaved_ = true;
 	}
 
 	// 画面外からランダム座標に向かってイージング移動
-	EasingMove(startPos_, randomTargetPos);
+	if (!isEasingComplete_) {
+		gunTurretModel_->SetTranslate(EasingVector3(startPos_, generatePos_));
+	}
 
 	// イージングが終了したら
 	if (isEasingComplete_) {
 		ResetTimer();              // タイマーリセット
 		isEasingComplete_ = false; // イージング終了フラグリセット
 		isStartPosSaved_ = false;  // 開始位置保存フラグリセット
-		state_ = State::Aiming;    // 状態遷移
+		state_ = State::AIMING;    // 状態遷移
 	}
 }
 
 void GunTurret::AimAtTarget() {
-	state_ = State::Charging; // 状態遷移
+	// 弾の発射方向を設定
+	bulletDirection_ = {0.0f, 5.0f, 0.0f};
+
+	state_ = State::CHARGING; // 状態遷移
 }
 
 void GunTurret::Charge() {
@@ -86,57 +106,89 @@ void GunTurret::Charge() {
 	ChargeAnimation();
 
 	if (timer_ >= kChargeDuration) {
-		ResetTimer();           // タイマーリセット
-		state_ = State::Firing; // 状態遷移
+		gunTurretModel_->SetScale(startScale_);
+		ResetTimer();         // タイマーリセット
+		state_ = State::SHOT; // 状態遷移
 	}
 }
 
 void GunTurret::Shot() {
 	// 発射処理
+	bullets_.emplace_back(std::make_unique<TurretBullet>(ctx_, gunTurretModel_->GetTranslate()));
 
-	state_ = State::Disappearing; // 状態遷移
+	// タイマーリセット
+	ResetTimer();
+
+	state_ = State::DISAPPEARING; // 状態遷移
 }
 
 void GunTurret::Disappear() {
-	Vector3 randomTargetPos = {RandomUtils::RangeFloat(0.0f, 1.0f), RandomUtils::RangeFloat(0.0f, 1.0f), RandomUtils::RangeFloat(0.0f, 1.0f)};
-
-	// 開始位置を保存
+	// 開始位置と退避位置を保存
 	if (!isStartPosSaved_) {
 		startPos_ = gunTurretModel_->GetTranslate();
+
+		// 退避位置を設定
+		UpdateRandomEscapePosTable(); // 退避位置テーブル更新
+		escapePos_ = kEscapePosTable[static_cast<int>(RandomPos::TOP)];
+
 		isStartPosSaved_ = true;
 	}
 
 	// 画面外に向かってイージング移動
-	EasingMove(startPos_, randomTargetPos);
+	gunTurretModel_->SetTranslate(EasingVector3(startPos_, escapePos_));
 
 	// イージングが終了したら
 	if (isEasingComplete_) {
 		ResetTimer();              // タイマーリセット
 		isEasingComplete_ = false; // イージング終了フラグリセット
 		isStartPosSaved_ = false;  // 開始位置保存フラグリセット
-		state_ = State::Hidden;    // 状態遷移
+		state_ = State::HIDDEN;    // 状態遷移
 	}
 }
 
 void GunTurret::ResetTimer() { timer_ = 0.0f; }
 
-void GunTurret::ChargeAnimation() {}
+void GunTurret::ChargeAnimation() {
+	if (!isScaleAnimation_) {
+		// 初期スケールを記録
+		startScale_ = gunTurretModel_->GetScale();
+		isScaleAnimation_ = true;
+	}
 
-void GunTurret::EasingMove(const Vector3 startPos, const Vector3 endPos) {
-	if (!isEasingComplete_)
-		return;
+	// イージングの結果を代入
+	if (!isEasingComplete_) {
+		gunTurretModel_->SetScale(EasingVector3(startScale_, endScale_));
+	}
+}
 
+Vector3 GunTurret::EasingVector3(const Vector3 start, const Vector3 end) {
 	// イージング移動処理
 	float t = std::clamp(timer_ / kEasingDuration, 0.0f, 1.0f);
 
 	// イージング
 	float e = Easing::easeOutCubic(t);
 
-	// 座標設定
-	gunTurretModel_->SetTranslate(startPos + (endPos - startPos) * e);
-
 	// 終了判定
 	if (t >= 1.0f) {
 		isEasingComplete_ = true; // 終了
 	}
+
+	// 座標設定
+	return start + (end - start) * e;
+}
+
+void GunTurret::UpdateRandomGeneratePosTable() {
+	kGeneratePosTable = {
+	    Vector3{RandomUtils::RangeFloat(0.0f, 8.0f),                        8.0f,  0.0f}, // TOP
+	    Vector3{8.0f,	                     RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // RIGHT
+	    Vector3{0.0f,	                     RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // LEFT
+	};
+}
+
+void GunTurret::UpdateRandomEscapePosTable() {
+	kEscapePosTable = {
+	    Vector3{RandomUtils::RangeFloat(0.0f, 8.0f),                        16.0f, 0.0f}, // TOP
+	    Vector3{16.0f,	                    RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // RIGHT
+	    Vector3{-8.0f,	                    RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // LEFT
+	};
 }

@@ -111,4 +111,5 @@ void SceneManager::AllModelLoad() {
 	engineContext_->modelManager->LoadModel("field1.obj");
 	engineContext_->modelManager->LoadModel("enemy.obj");
 	engineContext_->modelManager->LoadModel("AirplaneLow.glb");
+	engineContext_->modelManager->LoadModel("Cube.obj");
 }
