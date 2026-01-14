@@ -3,8 +3,8 @@
 #include "Object3d.h"
 #include "Random.h"
 #include "TurretBullet.h"
-#include <memory>
 #include <array>
+#include <memory>
 
 class GunTurret {
 public:
@@ -14,6 +14,9 @@ public:
 
 	void Draw();
 
+	// Setter
+	void SetTargetPos(Vector3 targetPos) { targetPos_ = targetPos; }
+
 private:
 	enum class State {
 		HIDDEN,       // 隠れる
@@ -21,6 +24,7 @@ private:
 		AIMING,       // 狙い
 		CHARGING,     // タメ
 		SHOT,         // 発射
+		WAITNG,       // 待機
 		DISAPPEARING, // 退場
 	};
 
@@ -46,6 +50,9 @@ private:
 	// 弾を発射する
 	void Shot();
 
+	// 待機
+	void Wait();
+
 	// 画面外に消える
 	void Disappear();
 
@@ -63,6 +70,9 @@ private:
 
 	// 退避位置テーブルを更新
 	void UpdateRandomEscapePosTable();
+
+	// 範囲外に出たら弾の削除
+	void EraseBullets();
 
 private:
 	// 砲台モデル
@@ -91,6 +101,9 @@ private:
 
 	// イージング移動時間
 	const float kEasingDuration = 1.0f;
+
+	// 待機時間
+	const float kWaitDuration = 2.0f;
 
 	// イージング終了判定
 	bool isEasingComplete_ = false;
@@ -127,15 +140,21 @@ private:
 
 	// 生成位置テーブル
 	std::array<Vector3, 3> kGeneratePosTable = {
-	    Vector3{RandomUtils::RangeFloat(0.0f, 8.0f),                        8.0f,  0.0f}, // TOP
-	    Vector3{8.0f,	                     RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // RIGHT
-	    Vector3{0.0f,	                     RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // LEFT
+	    Vector3{RandomUtils::RangeFloat(0.0f, 40.0f),                       26.0f,  0.0f}, // TOP
+	    Vector3{40.0f,	                    RandomUtils::RangeFloat(0.0f, 26.0f), 0.0f}, // RIGHT
+	    Vector3{0.0f,	                     RandomUtils::RangeFloat(0.0f, 26.0f), 0.0f}, // LEFT
 	};
 
 	// 退避位置テーブル
 	std::array<Vector3, 3> kEscapePosTable = {
-	    Vector3{RandomUtils::RangeFloat(0.0f, 8.0f),                        32.0f,  0.0f}, // TOP
-	    Vector3{32.0f,	                     RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // RIGHT
-	    Vector3{-16.0f,	                     RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // LEFT
+	    Vector3{RandomUtils::RangeFloat(0.0f, 8.0f),                        32.0f, 0.0f}, // TOP
+	    Vector3{32.0f,	                    RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // RIGHT
+	    Vector3{-16.0f,                       RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // LEFT
 	};
+
+	// 生成&退避位置
+	RandomPos currentRandomPos_ = RandomPos::TOP;
+
+	// 発射する弾の目標地点
+	Vector3 targetPos_{};
 };

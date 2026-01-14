@@ -135,6 +135,9 @@ void GamePlayScene::Update() {
 	// 砲台の更新
 	gunTurret_->Update(timeManager_->GetDeltaTime());
 
+	// 砲台のターゲット位置をプレイヤーの位置に設定
+	gunTurret_->SetTargetPos(player_->GetTranslate());
+
 	// 敵更新
 	enemy_->Update(timeManager_->GetDeltaTime());
 

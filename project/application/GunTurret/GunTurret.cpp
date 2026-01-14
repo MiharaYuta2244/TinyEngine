@@ -39,6 +39,10 @@ void GunTurret::Update(float deltaTime) {
 	case State::SHOT:
 		Shot();
 		break;
+		// 待機
+	case State::WAITNG:
+		Wait();
+		break;
 		// 退場
 	case State::DISAPPEARING:
 		Disappear();
@@ -49,6 +53,9 @@ void GunTurret::Update(float deltaTime) {
 	for (auto& bullet : bullets_) {
 		bullet->Update(deltaTime, bulletDirection_);
 	}
+
+	// 弾の削除
+	EraseBullets();
 
 	// Object3dの更新
 	gunTurretModel_->Update();
@@ -74,9 +81,10 @@ void GunTurret::Hide() {
 void GunTurret::Appear() {
 	// 開始位置と生成位置を保存
 	if (!isStartPosSaved_) {
-		startPos_ = gunTurretModel_->GetTranslate();                        // 開始位置保存
-		UpdateRandomGeneratePosTable();                                     // 生成位置テーブル更新
-		generatePos_ = kGeneratePosTable[static_cast<int>(RandomPos::TOP)]; // ランダムに生成位置を決定
+		startPos_ = gunTurretModel_->GetTranslate();                             // 開始位置保存
+		UpdateRandomGeneratePosTable();                                          // 生成位置テーブル更新
+		currentRandomPos_ = static_cast<RandomPos>(RandomUtils::RangeInt(0, 2)); // ランダムに生成位置を選択
+		generatePos_ = kGeneratePosTable[static_cast<int>(currentRandomPos_)];   // ランダムに生成位置を決定
 		isStartPosSaved_ = true;
 	}
 
@@ -96,7 +104,7 @@ void GunTurret::Appear() {
 
 void GunTurret::AimAtTarget() {
 	// 弾の発射方向を設定
-	bulletDirection_ = {0.0f, 5.0f, 0.0f};
+	bulletDirection_ = MathUtility::Normalize(targetPos_ - gunTurretModel_->GetTranslate());
 
 	state_ = State::CHARGING; // 状態遷移
 }
@@ -107,8 +115,9 @@ void GunTurret::Charge() {
 
 	if (timer_ >= kChargeDuration) {
 		gunTurretModel_->SetScale(startScale_);
-		ResetTimer();         // タイマーリセット
-		state_ = State::SHOT; // 状態遷移
+		isEasingComplete_ = false; // イージング終了フラグリセット
+		ResetTimer();              // タイマーリセット
+		state_ = State::SHOT;      // 状態遷移
 	}
 }
 
@@ -119,7 +128,14 @@ void GunTurret::Shot() {
 	// タイマーリセット
 	ResetTimer();
 
-	state_ = State::DISAPPEARING; // 状態遷移
+	state_ = State::WAITNG; // 状態遷移
+}
+
+void GunTurret::Wait() {
+	if (timer_ >= kWaitDuration) {
+		ResetTimer();                 // タイマーリセット
+		state_ = State::DISAPPEARING; // 状態遷移
+	}
 }
 
 void GunTurret::Disappear() {
@@ -129,13 +145,15 @@ void GunTurret::Disappear() {
 
 		// 退避位置を設定
 		UpdateRandomEscapePosTable(); // 退避位置テーブル更新
-		escapePos_ = kEscapePosTable[static_cast<int>(RandomPos::TOP)];
+		escapePos_ = kEscapePosTable[static_cast<int>(currentRandomPos_)];
 
 		isStartPosSaved_ = true;
 	}
 
 	// 画面外に向かってイージング移動
-	gunTurretModel_->SetTranslate(EasingVector3(startPos_, escapePos_));
+	if (!isEasingComplete_) {
+		gunTurretModel_->SetTranslate(EasingVector3(startPos_, escapePos_));
+	}
 
 	// イージングが終了したら
 	if (isEasingComplete_) {
@@ -179,16 +197,20 @@ Vector3 GunTurret::EasingVector3(const Vector3 start, const Vector3 end) {
 
 void GunTurret::UpdateRandomGeneratePosTable() {
 	kGeneratePosTable = {
-	    Vector3{RandomUtils::RangeFloat(0.0f, 8.0f),                        8.0f,  0.0f}, // TOP
-	    Vector3{8.0f,	                     RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // RIGHT
-	    Vector3{0.0f,	                     RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // LEFT
+	    Vector3{RandomUtils::RangeFloat(0.0f, 40.0f),                       26.0f,  0.0f}, // TOP
+	    Vector3{40.0f,	                    RandomUtils::RangeFloat(0.0f, 26.0f), 0.0f}, // RIGHT
+	    Vector3{0.0f,	                     RandomUtils::RangeFloat(0.0f, 26.0f), 0.0f}, // LEFT
 	};
 }
 
 void GunTurret::UpdateRandomEscapePosTable() {
 	kEscapePosTable = {
-	    Vector3{RandomUtils::RangeFloat(0.0f, 8.0f),                        16.0f, 0.0f}, // TOP
-	    Vector3{16.0f,	                    RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // RIGHT
-	    Vector3{-8.0f,	                    RandomUtils::RangeFloat(0.0f, 8.0f), 0.0f}, // LEFT
+	    Vector3{gunTurretModel_->GetTranslate().x, 36.0f,                             0.0f}, // TOP
+	    Vector3{50.0f,	                         gunTurretModel_->GetTranslate().y, 0.0f}, // RIGHT
+	    Vector3{-10.0f,	                         gunTurretModel_->GetTranslate().y, 0.0f}, // LEFT
 	};
+}
+
+void GunTurret::EraseBullets() {
+	std::erase_if(bullets_, [](const auto& b) { return b->IsOutside(); });
 }

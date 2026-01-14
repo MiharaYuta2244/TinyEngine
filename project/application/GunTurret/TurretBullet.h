@@ -13,6 +13,9 @@ public:
 
 	void Draw();
 
+	// 範囲外に出たか判定
+	bool IsOutside();
+
 private:
 	// 移動
 	void Move(float deltaTime, Vector3 direction);
@@ -20,4 +23,7 @@ private:
 private:
 	// モデル
 	std::unique_ptr<Object3d> bulletModel_;
+
+	// 速度
+	float velocity_ = 10.0f;
 };

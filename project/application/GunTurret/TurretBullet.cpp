@@ -10,7 +10,7 @@ void TurretBullet::Initialize(EngineContext* ctx, Vector3 pos) {
 	bulletModel_->Initialize(ctx);
 	bulletModel_->SetModel("sphere.obj");
 	bulletModel_->SetTranslate(pos);
-	bulletModel_->SetScale({0.2f, 0.2f, 0.2f});
+	bulletModel_->SetScale({1.0f, 1.0f, 1.0f});
 	bulletModel_->SetRotate({0.0f, 0.0f, 0.0f});
 }
 
@@ -24,4 +24,10 @@ void TurretBullet::Update(float deltaTime, Vector3 direction) {
 
 void TurretBullet::Draw() { bulletModel_->Draw(); }
 
-void TurretBullet::Move(float deltaTime, Vector3 direction) { bulletModel_->SetTranslate(bulletModel_->GetTranslate() += direction * deltaTime); }
+bool TurretBullet::IsOutside() { 
+	Vector3 pos = bulletModel_->GetTranslate(); // 弾の現在位置を取得
+
+	return pos.x < -10.0f || pos.x > 50.0f || pos.y < -10.0f || pos.y > 50.0f;
+}
+
+void TurretBullet::Move(float deltaTime, Vector3 direction) { bulletModel_->SetTranslate(bulletModel_->GetTranslate() += direction * velocity_ * deltaTime); }
