@@ -8,6 +8,7 @@
 #include "TitleMenuModel/TitleMenuModel.h"
 #include "TitleText/TitleText.h"
 #include "XAudio.h"
+#include "AnimationBundle.h"
 #include <array>
 #include <memory>
 
@@ -101,6 +102,9 @@ private:
 	// 選択中の項目に応じてスプライトの変更
 	void ChangeMenuSelectSprite();
 
+	// タイトルテキストアニメーション
+	void AnimationTitle();
+
 private:
 	// タイトルテキストモデル
 	std::unique_ptr<TitleText> titleText_;
@@ -184,4 +188,7 @@ private:
 
 	// メニューで選択中の項目スプライト
 	std::unique_ptr<Sprite> menuSelectSprite_;
+
+	// 遷移時のタイトルアニメーション
+	AnimationBundle<Vector3> animationTitle_;
 };

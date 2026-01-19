@@ -35,10 +35,10 @@ public:
 	bool GetIsActive() const { return isActive_; }
 
 private:
-	T start_;           // 始点
-	T end_;             // 終点
+	T start_;           // 開始値
+	T end_;             // 目標値
 	float duration_;    // アニメーション時間
 	float time_;        // 経過時間
 	EaseType easeType_; // イージングのタイプ
-	bool isActive_;      // アクティブかどうか
+	bool isActive_;     // アクティブかどうか
 };

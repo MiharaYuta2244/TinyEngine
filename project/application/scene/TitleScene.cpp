@@ -99,6 +99,11 @@ void TitleScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* 
 	}
 
 	menuSelected_ = false;
+
+	// タイトルアニメーション
+	animationTitle_.start = titleText_->GetTranslate();
+	animationTitle_.end = {0.0f, 0.0f, 0.0f};
+	animationTitle_.temp = animationTitle_.start;
 }
 
 void TitleScene::Update() {
@@ -110,18 +115,18 @@ void TitleScene::Update() {
 		}
 	}
 
-	// モデルの更新　タイトル1
-	Title1Update();
-
-	// モデルの更新　タイトル2
-	Title2Update();
-
 	// 両シーン共通の更新処理
 	rightCurtain_->Update();
 	leftCurtain_->Update();
 
 	// タイトルの状態切り替え
 	StateChange();
+
+	// モデルの更新　タイトル1
+	Title1Update();
+
+	// モデルの更新　タイトル2
+	Title2Update();
 
 	// イージング更新
 	UpdateEasing();
@@ -365,14 +370,27 @@ void TitleScene::ChangeMenuSelectSprite() {
 	}
 }
 
-void TitleScene::Title1Update() {
-	if (titleNumber_ == TitleNumber::TITLE1) {
-		titleText_->Update(timeManager_->GetDeltaTime());
-		startModel_->Update(timeManager_->GetDeltaTime());
-		endModel_->Update(timeManager_->GetDeltaTime());
-		ruleSprite1_->Update();
-		ruleSprite2_->Update();
+void TitleScene::AnimationTitle() {
+	if (!animationTitle_.anim.GetIsActive() && prevTitleNumber_ != titleNumber_) {
+		animationTitle_.anim = {
+		    animationTitle_.start, {1.0f, 1.0f, 1.0f},
+             0.5f, EaseType::EASEOUTCUBIC
+        };
 	}
+
+	animationTitle_.anim.Update(timeManager_->GetDeltaTime(), animationTitle_.temp);
+	titleText_->SetScale(animationTitle_.temp);
+}
+
+void TitleScene::Title1Update() {
+	// if (titleNumber_ == TitleNumber::TITLE1) {
+	AnimationTitle();
+	titleText_->Update(timeManager_->GetDeltaTime());
+	startModel_->Update(timeManager_->GetDeltaTime());
+	endModel_->Update(timeManager_->GetDeltaTime());
+	ruleSprite1_->Update();
+	ruleSprite2_->Update();
+	//}
 }
 
 void TitleScene::Title2Update() {
@@ -398,13 +416,13 @@ void TitleScene::Title2Update() {
 }
 
 void TitleScene::Title1Draw() {
-	if (titleNumber_ == TitleNumber::TITLE1) {
-		titleText_->Draw();
-		startModel_->Draw();
-		endModel_->Draw();
-		ruleSprite1_->Draw();
-		ruleSprite2_->Draw();
-	}
+	// if (titleNumber_ == TitleNumber::TITLE1) {
+	titleText_->Draw();
+	startModel_->Draw();
+	endModel_->Draw();
+	ruleSprite1_->Draw();
+	ruleSprite2_->Draw();
+	//}
 }
 
 void TitleScene::Title2Draw() {
