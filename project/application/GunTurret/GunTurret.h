@@ -24,7 +24,7 @@ private:
 		AIMING,       // 狙い
 		CHARGING,     // タメ
 		SHOT,         // 発射
-		WAITNG,       // 待機
+		WAITING,       // 待機
 		DISAPPEARING, // 退場
 	};
 

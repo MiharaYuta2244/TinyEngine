@@ -16,7 +16,7 @@ void Enemy::Initialize(EngineContext* ctx) {
 	transform_.rotate = {0.0f, std::numbers::pi_v<float>, 0.0f};
 	transform_.translate = {50.0f, -1.0f, 0.0f};
 	size_ = {1.0f, 1.0f, 1.0f};
-	collisionSize = {1.0f, 1.0f, 1.0f};
+	collisionSize_ = {1.0f, 1.0f, 1.0f};
 	isActive_ = true;
 
 	// HP

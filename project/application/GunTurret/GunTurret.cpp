@@ -40,7 +40,7 @@ void GunTurret::Update(float deltaTime) {
 		Shot();
 		break;
 		// 待機
-	case State::WAITNG:
+	case State::WAITING:
 		Wait();
 		break;
 		// 退場
@@ -128,7 +128,7 @@ void GunTurret::Shot() {
 	// タイマーリセット
 	ResetTimer();
 
-	state_ = State::WAITNG; // 状態遷移
+	state_ = State::WAITING; // 状態遷移
 }
 
 void GunTurret::Wait() {

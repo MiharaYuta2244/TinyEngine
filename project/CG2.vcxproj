@@ -231,7 +231,6 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\player\Player.cpp" />
     <ClCompile Include="application\Map\Map.cpp" />
     <ClCompile Include="engine\base\SrvManager.cpp" />
-    <ClCompile Include="application\PowerUpItem\PowerUpItem.cpp" />
     <ClCompile Include="engine\3d\Particle.cpp" />
     <ClCompile Include="engine\3d\ParticleCommon.cpp" />
     <ClCompile Include="engine\base\utility\random\Random.cpp" />
@@ -383,7 +382,6 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="engine\input\GamePad.h" />
     <ClInclude Include="application\Map\Map.h" />
     <ClInclude Include="engine\base\SrvManager.h" />
-    <ClInclude Include="application\PowerUpItem\PowerUpItem.h" />
     <ClInclude Include="engine\3d\Particle.h" />
     <ClInclude Include="engine\3d\ParticleCommon.h" />
     <ClInclude Include="engine\base\utility\random\Random.h" />

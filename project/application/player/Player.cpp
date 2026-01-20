@@ -19,7 +19,7 @@ void Player::Initialize(EngineContext* ctx, DirectInput* input, GamePad* gamePad
 	transform_.rotate = {0.0f, std::numbers::pi_v<float> / 2, 0.0f};
 	transform_.translate = {20.0f, 0.0f, 0.0f};
 	size_ = {1.0f, 1.0f, 1.0f};
-	collisionSize = {1.0f, 1.0f, 1.0f};
+	collisionSize_ = {1.0f, 1.0f, 1.0f};
 	isActive_ = true;
 
 	// 当たり判定位置更新

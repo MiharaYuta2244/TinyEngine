@@ -26,7 +26,7 @@ public:
 protected:
 	Transform transform_ = {0.0f,0.0f,0.0f};
 	Vector3 size_ = {0.0f, 0.0f, 0.0f};
-	Vector3 collisionSize = {0.0f, 0.0f, 0.0f};
+	Vector3 collisionSize_ = {0.0f, 0.0f, 0.0f};
 	bool isActive_ = true;
 	AABB aabb_;
 	Sphere sphere_;
