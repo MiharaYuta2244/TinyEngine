@@ -10,7 +10,6 @@
 #include "Fruit/Orange/Orange.h"
 #include "Particle.h"
 #include "Player/Player.h"
-#include "PowerUpItem/PowerUpItem.h"
 #include "Sprite.h"
 #include "Cloud/Cloud.h"
 #include "XAudio.h"

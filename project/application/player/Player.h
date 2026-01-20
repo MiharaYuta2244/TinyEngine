@@ -1,11 +1,11 @@
 #pragma once
 #include "Actor.h"
+#include "AnimationBundle.h"
 #include "DirectInput.h"
 #include "EasingAnimation.h"
 #include "EngineContext.h"
 #include "PlayerGauge/PlayerGauge.h"
 #include "Sprite.h"
-#include "AnimationBundle.h"
 #include <array>
 
 class GamePad;
@@ -159,4 +159,8 @@ private:
 
 	// ジャンプ後アニメーション
 	AnimationBundle<Vector3> afterJumpScaleAnim;
+
+	// プレイヤーの移動制限値
+	float rightMoveLimit_ = 42.0f;
+	float leftMoveLimit_ = -3.0f;
 };

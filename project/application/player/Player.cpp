@@ -63,10 +63,10 @@ void Player::Update(float deltaTime) {
 	// 横移動
 	HorizontalMove();
 
-	if (transform_.translate.x >= 42.0f) {
-		transform_.translate.x = 42.0f;
-	} else if (transform_.translate.x <= -3.0f) {
-		transform_.translate.x = -3.0f;
+	if (transform_.translate.x >= rightMoveLimit_) {
+		transform_.translate.x = rightMoveLimit_;
+	} else if (transform_.translate.x <= leftMoveLimit_) {
+		transform_.translate.x = leftMoveLimit_;
 	}
 
 	// ヒップドロップ
