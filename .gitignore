@@ -64,12 +64,6 @@ StyleCopReport.xml
 *.exe
 *.dll
 
-# Ignore external library Development builds
-project/externals/**/Development/
-
-# Ignore external library Development builds
-project/externals/**/Debug/
-
 # Imgui.ini
 project/imgui.ini
 

@@ -53,7 +53,7 @@ public:
 	void SetColor(const Vector4& color) { materialData_->color = color; }
 	void SetSize(const Vector2& size) { size_ = size; }
 	void SetSrvHandle(D3D12_GPU_DESCRIPTOR_HANDLE srvHandle);
-	void SetTexture(const std::string texturePath);
+	void SetTexture(const std::string& texturePath);
 	void SetAnchorPoint(const Vector2& anchorPoint) { anchorPoint_ = anchorPoint; }
 	void SetIsFlipX(const bool& isFlipX) { isFlipX_ = isFlipX; }
 	void SetIsFlipY(const bool& isFlipY) { isFlipY_ = isFlipY; }
