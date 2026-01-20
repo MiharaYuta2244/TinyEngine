@@ -59,6 +59,12 @@ StyleCopReport.xml
 # Debug symbols
 *.pdb
 
+# Executable build outputs
+*.exe
+
+# External library debug symbols
+externals/**/Debug/*.pdb
+
 # Chutzpah Test files
 _Chutzpah*
 
