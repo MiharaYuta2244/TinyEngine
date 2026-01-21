@@ -43,12 +43,6 @@ void Player::Initialize(EngineContext* ctx, DirectInput* input, GamePad* gamePad
 		spriteHPGauge_[i]->SetSize({24.0f, 32.0f});
 		spriteHPGauge_[i]->SetColor({0.0f, 1.0f, 0.0f, 1.0f});
 	}
-
-	// HPゲージ背景スプライト
-	spriteHPGaugeBG_->Initialize(ctx_, "resources/white.png");
-	spriteHPGaugeBG_->SetPosition({22.0f, 22.0f});
-	spriteHPGaugeBG_->SetSize({120.0f, 32.0f});
-	spriteHPGaugeBG_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 }
 
 void Player::Update(float deltaTime) {
@@ -113,15 +107,10 @@ void Player::Update(float deltaTime) {
 		spriteHPGauge_[i]->SetPosition(ScreenToWorldPoint({transform_.translate.x + i * 1.0f, transform_.translate.y, transform_.translate.z}, spriteMargin_));
 	}
 
-	spriteHPGaugeBG_->SetPosition(ScreenToWorldPoint(transform_.translate, spriteMargin_));
-
 	// HPゲージスプライト
 	for (auto& hpGauge : spriteHPGauge_) {
 		hpGauge->Update();
 	}
-
-	// HPゲージ背景スプライト
-	spriteHPGaugeBG_->Update();
 
 	// 位置の更新
 	object3d_->SetTransform(transform_);
@@ -138,9 +127,6 @@ void Player::Draw() {
 		object3d_->Draw();
 	}
 
-	// HPゲージ背景スプライト
-	// spriteHPGaugeBG_->Draw();
-
 	// HPゲージスプライト
 	for (auto& hpGauge : spriteHPGauge_) {
 		hpGauge->Draw();
@@ -150,17 +136,15 @@ void Player::Draw() {
 void Player::UpdateImGui() {
 #ifdef USE_IMGUI
 	ImGui::Begin("Player");
-
-	/*ImGui::Text("HP : %d", hp_);
+	ImGui::Text("HP : %d", hp_);
 	ImGui::Text("InvincibleFrameCount : %d", invincibleFrameCount_);
 	ImGui::DragFloat3("Position", &transform_.translate.x, 0.01f);
 	ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
 	ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
-	ImGui::DragFloat2("Velocity", &velocity_.x, 0.01f);*/
+	ImGui::DragFloat2("Velocity", &velocity_.x, 0.01f);
 	ImGui::DragFloat3("direction", &object3d_->GetDirectionalLight().direction.x, 0.01f);
 	ImGui::DragFloat("intensity", &object3d_->GetDirectionalLight().intensity, 0.01f);
 	ImGui::DragFloat("shininess", &object3d_->GetMaterial().shininess, 0.01f);
-
 	ImGui::End();
 #endif
 }
@@ -201,12 +185,6 @@ void Player::HorizontalMove() {
 
 void Player::Jump() {
 	bool isJumpInput = input_->KeyTriggered(DIK_SPACE) || gamePad_->GetState().buttonsPressed.a;
-	// bool isJumpHoldInput = input_->KeyDown(DIK_SPACE) || gamePad_->GetState().buttons.a;
-
-	// キーの入力時間に応じてジャンプ力を設定
-	/*if (isJumpHoldInput && !isJump_) {
-	    jumpPower_ += addChargeJumpAmount_;
-	}*/
 
 	// ジャンプ
 	if (isJumpInput && !isJump_) {
@@ -313,6 +291,13 @@ void Player::AfterHipDrop() {
 
 void Player::IncrementHipDropPowerLevel() { hipDropPowerLevel_ += 1; }
 
+void Player::SetFruitGetAnimation() {
+	fruitGetAnim_.anim = {
+	    transform_.scale, {2.0f, 2.0f, 2.0f},
+         0.5f, EaseType::EASEOUTCUBIC
+    };
+}
+
 Vector2 Player::ScreenToWorldPoint(Vector3 worldPosition, Vector2 margin) {
 	// ビューポートマトリックス
 	Matrix4x4 viewportMatrix = MathUtility::MakeViewPortMatrix(0, 0, 1280.0f, 720.0f, 0.0f, 1.0f);
@@ -345,18 +330,32 @@ void Player::AnimationJump() {
 
 	// ジャンプ後アニメーション
 	if (afterJumpScaleAnim.anim.GetIsActive()) {
-		bool playing = afterJumpScaleAnim.anim.Update(deltaTime_, afterJumpScaleAnim.temp);
+		afterJumpScaleAnim.anim.Update(deltaTime_, afterJumpScaleAnim.temp);
 		transform_.scale = afterJumpScaleAnim.temp;
 	}
 }
 
 void Player::AnimationFruitGet() {
-	if (!isGetFruit_)
-		return;
-
 	// フルーツ取得時のスケールアニメーション
-	if (fruitGetAnim_.anim.GetIsActive()) {
+	if (isGetFruit_ && fruitGetAnim_.anim.GetIsActive()) {
 		bool playing = fruitGetAnim_.anim.Update(deltaTime_, fruitGetAnim_.temp);
 		transform_.scale = fruitGetAnim_.temp;
+
+		if (!playing && !afterFruitGetAnim_.anim.GetIsActive()) {
+			isGetFruit_ = false; // 取得フラグを下す
+
+			// 取得後アニメーション初期化
+			afterFruitGetAnim_.anim = {
+			    transform_.scale, {1.0f, 1.0f, 1.0f},
+                 0.5f, EaseType::EASEOUTCUBIC
+            };
+		}
+		return;
+	}
+
+	// 取得後アニメーション
+	if (afterFruitGetAnim_.anim.GetIsActive()) {
+		afterFruitGetAnim_.anim.Update(deltaTime_, afterFruitGetAnim_.temp);
+		transform_.scale = afterFruitGetAnim_.temp;
 	}
 }

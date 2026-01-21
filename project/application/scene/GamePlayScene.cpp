@@ -402,6 +402,7 @@ template<typename FruitType> void GamePlayScene::HandleFruitCollision(std::vecto
 
 			        // フルーツ取得時プレイヤーのスケールアニメーションフラグをたてる
 			        player_->SetIsGetFruit(true);
+			        player_->SetFruitGetAnimation(); // アニメーションの初期設定
 
 			        return true;
 		        }

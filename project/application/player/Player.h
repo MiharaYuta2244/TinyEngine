@@ -45,6 +45,9 @@ public:
 	// ヒップドロップパワーレベルを上昇
 	void IncrementHipDropPowerLevel();
 
+	// アニメーションの初期設定を行う
+	void SetFruitGetAnimation();
+
 private:
 	enum class Direction {
 		RIGHT = 0,
@@ -139,9 +142,6 @@ private:
 	// HPゲージスプライト
 	std::vector<std::unique_ptr<Sprite>> spriteHPGauge_;
 
-	// HPゲージ背景スプライト
-	std::unique_ptr<Sprite> spriteHPGaugeBG_ = std::make_unique<Sprite>();
-
 	// 敵にヒップドロップを当てた時に立つフラグ
 	bool isHitEnemyHipDrop_ = false;
 
@@ -180,6 +180,9 @@ private:
 
 	// フルーツ取得時アニメーション
 	AnimationBundle<Vector3> fruitGetAnim_;
+
+	// フルーツ取得後アニメーション
+	AnimationBundle<Vector3> afterFruitGetAnim_;
 
 	// フルーツをゲットしたかどうか
 	bool isGetFruit_ = false;
