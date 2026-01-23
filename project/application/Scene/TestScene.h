@@ -24,4 +24,7 @@ private:
 
 	// Plane.glb
 	std::unique_ptr<Object3d> planeGltfModel_;
+
+	// 地形モデル
+	std::unique_ptr<Object3d> fieldModel_;
 };

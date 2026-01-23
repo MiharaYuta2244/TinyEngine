@@ -116,4 +116,5 @@ void SceneManager::AllModelLoad() {
 	engineContext_->modelManager->LoadModel("GunTurret.obj");
 	engineContext_->modelManager->LoadModel("MonsterBall.obj");
 	engineContext_->modelManager->LoadModel("plane.gltf");
+	engineContext_->modelManager->LoadModel("terrain.obj");
 }

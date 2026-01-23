@@ -128,11 +128,12 @@ PixelShaderOutput main(VertexShaderOutput input)
     // スポットライトからの距離
     float spotDistance = length(gSpotLight.position - input.worldPosition);
     // スポットライトの減衰
-    float spotAttenuation = pow(saturate(-spotDistance / gSpotLight.distance + 1.0), gSpotLight.decay);
+    float spotAttenuation = pow(saturate(1.0 - spotDistance / gSpotLight.distance), gSpotLight.decay);
 
     // スポットライトの角度減衰
     float spotDirectionCos = dot(-spotLightDirection, normalize(gSpotLight.direction));
-    float angleAttenuation = smoothstep(0.0, gSpotLight.cosAngle, spotDirectionCos);
+    // cosAngleが0.707の場合、45度のコーンを形成
+    float angleAttenuation = smoothstep(gSpotLight.cosAngle - 0.1, gSpotLight.cosAngle, spotDirectionCos);
  
     // 拡散反射 spot
     float3 diffuseSpotLight = gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * spotCos * gSpotLight.intensity * spotAttenuation * angleAttenuation;
@@ -155,10 +156,10 @@ PixelShaderOutput main(VertexShaderOutput input)
     float3 sLightColor = diffuseSpotLight + specularSpotLight;
 
     // 最終色
-    float3 lightFinalColor = pLightColor;
+    float3 lightFinalColor = dirLightColor + pLightColor + sLightColor;
         
     // 拡散反射+鏡面反射
-    output.color.rgb = dirLightColor;
+    output.color.rgb = lightFinalColor;
     // アルファ
     output.color.a = gMaterial.color.a * textureColor.a;
     

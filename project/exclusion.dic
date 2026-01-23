@@ -127,3 +127,5 @@ deadzone
 Anim
 aabb
 typeparam
+Gltf
+assimp

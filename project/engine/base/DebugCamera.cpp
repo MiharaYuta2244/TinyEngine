@@ -34,7 +34,6 @@ void DebugCamera::SetRotate(const Vector3& rotate) {
 }
 
 void DebugCamera::Update(const DirectInput& input, const GamePad& gamePad) {
-#ifdef _DEBUG
 	// フリー回転
 	if (input.MouseButtonDown(1)) {
 		float dx = input.GetMouseDeltaX() * 0.001f;
@@ -52,6 +51,7 @@ void DebugCamera::Update(const DirectInput& input, const GamePad& gamePad) {
 		float dx = input.GetMouseDeltaX() * 0.001f;
 		float dy = input.GetMouseDeltaY() * 0.001f;
 
+		// Y軸回転（ヨー）のみを適用してZ軸回転を制限
 		Matrix4x4 yaw = MathUtility::MakeYawRotateMatrix(dx);
 		Matrix4x4 pitch = MathUtility::MakePitchRotateMatrix(dy);
 		Matrix4x4 rot = MathUtility::Multiply(pitch, yaw);
@@ -61,8 +61,25 @@ void DebugCamera::Update(const DirectInput& input, const GamePad& gamePad) {
 		pos = MathUtility::MultiplyVector(pos, rot);
 		transform_.translate = pos;
 
+		// 回転を適用（Z軸の傾きを排除）
 		orientation_ = MathUtility::Multiply(rot, orientation_);
+		// Z軸の傾きを取り除くため正規直交化後、Z軸ロールをリセット
 		orientation_ = MathUtility::Orthonormalize(orientation_);
+
+		// Z軸ロール成分を0にする（ワールドアップベクトルを(0,1,0)に強制）
+		Vector3 right = {orientation_.m[0][0], orientation_.m[0][1], orientation_.m[0][2]};
+		Vector3 forward = {orientation_.m[2][0], orientation_.m[2][1], orientation_.m[2][2]};
+		Vector3 up = MathUtility::Cross(forward, right);
+
+		orientation_.m[0][0] = right.x;
+		orientation_.m[0][1] = right.y;
+		orientation_.m[0][2] = right.z;
+		orientation_.m[1][0] = up.x;
+		orientation_.m[1][1] = up.y;
+		orientation_.m[1][2] = up.z;
+		orientation_.m[2][0] = forward.x;
+		orientation_.m[2][1] = forward.y;
+		orientation_.m[2][2] = forward.z;
 	}
 
 	auto MoveLocal = [&](const Vector3& local) {
@@ -91,8 +108,6 @@ void DebugCamera::Update(const DirectInput& input, const GamePad& gamePad) {
 		transform_.translate = MathUtility::Add(transform_.translate, world);
 		pivot_ = MathUtility::Add(pivot_, world);
 	}
-
-#endif
 	UpdateViewMatrix();
 }
 

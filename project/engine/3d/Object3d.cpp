@@ -66,8 +66,8 @@ void Object3d::Update() {
 		worldViewProjectionMatrix_ = worldMatrix_;
 	}
 
-	transformMatrixData_->WVP = worldViewProjectionMatrix_;
-	transformMatrixData_->World = worldMatrix_;
+	transformMatrixData_->WVP = modelData_.rootNode.localMatrix * worldViewProjectionMatrix_;
+	transformMatrixData_->World = modelData_.rootNode.localMatrix * worldMatrix_;
 
 	// 非均一スケールに対応した逆転置行列の計算
 	// 3x3部分を抽出して逆行列を計算し、転置する
@@ -109,6 +109,11 @@ void Object3d::Update() {
 	XMVECTOR dirVec = XMVectorSet(directionalLight_.direction.x, directionalLight_.direction.y, directionalLight_.direction.z, 0.0f);
 	dirVec = XMVector3Normalize(dirVec);
 	XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&directionalLight_.direction), dirVec);
+
+	// SpotLightの方向を正規化
+	XMVECTOR spotDirVec = XMVectorSet(spotLight_.direction.x, spotLight_.direction.y, spotLight_.direction.z, 0.0f);
+	spotDirVec = XMVector3Normalize(spotDirVec);
+	XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&spotLight_.direction), spotDirVec);
 
 	*directionalLightData_ = directionalLight_;
 	*pointLightData_ = pointLight_;
@@ -159,6 +164,11 @@ void Object3d::Draw() {
 void Object3d::SetModel(const std::string& filePath) {
 	// モデルを検索してセットする
 	model_ = ctx_->modelManager->FindModel(filePath);
+
+	// モデルが正常に読み込まれた場合、modelDataをコピー
+	if (model_) {
+		modelData_ = model_->GetModelData();
+	}
 }
 
 void Object3d::SetColor(Vector4 color) {
@@ -296,6 +306,14 @@ void Object3d::CreateSpotLightData() {
 	spotLight_.distance = 20.0f;
 	spotLight_.decay = 1.0f;
 	spotLight_.cosAngle = 0.707f; // 約45度のコサイン値
+
+	// Vector3 → XMVECTOR 変換
+	XMVECTOR dirVec = XMVectorSet(spotLight_.direction.x, spotLight_.direction.y, spotLight_.direction.z, 0.0f);
+	// 正規化
+	dirVec = XMVector3Normalize(dirVec);
+	// XMVECTOR → Vector3 に戻す
+	XMStoreFloat3(reinterpret_cast<XMFLOAT3*>(&spotLight_.direction), dirVec);
+
 	// spotLightDataへの書き込み
 	*spotLightData_ = spotLight_;
 }

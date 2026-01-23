@@ -164,4 +164,7 @@ private:
 
 	// コンテキスト構造体
 	EngineContext* ctx_;
+
+	// モデルデータ
+	ModelData modelData_;
 };

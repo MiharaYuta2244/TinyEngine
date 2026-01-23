@@ -6,9 +6,11 @@
 #include "ModelCommon.h"
 #include "MeshData.h"
 #include "IMeshGenerator.h"
+#include "Node.h"
 #include <d3d12.h>
 #include <string>
 #include <vector>
+#include <assimp/scene.h>
 
 class TextureManager;
 
@@ -19,6 +21,9 @@ public:
 	void Draw();
 
 	void Update();
+
+	// Getter
+	const ModelData& GetModelData() const { return modelData_; }
 
 private:
 	ModelData LoadModelFile(const std::string& filename);
@@ -37,7 +42,7 @@ private:
 	void CreateIndexData();
 
 	// assimpのNode(aiNode)から、右の構造体に変換する関数を作る
-	//Node ReadNode(aiNode* node);
+	Node ReadNode(aiNode* node);
 
 private: 
 	ModelCommon* modelCommon_ = nullptr;
