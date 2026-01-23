@@ -104,7 +104,6 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	// ウェーブタイマーの生成&初期化
 	waveTimer_ = std::make_unique<WaveTimer>();
 	waveTimer_->Initialize(60.0f, engineContext_);
-	;
 }
 
 void GamePlayScene::Update() {
@@ -197,11 +196,12 @@ void GamePlayScene::Update() {
 	EndGameCheck();
 
 	// ヒップドロップパワースプライト更新
+	ChangingColorHipDropPowerSprite(); // カラーアニメーション
 	hipDropPowerSprite_->Update();
 
 #ifdef USE_IMGUI
 	// ImGuiデバッグ表示
-	ImGuiUpdate();                   
+	ImGuiUpdate();
 #endif
 
 #ifdef _DEBUG
@@ -331,6 +331,24 @@ void GamePlayScene::SpawnObjectsByMapChip(Vector2 leftTop) {
 				block->SetModel("Box.obj");
 				blocks_.push_back(std::move(block));
 			}
+		}
+	}
+}
+
+void GamePlayScene::ChangingColorHipDropPowerSprite() {
+	if (!hipDropPowerSpriteAnimation_.anim.GetIsActive()) {
+		hipDropPowerSpriteAnimation_.anim = {
+		    hipDropPowerSprite_->GetColor(), {1.0f, 0.0f, 0.0f, 1.0f},
+             1.0f, EaseType::EASEOUTCUBIC
+        };
+	} else {
+		bool playing = hipDropPowerSpriteAnimation_.anim.Update(timeManager_->GetDeltaTime(), hipDropPowerSpriteAnimation_.temp);
+
+		// 色の適用
+		if (!playing) {
+			hipDropPowerSprite_->SetColor(hipDropPowerSpriteAnimation_.temp);
+		}else{
+			hipDropPowerSprite_->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 		}
 	}
 }

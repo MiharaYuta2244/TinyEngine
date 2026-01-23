@@ -2,6 +2,7 @@
 #include "MathUtility.h"
 #include "Matrix4x4.h"
 #include "Vector3.h"
+#include "Vector4.h"
 
 inline Vector3 operator+(const Vector3& v1, const Vector3& v2) { return MathUtility::Add(v1, v2); }
 inline Vector3 operator-(const Vector3& v1, const Vector3& v2) { return MathUtility::Subtract(v1, v2); }
@@ -28,6 +29,34 @@ inline Vector3& operator*=(Vector3& lhs, float s) {
 }
 
 inline Vector3& operator/=(Vector3& lhs, float s) {
+	lhs = MathUtility::Multiply(1.0f / s, lhs);
+	return lhs;
+}
+
+inline Vector4 operator+(const Vector4& v1, const Vector4& v2) { return MathUtility::Add(v1, v2); }
+inline Vector4 operator-(const Vector4& v1, const Vector4& v2) { return MathUtility::Subtract(v1, v2); }
+inline Vector4 operator*(float s, const Vector4& v) { return MathUtility::Multiply(s, v); }
+inline Vector4 operator*(const Vector4& v, float s) { return s * v; }
+inline Vector4 operator/(const Vector4& v, float s) { return MathUtility::Multiply(1.0f / s, v); }
+inline Vector4 operator-(const Vector4& v) { return {-v.x, -v.y, -v.z, -v.w}; }
+inline Vector4 operator+(const Vector4& v) { return v; }
+
+inline Vector4& operator+=(Vector4& lhs, const Vector4& rhs) {
+	lhs = MathUtility::Add(lhs, rhs);
+	return lhs;
+}
+
+inline Vector4& operator-=(Vector4& lhs, const Vector4& rhs) {
+	lhs = MathUtility::Subtract(lhs, rhs);
+	return lhs;
+}
+
+inline Vector4& operator*=(Vector4& lhs, float s) {
+	lhs = MathUtility::Multiply(s, lhs);
+	return lhs;
+}
+
+inline Vector4& operator/=(Vector4& lhs, float s) {
 	lhs = MathUtility::Multiply(1.0f / s, lhs);
 	return lhs;
 }

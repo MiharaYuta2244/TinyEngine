@@ -86,6 +86,9 @@ private:
 
 	template<typename FruitType> void HandleFruitCollision(std::vector<std::unique_ptr<FruitType>>& fruits, const std::string& fruitName);
 
+	// ヒップドロップパワースプライトの色の切り替え
+	void ChangingColorHipDropPowerSprite();
+
 #ifdef USE_IMGUI
 	// フレームレートの表示
 	void ImGuiFPS();
@@ -229,4 +232,7 @@ private:
 
 	// ウェーブタイマー
 	std::unique_ptr<WaveTimer> waveTimer_;
+
+	// ヒップドロップパワースプライトのカラーアニメーション
+	AnimationBundle<Vector4> hipDropPowerSpriteAnimation_;
 };

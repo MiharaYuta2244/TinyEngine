@@ -1,6 +1,7 @@
 #pragma once
 #include "Matrix4x4.h"
 #include "Vector3.h"
+#include "Vector4.h"
 #include <numbers>
 class MathUtility {
 public:
@@ -53,6 +54,18 @@ public:
 	/// <param name="v">ベクトル</param>
 	/// <returns>正規化した値</returns>
 	static Vector3 Normalize(const Vector3& v);
+
+	static Vector4 Add(const Vector4& v1, const Vector4& v2);
+
+	static Vector4 Subtract(const Vector4& v1, const Vector4& v2);
+
+	static Vector4 Multiply(float scalar, const Vector4& v);
+
+	static float Dot(const Vector4& v1, const Vector4& v2);
+
+	static float Length(const Vector4& v);
+
+	static Vector4 Normalize(const Vector4& v);
 
 	/// <summary>
 	/// 拡大縮小行列

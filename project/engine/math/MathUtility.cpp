@@ -58,6 +58,58 @@ Vector3 MathUtility::Normalize(const Vector3& v) {
 	return result;
 }
 
+Vector4 MathUtility::Add(const Vector4& v1, const Vector4& v2) {
+	Vector4 result;
+	result.x = v1.x + v2.x;
+	result.y = v1.y + v2.y;
+	result.z = v1.z + v2.z;
+	result.w = v1.w + v2.w;
+	return result;
+}
+
+Vector4 MathUtility::Subtract(const Vector4& v1, const Vector4& v2) {
+	Vector4 result;
+	result.x = v1.x - v2.x;
+	result.y = v1.y - v2.y;
+	result.z = v1.z - v2.z;
+	result.w = v1.w - v2.w;
+	return result;
+}
+
+Vector4 MathUtility::Multiply(float scalar, const Vector4& v) {
+	Vector4 result;
+	result.x = v.x * scalar;
+	result.y = v.y * scalar;
+	result.z = v.z * scalar;
+	result.w = v.w * scalar;
+	return result;
+}
+
+float MathUtility::Dot(const Vector4& v1, const Vector4& v2) {
+	float result = 0.0f;
+	result += v1.x * v2.x;
+	result += v1.y * v2.y;
+	result += v1.z * v2.z;
+	result += v1.w * v2.w;
+	return result;
+}
+
+float MathUtility::Length(const Vector4& v) {
+	float result = 0.0f;
+	result = sqrtf(powf(v.x, 2) + powf(v.y, 2) + powf(v.z, 2) + powf(v.w, 2));
+	return result;
+}
+
+Vector4 MathUtility::Normalize(const Vector4& v) {
+	float length = Length(v);
+	Vector4 result;
+	result.x = v.x / length;
+	result.y = v.y / length;
+	result.z = v.z / length;
+	result.w = v.w / length;
+	return result;
+}
+
 Matrix4x4 MathUtility::MakeScaleMatrix(const Vector3& scale) {
 	Matrix4x4 result = {};
 	result.m[0][0] = scale.x;

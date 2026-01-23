@@ -39,6 +39,12 @@ public:
 	// Getter
 	bool GetIsActive() const { return isActive_; }
 
+	// リセットする
+	void Reset() {
+		time_ = 0.0f;
+		isActive_ = false;
+	}
+
 private:
 	T start_;           // 開始値
 	T end_;             // 目標値

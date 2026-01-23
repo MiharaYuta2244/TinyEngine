@@ -294,8 +294,12 @@ void Player::IncrementHipDropPowerLevel() { hipDropPowerLevel_ += 1; }
 void Player::SetFruitGetAnimation() {
 	fruitGetAnim_.anim = {
 	    transform_.scale, {2.0f, 2.0f, 2.0f},
-         0.5f, EaseType::EASEOUTCUBIC
+         0.3f, EaseType::EASEOUTCUBIC
     };
+
+	if (afterFruitGetAnim_.anim.GetIsActive()){
+		afterFruitGetAnim_.anim.Reset();
+	}
 }
 
 Vector2 Player::ScreenToWorldPoint(Vector3 worldPosition, Vector2 margin) {
@@ -347,7 +351,7 @@ void Player::AnimationFruitGet() {
 			// 取得後アニメーション初期化
 			afterFruitGetAnim_.anim = {
 			    transform_.scale, {1.0f, 1.0f, 1.0f},
-                 0.5f, EaseType::EASEOUTCUBIC
+                 0.3f, EaseType::EASEOUTCUBIC
             };
 		}
 		return;
