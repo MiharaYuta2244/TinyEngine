@@ -68,7 +68,40 @@ void Object3d::Update() {
 
 	transformMatrixData_->WVP = worldViewProjectionMatrix_;
 	transformMatrixData_->World = worldMatrix_;
-	transformMatrixData_->WorldInverseTranspose = MathUtility::Transpose(worldMatrix_);
+
+	// 非均一スケールに対応した逆転置行列の計算
+	// 3x3部分を抽出して逆行列を計算し、転置する
+	Matrix4x4 worldInverseTranspose = MathUtility::MakeIdentity4x4();
+
+	// ワールド行列の3x3部分を逆転置に変換
+	float m00 = worldMatrix_.m[0][0], m01 = worldMatrix_.m[0][1], m02 = worldMatrix_.m[0][2];
+	float m10 = worldMatrix_.m[1][0], m11 = worldMatrix_.m[1][1], m12 = worldMatrix_.m[1][2];
+	float m20 = worldMatrix_.m[2][0], m21 = worldMatrix_.m[2][1], m22 = worldMatrix_.m[2][2];
+
+	// 3x3行列式の計算
+	float det = m00 * (m11 * m22 - m12 * m21) - m01 * (m10 * m22 - m12 * m20) + m02 * (m10 * m21 - m11 * m20);
+
+	if (fabsf(det) > 1e-6f) {
+		// 逆行列を計算
+		float invDet = 1.0f / det;
+
+		worldInverseTranspose.m[0][0] = (m11 * m22 - m12 * m21) * invDet;
+		worldInverseTranspose.m[0][1] = (m02 * m21 - m01 * m22) * invDet;
+		worldInverseTranspose.m[0][2] = (m01 * m12 - m02 * m11) * invDet;
+
+		worldInverseTranspose.m[1][0] = (m12 * m20 - m10 * m22) * invDet;
+		worldInverseTranspose.m[1][1] = (m00 * m22 - m02 * m20) * invDet;
+		worldInverseTranspose.m[1][2] = (m02 * m10 - m00 * m12) * invDet;
+
+		worldInverseTranspose.m[2][0] = (m10 * m21 - m11 * m20) * invDet;
+		worldInverseTranspose.m[2][1] = (m01 * m20 - m00 * m21) * invDet;
+		worldInverseTranspose.m[2][2] = (m00 * m11 - m01 * m10) * invDet;
+	} else {
+		// 行列式がゼロの場合は単位行列を使用
+		worldInverseTranspose = MathUtility::MakeIdentity4x4();
+	}
+
+	transformMatrixData_->WorldInverseTranspose = worldInverseTranspose;
 
 	*transformMatrixData_ = {transformMatrixData_->WVP, transformMatrixData_->World, transformMatrixData_->WorldInverseTranspose};
 
@@ -97,25 +130,25 @@ void Object3d::Draw() {
 	// 3Dオブジェクト描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
 	ctx_->object3dCommon->DrawSettingCommon();
 
-	auto commadList = ctx_->object3dCommon->GetDxCommon()->GetCommandList();
+	auto commandList = ctx_->object3dCommon->GetDxCommon()->GetCommandList();
 
 	// commandList->IASetIndexBuffer(&indexBufferView_); // IBVを設定
 	// wvp用のBufferの場所を設定
-	commadList->SetGraphicsRootConstantBufferView(1, wvpResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(1, wvpResource_->GetGPUVirtualAddress());
 	// --- インスタンスのマテリアルを先にセット（root b0） ---
-	commadList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
 	// ライティングCBufferの場所を指定
-	commadList->SetGraphicsRootConstantBufferView(3, directionalLightResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(3, directionalLightResource_->GetGPUVirtualAddress());
 	// CameraForGPUCBufferの場所を指定
-	commadList->SetGraphicsRootConstantBufferView(4, cameraForGPUResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(4, cameraForGPUResource_->GetGPUVirtualAddress());
 	// FogParamCBufferの場所を指定
-	commadList->SetGraphicsRootConstantBufferView(5, fogParamResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(5, fogParamResource_->GetGPUVirtualAddress());
 	// TimeParamCBufferの場所を指定
-	commadList->SetGraphicsRootConstantBufferView(6, timeParamResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(6, timeParamResource_->GetGPUVirtualAddress());
 	// ポイントライトCBufferの場所を指定
-	commadList->SetGraphicsRootConstantBufferView(7, pointLightResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(7, pointLightResource_->GetGPUVirtualAddress());
 	// スポットライトCBufferの場所を指定
-	commadList->SetGraphicsRootConstantBufferView(8, spotLightResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(8, spotLightResource_->GetGPUVirtualAddress());
 
 	// 3Dモデルが割り当てられれば描画する
 	if (model_) {

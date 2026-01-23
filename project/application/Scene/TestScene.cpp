@@ -43,6 +43,10 @@ void TestScene::Update() {
 	ImGui::ColorEdit4("Color", &sphereModel_->GetDirectionalLight().color.x);
 	ImGui::DragFloat("shininess", &sphereModel_->GetMaterial().shininess);
 	ImGui::End();
+
+	ImGui::Begin("MonsterBall");
+	ImGui::DragFloat3("Scale", &sphereModel_->GetScale().x, 0.01f);
+	ImGui::End();
 #endif
 }
 
