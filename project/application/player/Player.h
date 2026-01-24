@@ -25,6 +25,7 @@ public:
 	void SetIsHitEnemyHipDrop(bool isHitEnemyHipDrop) { isHitEnemyHipDrop_ = isHitEnemyHipDrop; }
 	void SetIsPowerUp(bool isPowerUp) { isPowerUp_ = isPowerUp; }
 	void SetIsGetFruit(bool isGetFruit) { isGetFruit_ = isGetFruit; }
+	void ResetHipDropDamage() { isHipDropDamage_ = false; }
 
 	// Getter
 	Vector2 GetVelocity() { return velocity_; }

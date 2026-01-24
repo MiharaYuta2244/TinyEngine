@@ -387,11 +387,16 @@ void GamePlayScene::CollisionEnemyPlayerHipDrop() {
 		enemy_->SetIsHitPlayerHipDrop(true);
 
 		if (!player_->GetIsHitEnemyHipDrop()) {
+			enemy_->SetIsHitPlayerHipDrop(true);
 			player_->SetIsHitEnemyHipDrop(true);
 			int damage = player_->GetHipDropPowerLevel();
-			enemy_->SubHP(damage); // ダメージ減算
-			StartShake(30, 0.5f); // カメラシェイク
+			enemy_->SubHP(damage);         // ダメージ減算
+			player_->ResetHipDropDamage(); // ダメージ判定をリセット
+			StartShake(30, 0.5f);          // カメラシェイク
 		}
+
+		// 敵に接触したらダメージ判定を無効化
+		player_->SetIsHitEnemyHipDrop(true); // これにより敵への連続ダメージを防ぐ
 	}
 }
 

@@ -62,7 +62,7 @@ private:
 	Vector2 velocity_ = {10.0f, 0.0f};
 
 	// HP
-	const int kMaxHP = 20;
+	const int kMaxHP = 100;
 	int hp_ = kMaxHP;
 
 	// 経過時間

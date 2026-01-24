@@ -5,29 +5,59 @@
 void EnemyHPGauge::Initialize(EngineContext* ctx) {
 	ctx_ = ctx;
 
-	spriteHPBar_->Initialize(ctx_, "resources/white.png");
-	spriteHPBarBG_->Initialize(ctx_, "resources/white.png");
-
 	// HPゲージスプライトの初期化
+	spriteHPBar_ = std::make_unique<Sprite>();
+	spriteHPBar_->Initialize(ctx_, "resources/white.png");
 	spriteHPBar_->SetPosition({340.0f, 668.0f});
-	spriteHPBarBG_->SetPosition({335.0f, 663.0f});
-
 	spriteHPBar_->SetSize({spriteHPBarSizeX_, 32.0f});
-	spriteHPBarBG_->SetSize({610.0f, 42.0f});
-
 	spriteHPBar_->SetColor({0.69f, 0.13f, 0.1f, 1.0f});
+
+	// HPゲージスプライト残像の初期化
+	spriteHPBarAfter_ = std::make_unique<Sprite>();
+	spriteHPBarAfter_->Initialize(ctx_, "resources/white.png");
+	spriteHPBarAfter_->SetPosition({340.0f, 668.0f});
+	spriteHPBarAfter_->SetSize({spriteHPBarSizeX_, 32.0f});
+	spriteHPBarAfter_->SetColor({0.5f, 0.5f, 0.1f, 1.0f});
+
+	// HPゲージ背景の初期化
+	spriteHPBarBG_ = std::make_unique<Sprite>();
+	spriteHPBarBG_->Initialize(ctx_, "resources/white.png");
+	spriteHPBarBG_->SetPosition({335.0f, 663.0f});
+	spriteHPBarBG_->SetSize({610.0f, 42.0f});
 	spriteHPBarBG_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 }
 
-void EnemyHPGauge::Update() {
+void EnemyHPGauge::Update(float deltaTime) {
 	spriteHPBar_->SetSize({spriteHPBarSizeX_, 32.0f});
+
+	// 遅延カウンターがアクティブなら減少
+	if (afterImageDelayCounter_ > 0.0f) {
+		afterImageDelayCounter_ -= deltaTime;
+	} else if (spriteHPBarAfterSizeX_ > spriteHPBarSizeX_) {
+		if (!afterAnimation_.anim.GetIsActive()) {
+			// 残像アニメーション初期設定
+			afterAnimation_.anim = {spriteHPBarAfterSizeX_, spriteHPBarSizeX_, 0.5f, EaseType::EASEINCUBIC};
+		} else {
+			bool playing = afterAnimation_.anim.Update(deltaTime, afterAnimation_.temp);
+			spriteHPBarAfterSizeX_ = afterAnimation_.temp; // サイズの更新
+
+			if (!playing) {
+				afterImageDelayCounter_ = kAfterImageDelayFrames; // 遅延時間のリセット
+			}
+		}
+	}
+
+	// サイズの適用
+	spriteHPBarAfter_->SetSize({spriteHPBarAfterSizeX_, 32.0f});
 
 	spriteHPBar_->Update();
 	spriteHPBarBG_->Update();
+	spriteHPBarAfter_->Update();
 }
 
 void EnemyHPGauge::Draw() {
 	spriteHPBarBG_->Draw();
+	spriteHPBarAfter_->Draw();
 	spriteHPBar_->Draw();
 }
 

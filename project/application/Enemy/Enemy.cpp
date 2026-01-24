@@ -60,7 +60,7 @@ void Enemy::Update(float deltaTime) {
 	hpGauge_->HPBarSpriteApply(hp_, kMaxHP);
 
 	// HPゲージスプライト管理クラス
-	hpGauge_->Update();
+	hpGauge_->Update(deltaTime);
 }
 
 void Enemy::Draw() {
