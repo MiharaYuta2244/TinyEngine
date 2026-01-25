@@ -12,6 +12,11 @@ public:
 	/// </summary>
 	void DrawSettingCommon();
 
+	/// <summary>
+	/// アウトライン用の設定を適用するメソッド
+	/// </summary>
+	void DrawSettingOutline();
+
 	void Initialize(DirectXCommon* dxCommon);
 
 	void Update();
@@ -26,6 +31,7 @@ public:
 	DirectionalLight& GetDirectionalLight() { return globalDirectionalLight_; }
 	PointLight& GetPointLight() { return globalPointLight_; }
 	SpotLight& GetSpotLight() { return globalSpotLight_; }
+	ID3D12PipelineState* GetOutlinePipelineState() { return outlinePipelineState_.Get(); }
 
 #ifdef USE_IMGUI
 	// Lighting用ImGuiの描画
@@ -62,6 +68,9 @@ private:
 	void CreateGlobalPointLightData();
 	void CreateGlobalSpotLightData();
 
+	// アウトライン用PSO作成メソッド
+	void CreateOutlinePipeline();
+
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeBytes);
 
 private:
@@ -70,6 +79,7 @@ private:
 	// Root Signature / Pipeline
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState_;
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> outlinePipelineState_;
 
 	// Shader Compiler
 	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_;

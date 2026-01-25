@@ -129,3 +129,6 @@ aabb
 typeparam
 Gltf
 assimp
+Minmap
+Descs
+hlsl

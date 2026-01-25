@@ -300,6 +300,8 @@
     <FxCompile Include="resources\shaders\Sprite.PS.hlsl" />
     <FxCompile Include="resources\shaders\Particle.VS.hlsl" />
     <FxCompile Include="resources\shaders\Particle.PS.hlsl" />
+    <FxCompile Include="resources\shaders\Outline.VS.hlsl" />
+    <FxCompile Include="resources\shaders\Outline.PS.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="engine\base\StringUtility.h">
@@ -612,6 +614,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="application\HipDropPowerBG\HipDropPowerBG.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\base\Outline.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

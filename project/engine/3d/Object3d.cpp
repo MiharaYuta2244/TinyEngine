@@ -27,6 +27,9 @@ void Object3d::Initialize(EngineContext* ctx) {
 	// マテリアル作成
 	CreateMaterialData();
 
+	// アウトラインデータ作成
+	CreateOutlineData();
+
 	// Transform変数を作る
 	transform_ = {
 	    {1.0f, 1.0f, 1.0f},
@@ -113,10 +116,23 @@ void Object3d::Update() {
 }
 
 void Object3d::Draw() {
+	auto commandList = ctx_->object3dCommon->GetDxCommon()->GetCommandList();
+
+	// アウトライン描画準備
+	ctx_->object3dCommon->DrawSettingOutline();
+
+	// wvp用のBufferの場所を設定
+	commandList->SetGraphicsRootConstantBufferView(1, wvpResource_->GetGPUVirtualAddress());
+	// アウトライン用データをセット
+	*outlineData_ = outline_;
+	commandList->SetGraphicsRootConstantBufferView(9, outlineResource_->GetGPUVirtualAddress());
+
+	if (model_) {
+		model_->Draw(); // アウトライン描画
+	}
+
 	// 3Dオブジェクト描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
 	ctx_->object3dCommon->DrawSettingCommon();
-
-	auto commandList = ctx_->object3dCommon->GetDxCommon()->GetCommandList();
 
 	// wvp用のBufferの場所を設定
 	commandList->SetGraphicsRootConstantBufferView(1, wvpResource_->GetGPUVirtualAddress());
@@ -239,4 +255,10 @@ void Object3d::CreateMaterialData() {
 	material_.shininess = 64.0f;
 	// GPUへ書き込み
 	*materialData_ = material_;
+}
+
+void Object3d::CreateOutlineData() {
+	outlineResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(Outline));
+	outlineResource_->Map(0, nullptr, reinterpret_cast<void**>(&outlineData_));
+	*outlineData_ = outline_;
 }

@@ -2,6 +2,7 @@
 #include "DirectXCommon.h"
 #include "StringUtility.h"
 #include <DirectXMath.h>
+#include <d3dx12.h>
 #include <format>
 
 using namespace Microsoft::WRL;
@@ -22,6 +23,12 @@ void Object3dCommon::DrawSettingCommon() {
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(8, globalSpotLightResource_->GetGPUVirtualAddress());
 }
 
+void Object3dCommon::DrawSettingOutline() {
+	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature_.Get());
+	dxCommon_->GetCommandList()->SetPipelineState(outlinePipelineState_.Get()); // アウトライン用PSO
+	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
 void Object3dCommon::Initialize(DirectXCommon* dxCommon) {
 	dxCommon_ = dxCommon;
 
@@ -34,6 +41,9 @@ void Object3dCommon::Initialize(DirectXCommon* dxCommon) {
 	CreateGlobalDirectionalLightData();
 	CreateGlobalPointLightData();
 	CreateGlobalSpotLightData();
+
+	// アウトラインリソースの作成
+	CreateOutlinePipeline();
 }
 
 void Object3dCommon::Update() {
@@ -79,7 +89,7 @@ void Object3dCommon::CreateRootSignature() {
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND; // Offsetを自動計算
 
 	// RootParameter作成。複数設定できるので配列。
-	D3D12_ROOT_PARAMETER rootParameters[9] = {};
+	D3D12_ROOT_PARAMETER rootParameters[10] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;                   // CBVを使う
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;                // PixelShaderで使う
 	rootParameters[0].Descriptor.ShaderRegister = 0;                                   // レジスタ番号0とバインド
@@ -108,6 +118,10 @@ void Object3dCommon::CreateRootSignature() {
 	rootParameters[8].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;                   // CBVを使う
 	rootParameters[8].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;                // PixelShaderで使う
 	rootParameters[8].Descriptor.ShaderRegister = 6;                                   // レジスタ番号6を使う（SpotLight）
+	rootParameters[9].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;                   // 定数バッファ
+	rootParameters[9].Descriptor.ShaderRegister = 7;                                   // レジスタ番号7を使う（Outline）
+	rootParameters[9].Descriptor.RegisterSpace = 0;                                    // space0
+	rootParameters[9].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;                  // どちらからも見えるようにする
 
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;   // バイリニアフィルタ
@@ -373,6 +387,47 @@ void Object3dCommon::CreateGlobalSpotLightData() {
 
 	// globalSpotLightDataへの書き込み
 	*globalSpotLightData_ = globalSpotLight_;
+}
+
+void Object3dCommon::CreateOutlinePipeline() {
+	// 基本的な設定は CreateGraphicsPipeline() と同様に進める
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+
+	// シェーダーのセット
+	auto vsBlob = CompileShader(L"resources/shaders/Outline.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	auto psBlob = CompileShader(L"resources/shaders/Outline.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	psoDesc.VS = {vsBlob->GetBufferPointer(), vsBlob->GetBufferSize()};
+	psoDesc.PS = {psBlob->GetBufferPointer(), psBlob->GetBufferSize()};
+
+	// ルートシグネチャのセット
+	psoDesc.pRootSignature = rootSignature_.Get();
+
+	// ラスタライザ設定
+	psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
+	// 前面をカリングし背面のみ描画
+	psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
+
+	// 入力レイアウト
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[] = {
+	    {"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+	    {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+	    {"NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+	};
+	psoDesc.InputLayout = {inputElementDescs, _countof(inputElementDescs)};
+
+	// その他の設定
+	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	psoDesc.SampleMask = UINT_MAX;
+	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	psoDesc.NumRenderTargets = 1;
+	psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	psoDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	psoDesc.SampleDesc.Count = 1;
+
+	// PSO生成
+	HRESULT hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&outlinePipelineState_));
+	assert(SUCCEEDED(hr));
 }
 
 ComPtr<ID3D12Resource> Object3dCommon::CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeBytes) {

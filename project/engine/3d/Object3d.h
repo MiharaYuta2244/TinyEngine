@@ -9,6 +9,7 @@
 #include "Model.h"
 #include "ModelData.h"
 #include "ModelManager.h"
+#include "Outline.h"
 #include "PointLight.h"
 #include "SpotLight.h"
 #include "TimeParam.h"
@@ -40,6 +41,8 @@ public:
 	void SetTransform(const Transform& transform) { transform_ = transform; }
 	void SetWorldMatrix(Matrix4x4 worldMatrix) { worldMatrix_ = worldMatrix; }
 	void SetCamera(DebugCamera* camera) { camera_ = camera; }
+	void SetOutlineColor(const Vector4& color) { outline_.color = color; }
+	void SetOutlineColor(float thickness) { outline_.thickness = thickness; }
 
 	// getter
 	Vector3& GetScale() { return transform_.scale; }
@@ -80,6 +83,11 @@ private:
 	/// </summary>
 	void CreateMaterialData();
 
+	/// <summary>
+	/// アウトラインデータの作成
+	/// </summary>
+	void CreateOutlineData();
+
 private:
 	Model* model_ = nullptr;
 
@@ -91,6 +99,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> timeParamResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> outlineResource_;
 
 	// バッファリソース内のデータを指すポインタ
 	uint32_t* indexData_ = nullptr;
@@ -99,6 +108,7 @@ private:
 	FogParam* fogParamData_ = nullptr;
 	TimeParam* timeParamData_ = nullptr;
 	Material* materialData_ = nullptr;
+	Outline* outlineData_ = nullptr;
 
 	// バッファリソースの使い道を補足するバッファビュー
 	D3D12_INDEX_BUFFER_VIEW indexBufferView_;
@@ -109,6 +119,10 @@ private:
 	CameraForGPU cameraForGPU_;
 	FogParam fogParam_;
 	TimeParam timeParam_;
+	Outline outline_ = {
+	    {0.0f, 0.0f, 0.0f, 1.0f},
+        0.01f
+    };
 
 	// 3Dオブジェクト自体とカメラの座標変換行列の元となるTransform
 	Transform transform_;
