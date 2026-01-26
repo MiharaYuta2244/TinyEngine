@@ -75,6 +75,14 @@ void GunTurret::Hide() {
 	if (timer_ >= kAppearDelay) {
 		state_ = State::APPEARING; // 状態遷移
 		ResetTimer();              // タイマーリセット
+
+		// 事前に生成位置と退避位置を決定する
+		UpdateRandomGeneratePosTable();                                          // 生成位置テーブル更新
+		currentRandomPos_ = static_cast<RandomPos>(RandomUtils::RangeInt(0, 2)); // ランダムに生成位置を選択
+		generatePos_ = kGeneratePosTable[static_cast<int>(currentRandomPos_)];   // ランダムに生成位置を決定
+		UpdateRandomEscapePosTable();                                            // 退避位置テーブル更新
+		escapePos_ = kEscapePosTable[static_cast<int>(currentRandomPos_)];       // ランダムに退避位置を決定
+		gunTurretModel_->SetTranslate(escapePos_);                               // 退避位置に事前に移動
 	}
 }
 
@@ -82,9 +90,6 @@ void GunTurret::Appear() {
 	// 開始位置と生成位置を保存
 	if (!isStartPosSaved_) {
 		startPos_ = gunTurretModel_->GetTranslate();                             // 開始位置保存
-		UpdateRandomGeneratePosTable();                                          // 生成位置テーブル更新
-		currentRandomPos_ = static_cast<RandomPos>(RandomUtils::RangeInt(0, 2)); // ランダムに生成位置を選択
-		generatePos_ = kGeneratePosTable[static_cast<int>(currentRandomPos_)];   // ランダムに生成位置を決定
 		isStartPosSaved_ = true;
 	}
 
