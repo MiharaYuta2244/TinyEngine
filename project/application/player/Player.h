@@ -147,8 +147,9 @@ private:
 	// プレイヤーのパワーアップフラグ
 	bool isPowerUp_ = false;
 
-	// HPゲージ用プレイヤーとの距離
-	Vector2 spriteMargin_ = {1.0f, 2.0f};
+	// スプライトとプレイヤーの距離
+	Vector2 spriteHPGaugeMargin_ = {-2.5f, 3.0f}; // HPゲージとプレイヤー
+	Vector2 spriteLevelUpMargin_ = {1.0f, 2.0f}; // レベルアップとプレイヤー
 
 	// コンテキスト構造体
 	EngineContext* ctx_;
@@ -194,4 +195,10 @@ private:
 
 	// レベルアップアニメーション
 	AnimationBundle<Vector2> levelUpAnimation_;
+
+	// フルーツ取得時の十字エフェクト
+	std::unique_ptr<Sprite> crossSprite_;
+
+	// 十字エフェクトアニメーション
+	AnimationBundle<float> crossRotateAnimation_;
 };

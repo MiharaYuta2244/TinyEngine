@@ -49,6 +49,22 @@ void Player::Initialize(EngineContext* ctx, DirectInput* input, GamePad* gamePad
 	levelUpSprite_->Initialize(ctx, "resources/LEVEL_UP.png");
 	levelUpSprite_->SetPosition({640.0f, 360.0f});
 	levelUpSprite_->SetSize({64.0f, 14.0f});
+	levelUpSprite_->SetEnableShine(true);
+	levelUpSprite_->SetShineParams({0.0f, 0.5f, 0.5f, 1.0f});
+
+	// 十字エフェクトスプライト
+	crossSprite_ = std::make_unique<Sprite>();
+	crossSprite_->Initialize(ctx, "resources/Cross.png");
+	crossSprite_->SetPosition({0.0f, 0.0f});
+	crossSprite_->SetSize({1920.0f, 1920.0f});
+	crossSprite_->SetAnchorPoint({0.5f, 0.5f});
+	crossSprite_->SetColor({0.6f,0.6f,0.6f,1.0f});
+	crossSprite_->SetEnableShine(true);
+	crossSprite_->SetShineParams({0.0f, 0.8f, 1.0f, 1.0f});
+	crossSprite_->SetShineColor({1.0f, 1.0f, 1.0f, 1.0f});
+
+	// 十字エフェクトアニメーション
+	crossRotateAnimation_.anim = {0.0f, std::numbers::pi_v<float> * 2, 0.5f, EaseType::EASEOUTCUBIC};
 }
 
 void Player::Update(float deltaTime) {
@@ -110,7 +126,7 @@ void Player::Update(float deltaTime) {
 
 	// スプライトに変換した座標をセットする
 	for (int i = 0; i < spriteHPGauge_.size(); ++i) {
-		spriteHPGauge_[i]->SetPosition(ScreenToWorldPoint({transform_.translate.x + i * 1.0f, transform_.translate.y, transform_.translate.z}, spriteMargin_));
+		spriteHPGauge_[i]->SetPosition(ScreenToWorldPoint({transform_.translate.x + i * 1.0f, transform_.translate.y, transform_.translate.z}, spriteHPGaugeMargin_));
 	}
 
 	// HPゲージスプライト
@@ -125,12 +141,23 @@ void Player::Update(float deltaTime) {
 
 		if (!playing) {
 			isLevelUp_ = false; // レベルアップフラグをおろす
-			levelUpSprite_->SetSize({64.0f,14.0f});
+			levelUpSprite_->SetSize({64.0f, 14.0f});
 		}
 
-		levelUpSprite_->SetPosition(ScreenToWorldPoint({transform_.translate.x, transform_.translate.y, transform_.translate.z}, spriteMargin_));
+		levelUpSprite_->SetPosition(ScreenToWorldPoint({transform_.translate.x, transform_.translate.y, transform_.translate.z}, spriteLevelUpMargin_));
 		levelUpSprite_->Update();
 	}
+
+	// 十字エフェクト
+	bool playing = crossRotateAnimation_.anim.Update(deltaTime, crossRotateAnimation_.temp);
+
+	if (!playing) {
+		crossRotateAnimation_.anim = {0.0f, std::numbers::pi_v<float> * 2, 0.5f, EaseType::EASEOUTCUBIC};
+	}
+
+	crossSprite_->SetRotation(crossRotateAnimation_.temp);
+	crossSprite_->SetPosition(ScreenToWorldPoint({transform_.translate.x, transform_.translate.y, transform_.translate.z}, {0.0f, 0.0f}));
+	crossSprite_->Update();
 
 	// 位置の更新
 	object3d_->SetTransform(transform_);
@@ -152,6 +179,9 @@ void Player::Draw() {
 	for (auto& hpGauge : spriteHPGauge_) {
 		hpGauge->Draw();
 	}
+
+	// 十字エフェクト
+	crossSprite_->Draw();
 
 	// レベルアップスプライト
 	if (isLevelUp_) {
@@ -342,7 +372,7 @@ Vector2 Player::ScreenToWorldPoint(Vector3 worldPosition, Vector2 margin) {
 	Matrix4x4 matVPV = MathUtility::Multiply(ctx_->object3dCommon->GetDefaultCamera()->GetViewProjectionMatrix(), viewportMatrix);
 
 	// プレイヤーのワールド座標をスクリーン座標に変換
-	Vector3 worldPos = {worldPosition.x + spriteMargin_.x, worldPosition.y + spriteMargin_.y, worldPosition.z};
+	Vector3 worldPos = {worldPosition.x + spriteHPGaugeMargin_.x, worldPosition.y + spriteHPGaugeMargin_.y, worldPosition.z};
 	Vector3 screenPos = MathUtility::Transform(worldPos, matVPV);
 
 	return {screenPos.x, screenPos.y};
