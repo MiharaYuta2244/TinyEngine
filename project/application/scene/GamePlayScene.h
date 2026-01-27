@@ -1,21 +1,21 @@
 #pragma once
-#include "Fruit/Apple/Apple.h"
 #include "BaseScene.h"
 #include "Block/Block.h"
 #include "BothCurtain/BothCurtain.h"
+#include "Cloud/Cloud.h"
+#include "CrossEffect/CrossEffect.h"
 #include "Enemy/Enemy.h"
+#include "Fruit/Apple/Apple.h"
 #include "Fruit/Grape/Grape.h"
+#include "Fruit/Orange/Orange.h"
+#include "GunTurret/GunTurret.h"
+#include "HipDropPowerBG/HipDropPowerBG.h"
 #include "Map/Map.h"
 #include "Object3d.h"
-#include "Fruit/Orange/Orange.h"
 #include "Particle.h"
 #include "Player/Player.h"
 #include "Sprite.h"
-#include "Cloud/Cloud.h"
 #include "XAudio.h"
-#include "GunTurret/GunTurret.h"
-#include "HipDropPowerBG/HipDropPowerBG.h"
-#include "CrossEffect/CrossEffect.h"
 #include <array>
 #include <memory>
 #include <vector>
@@ -87,6 +87,9 @@ private:
 
 	template<typename FruitType> void HandleFruitCollision(std::vector<std::unique_ptr<FruitType>>& fruits, const std::string& fruitName);
 
+	// プレイヤー死亡時カメラアニメーション
+	void CameraAnimation();
+
 #ifdef USE_IMGUI
 	// フレームレートの表示
 	void ImGuiFPS();
@@ -145,7 +148,7 @@ private:
 	std::unique_ptr<Object3d> fieldModel_;
 
 	// 雲
-	std::array<std::unique_ptr<Cloud>,10> clouds_;
+	std::array<std::unique_ptr<Cloud>, 10> clouds_;
 
 	// ブドウ
 	std::vector<std::unique_ptr<Grape>> grapes_;
@@ -190,7 +193,7 @@ private:
 	float timer_ = 0.0f;
 
 	// フルーツの画像集
-	std::array<std::unique_ptr<Sprite>,3> fruitSprites_;
+	std::array<std::unique_ptr<Sprite>, 3> fruitSprites_;
 
 	// 目標フルーツ
 	std::unordered_map<std::string, Sprite*> fruitMap_;
@@ -208,13 +211,16 @@ private:
 	std::unique_ptr<Sprite> targetFruitBG_;
 
 	// 目標フルーツの最大数
-	const int kMaxFruitCount_= 10;
+	const int kMaxFruitCount_ = 10;
 
 	// 数字画像集
-	std::array<std::unique_ptr<Sprite>,10> numberSprites_;
+	std::array<std::unique_ptr<Sprite>, 10> numberSprites_;
 
 	// ヒップドロップダメージ表示用スプライト
 	std::array<std::unique_ptr<Sprite>, 2> hipDropDamageSprites_;
+
+	// ヒップドロップダメージスプライトアニメーション
+	AnimationBundle<Vector2> animationHipDropPower_;
 
 	// プレイヤーのヒップドロップパワースプライト
 	std::unique_ptr<Sprite> hipDropPowerSprite_;
@@ -230,4 +236,22 @@ private:
 
 	// 十字エフェクト
 	std::vector<std::unique_ptr<CrossEffect>> crossEffects_;
+
+	// カメラアニメーション
+	AnimationBundle<Vector3> cameraAnimation_;
+
+	// カメラの目標ポジション
+	Vector3 cameraTargetPos_;
+
+	// アニメーション終了フラグ
+	bool isAnimationEnd_ = false;
+
+	// ダメージ数エフェクトスプライト
+	std::array<std::unique_ptr<Sprite>,2> damageEffectSprite_;
+
+	// ダメージエフェクトアニメーション
+	AnimationBundle<Vector2> animationDamageEffect_;
+
+	// 座標変換便利クラス
+	std::unique_ptr<ScreenSpaceUtility> screenSpaceUtility_;
 };

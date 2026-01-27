@@ -20,8 +20,6 @@ void CrossEffect::Initialize(EngineContext* ctx, Vector3 targetPos) {
         1.0f, EaseType::EASEOUTBACK
     };
 
-	crossRotateAnimation_.anim = {0.0f, std::numbers::pi_v<float> * 2, 1.0f, EaseType::EASEOUTCUBIC};
-
 	// 目標ポジション
 	targetPos_ = targetPos;
 
@@ -32,13 +30,11 @@ void CrossEffect::Initialize(EngineContext* ctx, Vector3 targetPos) {
 void CrossEffect::Update(float deltaTime, DebugCamera* camera) {
 	// 十字エフェクト
 	crossScaleAnimation_.anim.Update(deltaTime, crossScaleAnimation_.temp);
-	crossRotateAnimation_.anim.Update(deltaTime, crossRotateAnimation_.temp);
 
 	// カメラのセット
 	screenSpaceUtility_->SetCamera(camera);
 
 	crossSprite_->SetSize(crossScaleAnimation_.temp);
-	//crossSprite_->SetRotation(crossRotateAnimation_.temp);
 	crossSprite_->SetPosition(screenSpaceUtility_->WorldToScreen({targetPos_.x, targetPos_.y, targetPos_.z}, {0.0f, 0.0f}));
 	crossSprite_->Update();
 }

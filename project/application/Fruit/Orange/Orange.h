@@ -3,7 +3,7 @@
 
 class Orange : public IFruit {
 public:
-	void Initialize(EngineContext* ctx) override;
+	void Initialize(EngineContext* ctx, const std::string& fruitName) override;
 	void Update(float deltaTime) override;
 	void Draw() override;
 };

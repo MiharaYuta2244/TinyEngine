@@ -86,6 +86,18 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 		hipDropDamageSprites_[i]->Initialize(engineContext_, "resources/1.png");
 		hipDropDamageSprites_[i]->SetSize({30.0f, 50.0f});
 		hipDropDamageSprites_[i]->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+		hipDropDamageSprites_[i]->SetAnchorPoint({0.5f, 0.5f});
+	}
+
+	// ダメージエフェクトスプライト
+	for (int i = 0; i < damageEffectSprite_.size(); ++i) {
+		damageEffectSprite_[i] = std::make_unique<Sprite>();
+		damageEffectSprite_[i]->Initialize(engineContext_, "resources/1.png");
+		damageEffectSprite_[i]->SetSize({15.0f, 25.0f});
+		damageEffectSprite_[i]->SetColor({0.7f, 0.7f, 0.7f, 1.0f});
+		damageEffectSprite_[i]->SetEnableShine(true);
+		damageEffectSprite_[i]->SetShineColor({1.0f, 1.0f, 1.0f, 1.0f});
+		damageEffectSprite_[i]->SetShineParams({0.0f, 0.5f, 1.0f, 1.0f});
 	}
 
 	// プレイヤーのヒップドロップパワースプライト
@@ -103,6 +115,9 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 
 	// タイトルシーンのライト初期設定
 	engineContext_->object3dCommon->SetDirectionalLightIntensity(0.5f);
+
+	// 座標変換便利クラス
+	screenSpaceUtility_ = std::make_unique<ScreenSpaceUtility>();
 }
 
 void GamePlayScene::Update() {
@@ -286,6 +301,13 @@ void GamePlayScene::Draw() {
 		sprite->Draw();
 	}
 
+	// ダメージエフェクトの描画
+	for (auto& sprite : damageEffectSprite_) {
+		if (animationDamageEffect_.anim.GetIsActive()) {
+			sprite->Draw();
+		}
+	}
+
 	// ヒップドロップパワースプライト描画
 	hipDropPowerSprite_->Draw();
 }
@@ -380,6 +402,12 @@ void GamePlayScene::CollisionEnemyPlayerHipDrop() {
 			enemy_->SubHP(damage);         // ダメージ減算
 			player_->ResetHipDropDamage(); // ダメージ判定をリセット
 			StartShake(30, 0.5f);          // カメラシェイク
+
+			// ダメージエフェクトのアニメーション初期設定
+			animationDamageEffect_.anim = {
+			    damageEffectSprite_[0]->GetSize(), {30.0f, 50.0f},
+                 1.5f, EaseType::EASEOUTBOUNCE
+            };
 		}
 
 		// 敵に接触したらダメージ判定を無効化
@@ -450,7 +478,7 @@ void GamePlayScene::CreateGrape() {
 
 	if (grapeGenerator_.generateTimer >= grapeGenerator_.kGenerateTimer) {
 		auto grape = std::make_unique<Grape>();
-		grape->Initialize(engineContext_);
+		grape->Initialize(engineContext_, "grape");
 
 		Vector3 pos;
 		pos.x = RandomUtils::RangeFloat(2.0f, 30.0f);
@@ -473,7 +501,7 @@ void GamePlayScene::CreateApple() {
 
 	if (appleGenerator_.generateTimer >= appleGenerator_.kGenerateTimer) {
 		auto apple = std::make_unique<Apple>();
-		apple->Initialize(engineContext_);
+		apple->Initialize(engineContext_, "apple");
 
 		Vector3 pos;
 		pos.x = RandomUtils::RangeFloat(2.0f, 30.0f);
@@ -496,7 +524,7 @@ void GamePlayScene::CreateOrange() {
 
 	if (orangeGenerator_.generateTimer >= orangeGenerator_.kGenerateTimer) {
 		auto orange = std::make_unique<Orange>();
-		orange->Initialize(engineContext_);
+		orange->Initialize(engineContext_, "orange");
 
 		Vector3 pos;
 		pos.x = RandomUtils::RangeFloat(2.0f, 30.0f);
@@ -551,13 +579,21 @@ void GamePlayScene::EndGameCheck() {
 		std::string resultStatus;
 		if (player_->GetHP() <= 0) {
 			resultStatus = "GameOver2.obj";
+			cameraTargetPos_ = player_->GetTranslate(); // カメラの目標ポジションを設定
 		} else if (enemy_->GetHP() <= 0) {
 			resultStatus = "StageClear.obj";
+			cameraTargetPos_ = enemy_->GetTranslate(); // カメラの目標ポジションを設定
 		}
 
-		// 結果文字列をファイルに保存
-		SaveResultStatus(resultStatus);
-		RequestSceneChange("Result");
+		// 死亡時カメラアニメーション
+		CameraAnimation();
+
+		// カメラアニメーションが終わったら
+		if (isAnimationEnd_) {
+			// 結果文字列をファイルに保存
+			SaveResultStatus(resultStatus);
+			RequestSceneChange("Result");
+		}
 	}
 }
 
@@ -585,18 +621,74 @@ void GamePlayScene::UpdateHipDropDamageDisplay() {
 	// 1の位
 	int digit1 = hipDropDamage % 10;
 
-	if (digit10 > 0) { // 10の位がある場合のみ表示
-		hipDropDamageSprites_[0]->SetTexture("resources/" + std::to_string(digit10) + ".png");
-		hipDropDamageSprites_[0]->SetPosition({1150.0f, 100.0f}); // 位置調整
-		hipDropDamageSprites_[0]->SetSize({30.0f, 50.0f});
-		hipDropDamageSprites_[0]->Update();
+	// カメラのセット
+	screenSpaceUtility_->SetCamera(debugCamera_);
+
+	// 攻撃力アニメーション初期設定
+	if (!animationHipDropPower_.anim.GetIsActive()) {
+		animationHipDropPower_.anim = {
+		    hipDropDamageSprites_[0]->GetSize(), {40.0f, 60.0f},
+             0.5f, EaseType::EASEOUTCUBIC
+        };
 	} else {
-		hipDropDamageSprites_[0]->SetSize({0.0f, 0.0f}); // 10の位が0の場合は表示しない
+		animationHipDropPower_.anim.Update(timeManager_->GetDeltaTime(), animationHipDropPower_.temp);
+		for (auto& sprite : hipDropDamageSprites_) {
+			sprite->SetSize(animationHipDropPower_.temp); // サイズの適用
+		}
 	}
 
+	// ダメージエフェクトアニメーション
+	if (animationDamageEffect_.anim.GetIsActive()) {
+		animationDamageEffect_.anim.Update(timeManager_->GetDeltaTime(), animationDamageEffect_.temp);
+	}
+
+	if (digit10 > 0) { // 10の位がある場合のみ表示
+		// 画面右上の攻撃力HUD
+		hipDropDamageSprites_[0]->SetTexture("resources/" + std::to_string(digit10) + ".png");
+		hipDropDamageSprites_[0]->SetPosition({1170.0f, 120.0f}); // 位置調整
+		hipDropDamageSprites_[0]->Update();
+
+		// ダメージエフェクト
+		damageEffectSprite_[0]->SetTexture("resources/" + std::to_string(digit10) + ".png");
+		damageEffectSprite_[0]->SetSize(animationDamageEffect_.temp);
+		damageEffectSprite_[0]->SetPosition(screenSpaceUtility_->WorldToScreen(enemy_->GetTranslate(), {2.0f, 2.0f}));
+		damageEffectSprite_[0]->Update();
+	} else {
+		hipDropDamageSprites_[0]->SetSize({0.0f, 0.0f}); // 10の位が0の場合は表示しない
+		damageEffectSprite_[0]->SetSize({0.0f, 0.0f});   // 10の位が0の場合は表示しない
+	}
+
+	// 画面右上の攻撃力HUD
 	hipDropDamageSprites_[1]->SetTexture("resources/" + std::to_string(digit1) + ".png");
-	hipDropDamageSprites_[1]->SetPosition({1190.0f, 100.0f}); // 位置調整
+	hipDropDamageSprites_[1]->SetPosition({1210.0f, 120.0f}); // 位置調整
 	hipDropDamageSprites_[1]->Update();
+
+	// ダメージエフェクト
+	damageEffectSprite_[1]->SetTexture("resources/" + std::to_string(digit1) + ".png");
+	damageEffectSprite_[1]->SetSize(animationDamageEffect_.temp);
+	damageEffectSprite_[1]->SetPosition(screenSpaceUtility_->WorldToScreen(enemy_->GetTranslate(), {2.0f, 2.0f}));
+	damageEffectSprite_[1]->Update();
+}
+
+void GamePlayScene::CameraAnimation() {
+	if (isAnimationEnd_) // アニメーションがすでに終わっていたら早期リターン
+		return;
+
+	if (!cameraAnimation_.anim.GetIsActive()) {
+		// ターゲットとカメラの中間地点
+		Vector3 midPos = debugCamera_->GetTranslation() + (cameraTargetPos_ - debugCamera_->GetTranslation()) * 0.8f;
+
+		// カメラアニメーションの初期設定
+		cameraAnimation_.anim = {debugCamera_->GetTranslation(), midPos, 1.0f, EaseType::EASEINOUTBACK};
+	} else {
+		bool playing = cameraAnimation_.anim.Update(timeManager_->GetDeltaTime(), cameraAnimation_.temp);
+		debugCamera_->SetTranslation(cameraAnimation_.temp);
+
+		if (!playing) {
+			// アニメーションの終了フラグを立てる
+			isAnimationEnd_ = true;
+		}
+	}
 }
 
 void GamePlayScene::GenerateTargetFruits() {

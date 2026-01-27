@@ -1,15 +1,16 @@
 #pragma once
 #include "EngineContext.h"
 #include "Object3d.h"
+#include "AnimationBundle.h"
 #include "AABB.h"
 #include <memory>
 #include <string>
 
 class IFruit {
 public:
-	virtual void Initialize(EngineContext* ctx) = 0;
-	virtual void Update(float deltaTime) = 0;
-	virtual void Draw() = 0;
+	virtual void Initialize(EngineContext* ctx, const std::string& fruitName);
+	virtual void Update(float deltaTime);
+	virtual void Draw();
 
 	// Getter
 	std::string GetFruitName() { return fruitName_; }
@@ -32,6 +33,13 @@ public:
 		}
 	}
 
+private:
+	// 回転アニメーション
+	void RotateAnimation(float deltaTime);
+
+	// 回転アニメーション初期設定
+	void SettingRotateAnimation();
+
 protected:
 	std::unique_ptr<Object3d> object3d_ = nullptr; // モデル
 
@@ -40,4 +48,7 @@ protected:
 	Transform transform_{};
 
 	AABB aabb_{};
+
+	// 回転アニメーション
+	AnimationBundle<float> rotateAnimation_;
 };

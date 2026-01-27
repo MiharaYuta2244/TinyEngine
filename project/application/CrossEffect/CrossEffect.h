@@ -14,14 +14,13 @@ public:
 	void Draw();
 
 	// Getter
-	bool GetIsAnimation() const { return crossRotateAnimation_.anim.GetIsActive(); }
+	bool GetIsAnimation() const { return crossScaleAnimation_.anim.GetIsActive(); }
 
 private:
 	// スプライト
 	std::unique_ptr<Sprite> crossSprite_;
 
 	// アニメーション
-	AnimationBundle<float> crossRotateAnimation_;
 	AnimationBundle<Vector2> crossScaleAnimation_;
 
 	// 目標ポジション

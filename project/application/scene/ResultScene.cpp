@@ -16,6 +16,10 @@ void ResultScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad*
 	audio_->SoundsAllLoad("resources/ResultScene.mp3");
 	audio_->SoundPlayWave();
 
+	// カメラの設定
+	debugCamera_->SetTranslation({19.45f, 28.0f, -75.0f});
+	debugCamera_->SetRotate({0.0f, 0.0f, 0.2f});
+
 	// さいかいモデル
 	restartModel_ = std::make_unique<ReStartModel>();
 	restartModel_->Initialize(engineContext_);

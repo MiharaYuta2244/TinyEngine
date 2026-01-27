@@ -165,6 +165,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\Block\Block.cpp" />
     <ClCompile Include="application\Enemy\Enemy.cpp" />
     <ClCompile Include="application\CrossEffect\CrossEffect.cpp" />
+    <ClCompile Include="application\Fruit\IFruit.cpp" />
     <ClCompile Include="engine\Collision\Collision.cpp" />
     <ClCompile Include="application\HPGauge\EnemyHPGauge.cpp" />
     <ClCompile Include="application\BothCurtain\BothCurtain.cpp" />
@@ -213,6 +214,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\Fruit\Grape\Grape.cpp" />
     <ClCompile Include="application\GunTurret\GunTurret.cpp" />
     <ClCompile Include="application\HipDropPowerBG\HipDropPowerBG.cpp" />
+    <ClCompile Include="application\LaunchPad\LaunchPad.cpp" />
     <ClCompile Include="main.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -248,8 +250,6 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\ReStartModel\ReStartModel.cpp" />
     <ClCompile Include="application\ToTitleModel\ToTitleModel.cpp" />
     <ClCompile Include="application\ResultModel\ResultModel.cpp" />
-    <ClCompile Include="application\Scene\Stage2.cpp" />
-    <ClCompile Include="application\Scene\Stage3.cpp" />
     <ClCompile Include="application\GunTurret\TurretBullet.cpp" />
     <ClCompile Include="application\HPGauge\PlayerHPGauge.cpp" />
     <ClCompile Include="engine\base\utility\screenSpaceUtility\ScreenSpaceUtility.cpp" />
@@ -421,14 +421,13 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\ReStartModel\ReStartModel.h" />
     <ClInclude Include="application\ToTitleModel\ToTitleModel.h" />
     <ClInclude Include="application\ResultModel\ResultModel.h" />
-    <ClInclude Include="application\Scene\Stage2.h" />
-    <ClInclude Include="application\Scene\Stage3.h" />
     <ClInclude Include="application\GunTurret\GunTurret.h" />
     <ClInclude Include="application\GunTurret\TurretBullet.h" />
     <ClInclude Include="application\HipDropPowerBG\HipDropPowerBG.h" />
     <ClInclude Include="application\HPGauge\IHPGauge.h" />
     <ClInclude Include="application\HPGauge\PlayerHPGauge.h" />
     <ClInclude Include="engine\base\utility\screenSpaceUtility\ScreenSpaceUtility.h" />
+    <ClInclude Include="application\LaunchPad\LaunchPad.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
