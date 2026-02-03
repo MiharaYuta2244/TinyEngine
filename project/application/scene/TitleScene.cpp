@@ -16,8 +16,11 @@ void TitleScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* 
 
 	audio_ = std::make_unique<XAudio>();
 	audio_->Initialize();
-	audio_->SoundsAllLoad("resources/TitleScene.mp3");
-	audio_->SoundPlayWave();
+	audio_->LoadWave("BGM_Title", "resources/TitleScene.mp3");
+	audio_->LoadWave("SE_Decied", "resources/Decied.mp3");
+	audio_->LoadWave("SE_Select", "resources/Select.mp3");
+	audio_->LoadWave("SE_StageSelect", "resources/StageSelect.mp3");
+	audio_->PlayBGM("BGM_Title", 0.2f);
 
 	debugCamera_->SetTranslation({19.45f, 28.0f, -75.0f});
 	debugCamera_->SetRotate({0.0f, 0.0f, 0.2f});
@@ -144,6 +147,9 @@ void TitleScene::Update() {
 	// タイトル番号の記録
 	prevTitleNumber_ = titleNumber_;
 
+	// オーディオ更新
+	audio_->Update();
+
 #ifdef USE_IMGUI
 	ImGui::Begin("Title");
 	ImGui::DragFloat3("position", &titleText_->GetTranslate().x, 0.01f);
@@ -195,9 +201,8 @@ void TitleScene::Finalize() {
 	titleText_.reset();
 	startModel_.reset();
 	endModel_.reset();
-	if (audio_) {
-		audio_->~XAudio();
-	}
+
+	audio_->StopBGM();
 }
 
 void TitleScene::ChangeScene() {
@@ -213,6 +218,9 @@ void TitleScene::ChangeScene() {
 		titleState_ = TitleState::START; // ゲーム開始
 		startModel_->SetSelected(true);  // 選択状態にする
 		endModel_->SetSelected(false);   // 選択状態を解除
+
+		// SE再生
+		audio_->PlaySE("SE_Select", 0.2f);
 	}
 
 	// 下入力の場合
@@ -220,6 +228,9 @@ void TitleScene::ChangeScene() {
 		titleState_ = TitleState::END;   // ゲーム終了
 		endModel_->SetSelected(true);    // 選択状態にする
 		startModel_->SetSelected(false); // 選択状態を解除
+
+		// SE再生
+		audio_->PlaySE("SE_Select", 0.2f);
 	}
 
 	// ゲーム開始入力
@@ -228,7 +239,13 @@ void TitleScene::ChangeScene() {
 		titleNumber_ = TitleNumber::TITLE2; // タイトル2へ
 		titleState_ = TitleState::STAGE1;   // タイトルの状態をステージ1に変更
 		ApplyMenuLayout();
+
+		// SE再生
+		audio_->PlaySE("SE_Decied", 0.6f);
 	} else if (startInput && titleState_ == TitleState::END) {
+		// SE再生
+		audio_->PlaySE("SE_Decied", 0.6f);
+
 		PostQuitMessage(0); // ゲーム終了
 	}
 }
@@ -282,12 +299,24 @@ void TitleScene::StateChange() {
 	if (!menuSelected_) {
 		const auto& t = transitions.at(titleState_);
 
-		if (leftInput)
+		if (leftInput) {
 			titleState_ = t.left;
-		if (rightInput)
+
+			// SE再生
+			audio_->PlaySE("SE_StageSelect", 0.4f);
+		}
+		if (rightInput) {
 			titleState_ = t.right;
-		if (decideInput)
+
+			// SE再生
+			audio_->PlaySE("SE_StageSelect", 0.4f);
+		}
+		if (decideInput) {
 			t.onDecide();
+
+			// SE再生
+			audio_->PlaySE("SE_Decied", 0.6f);
+		}
 
 		// 選択状態に応じてモデルの座標変更
 		if (prevState_ != titleState_ && titleNumber_ == TitleNumber::TITLE2) {
@@ -351,9 +380,9 @@ void TitleScene::ChangeMenuSelectSprite() {
 		menuSelectSprite_->SetTextureSize({184.0f, 64.0f});
 		break;
 	case TitleState::CHARACTER_SELECT:
-		menuSelectSprite_->SetTexture("resources/player.png");
-		menuSelectSprite_->SetSize({320.0f, 64.0f});
-		menuSelectSprite_->SetTextureSize({320.0f, 64.0f});
+		menuSelectSprite_->SetTexture("resources/random.png");
+		menuSelectSprite_->SetSize({248.0f, 64.0f});
+		menuSelectSprite_->SetTextureSize({248.0f, 64.0f});
 		break;
 	}
 }
@@ -372,7 +401,7 @@ void TitleScene::AnimationTitle() {
 
 void TitleScene::Title1Update() {
 	if (titleNumber_ == TitleNumber::TITLE1) {
-		//AnimationTitle();
+		// AnimationTitle();
 		titleText_->Update(timeManager_->GetDeltaTime());
 		startModel_->Update(timeManager_->GetDeltaTime());
 		endModel_->Update(timeManager_->GetDeltaTime());

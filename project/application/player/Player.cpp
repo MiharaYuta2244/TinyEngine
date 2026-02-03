@@ -46,7 +46,15 @@ void Player::Initialize(EngineContext* ctx, DirectInput* input, GamePad* gamePad
 	hpGauge_->Initialize(ctx);
 
 	// 座標変換便利クラス
-	screenSpaceUtility_=std::make_unique<ScreenSpaceUtility>();
+	screenSpaceUtility_ = std::make_unique<ScreenSpaceUtility>();
+
+	// オーディオ初期化
+	audio_ = std::make_unique<XAudio>();
+	audio_->Initialize();
+	audio_->LoadWave("SE_Jump", "resources/Jump.mp3");
+	audio_->LoadWave("SE_HipDrop", "resources/HipDrop.mp3");
+	audio_->LoadWave("SE_HitPlayer", "resources/HitPlayer.mp3");
+	audio_->LoadWave("SE_LevelUP", "resources/LevelUP.mp3");
 }
 
 void Player::Update(float deltaTime) {
@@ -208,6 +216,9 @@ void Player::Jump() {
 		velocity_.y = jumpPower_;
 		isJump_ = true;
 
+		// SE再生
+		audio_->PlaySE("SE_Jump", 0.6f);
+
 		// ジャンプ時のスケールに変更していく
 		jumpScaleAnim.start = {transform_.translate};
 		jumpScaleAnim.end = {1.0f, 1.5f, 1.0f};
@@ -224,6 +235,9 @@ void Player::HipDrop() {
 		isRotate_ = true;
 		velocity_.y = 0.0f;
 		isHipDropDamage_ = true;
+
+		// SE再生
+		audio_->PlaySE("SE_HipDrop", 0.2f);
 	}
 }
 
@@ -269,6 +283,9 @@ void Player::HitEnemy() {
 
 		// 当たり判定用ヒップドロップ判定フラグを下ろす
 		isHipDropDamage_ = false;
+
+		// SE再生
+		audio_->PlaySE("SE_HitBoss", 0.3f);
 	}
 }
 
@@ -306,6 +323,9 @@ void Player::AfterHipDrop() {
 void Player::IncrementHipDropPowerLevel() {
 	hipDropPowerLevel_ += 1; // 攻撃力を増やす
 	isLevelUp_ = true;       // レベルアップフラグを立てる
+
+	// SE再生
+	audio_->PlaySE("SE_LevelUp", 1.0f);
 
 	// レベルアップアニメーション初期設定
 	levelUpAnimation_.anim = {

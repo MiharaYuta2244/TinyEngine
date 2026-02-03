@@ -7,6 +7,7 @@
 #include "HPGauge/PlayerHPGauge.h"
 #include "Sprite.h"
 #include "ScreenSpaceUtility.h"
+#include "XAudio.h"
 #include <array>
 
 class GamePad;
@@ -169,15 +170,6 @@ private:
 	float rightMoveLimit_ = 42.0f;
 	float leftMoveLimit_ = -3.0f;
 
-	// チャージジャンプ用のゲージ
-	float chargeJumpGauge_ = 0.0f;
-
-	// チャージジャンプの最大値
-	const float kMaxChargeJumpGauge = 4.0f;
-
-	// チャージジャンプの加算量
-	float addChargeJumpAmount_ = 0.1f;
-
 	// フルーツ取得時アニメーション
 	AnimationBundle<Vector3> fruitGetAnim_;
 
@@ -201,4 +193,7 @@ private:
 
 	// 座標変換便利クラス
 	std::unique_ptr<ScreenSpaceUtility> screenSpaceUtility_;
+
+	// サウンド管理クラス
+	std::unique_ptr<XAudio> audio_;
 };

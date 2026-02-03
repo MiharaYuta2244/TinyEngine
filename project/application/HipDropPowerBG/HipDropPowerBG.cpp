@@ -4,7 +4,7 @@ void HipDropPowerBG::Initialize(EngineContext* ctx) {
 	hipDropPowerBGSprite_ = std::make_unique<Sprite>();
 	hipDropPowerBGSprite_->Initialize(ctx, "resources/white.png");
 	hipDropPowerBGSprite_->SetSize({64.0f, 64.0f});
-	hipDropPowerBGSprite_->SetPosition({1170.0f, 96.0f});
+	hipDropPowerBGSprite_->SetPosition({1170.0f, 116.0f});
 	hipDropPowerBGSprite_->SetColor({0.8f, 0.1f, 0.1f, 1.0f});
 	hipDropPowerBGSprite_->SetShineColor({0.9f, 0.1f, 0.1f, 1.0f});
 	hipDropPowerBGSprite_->SetEnableShine(true);

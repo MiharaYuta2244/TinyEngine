@@ -253,6 +253,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\GunTurret\TurretBullet.cpp" />
     <ClCompile Include="application\HPGauge\PlayerHPGauge.cpp" />
     <ClCompile Include="engine\base\utility\screenSpaceUtility\ScreenSpaceUtility.cpp" />
+    <ClCompile Include="application\Meteorite\Meteorite.cpp" />
+    <ClCompile Include="application\Meteorite\MeteoriteGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -428,6 +430,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\HPGauge\PlayerHPGauge.h" />
     <ClInclude Include="engine\base\utility\screenSpaceUtility\ScreenSpaceUtility.h" />
     <ClInclude Include="application\LaunchPad\LaunchPad.h" />
+    <ClInclude Include="application\Meteorite\Meteorite.h" />
+    <ClInclude Include="application\Meteorite\MeteoriteGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

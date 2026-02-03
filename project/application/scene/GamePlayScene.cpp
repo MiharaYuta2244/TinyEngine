@@ -21,8 +21,10 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	// オーディオ初期化
 	audio_ = std::make_unique<XAudio>();
 	audio_->Initialize();
-	audio_->SoundsAllLoad("resources/GameScene.mp3");
-	audio_->SoundPlayWave();
+	audio_->LoadWave("BGM_GameScene", "resources/GameScene.mp3");
+	audio_->LoadWave("SE_HitBoss", "resources/HitBoss.mp3");
+	audio_->LoadWave("SE_Eat", "resources/Eat.mp3");
+	audio_->PlayBGM("BGM_GameScene", 0.2f);
 
 	// 土埃パーティクル プレイヤー用
 	particleDustPlayer_ = std::make_unique<Particle>();
@@ -103,7 +105,7 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	// プレイヤーのヒップドロップパワースプライト
 	hipDropPowerSprite_ = std::make_unique<Sprite>();
 	hipDropPowerSprite_->Initialize(engineContext_, "resources/attackAmount.png");
-	hipDropPowerSprite_->SetPosition({1140.0f, 50.0f});
+	hipDropPowerSprite_->SetPosition({1140.0f, 70.0f});
 
 	// 砲台の生成&初期化
 	gunTurret_ = std::make_unique<GunTurret>();
@@ -118,6 +120,19 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 
 	// 座標変換便利クラス
 	screenSpaceUtility_ = std::make_unique<ScreenSpaceUtility>();
+
+	// 操作説明スプライト
+	moveSprite_=std::make_unique<Sprite>();
+	moveSprite_->Initialize(ctx, "resources/move.png");
+	moveSprite_->SetPosition({10.0f,5.0f});
+
+	aButtonSprite_=std::make_unique<Sprite>();
+	aButtonSprite_->Initialize(ctx, "resources/AButton.png");
+	aButtonSprite_->SetPosition({758.0f, 5.0f});
+
+	// 隕石のジェネレーター
+	// meteoriteGenerator_=std::make_unique<MeteoriteGenerator>();
+	// meteoriteGenerator_->Initialize(ctx);
 }
 
 void GamePlayScene::Update() {
@@ -217,6 +232,15 @@ void GamePlayScene::Update() {
 	// アニメーションが終わっていれば十字エフェクトを削除
 	std::erase_if(crossEffects_, [&](auto& effect) { return !effect->GetIsAnimation(); });
 
+	// オーディオ更新
+	audio_->Update();
+
+	// 隕石のジェネレーター
+	// meteoriteGenerator_->Update(timeManager_->GetDeltaTime());
+
+	moveSprite_->Update();
+	aButtonSprite_->Update();
+
 #ifdef USE_IMGUI
 	// ImGuiデバッグ表示
 	ImGuiUpdate();
@@ -274,6 +298,9 @@ void GamePlayScene::Draw() {
 		tree->Draw();
 	}
 
+	// 隕石のジェネレーター
+	// meteoriteGenerator_->Draw();
+
 	// Particle
 	particleDustPlayer_->Draw();
 	particleDustEnemy_->Draw();
@@ -310,6 +337,9 @@ void GamePlayScene::Draw() {
 
 	// ヒップドロップパワースプライト描画
 	hipDropPowerSprite_->Draw();
+
+	moveSprite_->Draw();
+	aButtonSprite_->Draw();
 }
 
 void GamePlayScene::Finalize() {
@@ -322,9 +352,8 @@ void GamePlayScene::Finalize() {
 	for (auto& tree : treeModels_) {
 		tree.reset();
 	}
-	if (audio_) {
-		audio_->~XAudio();
-	}
+
+	audio_->StopBGM();
 }
 
 void GamePlayScene::StartGameScene() {
@@ -404,10 +433,15 @@ void GamePlayScene::CollisionEnemyPlayerHipDrop() {
 			StartShake(30, 0.5f);          // カメラシェイク
 
 			// ダメージエフェクトのアニメーション初期設定
-			animationDamageEffect_.anim = {
-			    damageEffectSprite_[0]->GetSize(), {30.0f, 50.0f},
-                 1.5f, EaseType::EASEOUTBOUNCE
-            };
+			for (int i = 0; i < damageEffectSprite_.size(); ++i) {
+				animationDamageEffect_.anim = {
+				    damageEffectSprite_[i]->GetSize(), {30.0f, 50.0f},
+                     1.5f, EaseType::EASEOUTBOUNCE
+                };
+			}
+
+			// SE再生
+			audio_->PlaySE("SE_HitBoss");
 		}
 
 		// 敵に接触したらダメージ判定を無効化
@@ -447,6 +481,9 @@ template<typename FruitType> void GamePlayScene::HandleFruitCollision(std::vecto
 			        auto crossEffect = std::make_unique<CrossEffect>();
 			        crossEffect->Initialize(engineContext_, player_->GetTranslate());
 			        crossEffects_.push_back(std::move(crossEffect));
+
+					// SE再生
+			        audio_->PlaySE("SE_Eat", 0.4f);
 
 			        return true;
 		        }
@@ -586,14 +623,14 @@ void GamePlayScene::EndGameCheck() {
 		}
 
 		// 死亡時カメラアニメーション
-		CameraAnimation();
+		//CameraAnimation();
 
 		// カメラアニメーションが終わったら
-		if (isAnimationEnd_) {
+		//if (isAnimationEnd_) {
 			// 結果文字列をファイルに保存
 			SaveResultStatus(resultStatus);
 			RequestSceneChange("Result");
-		}
+		//}
 	}
 }
 
@@ -645,7 +682,7 @@ void GamePlayScene::UpdateHipDropDamageDisplay() {
 	if (digit10 > 0) { // 10の位がある場合のみ表示
 		// 画面右上の攻撃力HUD
 		hipDropDamageSprites_[0]->SetTexture("resources/" + std::to_string(digit10) + ".png");
-		hipDropDamageSprites_[0]->SetPosition({1170.0f, 120.0f}); // 位置調整
+		hipDropDamageSprites_[0]->SetPosition({1170.0f, 140.0f}); // 位置調整
 		hipDropDamageSprites_[0]->Update();
 
 		// ダメージエフェクト
@@ -660,13 +697,13 @@ void GamePlayScene::UpdateHipDropDamageDisplay() {
 
 	// 画面右上の攻撃力HUD
 	hipDropDamageSprites_[1]->SetTexture("resources/" + std::to_string(digit1) + ".png");
-	hipDropDamageSprites_[1]->SetPosition({1210.0f, 120.0f}); // 位置調整
+	hipDropDamageSprites_[1]->SetPosition({1210.0f, 140.0f}); // 位置調整
 	hipDropDamageSprites_[1]->Update();
 
 	// ダメージエフェクト
 	damageEffectSprite_[1]->SetTexture("resources/" + std::to_string(digit1) + ".png");
 	damageEffectSprite_[1]->SetSize(animationDamageEffect_.temp);
-	damageEffectSprite_[1]->SetPosition(screenSpaceUtility_->WorldToScreen(enemy_->GetTranslate(), {2.0f, 2.0f}));
+	damageEffectSprite_[1]->SetPosition(screenSpaceUtility_->WorldToScreen(enemy_->GetTranslate(), {4.0f, 2.0f}));
 	damageEffectSprite_[1]->Update();
 }
 

@@ -2,6 +2,9 @@
 #include <array>
 #include <assert.h>
 #include <fstream>
+#include <list> 
+#include <string>
+#include <unordered_map>
 #include <vector>
 #include <wrl.h>
 #include <xaudio2.h>
@@ -20,14 +23,35 @@ class XAudio {
 public:
 	~XAudio();
 	void Initialize();
-	void SoundsAllLoad(const std::string& filename);
-	void SoundPlayWave();
+
+	// メインループの更新処理で呼び出す
+	void Update();
+
+	// 読み込み
+	void LoadWave(const std::string& tag, const std::string& filename);
+
+	// BGM再生
+	void PlayBGM(const std::string& tag, float volume = 0.1f);
+
+	// BGM停止
+	void StopBGM();
+
+	// SE再生
+	void PlaySE(const std::string& tag, float volume = 0.1f);
 
 private:
-	void SoundLoadFile(const std::string& filename);
+	// 内部的な解放処理
 	void SoundUnLoad(SoundData* soundData);
 
 private:
 	Microsoft::WRL::ComPtr<IXAudio2> xAudio2_;
-	SoundData soundData_;
+
+	// 読み込んだ音声データの格納庫
+	std::unordered_map<std::string, SoundData> soundData_;
+
+	// BGM用のボイス
+	IXAudio2SourceVoice* bgmVoice_ = nullptr;
+
+	// 再生中のSEボイスリスト
+	std::list<IXAudio2SourceVoice*> seVoices_;
 };

@@ -258,7 +258,8 @@ void Object3d::CreateMaterialData() {
 }
 
 void Object3d::CreateOutlineData() {
+	// アウトライン用のリソースを作成
 	outlineResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(Outline));
 	outlineResource_->Map(0, nullptr, reinterpret_cast<void**>(&outlineData_));
-	*outlineData_ = outline_;
+	*outlineData_ = outline_;                                                                                           
 }

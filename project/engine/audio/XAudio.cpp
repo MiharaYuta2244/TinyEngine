@@ -4,6 +4,7 @@
 #include <mfidl.h>
 #include <mfobjects.h>
 #include <mfreadwrite.h>
+
 #pragma comment(lib, "mfplat.lib")
 #pragma comment(lib, "Mfreadwrite.lib")
 #pragma comment(lib, "mfuuid.lib")
@@ -13,11 +14,26 @@ using namespace Microsoft::WRL;
 XAudio::~XAudio() {
 	HRESULT result;
 
+	// 再生中のボイスを停止・破棄
+	StopBGM();
+	for (auto* voice : seVoices_) {
+		if (voice) {
+			voice->Stop();
+			voice->DestroyVoice();
+		}
+	}
+	seVoices_.clear();
+
 	result = MFShutdown();
 	assert(SUCCEEDED(result));
 
 	xAudio2_.Reset();
-	SoundUnLoad(&soundData_);
+
+	// マップ内のデータを全て解放
+	for (auto& pair : soundData_) {
+		SoundUnLoad(&pair.second);
+	}
+	soundData_.clear();
 }
 
 void XAudio::Initialize() {
@@ -31,14 +47,31 @@ void XAudio::Initialize() {
 	result = xAudio2_->CreateMasteringVoice(&masterVoice);
 	assert(SUCCEEDED(result));
 
-	// Windows Media FoundationNo初期化(ローカルファイル版)
+	// Windows Media Foundation初期化
 	result = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
 	assert(SUCCEEDED(result));
 }
 
-void XAudio::SoundsAllLoad(const std::string& filename) { SoundLoadFile(filename); }
+void XAudio::Update() {
+	// 再生が終了したSEのボイスをリストから削除・破棄する
+	seVoices_.remove_if([](IXAudio2SourceVoice* voice) {
+		XAUDIO2_VOICE_STATE state;
+		voice->GetState(&state);
+		// バッファのキューが空＝再生終了
+		if (state.BuffersQueued == 0) {
+			voice->DestroyVoice();
+			return true; // リストから削除
+		}
+		return false; // リストに残す
+	});
+}
 
-void XAudio::SoundLoadFile(const std::string& filename) {
+void XAudio::LoadWave(const std::string& tag, const std::string& filename) {
+	// 既に同じタグがあれば読み込まない
+	if (soundData_.find(tag) != soundData_.end()) {
+		return;
+	}
+
 	// フルパスをワイド文字列に変換
 	std::wstring filePathW = StringUtility::ConvertString(filename);
 	HRESULT result;
@@ -64,7 +97,7 @@ void XAudio::SoundLoadFile(const std::string& filename) {
 	WAVEFORMATEX* waveFormat = nullptr;
 	MFCreateWaveFormatExFromMFMediaType(pOutType.Get(), &waveFormat, nullptr);
 
-	// コンテナに格納する音声データ
+	// データを一時保管
 	SoundData soundData = {};
 	soundData.wfex = *(WAVEFORMATEXTENSIBLE*)waveFormat;
 
@@ -88,40 +121,90 @@ void XAudio::SoundLoadFile(const std::string& filename) {
 			pSample->ConvertToContiguousBuffer(&pBuffer);
 
 			BYTE* pData = nullptr; // データ読み取りポインタ
-			DWORD maxLength = 0, currentLegth = 0;
+			DWORD maxLength = 0, currentLength = 0;
 			// バッファ読み込み用にロック
-			pBuffer->Lock(&pData, &maxLength, &currentLegth);
+			pBuffer->Lock(&pData, &maxLength, &currentLength);
 			// バッファの末尾にデータを追加
-			soundData.buffer.insert(soundData.buffer.end(), pData, pData + currentLegth);
+			soundData.buffer.insert(soundData.buffer.end(), pData, pData + currentLength);
 			pBuffer->Unlock();
 		}
 	}
 
-	soundData_ = soundData;
+	// マップに登録
+	soundData_[tag] = soundData;
 }
 
-void XAudio::SoundPlayWave() {
-	HRESULT result;
+void XAudio::PlayBGM(const std::string& tag, float volume) {
+	// タグが見つからなければ何もしない
+	if (soundData_.find(tag) == soundData_.end()) {
+		return;
+	}
 
-	// 波形フォーマットを基にSourceVoiceの生成
-	IXAudio2SourceVoice* pSourceVoice = nullptr;
-	result = xAudio2_->CreateSourceVoice(&pSourceVoice, &soundData_.wfex.Format);
+	// 既に再生中のBGMがあれば停止・破棄
+	StopBGM();
+
+	HRESULT result;
+	SoundData& data = soundData_[tag];
+
+	// SourceVoiceの生成
+	result = xAudio2_->CreateSourceVoice(&bgmVoice_, &data.wfex.Format);
 	assert(SUCCEEDED(result));
 
-	// 再生する波形データの設定
+	// バッファの設定
 	XAUDIO2_BUFFER buf{};
-	buf.pAudioData = soundData_.buffer.empty() ? nullptr : soundData_.buffer.data();
-	buf.AudioBytes = static_cast<UINT32>(soundData_.buffer.size());
+	buf.pAudioData = data.buffer.data();
+	buf.AudioBytes = static_cast<UINT32>(data.buffer.size());
 	buf.Flags = XAUDIO2_END_OF_STREAM;
 
-	// 音声データの再生
-	result = pSourceVoice->SubmitSourceBuffer(&buf);
-	assert(SUCCEEDED(result));
-	result = pSourceVoice->Start();
+	// ★BGM用に無限ループ設定
+	buf.LoopCount = XAUDIO2_LOOP_INFINITE;
+
+	// 音声データの送信と再生
+	result = bgmVoice_->SubmitSourceBuffer(&buf);
+	result = bgmVoice_->Start();
+
+	// 音量設定
+	bgmVoice_->SetVolume(volume);
+}
+
+void XAudio::StopBGM() {
+	if (bgmVoice_) {
+		bgmVoice_->Stop();
+		bgmVoice_->DestroyVoice();
+		bgmVoice_ = nullptr;
+	}
+}
+
+void XAudio::PlaySE(const std::string& tag, float volume) {
+	// タグが見つからなければ何もしない
+	if (soundData_.find(tag) == soundData_.end()) {
+		return;
+	}
+
+	HRESULT result;
+	SoundData& data = soundData_[tag];
+
+	// SourceVoiceの生成（SEは毎回新しく作る）
+	IXAudio2SourceVoice* pSourceVoice = nullptr;
+	result = xAudio2_->CreateSourceVoice(&pSourceVoice, &data.wfex.Format);
 	assert(SUCCEEDED(result));
 
-	// 音量調整
-	pSourceVoice->SetVolume(0.1f);
+	// バッファの設定
+	XAUDIO2_BUFFER buf{};
+	buf.pAudioData = data.buffer.data();
+	buf.AudioBytes = static_cast<UINT32>(data.buffer.size());
+	buf.Flags = XAUDIO2_END_OF_STREAM;
+
+	// ★SEはループしない (LoopCount = 0)
+	buf.LoopCount = 0;
+
+	// 再生
+	result = pSourceVoice->SubmitSourceBuffer(&buf);
+	result = pSourceVoice->Start();
+	pSourceVoice->SetVolume(volume);
+
+	// リストに追加（Updateで終了監視するため）
+	seVoices_.push_back(pSourceVoice);
 }
 
 void XAudio::SoundUnLoad(SoundData* soundData) {

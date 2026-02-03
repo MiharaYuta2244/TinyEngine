@@ -3,6 +3,7 @@
 #include "Object3d.h"
 #include "Random.h"
 #include "TurretBullet.h"
+#include "XAudio.h"
 #include <array>
 #include <memory>
 
@@ -160,4 +161,7 @@ private:
 
 	// 発射する弾の目標地点
 	Vector3 targetPos_{};
+
+	// サウンド管理クラス
+	std::unique_ptr<XAudio> audio_;
 };

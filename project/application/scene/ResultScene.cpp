@@ -13,8 +13,10 @@ void ResultScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad*
 
 	audio_ = std::make_unique<XAudio>();
 	audio_->Initialize();
-	audio_->SoundsAllLoad("resources/ResultScene.mp3");
-	audio_->SoundPlayWave();
+	audio_->LoadWave("BGM_Result", "resources/ResultScene.mp3");
+	audio_->LoadWave("SE_Decied", "resources/Decied.mp3");
+	audio_->LoadWave("SE_Select", "resources/Select.mp3");
+	audio_->PlayBGM("BGM_Result",0.2f);
 
 	// カメラの設定
 	debugCamera_->SetTranslation({19.45f, 28.0f, -75.0f});
@@ -62,20 +64,35 @@ void ResultScene::Update() {
 	if (rightInput) {
 		toTitleModel_->SetSelected(true);
 		restartModel_->SetSelected(false);
+
+		// SE再生
+		audio_->PlaySE("SE_Select", 0.3f);
 	}
 
 	if (leftInput) {
 		restartModel_->SetSelected(true);
 		toTitleModel_->SetSelected(false);
+
+		// SE再生
+		audio_->PlaySE("SE_Select", 0.3f);
 	}
 
 	if (decideInput && toTitleModel_->GetSelected()) {
 		RequestSceneChange("Title");
+
+		// SE再生
+		audio_->PlaySE("SE_Decied", 0.6f);
 	}
 
 	if (decideInput && restartModel_->GetSelected()) {
 		RequestSceneChange("GamePlay");
+
+		// SE再生
+		audio_->PlaySE("SE_Decied", 0.6f);
 	}
+
+	// オーディオ更新
+	audio_->Update();
 
 #ifdef USE_IMGUI
 	ImGui::Begin("Result");
@@ -101,9 +118,8 @@ void ResultScene::Draw() {
 void ResultScene::Finalize() {
 	restartModel_.reset();
 	toTitleModel_.reset();
-	if (audio_) {
-		audio_->~XAudio();
-	}
+
+	audio_->StopBGM();
 }
 
 std::string ResultScene::LoadResultStatus() {

@@ -356,7 +356,7 @@ void Object3dCommon::CreateGlobalPointLightData() {
 	// 初期化
 	globalPointLight_.color = {1.0f, 1.0f, 1.0f, 1.0f};
 	globalPointLight_.position = {0.0f, 5.0f, 0.0f};
-	globalPointLight_.intensity = 1.0f;
+	globalPointLight_.intensity = 0.0f;
 	globalPointLight_.radius = 10.0f;
 	globalPointLight_.decay = 1.0f;
 	// globalPointLightDataへの書き込み
@@ -372,7 +372,7 @@ void Object3dCommon::CreateGlobalSpotLightData() {
 	// 初期化
 	globalSpotLight_.color = {1.0f, 1.0f, 1.0f, 1.0f};
 	globalSpotLight_.position = {0.0f, 10.0f, 0.0f};
-	globalSpotLight_.intensity = 1.0f;
+	globalSpotLight_.intensity = 0.0f;
 	globalSpotLight_.direction = {0.0f, -1.0f, 0.0f};
 	globalSpotLight_.distance = 20.0f;
 	globalSpotLight_.decay = 1.0f;

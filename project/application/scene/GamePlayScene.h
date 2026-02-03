@@ -16,6 +16,7 @@
 #include "Player/Player.h"
 #include "Sprite.h"
 #include "XAudio.h"
+#include "Meteorite/MeteoriteGenerator.h"
 #include <array>
 #include <memory>
 #include <vector>
@@ -254,4 +255,11 @@ private:
 
 	// 座標変換便利クラス
 	std::unique_ptr<ScreenSpaceUtility> screenSpaceUtility_;
+
+	// 隕石のジェネレーター
+	std::unique_ptr<MeteoriteGenerator> meteoriteGenerator_;
+
+	// 操作説明スプライト
+	std::unique_ptr<Sprite> moveSprite_;
+	std::unique_ptr<Sprite> aButtonSprite_;
 };

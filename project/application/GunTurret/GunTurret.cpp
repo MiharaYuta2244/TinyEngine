@@ -13,6 +13,13 @@ void GunTurret::Initialize(EngineContext* ctx) {
 
 	// エンジン機能のポインタを保存
 	ctx_ = ctx;
+
+	// オーディオ初期化
+	audio_ = std::make_unique<XAudio>();
+	audio_->Initialize();
+	audio_->LoadWave("SE_TurretShot", "resources/TurretShot.mp3");
+	audio_->LoadWave("SE_Appear", "resources/Appear.mp3");
+	audio_->LoadWave("SE_Charge", "resources/Charge.mp3");
 }
 
 void GunTurret::Update(float deltaTime) {
@@ -91,6 +98,9 @@ void GunTurret::Appear() {
 	if (!isStartPosSaved_) {
 		startPos_ = gunTurretModel_->GetTranslate(); // 開始位置保存
 		isStartPosSaved_ = true;
+
+		// SE再生
+		audio_->PlaySE("SE_Appear", 0.2f);
 	}
 
 	// 画面外からランダム座標に向かってイージング移動
@@ -110,16 +120,20 @@ void GunTurret::Appear() {
 void GunTurret::AimAtTarget() {
 	// 砲台からターゲットへのベクトル
 	Vector3 direction = targetPos_ - gunTurretModel_->GetTranslate();
-	direction = MathUtility::Normalize(direction);
+	// 正規化
+	Vector3 normalizedDirection = MathUtility::Normalize(direction);
 
 	// 弾の発射方向を設定
-	bulletDirection_ = direction;
+	bulletDirection_ = normalizedDirection;
 
 	// Z軸の回転角度を計算
-	float rotateZ = std::atan2(direction.x, direction.y);
+	float rotateZ = std::atan2(direction.y, direction.x);
+
+	// 例: モデルが「上」を向いている場合の補正
+	rotateZ -= std::numbers::pi_v<float> / 2.0f;
 
 	// 砲台のモデルの回転を設定
-	gunTurretModel_->SetRotate({0.0f, 0.0f, rotateZ});
+	gunTurretModel_->SetRotate({0.0f, std::numbers::pi_v<float>, rotateZ});
 
 	if (timer_ >= kAimDuration) {
 		state_ = State::CHARGING; // 状態遷移
@@ -134,17 +148,27 @@ void GunTurret::Charge() {
 	if (timer_ >= kChargeDuration) {
 		gunTurretModel_->SetScale(startScale_);
 		isEasingComplete_ = false; // イージング終了フラグリセット
-		ResetTimer();              // タイマーリセット
-		state_ = State::SHOT;      // 状態遷移
+		isScaleAnimation_ = false;
+		ResetTimer();         // タイマーリセット
+		state_ = State::SHOT; // 状態遷移
 	}
 }
 
 void GunTurret::Shot() {
 	// 発射処理
-	bullets_.emplace_back(std::make_unique<TurretBullet>(ctx_, gunTurretModel_->GetTranslate()));
+	Vector3 pos = {
+	    gunTurretModel_->GetTranslate().x,
+	    gunTurretModel_->GetTranslate().y - 0.5f,
+	    gunTurretModel_->GetTranslate().z,
+	};
+
+	bullets_.emplace_back(std::make_unique<TurretBullet>(ctx_, pos));
 
 	// タイマーリセット
 	ResetTimer();
+
+	// SE再生
+	audio_->PlaySE("SE_TurretShot", 0.4f);
 
 	state_ = State::WAITING; // 状態遷移
 }
@@ -189,6 +213,9 @@ void GunTurret::ChargeAnimation() {
 		// 初期スケールを記録
 		startScale_ = gunTurretModel_->GetScale();
 		isScaleAnimation_ = true;
+
+		// SE再生
+		audio_->PlaySE("SE_Charge", 0.8f);
 	}
 
 	// イージングの結果を代入
