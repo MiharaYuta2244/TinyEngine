@@ -1,28 +1,28 @@
 #pragma once
-#include <d3d12.h>
-#include <string>
-#include <vector>
-#include <wrl.h>
-#include <memory>
-#include <unordered_map>
+#include "AABB.h"
 #include "CameraForGPU.h"
 #include "DebugCamera.h"
+#include "DeltaTime.h"
 #include "DirectionalLight.h"
+#include "EngineContext.h"
 #include "FogParam.h"
 #include "Material.h"
 #include "MaterialData.h"
 #include "ModelData.h"
 #include "ModelManager.h"
 #include "ParticleForGPU.h"
+#include "ParticleModule.h"
 #include "ParticleState.h"
 #include "TimeParam.h"
 #include "Transform.h"
 #include "TransformationMatrix.h"
 #include "VertexData.h"
-#include "AABB.h"
-#include "DeltaTime.h"
-#include "EngineContext.h"
-#include "ParticleModule.h"
+#include <d3d12.h>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+#include <wrl.h>
 
 class Particle {
 private:
@@ -47,7 +47,7 @@ public:
 
 	// setter
 	void SetModel(const std::string& filePath);
-	void SetColor(Vector4 color);
+	void SetColor(Vector4 color) { materialData_->color = color; }
 	void SetWorldMatrix(Matrix4x4 worldMatrix) { worldMatrix_ = worldMatrix; }
 	void SetCamera(DebugCamera* camera) { camera_ = camera; }
 	void SetIsBillboard(bool isBillboard) { isBillboard_ = isBillboard; }
@@ -91,7 +91,7 @@ private:
 
 	// SRV作成
 	void CreateInstancingSRV(UINT srvIndex);
-	
+
 	// エミッタの初期化（モジュール名指定オーバーロードあり）
 	void InitializeEmitter(Vector3 emitterPos);
 	void InitializeEmitter(Vector3 emitterPos, const std::string& particleType);

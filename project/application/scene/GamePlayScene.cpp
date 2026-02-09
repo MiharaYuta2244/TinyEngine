@@ -34,6 +34,11 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	particleDustEnemy_ = std::make_unique<Particle>();
 	particleDustEnemy_->Initialize(engineContext_, {30.0f, 10.0f, 0.0f}, "resources/smoke.png", 4, "Dust");
 
+	// 土埃パーティクル 砲台用
+	particleTurret_ = std::make_unique<Particle>();
+	particleTurret_->Initialize(engineContext_, {30.0f, 10.0f, 0.0f}, "resources/smoke.png", 5, "Dust");
+	particleTurret_->SetColor({1.0f, 0.0f, 0.0f, 1.0f});
+
 	// 木のモデル
 	for (int i = 0; i < treeModels_.size(); i++) {
 		auto tree = std::make_unique<Object3d>();
@@ -169,6 +174,10 @@ void GamePlayScene::Update() {
 	// 砲台の更新
 	gunTurret_->Update(timeManager_->GetDeltaTime());
 
+	// 砲台の座標にパーティクルを生成するように位置を設定
+	particlePos = gunTurret_->GetTranslate();
+	particleTurret_->SetTranslate(particlePos);
+
 	// 砲台のターゲット位置をプレイヤーの位置に設定
 	gunTurret_->SetTargetPos(player_->GetTranslate());
 
@@ -207,6 +216,7 @@ void GamePlayScene::Update() {
 	// Particle
 	particleDustPlayer_->Update();
 	particleDustEnemy_->Update();
+	particleTurret_->Update();
 
 	// 画面両端の幕
 	rightCurtain_->Update();
@@ -304,6 +314,7 @@ void GamePlayScene::Draw() {
 	// Particle
 	particleDustPlayer_->Draw();
 	particleDustEnemy_->Draw();
+	particleTurret_->Draw();
 
 	// 十字エフェクト
 	for (auto& effect : crossEffects_) {
@@ -349,6 +360,7 @@ void GamePlayScene::Finalize() {
 	enemy_.reset();
 	particleDustPlayer_.reset();
 	particleDustEnemy_.reset();
+	particleTurret_.reset();
 	for (auto& tree : treeModels_) {
 		tree.reset();
 	}

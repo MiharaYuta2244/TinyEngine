@@ -138,6 +138,9 @@ private:
 	// 土埃パーティクル 敵用
 	std::unique_ptr<Particle> particleDustEnemy_;
 
+	// 土埃パーティクル 大砲用
+	std::unique_ptr<Particle> particleTurret_;
+
 	// 木のモデル
 	std::array<std::unique_ptr<Object3d>, 10> treeModels_;
 

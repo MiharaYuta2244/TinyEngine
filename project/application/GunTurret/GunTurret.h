@@ -21,6 +21,9 @@ public:
 	// Setter
 	void SetTargetPos(Vector3 targetPos) { targetPos_ = targetPos; }
 
+	// Getter
+	Vector3 GetTranslate() const { return gunTurretModel_->GetTranslate(); }
+
 private:
 	enum class State {
 		HIDDEN,       // 隠れる
