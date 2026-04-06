@@ -104,7 +104,7 @@ private:
 	std::unique_ptr<Object3dCommon> object3dCommon_ = std::make_unique<Object3dCommon>();
 
 	// ModelManager
-	std::unique_ptr<ModelManager> modelManger_ = std::make_unique<ModelManager>();
+	std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();
 
 	// Object3d
 	std::vector<std::unique_ptr<Object3d>> object3ds_;

@@ -131,11 +131,7 @@ void Sprite::CreateVertexData() {
 
 	// 書き込むためのアドレスを取得
 	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
-	vertexResource_->Unmap(0, nullptr);
-
-	// 書き込むためのアドレスを取得
 	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
-	indexResource_->Unmap(0, nullptr);
 }
 
 void Sprite::CreateMaterialData() {
@@ -145,7 +141,6 @@ void Sprite::CreateMaterialData() {
 
 	// Mapしてデータを書き込む
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
-	materialResource_->Unmap(0, nullptr);
 
 	material_.color = {1.0f, 1.0f, 1.0f, 1.0f};
 	material_.uvTransform = MathUtility::MakeIdentity4x4();
@@ -167,7 +162,6 @@ void Sprite::CreateTransformationData() {
 
 	// 書き込むためのアドレスを取得
 	transformMatrixResource_->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData_));
-	transformMatrixResource_->Unmap(0, nullptr);
 
 	// 単位行列を書き込んでおく
 	*transformationMatrixData_ = {MathUtility::MakeIdentity4x4()};

@@ -26,7 +26,7 @@ void Framework::Initialize() {
 	object3dCommon_->Initialize(dxCommon_.get());
 
 	// ModelManager
-	modelManger_->Initialize(dxCommon_.get(), textureManager_.get());
+	modelManager_->Initialize(dxCommon_.get(), textureManager_.get());
 
 	// Sprite共通部
 	spriteCommon_->Initialize(dxCommon_.get());
@@ -43,7 +43,7 @@ void Framework::Initialize() {
 	// コンテキスト構造体
 	engineContext_.object3dCommon = object3dCommon_.get();
 	engineContext_.spriteCommon = spriteCommon_.get();
-	engineContext_.modelManager = modelManger_.get();
+	engineContext_.modelManager = modelManager_.get();
 	engineContext_.textureManager = textureManager_.get();
 	engineContext_.particleCommon = particleCommon_.get();
 	engineContext_.srvManager = srvManager_.get();
