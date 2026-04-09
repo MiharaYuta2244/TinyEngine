@@ -24,7 +24,7 @@ private:
 	};
 
 	// フェード用スプライト
-	std::unique_ptr<Sprite> fadeSprite_;
+	std::unique_ptr<TinyEngine::Sprite> fadeSprite_;
 
 	// フェード管理
 	FadeState fadeState_ = FadeState::None;

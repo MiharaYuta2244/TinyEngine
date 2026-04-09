@@ -6,21 +6,21 @@
 #include "Model.h"
 #include "ModelCommon.h"
 #include "ModelManager.h"
-#include "Object3d.h"
 #include "Object3dCommon.h"
-#include "Particle.h"
 #include "ParticleCommon.h"
-#include "Sprite.h"
 #include "SpriteCommon.h"
 #include "SrvManager.h"
 #include "TextureManager.h"
 #include "WinApp.h"
-#include "XAudio.h"
 #include "DeltaTime.h"
 #include "DebugCamera.h"
 #include "DirectInput.h"
 #include "GamePad.h"
 #include "ImGuizmo.h"
+#include "Sprite.h"
+#include "Object3d.h"
+#include "Particle.h"
+#include "AudioManager.h"
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
 #include <dxgidebug.h>
@@ -74,10 +74,6 @@ public:
 	float GetFPS() { return fps_; }
 
 private:
-	// モデルを読み込む
-	void AllModelLoader();
-
-private:
 	bool endRequest_; // 終了フラグ
 
 	// リリースリークチェック
@@ -106,14 +102,8 @@ private:
 	// ModelManager
 	std::unique_ptr<ModelManager> modelManager_ = std::make_unique<ModelManager>();
 
-	// Object3d
-	std::vector<std::unique_ptr<Object3d>> object3ds_;
-
 	// Sprite共通部
 	std::unique_ptr<SpriteCommon> spriteCommon_ = std::make_unique<SpriteCommon>();
-
-	// XAudio
-	std::unique_ptr<XAudio> audio_ = std::make_unique<XAudio>();
 
 	// 経過時間
 	std::unique_ptr<DeltaTime> timeManager_ = std::make_unique<DeltaTime>();

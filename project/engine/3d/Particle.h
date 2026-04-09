@@ -24,6 +24,7 @@
 #include <vector>
 #include <wrl.h>
 
+namespace TinyEngine {
 class Particle {
 private:
 	struct Emitter {
@@ -63,8 +64,6 @@ public:
 	Material& GetMaterial() { return material_; }
 
 private:
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeBytes);
-
 	// 四角形の作成
 	ModelData CreatePrimitive(std::string texturePath);
 
@@ -174,3 +173,4 @@ private:
 	// 挙動モジュール
 	std::unique_ptr<ParticleModule> module_;
 };
+} // namespace TinyEngine

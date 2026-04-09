@@ -1,4 +1,4 @@
-#include "XAudio.h"
+#include "AudioManager.h"
 #include "StringUtility.h"
 #include <mfapi.h>
 #include <mfidl.h>
@@ -10,8 +10,9 @@
 #pragma comment(lib, "mfuuid.lib")
 
 using namespace Microsoft::WRL;
+using namespace TinyEngine;
 
-XAudio::~XAudio() {
+AudioManager::~AudioManager() {
 	HRESULT result;
 
 	// 再生中のボイスを停止・破棄
@@ -38,7 +39,7 @@ XAudio::~XAudio() {
 	spectrum_.clear();
 }
 
-void XAudio::Initialize() {
+void AudioManager::Initialize() {
 	HRESULT result;
 
 	IXAudio2MasteringVoice* masterVoice;
@@ -60,7 +61,7 @@ void XAudio::Initialize() {
 	spectrum_.resize(64);
 }
 
-void XAudio::Update() {
+void AudioManager::Update() {
 	// 再生が終了したSEのボイスをリストから削除・破棄する
 	seVoices_.remove_if([](IXAudio2SourceVoice* voice) {
 		XAUDIO2_VOICE_STATE state;
@@ -77,7 +78,7 @@ void XAudio::Update() {
 	fft_->GetSpectrum(spectrum_, *bgmVoice_, currentBgmTag_, soundData_);
 }
 
-void XAudio::LoadWave(const std::string& tag, const std::string& filename) {
+void AudioManager::LoadWave(const std::string& tag, const std::string& filename) {
 	// 既に同じタグがあれば読み込まない
 	if (soundData_.find(tag) != soundData_.end()) {
 		return;
@@ -145,7 +146,7 @@ void XAudio::LoadWave(const std::string& tag, const std::string& filename) {
 	soundData_[tag] = soundData;
 }
 
-void XAudio::PlayBGM(const std::string& tag, float volume) {
+void AudioManager::PlayBGM(const std::string& tag, float volume) {
 	// タグが見つからなければ何もしない
 	if (soundData_.find(tag) == soundData_.end()) {
 		return;
@@ -181,7 +182,7 @@ void XAudio::PlayBGM(const std::string& tag, float volume) {
 	bgmVoice_->SetVolume(volume);
 }
 
-void XAudio::StopBGM() {
+void AudioManager::StopBGM() {
 	if (bgmVoice_) {
 		bgmVoice_->Stop();
 		bgmVoice_->DestroyVoice();
@@ -192,7 +193,7 @@ void XAudio::StopBGM() {
 	currentBgmTag_.clear();
 }
 
-void XAudio::PlaySE(const std::string& tag, float volume) {
+void AudioManager::PlaySE(const std::string& tag, float volume) {
 	// タグが見つからなければ何もしない
 	if (soundData_.find(tag) == soundData_.end()) {
 		return;
@@ -224,7 +225,7 @@ void XAudio::PlaySE(const std::string& tag, float volume) {
 	seVoices_.push_back(pSourceVoice);
 }
 
-void XAudio::SoundUnLoad(SoundData* soundData) {
+void AudioManager::SoundUnLoad(SoundData* soundData) {
 	soundData->buffer.clear();
 	soundData->wfex = {};
 }

@@ -3,7 +3,7 @@
 #include "Object3d.h"
 #include "Particle.h"
 #include "Sprite.h"
-#include "XAudio.h"
+#include "AudioManager.h"
 #include <array>
 #include <memory>
 #include <vector>

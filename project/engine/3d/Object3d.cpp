@@ -2,12 +2,14 @@
 #include "MathOperator.h"
 #include "MathUtility.h"
 #include "Model.h"
+#include "DirectXUtils.h"
 #include <DirectXMath.h>
 #include <fstream>
 #include <sstream>
 
 using namespace Microsoft::WRL;
 using namespace DirectX;
+using namespace TinyEngine;
 
 void Object3d::Initialize(EngineContext* ctx) {
 	ctx_ = ctx;
@@ -162,40 +164,13 @@ void Object3d::SetModel(const std::string& filePath) {
 }
 
 void Object3d::SetColor(Vector4 color) {
-	// 変更: モデル共有の material を直接変更しない。インスタンス側の material_ を変更する
+	// モデル共有のmaterialを直接変更しない。インスタンス側のmaterial_を変更する
 	material_.color = color;
-}
-
-ComPtr<ID3D12Resource> Object3d::CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeBytes) {
-	if (!device)
-		return nullptr;
-
-	// 頂点リソース用のヒープの設定
-	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD; // uploadHeapを使う
-	// 頂点にリソースの設定
-	D3D12_RESOURCE_DESC resourceDesc{};
-	// バッファリソース。テクスチャの場合はまた別の設定をする
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	resourceDesc.Width = sizeBytes; // リソースのサイズ。今回はVector4を3頂点分
-	// バッファの場合はこれらは1にする決まり
-	resourceDesc.Height = 1;
-	resourceDesc.DepthOrArraySize = 1;
-	resourceDesc.MipLevels = 1;
-	resourceDesc.SampleDesc.Count = 1;
-	// バッファの場合はこれにする決まり
-	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	// 実際に頂点リソースを作る
-	ComPtr<ID3D12Resource> resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource));
-	assert(SUCCEEDED(hr));
-
-	return resource;
 }
 
 void Object3d::CreateTransformationMatrixData() {
 	// WVP用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
-	wvpResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(TransformationMatrix));
+	wvpResource_ = DirectXUtils::CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(TransformationMatrix));
 	// 書き込むためのアドレスを取得
 	wvpResource_->Map(0, nullptr, reinterpret_cast<void**>(&transformMatrixData_));
 	wvpResource_->Unmap(0, nullptr);
@@ -205,7 +180,7 @@ void Object3d::CreateTransformationMatrixData() {
 
 void Object3d::CreateCameraForGPUData() {
 	// cameraForGPUのリソースを作る
-	cameraForGPUResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(CameraForGPU));
+	cameraForGPUResource_ = DirectXUtils::CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(CameraForGPU));
 	// アドレス取得
 	cameraForGPUResource_->Map(0, nullptr, reinterpret_cast<void**>(&cameraForGPUData_));
 	cameraForGPUResource_->Unmap(0, nullptr);
@@ -216,7 +191,7 @@ void Object3d::CreateCameraForGPUData() {
 
 void Object3d::CreateFogParamData() {
 	// フォグパラメータのリソースを作る
-	fogParamResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(FogParam));
+	fogParamResource_ = DirectXUtils::CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(FogParam));
 	// アドレス取得
 	fogParamResource_->Map(0, nullptr, reinterpret_cast<void**>(&fogParamData_));
 	fogParamResource_->Unmap(0, nullptr);
@@ -231,7 +206,7 @@ void Object3d::CreateFogParamData() {
 
 void Object3d::CreateTimeParamData() {
 	// タイムパラメータのリソースを作る
-	timeParamResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(TimeParam));
+	timeParamResource_ = DirectXUtils::CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(TimeParam));
 	// アドレス取得
 	timeParamResource_->Map(0, nullptr, reinterpret_cast<void**>(&timeParamData_));
 	timeParamResource_->Unmap(0, nullptr);
@@ -243,7 +218,7 @@ void Object3d::CreateTimeParamData() {
 
 void Object3d::CreateMaterialData() {
 	// マテリアル用のリソースを作る
-	materialResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(Material));
+	materialResource_ = DirectXUtils::CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(Material));
 	// アドレス取得
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 	materialResource_->Unmap(0, nullptr);
@@ -259,7 +234,7 @@ void Object3d::CreateMaterialData() {
 
 void Object3d::CreateOutlineData() {
 	// アウトライン用のリソースを作成
-	outlineResource_ = CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(Outline));
+	outlineResource_ = DirectXUtils::CreateBufferResource(ctx_->object3dCommon->GetDxCommon()->GetDevice(), sizeof(Outline));
 	outlineResource_->Map(0, nullptr, reinterpret_cast<void**>(&outlineData_));
 	*outlineData_ = outline_;                                                                                           
 }

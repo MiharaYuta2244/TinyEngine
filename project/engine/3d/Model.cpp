@@ -4,6 +4,7 @@
 #include "SphereMeshGenerator.h"
 #include "TextureManager.h"
 #include "TransformationMatrix.h"
+#include "DirectXUtils.h"
 #include <Transform.h>
 #include <assert.h>
 #include <assimp/Importer.hpp>
@@ -130,36 +131,9 @@ MaterialData Model::LoadMaterialTemplateFile(const std::string& filename) {
 	return materialData;
 }
 
-ComPtr<ID3D12Resource> Model::CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeBytes) {
-	if (!device)
-		return nullptr;
-
-	// 頂点リソース用のヒープの設定
-	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD; // uploadHeapを使う
-	// 頂点にリソースの設定
-	D3D12_RESOURCE_DESC resourceDesc{};
-	// バッファリソース。テクスチャの場合はまた別の設定をする
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	resourceDesc.Width = sizeBytes; // リソースのサイズ。今回はVector4を3頂点分
-	// バッファの場合はこれらは1にする決まり
-	resourceDesc.Height = 1;
-	resourceDesc.DepthOrArraySize = 1;
-	resourceDesc.MipLevels = 1;
-	resourceDesc.SampleDesc.Count = 1;
-	// バッファの場合はこれにする決まり
-	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	// 実際に頂点リソースを作る
-	ComPtr<ID3D12Resource> resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource));
-	assert(SUCCEEDED(hr));
-
-	return resource;
-}
-
 void Model::CreateVertexData() {
 	// 頂点リソースの作成
-	vertexResource_ = CreateBufferResource(modelCommon_->GetDxCommon()->GetDevice(), sizeof(VertexData) * modelData_.vertices.size());
+	vertexResource_ = DirectXUtils::CreateBufferResource(modelCommon_->GetDxCommon()->GetDevice(), sizeof(VertexData) * modelData_.vertices.size());
 	// リソースの先頭のアドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
 	// 使用するリソースのサイズは頂点6つ分のサイズ
@@ -180,7 +154,7 @@ void Model::CreateIndexData() {
 	indexCount_ = static_cast<uint32_t>(meshData_.indices.size());
 
 	// インデックスリソースの作成
-	indexResource_ = CreateBufferResource(modelCommon_->GetDxCommon()->GetDevice(), sizeof(uint32_t) * indexCount_);
+	indexResource_ = DirectXUtils::CreateBufferResource(modelCommon_->GetDxCommon()->GetDevice(), sizeof(uint32_t) * indexCount_);
 	// リソースの先頭のアドレスから使う
 	indexBufferView_.BufferLocation = indexResource_->GetGPUVirtualAddress();
 	// 使用するリソースのサイズは頂点6つ分のサイズ

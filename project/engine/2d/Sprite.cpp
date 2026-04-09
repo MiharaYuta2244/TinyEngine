@@ -1,4 +1,5 @@
 #include "Sprite.h"
+#include "DirectXUtils.h"
 #include "MathUtility.h"
 #include "Matrix4x4.h"
 #include "VertexData.h"
@@ -6,6 +7,7 @@
 #include <cassert>
 
 using namespace Microsoft::WRL;
+using namespace TinyEngine;
 
 Sprite::~Sprite() {}
 
@@ -53,8 +55,8 @@ void Sprite::Update() {
 	TextureRangeSelection();
 
 	// 頂点データ4つで四角形の描画
-	vertexData_[0].position = {left_ + vertexOffsets_[0].x, bottom_ + vertexOffsets_[0].y, zDepth_, 1.0f}; // 左下
-	vertexData_[1].position = {left_ + vertexOffsets_[1].x, top_ + vertexOffsets_[1].y, zDepth_, 1.0f};    // 左上
+	vertexData_[0].position = {left_ + vertexOffsets_[0].x, bottom_ + vertexOffsets_[0].y, zDepth_, 1.0f};  // 左下
+	vertexData_[1].position = {left_ + vertexOffsets_[1].x, top_ + vertexOffsets_[1].y, zDepth_, 1.0f};     // 左上
 	vertexData_[2].position = {right_ + vertexOffsets_[2].x, bottom_ + vertexOffsets_[2].y, zDepth_, 1.0f}; // 右下
 	vertexData_[3].position = {right_ + vertexOffsets_[3].x, top_ + vertexOffsets_[3].y, zDepth_, 1.0f};    // 右上
 
@@ -110,10 +112,12 @@ void Sprite::Draw() {
 }
 
 void Sprite::CreateVertexData() {
+	auto device = ctx_->spriteCommon->GetDirectXCommon()->GetDevice();
+
 	// スプライトの頂点リソースを作る
-	vertexResource_ = CreateBufferResource(sizeof(VertexData) * 4);
+	vertexResource_ = DirectXUtils::CreateBufferResource(device, sizeof(VertexData) * 4);
 	// インデックスリソースを作る
-	indexResource_ = CreateBufferResource(sizeof(uint32_t) * 6);
+	indexResource_ = DirectXUtils::CreateBufferResource(device, sizeof(uint32_t) * 6);
 
 	// リソースの先頭のアドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
@@ -136,7 +140,7 @@ void Sprite::CreateVertexData() {
 
 void Sprite::CreateMaterialData() {
 	// Sprite用のマテリアルリソースを作る
-	materialResource_ = CreateBufferResource(sizeof(Material));
+	materialResource_ = DirectXUtils::CreateBufferResource(ctx_->spriteCommon->GetDirectXCommon()->GetDevice(), sizeof(Material));
 	materialData_ = nullptr;
 
 	// Mapしてデータを書き込む
@@ -158,7 +162,7 @@ void Sprite::CreateMaterialData() {
 
 void Sprite::CreateTransformationData() {
 	// Sprite用のTransformationMatrix用のリソースを作る。Matrix4x4 1つ分のサイズを用意する
-	transformMatrixResource_ = CreateBufferResource(sizeof(TransformationMatrix));
+	transformMatrixResource_ = DirectXUtils::CreateBufferResource(ctx_->spriteCommon->GetDirectXCommon()->GetDevice(), sizeof(TransformationMatrix));
 
 	// 書き込むためのアドレスを取得
 	transformMatrixResource_->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixData_));
@@ -172,33 +176,6 @@ void Sprite::SetSrvHandle(D3D12_GPU_DESCRIPTOR_HANDLE srvHandle) { srvHandle_ = 
 void Sprite::SetTexture(const std::string& texturePath) {
 	textureFilePath_ = texturePath;
 	textureIndex_ = ctx_->textureManager->GetSrvIndex(texturePath);
-}
-
-ComPtr<ID3D12Resource> Sprite::CreateBufferResource(size_t sizeBytes) {
-	// 頂点リソース用のヒープの設定
-	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD; // uploadHeapを使う
-	// 頂点にリソースの設定
-	D3D12_RESOURCE_DESC resourceDesc{};
-	// バッファリソース。テクスチャの場合はまた別の設定をする
-	resourceDesc.Alignment = 0;
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	resourceDesc.Width = sizeBytes; // リソースのサイズ。今回はVector4を3頂点分
-	// バッファの場合はこれらは1にする決まり
-	resourceDesc.Height = 1;
-	resourceDesc.DepthOrArraySize = 1;
-	resourceDesc.MipLevels = 1;
-	resourceDesc.SampleDesc.Count = 1;
-	// バッファの場合はこれにする決まり
-	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-	// 実際に頂点リソースを作る
-	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
-	HRESULT hr = ctx_->spriteCommon->GetDirectXCommon()->GetDevice()->CreateCommittedResource(
-	    &heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(resource.GetAddressOf()));
-	assert(SUCCEEDED(hr));
-
-	return resource;
 }
 
 void Sprite::ApplyFlip() {

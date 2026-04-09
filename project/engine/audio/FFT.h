@@ -3,7 +3,6 @@
 #include <complex>
 #include <vector>
 #include <unordered_map>
-//#include <xaudio2.h>
 
 struct SoundData;
 struct IXAudio2SourceVoice;

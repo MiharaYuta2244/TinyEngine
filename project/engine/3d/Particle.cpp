@@ -14,9 +14,11 @@
 #include "DustModule.h"
 #include "RisingModule.h"
 #include "RadialRingModule.h"
+#include "DirectXUtils.h"
 
 using namespace Microsoft::WRL;
 using namespace DirectX;
+using namespace TinyEngine;
 
 void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos, std::string texturePath, UINT srvIndex, const std::string& particleType) {
 	ctx_ = ctx;
@@ -218,33 +220,6 @@ void Particle::Draw() {
 	commandList->DrawInstanced(UINT(modelData_.vertices.size()), numInstance_, 0, 0);
 }
 
-ComPtr<ID3D12Resource> Particle::CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeBytes) {
-	if (!device)
-		return nullptr;
-
-	// 頂点リソース用のヒープの設定
-	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD; // uploadHeapを使う
-	// 頂点にリソースの設定
-	D3D12_RESOURCE_DESC resourceDesc{};
-	// バッファリソース。テクスチャの場合はまた別の設定をする
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	resourceDesc.Width = sizeBytes; // リソースのサイズ。今回はVector4を3頂点分
-	// バッファの場合はこれらは1にする決まり
-	resourceDesc.Height = 1;
-	resourceDesc.DepthOrArraySize = 1;
-	resourceDesc.MipLevels = 1;
-	resourceDesc.SampleDesc.Count = 1;
-	// バッファの場合はこれにする決まり
-	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	// 実際に頂点リソースを作る
-	ComPtr<ID3D12Resource> resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource));
-	assert(SUCCEEDED(hr));
-
-	return resource;
-}
-
 ModelData Particle::CreatePrimitive(std::string texturePath) {
 	ModelData modelData;
 
@@ -286,7 +261,7 @@ ModelData Particle::CreatePrimitive(std::string texturePath) {
 
 void Particle::CreateVertexData() {
 	// 頂点リソースの作成
-	vertexResource_ = CreateBufferResource(ctx_->particleCommon->GetDxCommon()->GetDevice(), sizeof(VertexData) * modelData_.vertices.size());
+	vertexResource_ = DirectXUtils::CreateBufferResource(ctx_->particleCommon->GetDxCommon()->GetDevice(), sizeof(VertexData) * modelData_.vertices.size());
 	// リソースの先頭のアドレスから使う
 	vertexBufferView_.BufferLocation = vertexResource_->GetGPUVirtualAddress();
 	// 使用するリソースのサイズは頂点6つ分のサイズ
@@ -301,7 +276,7 @@ void Particle::CreateVertexData() {
 
 void Particle::CreateMaterialData() {
 	// マテリアル用のリソースを作る。今回はcolor1つ分のサイズを用意する
-	materialResource_ = CreateBufferResource(ctx_->particleCommon->GetDxCommon()->GetDevice(), sizeof(Material));
+	materialResource_ = DirectXUtils::CreateBufferResource(ctx_->particleCommon->GetDxCommon()->GetDevice(), sizeof(Material));
 	// 書き込むためのアドレスを取得
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
 	materialResource_->Unmap(0, nullptr);
@@ -319,7 +294,7 @@ void Particle::CreateMaterialData() {
 
 void Particle::CreateInstancingResource() {
 	// Instancing用のTransformationMatrixリソースを作る
-	instancingResource_ = CreateBufferResource(ctx_->particleCommon->GetDxCommon()->GetDevice(), sizeof(ParticleForGPU) * kNumMaxInstance);
+	instancingResource_ = DirectXUtils::CreateBufferResource(ctx_->particleCommon->GetDxCommon()->GetDevice(), sizeof(ParticleForGPU) * kNumMaxInstance);
 
 	// 書き込むためのアドレス取得
 	instancingResource_->Map(0, nullptr, reinterpret_cast<void**>(&instancingData_));

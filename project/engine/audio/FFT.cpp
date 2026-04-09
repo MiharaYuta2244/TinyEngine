@@ -1,5 +1,5 @@
 #include "FFT.h"
-#include "XAudio.h"
+#include "AudioManager.h"
 
 void FFT::GetSpectrum(std::vector<float>& output, IXAudio2SourceVoice& bgmVoice, const std::string& currentBgmTag, std::unordered_map<std::string, SoundData>& soundData) {
 	// データサイズ定義

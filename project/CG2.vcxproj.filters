@@ -141,7 +141,7 @@
     <ClCompile Include="engine\base\TextureManager.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="engine\audio\XAudio.cpp">
+    <ClCompile Include="engine\audio\AudioManager.cpp">
       <Filter>ソース ファイル\engine\audio</Filter>
     </ClCompile>
     <ClCompile Include="engine\2d\SpriteCommon.cpp">
@@ -220,6 +220,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="engine\audio\FFT.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="engine\utility\DirectXUtils.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -379,7 +382,7 @@
     <ClInclude Include="engine\2d\SpriteCommon.h">
       <Filter>ヘッダー ファイル\engine\2d</Filter>
     </ClInclude>
-    <ClInclude Include="engine\audio\XAudio.h">
+    <ClInclude Include="engine\audio\AudioManager.h">
       <Filter>ヘッダー ファイル\engine\audio</Filter>
     </ClInclude>
     <ClInclude Include="engine\base\TextureData.h">
@@ -488,6 +491,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="engine\audio\FFT.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\utility\DirectXUtils.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

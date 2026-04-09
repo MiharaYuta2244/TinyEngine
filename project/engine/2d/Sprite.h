@@ -10,6 +10,7 @@
 #include <string>
 #include <wrl.h>
 
+namespace TinyEngine {
 class Sprite {
 public:
 	~Sprite();
@@ -136,8 +137,6 @@ private:
 	};
 
 private:
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeBytes);
-
 	// フリップの反映処理
 	void ApplyFlip();
 
@@ -226,3 +225,4 @@ private:
 	// 深度値
 	float zDepth_ = 0.0f;
 };
+} // namespace TinyEngine

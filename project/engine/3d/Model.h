@@ -29,7 +29,6 @@ private:
 	ModelData LoadModelFile(const std::string& filename);
 
 	MaterialData LoadMaterialTemplateFile(const std::string& filename);
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeBytes);
 
 	/// <summary>
 	/// 頂点データ作成

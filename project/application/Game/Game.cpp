@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <numbers>
 
+using namespace TinyEngine;
+
 void Game::Initialize() {
 	// 基底クラスの初期化処理
 	Framework::Initialize();

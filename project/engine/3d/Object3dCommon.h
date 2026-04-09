@@ -71,8 +71,6 @@ private:
 	// アウトライン用PSO作成メソッド
 	void CreateOutlinePipeline();
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeBytes);
-
 private:
 	DirectXCommon* dxCommon_;
 

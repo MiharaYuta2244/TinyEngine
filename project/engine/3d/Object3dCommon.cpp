@@ -1,6 +1,7 @@
 #include "Object3dCommon.h"
 #include "DirectXCommon.h"
 #include "StringUtility.h"
+#include "DirectXUtils.h"
 #include <DirectXMath.h>
 #include <d3dx12.h>
 #include <format>
@@ -327,7 +328,7 @@ void Object3dCommon::UpdateGlobalLightingBuffers() {
 
 void Object3dCommon::CreateGlobalDirectionalLightData() {
 	// 平行光源用のリソースを作る
-	globalDirectionalLightResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(DirectionalLight));
+	globalDirectionalLightResource_ = DirectXUtils::CreateBufferResource(dxCommon_->GetDevice(), sizeof(DirectionalLight));
 	// アドレス取得
 	globalDirectionalLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&globalDirectionalLightData_));
 	globalDirectionalLightResource_->Unmap(0, nullptr);
@@ -349,7 +350,7 @@ void Object3dCommon::CreateGlobalDirectionalLightData() {
 
 void Object3dCommon::CreateGlobalPointLightData() {
 	// ポイントライト用のリソースを作る
-	globalPointLightResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(PointLight));
+	globalPointLightResource_ = DirectXUtils::CreateBufferResource(dxCommon_->GetDevice(), sizeof(PointLight));
 	// アドレス取得
 	globalPointLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&globalPointLightData_));
 	globalPointLightResource_->Unmap(0, nullptr);
@@ -365,7 +366,7 @@ void Object3dCommon::CreateGlobalPointLightData() {
 
 void Object3dCommon::CreateGlobalSpotLightData() {
 	// スポットライト用のリソースを作る
-	globalSpotLightResource_ = CreateBufferResource(dxCommon_->GetDevice(), sizeof(SpotLight));
+	globalSpotLightResource_ = DirectXUtils::CreateBufferResource(dxCommon_->GetDevice(), sizeof(SpotLight));
 	// アドレス取得
 	globalSpotLightResource_->Map(0, nullptr, reinterpret_cast<void**>(&globalSpotLightData_));
 	globalSpotLightResource_->Unmap(0, nullptr);
@@ -428,31 +429,4 @@ void Object3dCommon::CreateOutlinePipeline() {
 	// PSO生成
 	HRESULT hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&outlinePipelineState_));
 	assert(SUCCEEDED(hr));
-}
-
-ComPtr<ID3D12Resource> Object3dCommon::CreateBufferResource(ComPtr<ID3D12Device> device, size_t sizeBytes) {
-	if (!device)
-		return nullptr;
-
-	// 頂点リソース用のヒープの設定
-	D3D12_HEAP_PROPERTIES heapProperties{};
-	heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD; // uploadHeapを使う
-	// 頂点にリソースの設定
-	D3D12_RESOURCE_DESC resourceDesc{};
-	// バッファリソース。テクスチャの場合はまた別の設定をする
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	resourceDesc.Width = sizeBytes; // リソースのサイズ。今回はVector4を3頂点分
-	// バッファの場合はこれらは1にする決まり
-	resourceDesc.Height = 1;
-	resourceDesc.DepthOrArraySize = 1;
-	resourceDesc.MipLevels = 1;
-	resourceDesc.SampleDesc.Count = 1;
-	// バッファの場合はこれにする決まり
-	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	// 実際に頂点リソースを作る
-	ComPtr<ID3D12Resource> resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(&heapProperties, D3D12_HEAP_FLAG_NONE, &resourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ, nullptr, IID_PPV_ARGS(&resource));
-	assert(SUCCEEDED(hr));
-
-	return resource;
 }

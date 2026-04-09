@@ -1,4 +1,5 @@
 #pragma once
+#include "FFT.h"
 #include <array>
 #include <assert.h>
 #include <fstream>
@@ -8,7 +9,6 @@
 #include <vector>
 #include <wrl.h>
 #include <xaudio2.h>
-#include "FFT.h"
 
 #pragma comment(lib, "xaudio2.lib")
 
@@ -20,9 +20,10 @@ struct SoundData {
 	std::vector<BYTE> buffer;
 };
 
-class XAudio {
+namespace TinyEngine {
+class AudioManager {
 public:
-	~XAudio();
+	~AudioManager();
 	void Initialize();
 
 	// メインループの更新処理で呼び出す
@@ -68,3 +69,4 @@ private:
 	// スペクトラム
 	std::vector<float> spectrum_;
 };
+} // namespace TinyEngine

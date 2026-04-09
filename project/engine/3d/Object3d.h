@@ -21,6 +21,7 @@
 #include <vector>
 #include <wrl.h>
 
+namespace TinyEngine {
 class Object3d {
 public:
 	void Initialize(EngineContext* ctx);
@@ -56,8 +57,6 @@ public:
 	Material& GetMaterial() { return material_; }
 
 private:
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeBytes);
-
 	/// <summary>
 	/// 座標変換行列データ作成
 	/// </summary>
@@ -141,3 +140,4 @@ private:
 	// モデルデータ
 	ModelData modelData_;
 };
+} // namespace TinyEngine
