@@ -5,6 +5,9 @@
 #include "PointLight.h"
 #include "SpotLight.h"
 
+/// <summary>
+/// 3Dオブジェクトの共通クラス
+/// </summary>
 class Object3dCommon {
 public:
 	/// <summary>

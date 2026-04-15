@@ -22,6 +22,9 @@
 #include <wrl.h>
 
 namespace TinyEngine {
+/// <summary>
+/// 3Dオブジェクトクラス
+/// </summary>
 class Object3d {
 public:
 	void Initialize(EngineContext* ctx);

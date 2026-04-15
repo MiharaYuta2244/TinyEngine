@@ -23,6 +23,9 @@ struct GamepadState {
 	GamepadAxes axes{};
 };
 
+/// <summary>
+/// ゲームパッド管理クラス
+/// </summary>
 class GamePad {
 public:
 	GamePad();

@@ -25,6 +25,9 @@
 #include <wrl.h>
 
 namespace TinyEngine {
+/// <summary>
+/// パーティクルクラス
+/// </summary>
 class Particle {
 private:
 	struct Emitter {

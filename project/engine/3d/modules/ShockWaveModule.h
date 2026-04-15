@@ -1,6 +1,9 @@
 #pragma once
 #include "ParticleModule.h"
 
+/// <summary>
+/// 衝撃波パーティクルのモジュール
+/// </summary>
 class ShockWaveModule : public ParticleModule {
 public:
     ShockWaveModule(float life = 0.4f, float startScale = 0.5f, float endScale = 2.0f)

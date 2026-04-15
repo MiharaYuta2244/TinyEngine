@@ -2,6 +2,9 @@
 #include "DebugCamera.h"
 #include "DirectXCommon.h"
 
+/// <summary>
+/// パーティクルの共通クラス
+/// </summary>
 class ParticleCommon {
 public:
 	/// <summary>

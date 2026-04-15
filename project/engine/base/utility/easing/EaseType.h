@@ -1,4 +1,7 @@
 #pragma once
+/// <summary>
+/// イージングの種類を表す列挙型
+/// </summary>
 enum class EaseType {
 	EASEINSINE,
 	EASEOUTSINE,

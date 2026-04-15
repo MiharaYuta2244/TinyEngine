@@ -1,6 +1,9 @@
 #pragma once
 #include "DirectXCommon.h"
 
+/// <summary>
+/// SRVマネージャークラス
+/// </summary>
 class SrvManager {
 public:
 	void Initialize(DirectXCommon* dxCommon);

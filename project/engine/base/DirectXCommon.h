@@ -11,6 +11,9 @@ class WinApp; // 前方宣言
 #pragma comment(lib, "dxguid.lib")
 #include <dxcapi.h>
 
+/// <summary>
+/// DirectXの共通処理を管理するクラス
+/// </summary>
 class DirectXCommon {
 public:
 	DirectXCommon();

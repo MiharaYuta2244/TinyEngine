@@ -2,6 +2,9 @@
 #include <d3d12.h>
 #include <wrl.h>
 
+/// <summary>
+/// DirectX便利クラス
+/// </summary>
 class DirectXUtils {
 public:
 	/// <summary>

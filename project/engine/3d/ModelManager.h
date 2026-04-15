@@ -5,8 +5,12 @@
 #include <memory>
 #include <string>
 
+/// <summary>
+/// モデルマネージャークラス
+/// </summary>
 class ModelManager {
 public:
+	// 初期化関数
 	void Initialize(DirectXCommon* dxCommon, TextureManager* textureManager);
 
 	/// <summary>

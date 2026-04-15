@@ -6,6 +6,9 @@
 #include "ParticleCommon.h"
 #include "SrvManager.h"
 
+/// <summary>
+/// エンジンのコンテキストを保持する構造体
+/// </summary>
 struct EngineContext {
 	Object3dCommon* object3dCommon = nullptr;
 	SpriteCommon* spriteCommon = nullptr;

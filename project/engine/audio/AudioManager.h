@@ -21,6 +21,9 @@ struct SoundData {
 };
 
 namespace TinyEngine {
+/// <summary>
+/// オーディオマネージャークラス
+/// </summary>
 class AudioManager {
 public:
 	~AudioManager();

@@ -1,6 +1,9 @@
 #pragma once
 #include <chrono>
 
+/// <summary>
+/// フレーム間の経過時間を管理するクラス
+/// </summary>
 class DeltaTime {
 public:
 	void Update();

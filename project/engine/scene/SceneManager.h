@@ -4,6 +4,9 @@
 #include <memory>
 #include <unordered_map>
 
+/// <summary>
+/// シーンマネージャークラス
+/// </summary>
 class SceneManager {
 public:
 	SceneManager() = default;

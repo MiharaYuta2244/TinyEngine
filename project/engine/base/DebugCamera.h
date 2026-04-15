@@ -6,6 +6,9 @@
 #include "MathUtility.h"
 #include <Transform.h>
 
+/// <summary>
+/// デバッグ用カメラのクラス
+/// </summary>
 class DebugCamera {
 public:
 	DebugCamera();

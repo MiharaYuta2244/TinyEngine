@@ -2,6 +2,9 @@
 #include "ParticleModule.h"
 #include "Random.h"
 
+/// <summary>
+/// 上昇するパーティクルのモジュール
+/// </summary>
 class RisingModule : public ParticleModule {
 public:
 	RisingModule(float lifeMin = 5.0f, float lifeMax = 6.0f, float riseSpeed = 1.2f, float horizontalJitter = 0.5f, float sizeMin = 2.0f, float sizeMax = 3.0f)

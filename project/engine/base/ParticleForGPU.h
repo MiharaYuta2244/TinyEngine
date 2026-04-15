@@ -2,6 +2,9 @@
 #include "Matrix4x4.h"
 #include "Vector4.h"
 
+/// <summary>
+/// GPUに送るパーティクルの構造体
+/// </summary>
 struct ParticleForGPU
 {
 	Matrix4x4 WVP;

@@ -2,6 +2,9 @@
 #include "ParticleModule.h"
 #include "Random.h"
 
+/// <summary>
+/// 放射状に広がるリング型のパーティクルモジュール
+/// </summary>
 class RadialRingModule : public ParticleModule {
 public:
 	RadialRingModule(float lifeMin = 0.7f, float lifeMax = 1.3f, float baseSpeed = 6.0f, float sizeMin = 0.18f, float sizeMax = 0.38f, float yVelocity = 0.05f)

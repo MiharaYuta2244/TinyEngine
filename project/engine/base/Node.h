@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 
+/// <summary>
+/// GPUに送るノードの構造体
+/// </summary>
 struct Node {
 	Matrix4x4 localMatrix;
 	std::string name;

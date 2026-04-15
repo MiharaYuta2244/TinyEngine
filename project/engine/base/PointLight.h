@@ -2,6 +2,9 @@
 #include "Vector4.h"
 #include "Vector3.h"
 
+/// <summary>
+/// ポイントライト構造体
+/// </summary>
 struct PointLight
 {
 	Vector4 color;

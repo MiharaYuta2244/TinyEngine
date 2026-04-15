@@ -10,6 +10,9 @@
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
 
+/// <summary>
+/// 入力管理クラス
+/// </summary>
 class DirectInput {
 public:
 	// namespace省略

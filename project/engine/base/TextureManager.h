@@ -11,6 +11,9 @@
 class DirectXCommon;
 class SrvManager;
 
+/// <summary>
+/// テクスチャマネージャークラス
+/// </summary>
 class TextureManager {
 public:
 	~TextureManager();

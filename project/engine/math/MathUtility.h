@@ -4,6 +4,10 @@
 #include "Vector3.h"
 #include "Vector4.h"
 #include <numbers>
+
+/// <summary>
+/// 数学便利クラス
+/// </summary>
 class MathUtility {
 public:
 	MathUtility();

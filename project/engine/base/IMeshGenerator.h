@@ -1,6 +1,10 @@
 #pragma once
 #include "MeshData.h"
 #include <vector>
+
+/// <summary>
+/// メッシュデータを生成するインターフェース
+/// </summary>
 class IMeshGenerator
 {
 public:

@@ -28,6 +28,9 @@
 #include <dxcapi.h>
 #pragma comment(lib, "dxcompiler.lib")
 
+/// <summary>
+/// フレームワーククラス
+/// </summary>
 class Framework {
 public:
 	virtual ~Framework() = default;

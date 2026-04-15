@@ -10,14 +10,21 @@
 #include <string>
 #include <wrl.h>
 
+/// <summary>
+/// スプライトクラス
+/// </summary>
 namespace TinyEngine {
 class Sprite {
 public:
 	~Sprite();
+
+	// 初期化関数
 	void Initialize(EngineContext* ctx, std::string textureFilePath);
 
+	// 更新関数
 	void Update();
 
+	// 描画関数
 	void Draw();
 
 	/// <summary>

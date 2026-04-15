@@ -8,6 +8,9 @@ struct SoundData;
 struct IXAudio2SourceVoice;
 class XAudio;
 
+/// <summary>
+/// FFTクラス
+/// </summary>
 class FFT {
 public:
 	void GetSpectrum(std::vector<float>& output, IXAudio2SourceVoice& bgmVoice, const std::string& currentBgmTag, std::unordered_map<std::string, SoundData>& soundData);

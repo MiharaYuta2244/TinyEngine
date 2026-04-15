@@ -1,6 +1,10 @@
 #pragma once
 #include <string>
 #include <wrl.h>
+
+/// <summary>
+/// ログを出力するクラス
+/// </summary>
 class Logger {
 public:
 	/// <summary>

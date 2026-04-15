@@ -2,6 +2,9 @@
 #include "ParticleModule.h"
 #include "Random.h"
 
+/// <summary>
+/// ほこりパーティクルのモジュール
+/// </summary>
 class DustModule : public ParticleModule {
 public:
     DustModule(float lifeMin = 0.4f, float lifeMax = 0.9f,

@@ -2,6 +2,10 @@
 #include "Matrix4x4.h"
 #include "Vector4.h"
 #include <widemath.h>
+
+/// <summary>
+/// GPUに送るマテリアルの構造体
+/// </summary>
 struct Material {
 	Vector4 color;
 	int32_t enableLighting;

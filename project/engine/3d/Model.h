@@ -14,12 +14,18 @@
 
 class TextureManager;
 
+/// <summary>
+/// モデルクラス
+/// </summary>
 class Model {
 public:
+	// 初期化関数
 	void Initialize(ModelCommon* modelCommon, TextureManager* textureManager, const std::string& filename);
 
+	// 描画関数
 	void Draw();
 
+	// 更新関数
 	void Update();
 
 	// Getter

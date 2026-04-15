@@ -1,6 +1,10 @@
 #pragma once
 #include "IMeshGenerator.h"
 #include <cmath>
+
+/// <summary>
+/// 球メッシュ生成クラス
+/// </summary>
 class SphereMeshGenerator : public IMeshGenerator
 {
 public:

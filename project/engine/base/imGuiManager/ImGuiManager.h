@@ -8,7 +8,9 @@
 #include <dxgi1_6.h>
 #include <memory>
 
-
+/// <summary>
+/// ImGuiの管理を行うクラス
+/// </summary>
 class ImGuiManager {
 public:
 	void Initialize(HWND hwnd, Microsoft::WRL::ComPtr<ID3D12Device> device, UINT bufferCount, DXGI_FORMAT format, Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> srvDescriptorHeap);

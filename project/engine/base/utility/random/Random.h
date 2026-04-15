@@ -2,6 +2,9 @@
 #include <random>
 #include <vector>
 
+/// <summary>
+/// ランダム機能を提供するクラス
+/// </summary>
 class RandomEngine {
 public:
 	// コンストラクタでシード指定可能
