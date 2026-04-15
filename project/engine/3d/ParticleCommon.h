@@ -12,6 +12,10 @@ public:
 	/// </summary>
 	void DrawSettingCommon();
 
+	/// <summary>
+	/// 初期化関数
+	/// </summary>
+	/// <param name="dxCommon">DirectX共通クラスのポインタ</param>
 	void Initialize(DirectXCommon* dxCommon);
 
 	// setter
@@ -32,6 +36,9 @@ private:
 	/// </summary>
 	void CreateGraphicsPipeline();
 
+	/// <summary>
+	/// シェーダコンパイラの初期化
+	/// </summary>
 	void InitializeShaderCompiler();
 
 private:

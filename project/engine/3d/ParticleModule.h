@@ -18,5 +18,5 @@ public:
 	virtual void Update(ParticleState& particle, float deltaTime, EngineContext* ctx) {}
 
     // 描画直前に呼べるフック（WVP などレンダリング用データ準備を行う場合）
-    virtual void PrepareRender(const ParticleState& particle, EngineContext* ctx) {}
+	virtual void PrepareRender(const ParticleState& particle, EngineContext* ctx) {}
 };

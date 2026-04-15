@@ -32,8 +32,18 @@ public:
 	const ModelData& GetModelData() const { return modelData_; }
 
 private:
+	/// <summary>
+	/// モデルファイルを読み込む
+	/// </summary>
+	/// <param name="filename">モデルファイルのパス</param>
+	/// <returns>読み込んだモデルデータ</returns>
 	ModelData LoadModelFile(const std::string& filename);
 
+	/// <summary>
+	/// マテリアルテンプレートファイルを読み込む
+	/// </summary>
+	/// <param name="filename">マテリアルテンプレートファイルのパス</param>
+	/// <returns>読み込んだマテリアルデータ</returns>
 	MaterialData LoadMaterialTemplateFile(const std::string& filename);
 
 	/// <summary>

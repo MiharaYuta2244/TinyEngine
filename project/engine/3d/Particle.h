@@ -43,10 +43,24 @@ private:
 	};
 
 public:
+	/// <summary>
+	///	初期化処理
+	/// </summary>
+	/// <param name="ctx">エンジンコンテキスト</param>
+	/// <param name="emitterPos">エミッタの位置</param>
+	/// <param name="texturePath">テクスチャのパス</param>
+	/// <param name="srvIndex">SRVインデックス</param>
+	/// <param name="particleType">パーティクルの種類</param>
 	void Initialize(EngineContext* ctx, Vector3 emitterPos, std::string texturePath, UINT srvIndex = 3, const std::string& particleType = "");
 
+	/// <summary>
+	/// 更新関数
+	/// </summary>
 	void Update();
 
+	/// <summary>
+	/// 描画関数
+	/// </summary>
 	void Draw();
 
 	// setter

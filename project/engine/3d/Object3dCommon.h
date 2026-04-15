@@ -20,8 +20,15 @@ public:
 	/// </summary>
 	void DrawSettingOutline();
 
+	/// <summary>
+	/// 初期化関数
+	/// </summary>
+	/// <param name="dxCommon">DirectX共通クラスのポインタ</param>
 	void Initialize(DirectXCommon* dxCommon);
 
+	/// <summary>
+	/// 更新関数
+	/// </summary>
 	void Update();
 
 	// Setter
@@ -52,6 +59,9 @@ private:
 	/// </summary>
 	void CreateGraphicsPipeline();
 
+	/// <summary>
+	/// シェーダコンパイラの初期化
+	/// </summary>
 	void InitializeShaderCompiler();
 
 	// グローバルライティングバッファの更新

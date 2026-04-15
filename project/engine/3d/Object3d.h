@@ -27,10 +27,20 @@ namespace TinyEngine {
 /// </summary>
 class Object3d {
 public:
+	/// <summary>
+	/// 初期化関数
+	/// </summary>
+	/// <param name="ctx">エンジンコンテキスト</param>
 	void Initialize(EngineContext* ctx);
 
+	/// <summary>
+	/// 更新関数
+	/// </summary>
 	void Update();
 
+	/// <summary>
+	/// 描画関数
+	/// </summary>
 	void Draw();
 
 	// setter

@@ -204,6 +204,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="engine\Framework\Framework.cpp" />
     <ClCompile Include="application\Scene\GamePlayScene.cpp" />
     <ClCompile Include="engine\audio\FFT.cpp" />
+    <ClCompile Include="application\Fade\FadeStates.cpp" />
+    <ClCompile Include="application\Fade\FadeManager.cpp" />
     <ClCompile Include="main.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -378,6 +380,9 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\Scene\GamePlayScene.h" />
     <ClInclude Include="engine\base\utility\screenSpaceUtility\ScreenSpaceUtility.h" />
     <ClInclude Include="engine\audio\FFT.h" />
+    <ClInclude Include="application\Fade\IFadeState.h" />
+    <ClInclude Include="application\Fade\FadeStates.h" />
+    <ClInclude Include="application\Fade\FadeManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

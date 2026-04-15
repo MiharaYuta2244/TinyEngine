@@ -18,72 +18,29 @@ void Game::Initialize() {
 	// 最初のシーンを初期化
 	sceneManager_->ChangeScene("Title");
 
-	// フェード用スプライト初期化
-	fadeSprite_ = std::make_unique<Sprite>();
-	fadeSprite_->Initialize(&GetEngineContext(), "resources/white.png");
-	fadeSprite_->SetPosition({0.0f, 0.0f});
-	fadeSprite_->SetSize({static_cast<float>(WinApp::kClientWidth), static_cast<float>(WinApp::kClientHeight)});
-	fadeSprite_->SetAnchorPoint({0.0f, 0.0f});
-	fadeSprite_->SetColor({0.0f, 0.0f, 0.0f, 0.0f});
-	fadeState_ = FadeState::None;
-	fadeTimer_ = 0.0f;
-	lastSceneName_ = "";
+	// フェードマネージャーの生成&初期化
+	fadeManager_ = std::make_unique<FadeManager>();
+	fadeManager_->Initialize(&GetEngineContext());
 }
 
 void Game::Update() {
 	// 基底クラスの更新処理
 	Framework::Update();
 
+	// シーン切り替えの要求があればフェードアウト開始
 	if (sceneManager_->GetRequestedSceneName() != "") {
-		requestedSceneName_ = sceneManager_->GetRequestedSceneName();
+		fadeManager_->FadeOutTo(sceneManager_->GetRequestedSceneName());
 		sceneManager_->SetRequestedSceneName("");
 	}
 
-	if (requestedSceneName_ != "" && fadeState_ == FadeState::None) {
-		// シーン切り替え要求があり、フェード中でなければフェードアウト開始
-		fadeState_ = FadeState::FadeOut;
-		fadeTimer_ = 0.0f;
-	}
+	// フェードの更新処理
+	float dt = GetTimeManager()->GetDeltaTime();
+	fadeManager_->Update(dt);
 
-	// フェード更新（優先して処理）
-	if (fadeState_ != FadeState::None) {
-		float dt = GetTimeManager()->GetDeltaTime();
-		fadeTimer_ += dt;
-		float t = fadeDuration_ > 0.0f ? std::clamp(fadeTimer_ / fadeDuration_, 0.0f, 1.0f) : 1.0f;
-
-		if (fadeState_ == FadeState::FadeOut) {
-			// フェードアウト進行（透明->不透明）
-			fadeSprite_->SetColor({0.0f, 0.0f, 0.0f, t});
-			if (t >= 1.0f) {
-				// フェードアウト完了 → シーン切り替え
-				fadeState_ = FadeState::WaitingForSceneChange;
-				fadeTimer_ = 0.0f;
-				isSceneChangeRequested_ = true;
-			}
-		} else if (fadeState_ == FadeState::WaitingForSceneChange) {
-			// シーン切り替えを実行
-			if (isSceneChangeRequested_) {
-				sceneManager_->ChangeScene(requestedSceneName_);
-				isSceneChangeRequested_ = false;
-				requestedSceneName_ = "";
-			}
-			// シーン切り替え完了後、フェードインへ移行
-			const std::string& currentSceneName = sceneManager_->GetCurrentSceneName();
-			if (lastSceneName_ != currentSceneName) {
-				lastSceneName_ = currentSceneName;
-				fadeState_ = FadeState::FadeIn;
-				fadeTimer_ = 0.0f;
-			}
-		} else if (fadeState_ == FadeState::FadeIn) {
-			// フェードイン進行（不透明->透明）
-			fadeSprite_->SetColor({0.0f, 0.0f, 0.0f, 1.0f - t});
-			if (t >= 1.0f) {
-				// フェード完了
-				fadeState_ = FadeState::None;
-				fadeTimer_ = 0.0f;
-				fadeSprite_->SetColor({0.0f, 0.0f, 0.0f, 0.0f});
-			}
-		}
+	// 画面が完全に暗くなったらシーンを切り替える
+	if(fadeManager_->IsWaitingForSceneShange()){
+		sceneManager_->ChangeScene(fadeManager_->GetRequestedSceneName());
+		fadeManager_->NotifySceneChanged();
 	}
 
 	// シーンマネージャー更新
@@ -98,10 +55,7 @@ void Game::Draw() {
 	sceneManager_->Draw();
 
 	// フェードスプライトを上書きで描画
-	if (fadeSprite_) {
-		fadeSprite_->Update();
-		fadeSprite_->Draw();
-	}
+	fadeManager_->Draw();
 
 	// 描画後処理
 	Framework::PostDraw();
