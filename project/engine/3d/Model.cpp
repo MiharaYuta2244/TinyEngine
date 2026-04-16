@@ -1,15 +1,16 @@
 #include "Model.h"
+#include "DirectXUtils.h"
 #include "MathUtility.h"
 #include "ModelCommon.h"
 #include "SphereMeshGenerator.h"
 #include "TextureManager.h"
 #include "TransformationMatrix.h"
-#include "DirectXUtils.h"
 #include <Transform.h>
 #include <assert.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <cmath>
 #include <fstream>
 #include <sstream>
 
@@ -54,29 +55,69 @@ ModelData Model::LoadModelFile(const std::string& filename) {
 	std::string line;               // ファイルから読んだ1行を格納するもの
 
 	// デフォルトのテクスチャパスを事前に設定
-	modelData.material.textureFilePath = "resources/model/white.png";
+	modelData.material.textureFilePath = "white.png";
 
 	Assimp::Importer importer;
-	std::string filePath = "resources/model/" + filename;
-	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
-	assert(scene->HasMeshes()); // メッシュがないのは対応しない
+	std::string filePath = "resources/models/" + filename;
+	// 三角形化とUV/向きの調整を入れておく（法線やUVがない場合も後処理で対応）
+	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_Triangulate | aiProcess_FlipWindingOrder | aiProcess_FlipUVs);
+	assert(scene && scene->HasMeshes()); // シーン・メッシュがないのは対応しない
 
 	for (uint32_t meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex) {
 		aiMesh* mesh = scene->mMeshes[meshIndex];
-		assert(mesh->HasNormals());        // 法線がないMeshは今回は非対応
-		assert(mesh->HasTextureCoords(0)); // TexcoordがないMeshは今回は非対応
+
+		// メッシュが法線・UVを持っていない場合に備えてフラグを用意
+		const bool hasNormals = mesh->HasNormals();
+		const bool hasTexcoords = mesh->HasTextureCoords(0);
 
 		// Meshの中身(Face)の解析を行っていく
 		for (uint32_t faceIndex = 0; faceIndex < mesh->mNumFaces; ++faceIndex) {
 			aiFace& face = mesh->mFaces[faceIndex];
-			assert(face.mNumIndices == 3); // 三角形のみサポート
+			assert(face.mNumIndices == 3); // 三角形のみサポート（Triangulateを指定しているので通常成立）
+
+			// 三角形頂点の位置を先に取得しておく（法線生成に利用）
+			aiVector3D v0 = mesh->mVertices[face.mIndices[0]];
+			aiVector3D v1 = mesh->mVertices[face.mIndices[1]];
+			aiVector3D v2 = mesh->mVertices[face.mIndices[2]];
+
+			// face法線（メッシュに法線が無い場合に使用する平面法線を計算）
+			aiVector3D computedFaceNormal(0.0f, 0.0f, 0.0f);
+			if (!hasNormals) {
+				aiVector3D e1 = v1 - v0;
+				aiVector3D e2 = v2 - v0;
+				// クロス積
+				computedFaceNormal.x = e1.y * e2.z - e1.z * e2.y;
+				computedFaceNormal.y = e1.z * e2.x - e1.x * e2.z;
+				computedFaceNormal.z = e1.x * e2.y - e1.y * e2.x;
+				// 正規化
+				float len = std::sqrt(computedFaceNormal.x * computedFaceNormal.x + computedFaceNormal.y * computedFaceNormal.y + computedFaceNormal.z * computedFaceNormal.z);
+				if (len > 0.0f) {
+					computedFaceNormal.x /= len;
+					computedFaceNormal.y /= len;
+					computedFaceNormal.z /= len;
+				}
+			}
 
 			// Faceの中身(Vertex)の解析を行っていく
 			for (uint32_t element = 0; element < face.mNumIndices; ++element) {
 				uint32_t vertexIndex = face.mIndices[element];
 				aiVector3D& position = mesh->mVertices[vertexIndex];
-				aiVector3D& normal = mesh->mNormals[vertexIndex];
-				aiVector3D& texcoord = mesh->mTextureCoords[0][vertexIndex];
+
+				aiVector3D normal;
+				if (hasNormals) {
+					normal = mesh->mNormals[vertexIndex];
+				} else {
+					normal = computedFaceNormal; // 法線が無ければface法線を割り当て（flat shading）
+				}
+
+				aiVector3D texcoord;
+				if (hasTexcoords) {
+					texcoord = mesh->mTextureCoords[0][vertexIndex];
+				} else {
+					// UVが無ければ(0,0)を割り当て
+					texcoord = aiVector3D(0.0f, 0.0f, 0.0f);
+				}
+
 				VertexData vertex;
 				vertex.position = {position.x, position.y, position.z, 1.0f};
 				vertex.normal = {normal.x, normal.y, normal.z};
@@ -99,7 +140,46 @@ ModelData Model::LoadModelFile(const std::string& filename) {
 
 			// テクスチャファイルパスが空でない場合は指定したパスを使用
 			if (textureFilePath.length > 0) {
-				modelData.material.textureFilePath = "resources/model/" + std::string(textureFilePath.C_Str());
+				std::string texStr = textureFilePath.C_Str();
+				// 埋め込みテクスチャ参照は "*<index>" の形式になる（例: "*0"）
+				if (!texStr.empty() && texStr[0] == '*') {
+					// "*n" の n を取り出す
+					int texIndex = 0;
+					try {
+						texIndex = std::stoi(texStr.substr(1));
+					} catch (...) {
+						texIndex = -1;
+					}
+
+					if (texIndex >= 0 && scene->mTextures && texIndex < static_cast<int>(scene->mNumTextures)) {
+						aiTexture* atex = scene->mTextures[texIndex];
+						// 圧縮されたイメージデータ（PNG/JPEG 等）は mHeight == 0, pcData に生のバイナリが入る
+						if (atex->mHeight == 0 && atex->pcData) {
+							// 出力ファイル名を作る（モデル名を元に一意化）
+							std::string baseName = filename;
+							auto pos = baseName.find_last_of('.');
+							if (pos != std::string::npos) baseName = baseName.substr(0, pos);
+							std::string outPath = "resources/models/" + baseName + "_embedded" + std::to_string(texIndex) + ".png";
+
+							// バイナリ書き出し
+							std::ofstream ofs(outPath, std::ios::binary);
+							if (ofs) {
+								ofs.write(reinterpret_cast<const char*>(atex->pcData), static_cast<std::streamsize>(atex->mWidth));
+								ofs.close();
+								modelData.material.textureFilePath = outPath;
+							} else {
+								// 書き出し失敗時はデフォルトのままにする（white.png）
+							}
+						} else {
+							// mHeight > 0 の場合は非圧縮RGBA等の生データが入っている。
+							// ここを対応するには生データをPNG等へ変換する処理が必要（未実装）
+							// 現時点ではデフォルトテクスチャを使用する
+						}
+					}
+				} else {
+					// 通常のファイルパスをそのまま利用（既存の処理）
+					modelData.material.textureFilePath = "resources/models/" + texStr;
+				}
 			}
 		}
 	}
@@ -110,10 +190,10 @@ ModelData Model::LoadModelFile(const std::string& filename) {
 }
 
 MaterialData Model::LoadMaterialTemplateFile(const std::string& filename) {
-	MaterialData materialData;                         // 構築するMaterialData
-	std::string line;                                  // ファイルから読んだ1行を格納するもの
-	std::ifstream file("resources/model/" + filename); // ファイルを開く
-	assert(file.is_open());                            // とりあえず開けなかったら止める
+	MaterialData materialData;                          // 構築するMaterialData
+	std::string line;                                   // ファイルから読んだ1行を格納するもの
+	std::ifstream file("resources/models/" + filename); // ファイルを開く
+	assert(file.is_open());                             // とりあえず開けなかったら止める
 
 	while (std::getline(file, line)) {
 		std::string identifier;
@@ -125,7 +205,7 @@ MaterialData Model::LoadMaterialTemplateFile(const std::string& filename) {
 			std::string textureFilename;
 			s >> textureFilename;
 			// 連結してファイルパスにする
-			materialData.textureFilePath = "resources/model/" + textureFilename;
+			materialData.textureFilePath = "resources/models/" + textureFilename;
 		}
 	}
 	return materialData;

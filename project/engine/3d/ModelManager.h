@@ -26,6 +26,11 @@ public:
 	/// <param name="filePath">ファイル名</param>
 	void LoadModel(const std::string& filePath);
 
+	/// <summary>
+	/// プロジェクト内のすべてのモデルを読み込む
+	/// </summary>
+	void AllModelLoad();
+
 private:
 	std::unique_ptr<ModelCommon> modelCommon_ = nullptr;
 	TextureManager* textureManager_ = nullptr;

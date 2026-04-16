@@ -17,8 +17,15 @@ class SrvManager;
 class TextureManager {
 public:
 	~TextureManager();
+
+	// 初期化処理
 	void Initialize(DirectXCommon* directXCommon, SrvManager* srvManager);
+
+	// テクスチャの読み込み
 	void LoadTexture(const std::string& filePath);
+
+	// プロジェクト内のテクスチャの読み込み
+	void AllTextureLoad();
 
 	// テクスチャ番号からGPUハンドルを取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(const std::string& filePath);

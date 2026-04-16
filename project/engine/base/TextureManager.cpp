@@ -2,9 +2,11 @@
 #include "DirectXCommon.h"
 #include "StringUtility.h"
 #include "SrvManager.h"
+#include <filesystem>
 
 uint32_t TextureManager::kSRVIndexTop = 1;
 
+namespace fs = std::filesystem;
 using namespace Microsoft::WRL;
 
 TextureManager::~TextureManager() {}
@@ -17,58 +19,21 @@ void TextureManager::Initialize(DirectXCommon* directXCommon, SrvManager* srvMan
 	textureDatas_.reserve(DirectXCommon::kMaxSRVCount);
 
 	// Textureを読んで転送する
-	LoadTexture("resources/uvChecker.png");
-	LoadTexture("resources/white.png");
-	LoadTexture("resources/fence.png");
-	LoadTexture("resources/SkySphere.png");
-	LoadTexture("resources/skydome.png");
-	LoadTexture("resources/Field.png");
-	LoadTexture("resources/sphere.png");
-	LoadTexture("resources/Heart.png");
-	LoadTexture("resources/monsterBall.png");
-	LoadTexture("resources/circle.png");
-	LoadTexture("resources/smoke.png");
-	LoadTexture("resources/BossIcon.png");
-	LoadTexture("resources/HiyokoAfroIcon.png");
-	LoadTexture("resources/HiyokoGlassIcon.png");
-	LoadTexture("resources/HiyokoIcon.png");
-	LoadTexture("resources/HiyokoStudentIcon.png");
-	LoadTexture("resources/select.png");
-	LoadTexture("resources/selectIcon.png");
-	LoadTexture("resources/menu.png");
-	LoadTexture("resources/menuBG.png");
-	LoadTexture("resources/selectBG.png");
-	LoadTexture("resources/apple.png");
-	LoadTexture("resources/orange.png");
-	LoadTexture("resources/grape.png");
-	LoadTexture("resources/rule1.png");
-	LoadTexture("resources/rule2.png");
-	LoadTexture("resources/0.png");
-	LoadTexture("resources/1.png");
-	LoadTexture("resources/2.png");
-	LoadTexture("resources/3.png");
-	LoadTexture("resources/4.png");
-	LoadTexture("resources/5.png");
-	LoadTexture("resources/6.png");
-	LoadTexture("resources/7.png");
-	LoadTexture("resources/8.png");
-	LoadTexture("resources/9.png");
-	LoadTexture("resources/attackAmount.png");
-	LoadTexture("resources/stage1.png");
-	LoadTexture("resources/stage2.png");
-	LoadTexture("resources/stage3.png");
-	LoadTexture("resources/player.png");
-	LoadTexture("resources/back.png");
-	LoadTexture("resources/LEVEL_UP.png");
-	LoadTexture("resources/Cross.png");
-	LoadTexture("resources/AButton.png");
-	LoadTexture("resources/move.png");
-	LoadTexture("resources/random.png");
+	AllTextureLoad();
 }
 
 void TextureManager::LoadTexture(const std::string& filePath) {
+	std::string fullPath;
+
+	// すでに "resources/models/" が含まれているかチェック
+	if (filePath.find("resources/models/") == std::string::npos) {
+		fullPath = "resources/textures/" + filePath;
+	} else {
+		fullPath = filePath;
+	}
+
 	// 読み込み済みテクスチャを検索
-	if (textureDatas_.contains(filePath)) {
+	if (textureDatas_.contains(fullPath)) {
 		return;
 	}
 
@@ -77,7 +42,7 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 
 	// テクスチャファイルを読んでプログラムで扱えるようにする
 	DirectX::ScratchImage image{};
-	std::wstring filePathW = StringUtility::ConvertString(filePath);
+	std::wstring filePathW = StringUtility::ConvertString(fullPath);
 	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
 	assert(SUCCEEDED(hr));
 
@@ -87,7 +52,7 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	assert(SUCCEEDED(hr));
 
 	// 追加したテクスチャデータの参照を取得する
-	TextureData& textureData = textureDatas_[filePath];
+	TextureData& textureData = textureDatas_[fullPath];
 
 	// テクスチャデータの要素数番号をSRVのインデックスとする
 	textureData.srvIndex = srvManager_->Allocate();
@@ -109,6 +74,21 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 
 	// 実データをGPUに書き込む
 	UploadTextureData(textureData.resource, mipImages);
+}
+
+void TextureManager::AllTextureLoad() {
+	std::string directoryPath = "resources/";
+
+	for (const auto& entry : fs::directory_iterator(directoryPath)) {
+		if (entry.is_regular_file()) {
+			// 拡張子チェック
+			auto ext = entry.path().extension().string();
+			if (ext == ".png" || ext == ".jpg" || ext == ".jpeg" || ext == ".dds" || ext == ".tga") {
+				// ファイル名を取得して読み込む
+				LoadTexture(entry.path().filename().string());
+			}
+		}
+	}
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(const std::string& filePath) {

@@ -1,4 +1,7 @@
 #include "ModelManager.h"
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 void ModelManager::Initialize(DirectXCommon* dxCommon, TextureManager* textureManager) {
 	modelCommon_ = std::make_unique<ModelCommon>();
@@ -31,4 +34,19 @@ void ModelManager::LoadModel(const std::string& filePath) {
 
 	// モデルをmapコンテナに格納する
 	models.insert(std::make_pair(filePath, std::move(model)));
+}
+
+void ModelManager::AllModelLoad(){
+	std::string directoryPath = "resources/models/";
+
+	for (const auto& entry : fs::directory_iterator(directoryPath)) {
+		if (entry.is_regular_file()) {
+			// ファイルの拡張子をチェック
+			auto ext = entry.path().extension().string();
+			if (ext == ".obj" || ext == ".gltf" || ext == ".glb") {
+				// ファイル名を取得して読み込む
+				LoadModel(entry.path().filename().string());
+			}
+		}
+	}
 }

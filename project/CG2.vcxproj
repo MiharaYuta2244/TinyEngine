@@ -231,6 +231,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="engine\3d\modules\RisingModule.cpp" />
     <ClCompile Include="engine\3d\modules\RadialRingModule.cpp" />
     <ClCompile Include="engine\base\utility\screenSpaceUtility\ScreenSpaceUtility.cpp" />
+    <ClCompile Include="application\Scene\TitleScene.cpp" />
+    <ClCompile Include="application\GameObjects\Player\Player.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -383,6 +385,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\Fade\IFadeState.h" />
     <ClInclude Include="application\Fade\FadeStates.h" />
     <ClInclude Include="application\Fade\FadeManager.h" />
+    <ClInclude Include="application\Scene\TitleScene.h" />
+    <ClInclude Include="application\GameObjects\Player\Player.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

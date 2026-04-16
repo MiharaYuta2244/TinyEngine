@@ -5,7 +5,7 @@ using namespace TinyEngine;
 
 void FadeManager::Initialize(EngineContext* ctx) {
 	fadeSprite_ = std::make_unique<Sprite>();
-	fadeSprite_->Initialize(ctx, "resources/white.png");
+	fadeSprite_->Initialize(ctx, "white.png");
 	fadeSprite_->SetPosition({640.0f, 360.0f});
 	fadeSprite_->SetSize({1280.0f, 720.0f});
 	fadeSprite_->SetAnchorPoint({0.5f, 0.5f});

@@ -27,6 +27,7 @@ void Framework::Initialize() {
 
 	// ModelManager
 	modelManager_->Initialize(dxCommon_.get(), textureManager_.get());
+	modelManager_->AllModelLoad();
 
 	// Sprite共通部
 	spriteCommon_->Initialize(dxCommon_.get());

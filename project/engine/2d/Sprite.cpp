@@ -13,7 +13,7 @@ Sprite::~Sprite() {}
 
 void Sprite::Initialize(EngineContext* ctx, std::string textureFilePath) {
 	ctx_ = ctx;
-	textureFilePath_ = textureFilePath;
+	textureFilePath_ = "resources/textures/" + textureFilePath;
 
 	// 頂点データ作成
 	CreateVertexData();

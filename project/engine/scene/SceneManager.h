@@ -42,9 +42,6 @@ public:
 	void Finalize();
 
 private:
-	void AllModelLoad();
-
-private:
 	// シーンマップ
 	std::unordered_map<std::string, std::unique_ptr<BaseScene>> scenes_;
 

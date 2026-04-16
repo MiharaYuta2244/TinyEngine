@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Scene/GamePlayScene.h"
+#include "Scene/TitleScene.h"
 #include <algorithm>
 #include <numbers>
 
@@ -14,9 +15,10 @@ void Game::Initialize() {
 
 	// シーン追加
 	sceneManager_->AddScene("GamePlay", std::make_unique<GamePlayScene>());
+	sceneManager_->AddScene("Title", std::make_unique<TitleScene>());
 
 	// 最初のシーンを初期化
-	sceneManager_->ChangeScene("Title");
+	sceneManager_->ChangeScene("GamePlay");
 
 	// フェードマネージャーの生成&初期化
 	fadeManager_ = std::make_unique<FadeManager>();

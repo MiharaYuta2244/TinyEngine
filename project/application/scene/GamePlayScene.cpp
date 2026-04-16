@@ -13,14 +13,18 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	debugCamera_ = debugCamera;
 	timeManager_ = timeManager;
 	sceneManager_ = sceneManager;
+
+	// プレイヤーの生成&初期化
+	player_=std::make_unique<Player>();
+	player_->Initialize(ctx);
 }
 
 void GamePlayScene::Update() {
-	
+	player_->Update();
 }
 
 void GamePlayScene::Draw() {
-	
+	player_->Draw();
 }
 
 void GamePlayScene::Finalize() {
