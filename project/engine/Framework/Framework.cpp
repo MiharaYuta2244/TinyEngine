@@ -27,7 +27,7 @@ void Framework::Initialize() {
 
 	// ModelManager
 	modelManager_->Initialize(dxCommon_.get(), textureManager_.get());
-	//modelManager_->AllModelLoad();
+	modelManager_->AllModelLoad();
 
 	// Sprite共通部
 	spriteCommon_->Initialize(dxCommon_.get());
@@ -48,8 +48,6 @@ void Framework::Initialize() {
 	engineContext_.textureManager = textureManager_.get();
 	engineContext_.particleCommon = particleCommon_.get();
 	engineContext_.srvManager = srvManager_.get();
-
-	engineContext_.modelManager->AllModelLoad();
 
 	// DirectInput
 	input_->Initialize(winApp_.get());
