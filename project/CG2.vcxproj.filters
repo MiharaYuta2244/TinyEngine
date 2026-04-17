@@ -234,7 +234,10 @@
     <ClCompile Include="application\Scene\TitleScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="application\GameObjects\Player\Player.cpp">
+    <ClCompile Include="application\GameObjects\Player\PlayerRender.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="application\GameObjects\Player\PlayerStateNormal.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -520,7 +523,13 @@
     <ClInclude Include="application\Scene\TitleScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="application\GameObjects\Player\Player.h">
+    <ClInclude Include="application\GameObjects\Player\PlayerRender.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="application\GameObjects\Player\IPlayerState.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="application\GameObjects\Player\PlayerStateNormal.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -55,7 +55,7 @@ ModelData Model::LoadModelFile(const std::string& filename) {
 	std::string line;               // ファイルから読んだ1行を格納するもの
 
 	// デフォルトのテクスチャパスを事前に設定
-	modelData.material.textureFilePath = "white.png";
+	modelData.material.textureFilePath = "resources/models/white.png";
 
 	Assimp::Importer importer;
 	std::string filePath = "resources/models/" + filename;
@@ -158,7 +158,8 @@ ModelData Model::LoadModelFile(const std::string& filename) {
 							// 出力ファイル名を作る（モデル名を元に一意化）
 							std::string baseName = filename;
 							auto pos = baseName.find_last_of('.');
-							if (pos != std::string::npos) baseName = baseName.substr(0, pos);
+							if (pos != std::string::npos)
+								baseName = baseName.substr(0, pos);
 							std::string outPath = "resources/models/" + baseName + "_embedded" + std::to_string(texIndex) + ".png";
 
 							// バイナリ書き出し
@@ -222,8 +223,8 @@ void Model::CreateVertexData() {
 	vertexBufferView_.StrideInBytes = sizeof(VertexData);
 	// 書き込むためのアドレスを取得
 	vertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&vertexData_));
-	vertexResource_->Unmap(0, nullptr);
 	std::memcpy(vertexData_, modelData_.vertices.data(), sizeof(VertexData) * modelData_.vertices.size());
+	vertexResource_->Unmap(0, nullptr);
 }
 
 void Model::CreateIndexData() {
@@ -243,8 +244,8 @@ void Model::CreateIndexData() {
 	indexBufferView_.Format = DXGI_FORMAT_R32_UINT;
 	// 書き込むためのアドレスを取得
 	indexResource_->Map(0, nullptr, reinterpret_cast<void**>(&indexData_));
-	indexResource_->Unmap(0, nullptr);
 	std::memcpy(indexData_, meshData_.vertices.data(), sizeof(uint32_t) * indexCount_);
+	indexResource_->Unmap(0, nullptr);
 }
 
 Node Model::ReadNode(aiNode* node) {

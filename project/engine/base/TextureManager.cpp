@@ -77,7 +77,7 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 }
 
 void TextureManager::AllTextureLoad() {
-	std::string directoryPath = "resources/";
+	std::string directoryPath = "resources/textures/";
 
 	for (const auto& entry : fs::directory_iterator(directoryPath)) {
 		if (entry.is_regular_file()) {
