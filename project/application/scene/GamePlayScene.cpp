@@ -17,34 +17,25 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	sceneManager_ = sceneManager;
 
 	// プレイヤーの生成&初期化
-	player_ = std::make_unique<Player::Render>();
-	player_->Initialize(ctx, keyboard);
-
-	sprite_ = std::make_unique<Sprite>();
-	sprite_->Initialize(ctx, "white.png");
-	sprite_->SetSize({100.0f, 100.0f});
+	player_ = std::make_unique<Player>();
+	player_->Initialize(ctx);
 }
 
 void GamePlayScene::Update() {
-	player_->Update();
-	sprite_->Update();
+	// プレイヤーの更新処理
+	player_->Update(timeManager_->GetDeltaTime(), keyboard_);
 
 #ifdef USE_IMGUI
 	ImGui::Begin("Camera");
 	ImGui::DragFloat3("Rotate", &debugCamera_->GetRotate().x, 0.01f);
 	ImGui::DragFloat3("Translate", &debugCamera_->GetTranslation().x, 0.01f);
 	ImGui::End();
-
-	ImGui::Begin("Sprite");
-	ImGui::DragFloat2("Position", &sprite_->GetPosition().x, 1.0f);
-	ImGui::DragFloat2("Size", &sprite_->GetSize().x, 1.0f);
-	ImGui::End();
 #endif // USE_IMGUI
 }
 
 void GamePlayScene::Draw() {
+	// プレイヤーの描画処理
 	player_->Draw();
-	sprite_->Draw();
 }
 
 void GamePlayScene::Finalize() {}

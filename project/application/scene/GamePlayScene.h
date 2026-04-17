@@ -4,7 +4,7 @@
 #include "Particle.h"
 #include "Sprite.h"
 #include "AudioManager.h"
-#include "GameObjects/Player/PlayerRender.h"
+#include "GameObjects/Player/Player.h"
 #include <array>
 #include <memory>
 #include <vector>
@@ -20,7 +20,5 @@ public:
 	void Finalize() override;
 private:
 	// プレイヤー
-	std::unique_ptr<Player::Render> player_;
-
-	std::unique_ptr<TinyEngine::Sprite> sprite_;
+	std::unique_ptr<Player> player_;
 };
