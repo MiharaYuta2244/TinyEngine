@@ -19,11 +19,18 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	// プレイヤーの生成&初期化
 	player_ = std::make_unique<Player>();
 	player_->Initialize(ctx);
+
+	// プレイヤーの生成&初期化
+	enemy_ = std::make_unique<Enemy>();
+	enemy_->Initialize(ctx);
 }
 
 void GamePlayScene::Update() {
 	// プレイヤーの更新処理
 	player_->Update(timeManager_->GetDeltaTime(), keyboard_);
+
+	// 敵の更新処理
+	enemy_->Update();
 
 #ifdef USE_IMGUI
 	ImGui::Begin("Camera");
@@ -36,6 +43,9 @@ void GamePlayScene::Update() {
 void GamePlayScene::Draw() {
 	// プレイヤーの描画処理
 	player_->Draw();
+
+	// 敵の描画処理
+	enemy_->Draw();
 }
 
 void GamePlayScene::Finalize() {}

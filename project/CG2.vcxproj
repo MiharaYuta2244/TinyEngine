@@ -161,6 +161,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="application\GameObjects\Enemy\Enemy.cpp" />
     <ClCompile Include="engine\utility\DirectXUtils.cpp" />
     <ClCompile Include="engine\Collision\Collision.cpp" />
     <ClCompile Include="engine\scene\BaseScene.cpp" />
@@ -232,9 +233,9 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="engine\3d\modules\RadialRingModule.cpp" />
     <ClCompile Include="engine\base\utility\screenSpaceUtility\ScreenSpaceUtility.cpp" />
     <ClCompile Include="application\Scene\TitleScene.cpp" />
-    <ClCompile Include="application\GameObjects\Player\PlayerRender.cpp" />
     <ClCompile Include="application\GameObjects\Player\Player.cpp" />
     <ClCompile Include="application\GameObjects\Player\PlayerMove.cpp" />
+    <ClCompile Include="application\GameObjects\ObjectRender\ObjectRender.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -303,6 +304,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="application\GameObjects\Enemy\Enemy.h" />
     <ClInclude Include="engine\utility\DirectXUtils.h" />
     <ClInclude Include="engine\base\Outline.h" />
     <ClInclude Include="engine\base\utility\easing\EaseType.h" />
@@ -388,9 +390,9 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\Fade\FadeStates.h" />
     <ClInclude Include="application\Fade\FadeManager.h" />
     <ClInclude Include="application\Scene\TitleScene.h" />
-    <ClInclude Include="application\GameObjects\Player\PlayerRender.h" />
     <ClInclude Include="application\GameObjects\Player\Player.h" />
     <ClInclude Include="application\GameObjects\Player\PlayerMove.h" />
+    <ClInclude Include="application\GameObjects\ObjectRender\ObjectRender.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

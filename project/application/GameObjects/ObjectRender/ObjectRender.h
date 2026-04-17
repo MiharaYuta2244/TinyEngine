@@ -1,14 +1,13 @@
 #pragma once
 #include "Object3d.h"
-#include <memory>
 
 /// <summary>
-/// プレイヤーの描画処理をまとめたクラス
+/// オブジェクトの描画処理を行う基底クラス
 /// </summary>
-class PlayerRender {
+class ObjectRender {
 public:
 	// 初期化処理
-	void Initialize(EngineContext* ctx);
+	void Initialize(EngineContext* ctx, const std::string& filepath);
 
 	// 更新処理
 	void Update(Transform transform);
@@ -17,6 +16,6 @@ public:
 	void Draw();
 
 private:
-	// プレイヤーモデル
+	// モデル
 	std::unique_ptr<TinyEngine::Object3d> object3d_;
 };

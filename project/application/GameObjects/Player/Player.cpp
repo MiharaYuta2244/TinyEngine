@@ -1,16 +1,16 @@
 #include "Player.h"
 
 void Player::Initialize(EngineContext* ctx) {
-	transform_.scale = {1.0f,1.0f,1.0f};
-	transform_.rotate = {0.0f,0.0f,0.0f};
-	transform_.translate = {0.0f,0.0f,0.0f};
+	transform_.scale = {1.0f, 1.0f, 1.0f};
+	transform_.rotate = {0.0f, 0.0f, 0.0f};
+	transform_.translate = {0.0f, 0.0f, 0.0f};
 
 	// 描画用インスタンス生成&初期化
-	render_ = std::make_unique<PlayerRender>();
-	render_->Initialize(ctx);
+	render_ = std::make_unique<ObjectRender>();
+	render_->Initialize(ctx, "suzanne.obj");
 
 	// 移動用インスタンス生成
-	move_=std::make_unique<PlayerMove>();
+	move_ = std::make_unique<PlayerMove>();
 }
 
 void Player::Update(float deltaTime, DirectInput* input) {
@@ -38,11 +38,9 @@ void Player::Update(float deltaTime, DirectInput* input) {
 	render_->Update(transform_);
 }
 
-void Player::Draw(){
+void Player::Draw() {
 	// 描画
 	render_->Draw();
 }
 
-void Player::Damage(int value){
-
-}
+void Player::Damage(int value) {}

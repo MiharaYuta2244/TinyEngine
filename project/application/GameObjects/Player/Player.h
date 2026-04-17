@@ -1,5 +1,5 @@
 #pragma once
-#include "PlayerRender.h"
+#include "GameObjects/ObjectRender/ObjectRender.h"
 #include "PlayerMove.h"
 #include "DirectInput.h"
 
@@ -30,6 +30,6 @@ private:
 	Transform transform_;
 	Vector2 velocity_;
 
-	std::unique_ptr<PlayerRender> render_; // 描画用インスタンス
+	std::unique_ptr<ObjectRender> render_; // 描画用インスタンス
 	std::unique_ptr<PlayerMove> move_; // 移動用インスタンス
 };

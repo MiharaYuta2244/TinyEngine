@@ -5,6 +5,7 @@
 #include "Sprite.h"
 #include "AudioManager.h"
 #include "GameObjects/Player/Player.h"
+#include "GameObjects/Enemy/Enemy.h"
 #include <array>
 #include <memory>
 #include <vector>
@@ -21,4 +22,7 @@ public:
 private:
 	// プレイヤー
 	std::unique_ptr<Player> player_;
+
+	// 敵
+	std::unique_ptr<Enemy> enemy_;
 };
