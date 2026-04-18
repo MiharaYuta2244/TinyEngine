@@ -1,4 +1,5 @@
 #include "Enemy.h"
+#include "EnemyBulletManager.h"
 
 void Enemy::Initialize(EngineContext* ctx) {
 	transform_.scale = {1.0f, 1.0f, 1.0f};
@@ -14,18 +15,15 @@ void Enemy::Initialize(EngineContext* ctx) {
 	ai_->Initialize(&transform_, ctx);
 }
 
-void Enemy::Update(float deltaTime, Vector3 playerPos) {
+void Enemy::Update(float deltaTime, Vector3 playerPos, EnemyBulletManager* enemyBulletManager) {
 	// AIインスタンス更新
-	ai_->Update(deltaTime, playerPos);
+	ai_->Update(deltaTime, playerPos, enemyBulletManager);
 
 	// 描画用インスタンス更新処理
 	render_->Update(transform_);
 }
 
 void Enemy::Draw(){
-	// AIインスタンス描画 (弾の描画) 
-	ai_->Draw();
-
 	// 描画
 	render_->Draw();
 }

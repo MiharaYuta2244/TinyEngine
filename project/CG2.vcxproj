@@ -165,6 +165,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\GameObjects\Enemy\EnemyAI.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\EnemyBullet.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\EnemyHealth.cpp" />
+    <ClCompile Include="application\GameObjects\Enemy\EnemyBulletManager.cpp" />
     <ClCompile Include="engine\utility\DirectXUtils.cpp" />
     <ClCompile Include="engine\Collision\Collision.cpp" />
     <ClCompile Include="engine\scene\BaseScene.cpp" />
@@ -313,6 +314,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\GameObjects\Enemy\EnemyAI.h" />
     <ClInclude Include="application\GameObjects\Enemy\EnemyBullet.h" />
     <ClInclude Include="application\GameObjects\Enemy\EnemyHealth.h" />
+    <ClInclude Include="application\GameObjects\Enemy\EnemyBulletManager.h" />
     <ClInclude Include="engine\math\mathLib\Rect.h" />
     <ClInclude Include="engine\utility\DirectXUtils.h" />
     <ClInclude Include="engine\base\Outline.h" />

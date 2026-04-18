@@ -2,6 +2,9 @@
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "Rect.h"
 
+/// <summary>
+/// 敵の弾クラス
+/// </summary>
 class EnemyBullet {
 public:
 	// 初期化処理
@@ -15,6 +18,9 @@ public:
 
 	// 削除用の関数
 	bool IsDead(const Rect<float>& rect) const;
+
+	// 座標のGetter
+	Vector3 GetPosition() const { return transform_.translate; }
 
 private:
 	Transform transform_;

@@ -6,6 +6,7 @@
 #include "AudioManager.h"
 #include "GameObjects/Player/Player.h"
 #include "GameObjects/Enemy/Enemy.h"
+#include "GameObjects/Enemy/EnemyBulletManager.h"
 #include <array>
 #include <memory>
 #include <vector>
@@ -19,10 +20,18 @@ public:
 	void Draw() override;
 
 	void Finalize() override;
+
+private:
+	// 当たり判定
+	void CollisionGameObjects();
+
 private:
 	// プレイヤー
 	std::unique_ptr<Player> player_;
 
 	// 敵
 	std::unique_ptr<Enemy> enemy_;
+
+	// 敵の弾を管理するクラス
+	std::unique_ptr<EnemyBulletManager> enemyBulletManager_;
 };

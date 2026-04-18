@@ -24,6 +24,9 @@ public:
 	// 死亡フラグGetter
 	bool IsDead() const;
 
+	// ダメージ処理
+	void Damage(float value);
+
 private:
 	Transform transform_;
 	Vector2 velocity_;

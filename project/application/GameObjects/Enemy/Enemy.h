@@ -2,13 +2,15 @@
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "EnemyAI.h"
 
+class EnemyBulletManager;
+
 class Enemy {
 public:
 	// 初期化処理
 	void Initialize(EngineContext* ctx);
 
 	// 更新処理
-	void Update(float deltaTime, Vector3 playerPos);
+	void Update(float deltaTime, Vector3 playerPos, EnemyBulletManager* enemyBulletManager);
 
 	// 描画処理
 	void Draw();

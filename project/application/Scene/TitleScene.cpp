@@ -1,4 +1,5 @@
 #include "TitleScene.h"
+#include "SceneManager.h"
 
 void TitleScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, DebugCamera* debugCamera, DeltaTime* timeManager, SceneManager* sceneManager) {
 	engineContext_ = ctx;
@@ -12,7 +13,9 @@ void TitleScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* 
 }
 
 void TitleScene::Update() {
-
+	if(keyboard_->KeyTriggered(DIK_SPACE)){
+		sceneManager_->ChangeScene("GamePlay");
+	}
 }
 
 void TitleScene::Draw() {

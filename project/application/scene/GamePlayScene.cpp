@@ -20,9 +20,12 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	player_ = std::make_unique<Player>();
 	player_->Initialize(ctx);
 
-	// プレイヤーの生成&初期化
+	// 敵の生成&初期化
 	enemy_ = std::make_unique<Enemy>();
 	enemy_->Initialize(ctx);
+
+	// 敵の弾管理インスタンス生成
+	enemyBulletManager_ = std::make_unique<EnemyBulletManager>();
 }
 
 void GamePlayScene::Update() {
@@ -35,7 +38,13 @@ void GamePlayScene::Update() {
 	}
 
 	// 敵の更新処理
-	enemy_->Update(timeManager_->GetDeltaTime(), player_->GetPosition());
+	enemy_->Update(timeManager_->GetDeltaTime(), player_->GetPosition(), enemyBulletManager_.get());
+
+	// 敵の弾の更新処理
+	enemyBulletManager_->Update(timeManager_->GetDeltaTime());
+
+	// 当たり判定
+	CollisionGameObjects();
 
 #ifdef USE_IMGUI
 	ImGui::Begin("Camera");
@@ -51,6 +60,23 @@ void GamePlayScene::Draw() {
 
 	// 敵の描画処理
 	enemy_->Draw();
+
+	// 敵の弾の描画処理
+	enemyBulletManager_->Draw();
 }
 
 void GamePlayScene::Finalize() {}
+
+void GamePlayScene::CollisionGameObjects() {
+	// プレイヤーと敵の弾の当たり判定
+	Sphere playerSphere = {player_->GetPosition(), 1.0f}; // プレイヤーの当たり判定形状（仮）
+	for (const auto& bullet : enemyBulletManager_->GetBullets()) {
+		Sphere bulletSphere = {bullet->GetPosition(), 0.5f}; // 弾の当たり判定形状（仮）
+
+		// 衝突判定！
+		if (Collision::Intersect(playerSphere, bulletSphere)) {
+			// プレイヤーにダメージを与える処理
+			player_->Damage(1.0f);
+		}
+	}
+}

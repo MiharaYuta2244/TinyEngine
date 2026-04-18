@@ -1,5 +1,6 @@
 #include "EnemyAI.h"
 #include "MathUtility.h"
+#include "EnemyBulletManager.h"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -12,7 +13,7 @@ void EnemyAI::Initialize(Transform* transform, EngineContext* ctx) {
 	shotTimer_.Initialize(shotDuration_);
 }
 
-void EnemyAI::Update(float deltaTime, const Vector3& playerPos) {
+void EnemyAI::Update(float deltaTime, const Vector3& playerPos, EnemyBulletManager* enemyBulletManager) {
 	// プレイヤーの座標を受け取る
 	playerPos_ = playerPos;
 
@@ -31,43 +32,15 @@ void EnemyAI::Update(float deltaTime, const Vector3& playerPos) {
 
 		// 指定した時間がたったら
 		if (shotTimer_.IsEnd()) {
-			// 弾を生成
-			BulletGenerate();
+			// 弾の生成&初期化
+			auto bullet = std::make_unique<EnemyBullet>();
+			Vector3 dir = MathUtility::Normalize(playerPos_);
+			bullet->Initialize(ctx_, {dir.x, dir.z});
+			enemyBulletManager->AddBullet(std::move(bullet));
 
 			// タイマーのリセット
 			shotTimer_.Initialize(shotDuration_);
 		}
-
-		// 弾の更新処理
-		for (auto& bullet : bullets_) {
-			bullet->Update(deltaTime, bulletSpeed_);
-
-			// 弾の削除
-			std::erase_if(bullets_, [this](const std::unique_ptr<EnemyBullet>& b) {
-				return b->IsDead(bulletActiveArea_); // 消したい条件
-			});
-		}
 		break;
 	}
-
-#ifdef USE_IMGUI
-	ImGui::Begin("bullet");
-	ImGui::DragFloat("speed", &bulletSpeed_, 0.01f);
-	ImGui::End();
-#endif
-}
-
-void EnemyAI::Draw() {
-	// 弾の描画
-	for (auto& bullet : bullets_) {
-		bullet->Draw();
-	}
-}
-
-void EnemyAI::BulletGenerate() {
-	// 弾の生成&初期化
-	auto bullet = std::make_unique<EnemyBullet>();
-	Vector3 dir = MathUtility::Normalize(playerPos_);
-	bullet->Initialize(ctx_, {dir.x, dir.z});
-	bullets_.push_back(std::move(bullet));
 }

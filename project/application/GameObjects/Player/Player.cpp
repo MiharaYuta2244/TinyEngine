@@ -41,6 +41,9 @@ void Player::Update(float deltaTime, DirectInput* input) {
 	// 描画更新
 	render_->Update(transform_);
 
+	// HP管理インスタンス更新
+	hp_->Update(deltaTime);
+
 	// HP管理用インスタンスImGui
 	hp_->DrawImGui();
 }
@@ -51,3 +54,7 @@ void Player::Draw() {
 }
 
 bool Player::IsDead() const { return hp_->IsDead(); }
+
+void Player::Damage(float value) {
+	hp_->Damage(value);
+}
