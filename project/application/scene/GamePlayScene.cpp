@@ -29,6 +29,11 @@ void GamePlayScene::Update() {
 	// プレイヤーの更新処理
 	player_->Update(timeManager_->GetDeltaTime(), keyboard_);
 
+	// プレイヤーが死亡したらシーン遷移
+	if(player_->IsDead()){
+		sceneManager_->ChangeScene("Title");
+	}
+
 	// 敵の更新処理
 	enemy_->Update(timeManager_->GetDeltaTime(), player_->GetPosition());
 

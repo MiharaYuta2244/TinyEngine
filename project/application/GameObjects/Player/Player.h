@@ -2,6 +2,7 @@
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "PlayerMove.h"
 #include "DirectInput.h"
+#include "PlayerHealth.h"
 
 /// <summary>
 /// プレイヤーの処理をまとめたクラス
@@ -17,9 +18,6 @@ public:
 	// 描画処理
 	void Draw();
 
-	// ダメージ
-	void Damage(int value);
-
 	// 座標のGetter
 	Vector3 GetPosition() const { return transform_.translate; }
 
@@ -30,6 +28,10 @@ private:
 	Transform transform_;
 	Vector2 velocity_;
 
+	// プレイヤーの最大HP
+	float maxHP_ = 3.0f;
+
 	std::unique_ptr<ObjectRender> render_; // 描画用インスタンス
 	std::unique_ptr<PlayerMove> move_; // 移動用インスタンス
+	std::unique_ptr<PlayerHealth> hp_; // HP管理用インスタンス
 };

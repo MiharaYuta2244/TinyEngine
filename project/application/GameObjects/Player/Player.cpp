@@ -11,6 +11,10 @@ void Player::Initialize(EngineContext* ctx) {
 
 	// 移動用インスタンス生成
 	move_ = std::make_unique<PlayerMove>();
+
+	// HP管理用インスタンス生成&初期化
+	hp_ = std::make_unique<PlayerHealth>();
+	hp_->Initialize(maxHP_);
 }
 
 void Player::Update(float deltaTime, DirectInput* input) {
@@ -36,6 +40,9 @@ void Player::Update(float deltaTime, DirectInput* input) {
 
 	// 描画更新
 	render_->Update(transform_);
+
+	// HP管理用インスタンスImGui
+	hp_->DrawImGui();
 }
 
 void Player::Draw() {
@@ -43,4 +50,4 @@ void Player::Draw() {
 	render_->Draw();
 }
 
-void Player::Damage(int value) {}
+bool Player::IsDead() const { return hp_->IsDead(); }
