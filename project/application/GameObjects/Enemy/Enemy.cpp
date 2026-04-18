@@ -8,14 +8,24 @@ void Enemy::Initialize(EngineContext* ctx) {
 	// 描画用インスタンスの生成&初期化
 	render_=std::make_unique<ObjectRender>();
 	render_->Initialize(ctx, "Hiyoko.obj");
+
+	// AIインスタンス生成&初期化
+	ai_ = std::make_unique<EnemyAI>();
+	ai_->Initialize(&transform_, ctx);
 }
 
-void Enemy::Update(){
+void Enemy::Update(float deltaTime, Vector3 playerPos) {
+	// AIインスタンス更新
+	ai_->Update(deltaTime, playerPos);
+
 	// 描画用インスタンス更新処理
 	render_->Update(transform_);
 }
 
 void Enemy::Draw(){
+	// AIインスタンス描画 (弾の描画) 
+	ai_->Draw();
+
 	// 描画
 	render_->Draw();
 }

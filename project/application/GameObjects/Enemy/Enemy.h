@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObjects/ObjectRender/ObjectRender.h"
+#include "EnemyAI.h"
 
 class Enemy {
 public:
@@ -7,7 +8,7 @@ public:
 	void Initialize(EngineContext* ctx);
 
 	// 更新処理
-	void Update();
+	void Update(float deltaTime, Vector3 playerPos);
 
 	// 描画処理
 	void Draw();
@@ -19,4 +20,5 @@ private:
 	Transform transform_;
 
 	std::unique_ptr<ObjectRender> render_; // 描画用インスタンス
+	std::unique_ptr<EnemyAI> ai_; // AI
 };

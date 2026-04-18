@@ -30,7 +30,7 @@ void GamePlayScene::Update() {
 	player_->Update(timeManager_->GetDeltaTime(), keyboard_);
 
 	// 敵の更新処理
-	enemy_->Update();
+	enemy_->Update(timeManager_->GetDeltaTime(), player_->GetPosition());
 
 #ifdef USE_IMGUI
 	ImGui::Begin("Camera");
