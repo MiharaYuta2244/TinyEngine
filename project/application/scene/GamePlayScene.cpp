@@ -41,7 +41,7 @@ void GamePlayScene::Update() {
 	player_->Update(timeManager_->GetDeltaTime(), keyboard_, enemy_.get());
 
 	// 敵の更新処理
-	enemy_->Update(timeManager_->GetDeltaTime(), player_->GetPosition(), enemyBulletManager_.get());
+	enemy_->Update(timeManager_->GetDeltaTime(), player_.get(), enemyBulletManager_.get(), wallManager_.get());
 
 	// 敵の弾の更新処理
 	enemyBulletManager_->Update(timeManager_->GetDeltaTime());

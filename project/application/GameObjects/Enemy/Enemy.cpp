@@ -15,14 +15,14 @@ void Enemy::Initialize(EngineContext* ctx) {
 	ai_->Initialize(&transform_, ctx);
 }
 
-void Enemy::Update(float deltaTime, Vector3 playerPos, EnemyBulletManager* enemyBulletManager) {
+void Enemy::Update(float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, WallManager* wallManager) {
 	if (isDead_) {
 		return;
 	}
 
 	// AIインスタンス更新
 	if (enableMove_) {
-		ai_->Update(deltaTime, playerPos, enemyBulletManager);
+		ai_->Update(deltaTime, player, enemyBulletManager, wallManager);
 	}
 
 	if (knockBackAnim_.anim.GetIsActive()) {

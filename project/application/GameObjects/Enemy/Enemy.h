@@ -5,6 +5,8 @@
 #include "GameObjects/ObjectRender/ObjectRender.h"
 
 class EnemyBulletManager;
+class Player;
+class WallManager;
 
 class Enemy {
 public:
@@ -12,7 +14,7 @@ public:
 	void Initialize(EngineContext* ctx);
 
 	// 更新処理
-	void Update(float deltaTime, Vector3 playerPos, EnemyBulletManager* enemyBulletManager);
+	void Update(float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, WallManager* wallManager);
 
 	// 押し戻し完了後に呼ぶ最終更新処理
 	void PostUpdate();
