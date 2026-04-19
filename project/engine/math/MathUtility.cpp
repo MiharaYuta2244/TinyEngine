@@ -68,6 +68,12 @@ float MathUtility::Length(const Vector3& v) {
 	return result;
 }
 
+float MathUtility::Length(const Vector2& v) {
+	float result = 0.0f;
+	result = sqrtf(powf(v.x, 2) + powf(v.y, 2));
+	return result;
+}
+
 Vector3 MathUtility::Normalize(const Vector3& v) {
 	float length = 0.0f;
 	Vector3 result;
@@ -76,6 +82,16 @@ Vector3 MathUtility::Normalize(const Vector3& v) {
 	result.x = v.x / length;
 	result.y = v.y / length;
 	result.z = v.z / length;
+	return result;
+}
+
+Vector2 MathUtility::Normalize(const Vector2& v) {
+	float length = 0.0f;
+	Vector2 result;
+
+	length = Length(v);
+	result.x = v.x / length;
+	result.y = v.y / length;
 	return result;
 }
 

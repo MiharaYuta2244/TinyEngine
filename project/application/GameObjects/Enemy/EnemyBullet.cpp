@@ -1,9 +1,9 @@
 #include "EnemyBullet.h"
 
-void EnemyBullet::Initialize(EngineContext* ctx, Vector2 dir) {
+void EnemyBullet::Initialize(EngineContext* ctx, Vector2 dir, Vector3 pos) {
 	transform_.scale = {1.0f, 1.0f, 1.0f};
 	transform_.rotate = {0.0f, 0.0f, 0.0f};
-	transform_.translate = {3.0f, 0.0f, 0.0f};
+	transform_.translate = pos;
 
 	// 描画用インスタンス生成&初期化
 	render_ = std::make_unique<ObjectRender>();

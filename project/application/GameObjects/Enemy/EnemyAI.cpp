@@ -1,6 +1,7 @@
 #include "EnemyAI.h"
 #include "MathUtility.h"
 #include "EnemyBulletManager.h"
+#include "MathOperator.h"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -34,8 +35,9 @@ void EnemyAI::Update(float deltaTime, const Vector3& playerPos, EnemyBulletManag
 		if (shotTimer_.IsEnd()) {
 			// 弾の生成&初期化
 			auto bullet = std::make_unique<EnemyBullet>();
-			Vector3 dir = MathUtility::Normalize(playerPos_);
-			bullet->Initialize(ctx_, {dir.x, dir.z});
+			Vector3 enemyPos = transform_->translate;
+			Vector3 dir = MathUtility::Normalize(playerPos_ - enemyPos);
+			bullet->Initialize(ctx_, {dir.x, dir.z}, transform_->translate);
 			enemyBulletManager->AddBullet(std::move(bullet));
 
 			// タイマーのリセット

@@ -59,12 +59,16 @@ public:
 	/// <returns>長さ</returns>
 	static float Length(const Vector3& v);
 
+	static float Length(const Vector2& v);
+
 	/// <summary>
 	/// ベクトルの正規化
 	/// </summary>
 	/// <param name="v">ベクトル</param>
 	/// <returns>正規化した値</returns>
 	static Vector3 Normalize(const Vector3& v);
+
+	static Vector2 Normalize(const Vector2& v);
 
 	static Vector4 Add(const Vector4& v1, const Vector4& v2);
 

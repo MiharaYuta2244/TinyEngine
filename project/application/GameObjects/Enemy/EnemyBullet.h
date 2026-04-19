@@ -8,7 +8,7 @@
 class EnemyBullet {
 public:
 	// 初期化処理
-	void Initialize(EngineContext* ctx, Vector2 dir);
+	void Initialize(EngineContext* ctx, Vector2 dir, Vector3 pos);
 
 	// 更新処理
 	void Update(float deltaTime, float bulletSpeed);

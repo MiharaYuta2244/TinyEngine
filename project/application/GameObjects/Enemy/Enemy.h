@@ -1,6 +1,8 @@
 #pragma once
-#include "GameObjects/ObjectRender/ObjectRender.h"
+#include "AABB.h"
 #include "EnemyAI.h"
+#include "GameObjects/ObjectRender/ObjectRender.h"
+#include "AnimationBundle.h"
 
 class EnemyBulletManager;
 
@@ -18,9 +20,29 @@ public:
 	// 死亡フラグGetter
 	bool IsDead() const;
 
+	// 敵の当たり判定
+	AABB GetAABBCol() const { return aabbCol_; }
+
+	// 敵の座標Getter
+	Vector3& GetPos() { return transform_.translate; }
+
+	// 敵の座標Setter
+	void SetPos(Vector3 pos) { transform_.translate = pos; }
+
+	void SetEnableMove(bool enableMove) { enableMove_ = enableMove; }
+
+	// ノックバックを始める
+	void StartKnockBack(Vector3 dir);
+
 private:
 	Transform transform_;
+	AABB aabbCol_;
+	bool enableMove_ = true;
+	AnimationBundle<Vector3> knockBackAnim_;
+
+	// ノックバックの強さ
+	float knockBackPower_ = 10.0f;
 
 	std::unique_ptr<ObjectRender> render_; // 描画用インスタンス
-	std::unique_ptr<EnemyAI> ai_; // AI
+	std::unique_ptr<EnemyAI> ai_;          // AI
 };

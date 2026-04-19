@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "GameObjects/Enemy/Enemy.h"
 
 void Player::Initialize(EngineContext* ctx) {
 	transform_.scale = {1.0f, 1.0f, 1.0f};
@@ -17,7 +18,7 @@ void Player::Initialize(EngineContext* ctx) {
 	hp_->Initialize(maxHP_);
 }
 
-void Player::Update(float deltaTime, DirectInput* input) {
+void Player::Update(float deltaTime, DirectInput* input, Enemy* enemy) {
 	bool right = input->KeyDown(DIK_D);
 	bool left = input->KeyDown(DIK_A);
 	bool front = input->KeyDown(DIK_W);
@@ -35,6 +36,11 @@ void Player::Update(float deltaTime, DirectInput* input) {
 	if (back)
 		dir.y -= 1.0f;
 
+	// 移動方向があれば記録
+	if (dir.x != 0.0f || dir.y != 0.0f) {
+		lastMoveDirection_ = MathUtility::Normalize(dir);
+	}
+
 	// 移動更新
 	move_->Update(&transform_, dir, deltaTime);
 
@@ -46,6 +52,26 @@ void Player::Update(float deltaTime, DirectInput* input) {
 
 	// HP管理用インスタンスImGui
 	hp_->DrawImGui();
+
+	// 攻撃用の当たり判定更新
+	Vector3 pos = transform_.translate;
+	attackCol_.max = {pos.x + 0.5f, pos.y, pos.z + 0.5f};
+	attackCol_.min = {pos.x - 0.5f, pos.y, pos.z - 0.5f};
+
+	if(enableAttack_ && input->KeyDown(DIK_J)){
+		isHold_ = true;
+		enemy->SetPos(pos);
+		enemy->SetEnableMove(false);
+	}
+
+	if(isHold_ && input->KeyReleased(DIK_J)){
+		isHold_ = false;
+		enemy->SetEnableMove(true);
+	}
+
+	if (enableAttack_ && input->KeyTriggered(DIK_K)) {
+		enemy->StartKnockBack({lastMoveDirection_.x, 0.0f, lastMoveDirection_.y});
+	}
 }
 
 void Player::Draw() {

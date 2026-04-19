@@ -30,7 +30,7 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 
 void GamePlayScene::Update() {
 	// プレイヤーの更新処理
-	player_->Update(timeManager_->GetDeltaTime(), keyboard_);
+	player_->Update(timeManager_->GetDeltaTime(), keyboard_, enemy_.get());
 
 	// プレイヤーが死亡したらシーン遷移
 	if(player_->IsDead()){
@@ -73,10 +73,19 @@ void GamePlayScene::CollisionGameObjects() {
 	for (const auto& bullet : enemyBulletManager_->GetBullets()) {
 		Sphere bulletSphere = {bullet->GetPosition(), 0.5f}; // 弾の当たり判定形状（仮）
 
-		// 衝突判定！
+		// 衝突判定
 		if (Collision::Intersect(playerSphere, bulletSphere)) {
 			// プレイヤーにダメージを与える処理
 			player_->Damage(1.0f);
 		}
+	}
+
+	// プレイヤーの攻撃用範囲と敵の当たり判定
+	if (Collision::Intersect(player_->GetAttackCol(), enemy_->GetAABBCol())) {
+		// プレイヤーの攻撃フラグを立てる
+		player_->SetEnableAttack(true);
+	}else {
+		// プレイヤーの攻撃フラグを下す
+		player_->SetEnableAttack(false);
 	}
 }
