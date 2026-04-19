@@ -28,8 +28,8 @@ void Enemy::Update(float deltaTime, Vector3 playerPos, EnemyBulletManager* enemy
 
 	// 当たり判定更新
 	Vector3 pos = transform_.translate;
-	aabbCol_.max = {pos.x + 0.5f, pos.y, pos.z + 0.5f};
-	aabbCol_.min = {pos.x - 0.5f, pos.y, pos.z - 0.5f};
+	bodyCol_.max = {pos.x + 0.5f, pos.y, pos.z + 0.5f};
+	bodyCol_.min = {pos.x - 0.5f, pos.y, pos.z - 0.5f};
 
 	// 描画用インスタンス更新処理
 	render_->Update(transform_);

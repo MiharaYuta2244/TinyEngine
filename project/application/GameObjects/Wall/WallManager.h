@@ -19,6 +19,9 @@ public:
 	// ImGui
 	void DrawImGui();
 
+	// 壁のリストを取得するGetter
+	const std::list<std::unique_ptr<Wall>>& GetWalls() const { return walls_; }
+
 private:
 	// CSV読み込み
 	void LoadFromCSV(const std::string& filepath);

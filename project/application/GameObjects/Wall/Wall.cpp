@@ -14,8 +14,9 @@ void Wall::Initialize(EngineContext* ctx, WallStatus wallStatus) {
 void Wall::Update() {
 	// 当たり判定更新
 	Vector3 pos = transform_.translate;
-	collision_.max = {pos.x + 0.5f, pos.y, pos.z + 0.5f};
-	collision_.min = {pos.x - 0.5f, pos.y, pos.z - 0.5f};
+	Vector3 scale = transform_.scale;
+	collision_.max = {pos.x + scale.x, pos.y, pos.z + scale.z};
+	collision_.min = {pos.x - scale.x, pos.y, pos.z - scale.z};
 
 	// 描画用インスタンス更新
 	render_->Update(transform_);

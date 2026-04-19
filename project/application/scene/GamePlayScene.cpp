@@ -53,6 +53,9 @@ void GamePlayScene::Update() {
 	// 当たり判定
 	CollisionGameObjects();
 
+	// 押し戻し完了後の最終的な座標で、描画更新&AABB更新
+	player_->PostUpdate();
+
 	// 壁の管理インスタンスImGui
 	wallManager_->DrawImGui();
 
@@ -81,7 +84,9 @@ void GamePlayScene::Draw() {
 void GamePlayScene::Finalize() {}
 
 void GamePlayScene::CollisionGameObjects() {
+	// ==========================================
 	// プレイヤーと敵の弾の当たり判定
+	// ==========================================
 	Sphere playerSphere = {player_->GetPosition(), 1.0f}; // プレイヤーの当たり判定形状（仮）
 	for (const auto& bullet : enemyBulletManager_->GetBullets()) {
 		Sphere bulletSphere = {bullet->GetPosition(), 0.5f}; // 弾の当たり判定形状（仮）
@@ -93,12 +98,67 @@ void GamePlayScene::CollisionGameObjects() {
 		}
 	}
 
+	// ==========================================
 	// プレイヤーの攻撃用範囲と敵の当たり判定
-	if (Collision::Intersect(player_->GetAttackCol(), enemy_->GetAABBCol())) {
+	// ==========================================
+	if (Collision::Intersect(player_->GetAttackCol(), enemy_->GetBodyCol())) {
 		// プレイヤーの攻撃フラグを立てる
 		player_->SetEnableAttack(true);
 	}else {
 		// プレイヤーの攻撃フラグを下す
 		player_->SetEnableAttack(false);
+	}
+
+	// ==========================================
+	// プレイヤーと壁の押し出し判定
+	// ==========================================
+	AABB playerAABB = player_->GetBodyCol();
+	Vector3 playerPos = player_->GetPosition();
+
+	for (const auto& wall : wallManager_->GetWalls()) {
+		AABB wallAABB = wall->GetCollision();
+
+		// AABB同士の交差判定
+		if (playerAABB.min.x <= wallAABB.max.x && playerAABB.max.x >= wallAABB.min.x && playerAABB.min.y <= wallAABB.max.y && playerAABB.max.y >= wallAABB.min.y &&
+		    playerAABB.min.z <= wallAABB.max.z && playerAABB.max.z >= wallAABB.min.z) {
+
+			// めり込み量の計算
+			// X軸方向のめり込み量
+			float overlapX1 = wallAABB.max.x - playerAABB.min.x; // 右から左へ押す量
+			float overlapX2 = playerAABB.max.x - wallAABB.min.x; // 左から右へ押す量
+			// Z軸方向のめり込み量
+			float overlapZ1 = wallAABB.max.z - playerAABB.min.z; // 奥から手前へ押す量
+			float overlapZ2 = playerAABB.max.z - wallAABB.min.z; // 手前から奥へ押す量
+
+			// 最小のめり込み量を選ぶ（正の値にする）
+			float minOverlapX = std::min(overlapX1, overlapX2);
+			float minOverlapZ = std::min(overlapZ1, overlapZ2);
+
+			// めり込みが少ない軸の方向に押し出す
+			if (minOverlapX < minOverlapZ) {
+				// X軸方向に押し出す
+				if (overlapX1 < overlapX2) {
+					playerPos.x += overlapX1; // 右へ押し出す
+				} else {
+					playerPos.x -= overlapX2; // 左へ押し出す
+				}
+			} else {
+				// Z軸方向に押し出す
+				if (overlapZ1 < overlapZ2) {
+					playerPos.z += overlapZ1; // 奥へ押し出す
+				} else {
+					playerPos.z -= overlapZ2; // 手前へ押し出す
+				}
+			}
+
+			// 押し出した結果をプレイヤーの座標に反映
+			player_->SetPosition(playerPos);
+
+			// 複数の壁と連続で当たるケースを考慮し、判定用AABBもその場で更新
+			playerAABB.max.x = playerPos.x + 0.4f;
+			playerAABB.min.x = playerPos.x - 0.4f;
+			playerAABB.max.z = playerPos.z + 0.4f;
+			playerAABB.min.z = playerPos.z - 0.4f;
+		}
 	}
 }

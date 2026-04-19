@@ -18,11 +18,17 @@ public:
 	// 更新処理
 	void Update(float deltaTime, DirectInput* input, Enemy* enemy);
 
+	// 当たり判定などの解決後に行う最終更新処理
+	void PostUpdate();
+
 	// 描画処理
 	void Draw();
 
 	// 座標のGetter
 	Vector3 GetPosition() const { return transform_.translate; }
+
+	// 座標のSetter
+	void SetPosition(const Vector3& pos) { transform_.translate = pos; }
 
 	// 死亡フラグGetter
 	bool IsDead() const;
@@ -36,10 +42,18 @@ public:
 	// 攻撃可能かどうかSetter
 	void SetEnableAttack(bool enableAttack) { enableAttack_ = enableAttack; }
 
+	// 本体の当たり判定
+	AABB GetBodyCol() const { return bodyCol_; }
+
+private:
+	// 当たり判定の更新処理
+	void UpdateCollision();
+
 private:
 	Transform transform_;
 	Vector2 velocity_;
 	AABB attackCol_;
+	AABB bodyCol_;
 	Vector2 lastMoveDirection_;
 
 	// プレイヤーの最大HP

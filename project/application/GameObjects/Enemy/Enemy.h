@@ -21,7 +21,7 @@ public:
 	bool IsDead() const;
 
 	// 敵の当たり判定
-	AABB GetAABBCol() const { return aabbCol_; }
+	AABB GetBodyCol() const { return bodyCol_; }
 
 	// 敵の座標Getter
 	Vector3& GetPos() { return transform_.translate; }
@@ -36,7 +36,7 @@ public:
 
 private:
 	Transform transform_;
-	AABB aabbCol_;
+	AABB bodyCol_; // 本体のAABB
 	bool enableMove_ = true;
 	AnimationBundle<Vector3> knockBackAnim_;
 

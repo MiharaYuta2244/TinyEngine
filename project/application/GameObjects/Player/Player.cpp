@@ -46,7 +46,7 @@ void Player::Update(float deltaTime, DirectInput* input, Enemy* enemy) {
 	move_->Update(&transform_, dir, deltaTime);
 
 	// 描画更新
-	render_->Update(transform_);
+	//render_->Update(transform_);
 
 	// HP管理インスタンス更新
 	hp_->Update(deltaTime);
@@ -54,14 +54,12 @@ void Player::Update(float deltaTime, DirectInput* input, Enemy* enemy) {
 	// HP管理用インスタンスImGui
 	hp_->DrawImGui();
 
-	// 攻撃用の当たり判定更新
-	Vector3 pos = transform_.translate;
-	attackCol_.max = {pos.x + 0.5f, pos.y, pos.z + 0.5f};
-	attackCol_.min = {pos.x - 0.5f, pos.y, pos.z - 0.5f};
+	// 衝突判定のために、移動後の座標で仮のAABBの更新
+	UpdateCollision();
 
 	if (enableAttack_ && input->KeyDown(DIK_J)) {
 		isHold_ = true;
-		enemy->SetPos(pos);
+		enemy->SetPos(transform_.translate);
 		enemy->SetEnableMove(false);
 	}
 
@@ -78,6 +76,14 @@ void Player::Update(float deltaTime, DirectInput* input, Enemy* enemy) {
 	}
 }
 
+void Player::PostUpdate() {
+	// 押し戻しによってtransform_が変更された場合、それに合わせてAABBも最終的な正しい位置に合わせる
+	UpdateCollision();
+
+	// 最後に描画用の更新を行う
+	render_->Update(transform_);
+}
+
 void Player::Draw() {
 	// 描画
 	render_->Draw();
@@ -86,3 +92,14 @@ void Player::Draw() {
 bool Player::IsDead() const { return hp_->IsDead(); }
 
 void Player::Damage(float value) { hp_->Damage(value); }
+
+void Player::UpdateCollision() {
+	// 攻撃用の当たり判定更新
+	Vector3 pos = transform_.translate;
+	attackCol_.max = {pos.x + 0.5f, pos.y, pos.z + 0.5f};
+	attackCol_.min = {pos.x - 0.5f, pos.y, pos.z - 0.5f};
+
+	// 本体の当たり判定更新
+	bodyCol_.max = {pos.x + 0.5f, pos.y + 0.5f, pos.z + 0.5f};
+	bodyCol_.min = {pos.x - 0.5f, pos.y - 0.5f, pos.z - 0.5f};
+}
