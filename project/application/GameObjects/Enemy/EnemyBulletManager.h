@@ -26,7 +26,7 @@ private:
 	std::list<std::unique_ptr<EnemyBullet>> bullets_;
 
 	// 弾が生存できる範囲
-	Rect<float> bulletActiveArea_ = {50.0f, -50.0f, 50.0f, -50.0f};
+	Rect<float> bulletActiveArea_ = {100.0f, -100.0f, 100.0f, -100.0f};
 
 	// 弾の速度
 	float bulletSpeed_ = 20.0f;

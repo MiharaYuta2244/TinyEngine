@@ -16,11 +16,6 @@ void Enemy::Initialize(EngineContext* ctx) {
 }
 
 void Enemy::Update(float deltaTime, Vector3 playerPos, EnemyBulletManager* enemyBulletManager) {
-	// 当たり判定更新
-	Vector3 pos = transform_.translate;
-	aabbCol_.max = {pos.x + 0.5f, pos.y, pos.z + 0.5f};
-	aabbCol_.min = {pos.x - 0.5f, pos.y, pos.z - 0.5f};
-
 	// AIインスタンス更新
 	if (enableMove_) {
 		ai_->Update(deltaTime, playerPos, enemyBulletManager);
@@ -30,6 +25,11 @@ void Enemy::Update(float deltaTime, Vector3 playerPos, EnemyBulletManager* enemy
 		knockBackAnim_.anim.Update(deltaTime, knockBackAnim_.temp);
 		transform_.translate = knockBackAnim_.temp;
 	}
+
+	// 当たり判定更新
+	Vector3 pos = transform_.translate;
+	aabbCol_.max = {pos.x + 0.5f, pos.y, pos.z + 0.5f};
+	aabbCol_.min = {pos.x - 0.5f, pos.y, pos.z - 0.5f};
 
 	// 描画用インスタンス更新処理
 	render_->Update(transform_);

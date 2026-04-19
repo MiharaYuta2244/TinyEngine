@@ -15,6 +15,9 @@ public:
 	// 描画処理
 	void Draw();
 
+	// 色のSetter
+	void SetColor(Vector4 color) { object3d_->SetColor(color); }
+
 private:
 	// モデル
 	std::unique_ptr<TinyEngine::Object3d> object3d_;

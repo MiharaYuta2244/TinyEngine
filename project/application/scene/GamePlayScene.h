@@ -7,6 +7,7 @@
 #include "GameObjects/Player/Player.h"
 #include "GameObjects/Enemy/Enemy.h"
 #include "GameObjects/Enemy/EnemyBulletManager.h"
+#include "GameObjects/Wall/WallManager.h"
 #include <array>
 #include <memory>
 #include <vector>
@@ -34,4 +35,7 @@ private:
 
 	// 敵の弾を管理するクラス
 	std::unique_ptr<EnemyBulletManager> enemyBulletManager_;
+
+	// 壁の管理クラス
+	std::unique_ptr<WallManager> wallManager_;
 };

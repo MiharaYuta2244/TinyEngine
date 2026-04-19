@@ -242,6 +242,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\GameObjects\Player\PlayerMove.cpp" />
     <ClCompile Include="application\GameObjects\ObjectRender\ObjectRender.cpp" />
     <ClCompile Include="application\GameObjects\Player\PlayerHealth.cpp" />
+    <ClCompile Include="application\GameObjects\Wall\Wall.cpp" />
+    <ClCompile Include="application\GameObjects\Wall\WallManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -406,6 +408,8 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\GameObjects\ObjectRender\ObjectRender.h" />
     <ClInclude Include="application\GameObjects\Player\PlayerHealth.h" />
     <ClInclude Include="engine\base\utility\gameTimer\GameTimer.h" />
+    <ClInclude Include="application\GameObjects\Wall\Wall.h" />
+    <ClInclude Include="application\GameObjects\Wall\WallManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

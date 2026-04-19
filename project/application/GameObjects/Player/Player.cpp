@@ -9,6 +9,7 @@ void Player::Initialize(EngineContext* ctx) {
 	// 描画用インスタンス生成&初期化
 	render_ = std::make_unique<ObjectRender>();
 	render_->Initialize(ctx, "suzanne.obj");
+	render_->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
 
 	// 移動用インスタンス生成
 	move_ = std::make_unique<PlayerMove>();
@@ -58,18 +59,21 @@ void Player::Update(float deltaTime, DirectInput* input, Enemy* enemy) {
 	attackCol_.max = {pos.x + 0.5f, pos.y, pos.z + 0.5f};
 	attackCol_.min = {pos.x - 0.5f, pos.y, pos.z - 0.5f};
 
-	if(enableAttack_ && input->KeyDown(DIK_J)){
+	if (enableAttack_ && input->KeyDown(DIK_J)) {
 		isHold_ = true;
 		enemy->SetPos(pos);
 		enemy->SetEnableMove(false);
 	}
 
-	if(isHold_ && input->KeyReleased(DIK_J)){
+	if (isHold_ && input->KeyReleased(DIK_J)) {
 		isHold_ = false;
 		enemy->SetEnableMove(true);
 	}
 
 	if (enableAttack_ && input->KeyTriggered(DIK_K)) {
+		isHold_ = false;
+		enableAttack_ = false;
+		enemy->SetEnableMove(true);
 		enemy->StartKnockBack({lastMoveDirection_.x, 0.0f, lastMoveDirection_.y});
 	}
 }
@@ -81,6 +85,4 @@ void Player::Draw() {
 
 bool Player::IsDead() const { return hp_->IsDead(); }
 
-void Player::Damage(float value) {
-	hp_->Damage(value);
-}
+void Player::Damage(float value) { hp_->Damage(value); }

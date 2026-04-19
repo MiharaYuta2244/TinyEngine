@@ -26,6 +26,10 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 
 	// 敵の弾管理インスタンス生成
 	enemyBulletManager_ = std::make_unique<EnemyBulletManager>();
+
+	// 壁の管理インスタンス生成&初期化
+	wallManager_ = std::make_unique<WallManager>();
+	wallManager_->Initialize(ctx);
 }
 
 void GamePlayScene::Update() {
@@ -43,8 +47,14 @@ void GamePlayScene::Update() {
 	// 敵の弾の更新処理
 	enemyBulletManager_->Update(timeManager_->GetDeltaTime());
 
+	// 壁の管理インスタンス更新
+	wallManager_->Update();
+
 	// 当たり判定
 	CollisionGameObjects();
+
+	// 壁の管理インスタンスImGui
+	wallManager_->DrawImGui();
 
 #ifdef USE_IMGUI
 	ImGui::Begin("Camera");
@@ -63,6 +73,9 @@ void GamePlayScene::Draw() {
 
 	// 敵の弾の描画処理
 	enemyBulletManager_->Draw();
+
+	// 壁の管理インスタンス描画
+	wallManager_->Draw();
 }
 
 void GamePlayScene::Finalize() {}
