@@ -255,9 +255,6 @@
     <ClCompile Include="application\GameObjects\Player\PlayerHealth.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="application\GameObjects\Enemy\EnemyHealth.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="engine\base\utility\gameTimer\GameTimer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -268,6 +265,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="application\GameObjects\Wall\WallManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="application\GameObjects\Goal\Goal.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -574,9 +574,6 @@
     <ClInclude Include="application\GameObjects\Player\PlayerHealth.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="application\GameObjects\Enemy\EnemyHealth.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="engine\base\utility\gameTimer\GameTimer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -590,6 +587,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="application\GameObjects\Wall\WallManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="application\GameObjects\Goal\Goal.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

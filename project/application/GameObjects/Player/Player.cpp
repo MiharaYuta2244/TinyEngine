@@ -45,9 +45,6 @@ void Player::Update(float deltaTime, DirectInput* input, Enemy* enemy) {
 	// 移動更新
 	move_->Update(&transform_, dir, deltaTime);
 
-	// 描画更新
-	//render_->Update(transform_);
-
 	// HP管理インスタンス更新
 	hp_->Update(deltaTime);
 
@@ -74,6 +71,14 @@ void Player::Update(float deltaTime, DirectInput* input, Enemy* enemy) {
 		enemy->SetEnableMove(true);
 		enemy->StartKnockBack({lastMoveDirection_.x, 0.0f, lastMoveDirection_.y});
 	}
+
+#ifdef USE_IMGUI
+	ImGui::Begin("Player");
+	ImGui::DragFloat3("Scale", &transform_.scale.x, 0.01f);
+	ImGui::DragFloat3("Rotate", &transform_.rotate.x, 0.01f);
+	ImGui::DragFloat3("Translate", &transform_.translate.x, 0.01f);
+	ImGui::End();
+#endif // USE_IMGUI
 }
 
 void Player::PostUpdate() {

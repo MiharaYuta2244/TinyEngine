@@ -30,16 +30,15 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	// 壁の管理インスタンス生成&初期化
 	wallManager_ = std::make_unique<WallManager>();
 	wallManager_->Initialize(ctx);
+
+	// ゴール判定インスタンス生成&初期化
+	goal_=std::make_unique<Goal>();
+	goal_->Initialize(ctx);
 }
 
 void GamePlayScene::Update() {
 	// プレイヤーの更新処理
 	player_->Update(timeManager_->GetDeltaTime(), keyboard_, enemy_.get());
-
-	// プレイヤーが死亡したらシーン遷移
-	if (player_->IsDead()) {
-		sceneManager_->ChangeScene("Title");
-	}
 
 	// 敵の更新処理
 	enemy_->Update(timeManager_->GetDeltaTime(), player_->GetPosition(), enemyBulletManager_.get());
@@ -49,6 +48,9 @@ void GamePlayScene::Update() {
 
 	// 壁の管理インスタンス更新
 	wallManager_->Update();
+
+	// ゴール判定インスタンス更新
+	goal_->Update();
 
 	// 当たり判定
 	CollisionGameObjects();
@@ -62,6 +64,16 @@ void GamePlayScene::Update() {
 
 	// 壁の管理インスタンスImGui
 	wallManager_->DrawImGui();
+
+	// プレイヤーが死亡したらシーン遷移
+	if (player_->IsDead()) {
+		sceneManager_->ChangeScene("Title");
+	}
+
+	// ゴールしていたらシーン遷移
+	if(goal_->GetGoal()){
+		sceneManager_->ChangeScene("Title");
+	}
 
 #ifdef USE_IMGUI
 	ImGui::Begin("Camera");
@@ -83,6 +95,9 @@ void GamePlayScene::Draw() {
 
 	// 壁の管理インスタンス描画
 	wallManager_->Draw();
+
+	// ゴール判定インスタンス描画
+	goal_->Draw();
 }
 
 void GamePlayScene::Finalize() {}
@@ -223,5 +238,13 @@ void GamePlayScene::CollisionGameObjects() {
 				enemyAABB.min.z = enemyPos.z - 0.5f;
 			}
 		}
+	}
+
+	// ==========================================
+	// プレイヤーとゴールの当たり判定
+	// ==========================================
+	if (Collision::Intersect(player_->GetBodyCol(), goal_->GetCol())) {
+		// ゴールフラグを立てる
+		goal_->SetGoal(true);
 	}
 }

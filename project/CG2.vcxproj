@@ -164,7 +164,6 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\GameObjects\Enemy\Enemy.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\EnemyAI.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\EnemyBullet.cpp" />
-    <ClCompile Include="application\GameObjects\Enemy\EnemyHealth.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\EnemyBulletManager.cpp" />
     <ClCompile Include="engine\utility\DirectXUtils.cpp" />
     <ClCompile Include="engine\Collision\Collision.cpp" />
@@ -212,6 +211,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\Fade\FadeStates.cpp" />
     <ClCompile Include="application\Fade\FadeManager.cpp" />
     <ClCompile Include="engine\base\utility\gameTimer\GameTimer.cpp" />
+    <ClCompile Include="application\GameObjects\Goal\Goal.cpp" />
     <ClCompile Include="main.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -315,7 +315,6 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\GameObjects\Enemy\Enemy.h" />
     <ClInclude Include="application\GameObjects\Enemy\EnemyAI.h" />
     <ClInclude Include="application\GameObjects\Enemy\EnemyBullet.h" />
-    <ClInclude Include="application\GameObjects\Enemy\EnemyHealth.h" />
     <ClInclude Include="application\GameObjects\Enemy\EnemyBulletManager.h" />
     <ClInclude Include="engine\math\mathLib\Rect.h" />
     <ClInclude Include="engine\utility\DirectXUtils.h" />
@@ -410,6 +409,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="engine\base\utility\gameTimer\GameTimer.h" />
     <ClInclude Include="application\GameObjects\Wall\Wall.h" />
     <ClInclude Include="application\GameObjects\Wall\WallManager.h" />
+    <ClInclude Include="application\GameObjects\Goal\Goal.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

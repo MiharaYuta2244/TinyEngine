@@ -8,6 +8,7 @@
 #include "GameObjects/Enemy/Enemy.h"
 #include "GameObjects/Enemy/EnemyBulletManager.h"
 #include "GameObjects/Wall/WallManager.h"
+#include "GameObjects/Goal/Goal.h"
 #include <array>
 #include <memory>
 #include <vector>
@@ -38,4 +39,7 @@ private:
 
 	// 壁の管理クラス
 	std::unique_ptr<WallManager> wallManager_;
+
+	// ゴール判定用クラス
+	std::unique_ptr<Goal> goal_;
 };
