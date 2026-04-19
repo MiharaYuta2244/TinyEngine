@@ -16,6 +16,10 @@ void Enemy::Initialize(EngineContext* ctx) {
 }
 
 void Enemy::Update(float deltaTime, Vector3 playerPos, EnemyBulletManager* enemyBulletManager) {
+	if (isDead_) {
+		return;
+	}
+
 	// AIインスタンス更新
 	if (enableMove_) {
 		ai_->Update(deltaTime, playerPos, enemyBulletManager);
@@ -26,23 +30,30 @@ void Enemy::Update(float deltaTime, Vector3 playerPos, EnemyBulletManager* enemy
 		transform_.translate = knockBackAnim_.temp;
 	}
 
-	// 当たり判定更新
-	Vector3 pos = transform_.translate;
-	bodyCol_.max = {pos.x + 0.5f, pos.y, pos.z + 0.5f};
-	bodyCol_.min = {pos.x - 0.5f, pos.y, pos.z - 0.5f};
+	// 当たり判定更新　衝突判定用
+	UpdateCollision();
+}
 
-	// 描画用インスタンス更新処理
+void Enemy::PostUpdate() {
+	// 押し戻しを反映したAABBの再計算
+	UpdateCollision();
+
+	// 正しい座標で描画用インスタンスの更新
 	render_->Update(transform_);
 }
 
 void Enemy::Draw() {
+	if (isDead_) {
+		return;
+	}
+
 	// 描画
 	render_->Draw();
 }
 
 void Enemy::StartKnockBack(Vector3 dir) {
 	Vector3 pos = transform_.translate;
-	
+
 	// 入力方向ベクトルを正規化
 	if (dir.x != 0.0f || dir.z != 0.0f) {
 		dir = MathUtility::Normalize(dir);
@@ -56,4 +67,10 @@ void Enemy::StartKnockBack(Vector3 dir) {
 	    pos.z + dir.z * knockBackPower_,
 	};
 	knockBackAnim_.anim.Start(transform_.translate, targetPos, 0.5f, EaseType::EASEOUTCUBIC);
+}
+
+void Enemy::UpdateCollision() {
+	Vector3 pos = transform_.translate;
+	bodyCol_.max = {pos.x + 0.5f, pos.y, pos.z + 0.5f};
+	bodyCol_.min = {pos.x - 0.5f, pos.y, pos.z - 0.5f};
 }

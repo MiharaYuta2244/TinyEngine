@@ -37,7 +37,7 @@ void GamePlayScene::Update() {
 	player_->Update(timeManager_->GetDeltaTime(), keyboard_, enemy_.get());
 
 	// プレイヤーが死亡したらシーン遷移
-	if(player_->IsDead()){
+	if (player_->IsDead()) {
 		sceneManager_->ChangeScene("Title");
 	}
 
@@ -55,6 +55,10 @@ void GamePlayScene::Update() {
 
 	// 押し戻し完了後の最終的な座標で、描画更新&AABB更新
 	player_->PostUpdate();
+
+	if (!enemy_->IsDead()) {
+		enemy_->PostUpdate();
+	}
 
 	// 壁の管理インスタンスImGui
 	wallManager_->DrawImGui();
@@ -104,7 +108,7 @@ void GamePlayScene::CollisionGameObjects() {
 	if (Collision::Intersect(player_->GetAttackCol(), enemy_->GetBodyCol())) {
 		// プレイヤーの攻撃フラグを立てる
 		player_->SetEnableAttack(true);
-	}else {
+	} else {
 		// プレイヤーの攻撃フラグを下す
 		player_->SetEnableAttack(false);
 	}
@@ -159,6 +163,65 @@ void GamePlayScene::CollisionGameObjects() {
 			playerAABB.min.x = playerPos.x - 0.4f;
 			playerAABB.max.z = playerPos.z + 0.4f;
 			playerAABB.min.z = playerPos.z - 0.4f;
+		}
+	}
+
+	// ==========================================
+	// 敵と壁の判定（めり込み防止 ＆ ノックバック時死亡）
+	// ==========================================
+	if (!enemy_->IsDead()) {
+		AABB enemyAABB = enemy_->GetBodyCol();
+		Vector3 enemyPos = enemy_->GetPos();
+
+		for (const auto& wall : wallManager_->GetWalls()) {
+			AABB wallAABB = wall->GetCollision();
+
+			// AABB同士の交差判定
+			if (enemyAABB.min.x <= wallAABB.max.x && enemyAABB.max.x >= wallAABB.min.x && enemyAABB.min.y <= wallAABB.max.y && enemyAABB.max.y >= wallAABB.min.y && enemyAABB.min.z <= wallAABB.max.z &&
+			    enemyAABB.max.z >= wallAABB.min.z) {
+
+				// ----------------------------------------
+				// 壁激突死の判定：もしノックバック中なら死亡させて処理を抜ける
+				// ----------------------------------------
+				if (enemy_->IsKnockBack()) {
+					enemy_->Kill();
+					break;
+				}
+
+				// ----------------------------------------
+				// 通常時の押し出し処理
+				// ----------------------------------------
+				float overlapX1 = wallAABB.max.x - enemyAABB.min.x;
+				float overlapX2 = enemyAABB.max.x - wallAABB.min.x;
+				float overlapZ1 = wallAABB.max.z - enemyAABB.min.z;
+				float overlapZ2 = enemyAABB.max.z - wallAABB.min.z;
+
+				float minOverlapX = std::min(overlapX1, overlapX2);
+				float minOverlapZ = std::min(overlapZ1, overlapZ2);
+
+				if (minOverlapX < minOverlapZ) {
+					if (overlapX1 < overlapX2) {
+						enemyPos.x += overlapX1;
+					} else {
+						enemyPos.x -= overlapX2;
+					}
+				} else {
+					if (overlapZ1 < overlapZ2) {
+						enemyPos.z += overlapZ1;
+					} else {
+						enemyPos.z -= overlapZ2;
+					}
+				}
+
+				// 結果を敵の座標に反映
+				enemy_->SetPos(enemyPos);
+
+				// 連続で壁に当たるケースを考慮してAABB更新
+				enemyAABB.max.x = enemyPos.x + 0.5f;
+				enemyAABB.min.x = enemyPos.x - 0.5f;
+				enemyAABB.max.z = enemyPos.z + 0.5f;
+				enemyAABB.min.z = enemyPos.z - 0.5f;
+			}
 		}
 	}
 }
