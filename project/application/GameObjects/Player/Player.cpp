@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "GameObjects/Enemy/Enemy.h"
+#include "GameObjects/Enemy/EnemyManager.h"
 
 void Player::Initialize(EngineContext* ctx) {
 	transform_.scale = {1.0f, 1.0f, 1.0f};
@@ -19,7 +20,7 @@ void Player::Initialize(EngineContext* ctx) {
 	hp_->Initialize(maxHP_);
 }
 
-void Player::Update(float deltaTime, DirectInput* input, Enemy* enemy) {
+void Player::Update(float deltaTime, DirectInput* input, EnemyManager* enemyManager) {
 	bool right = input->KeyDown(DIK_D);
 	bool left = input->KeyDown(DIK_A);
 	bool front = input->KeyDown(DIK_W);
@@ -54,22 +55,54 @@ void Player::Update(float deltaTime, DirectInput* input, Enemy* enemy) {
 	// 衝突判定のために、移動後の座標で仮のAABBの更新
 	UpdateCollision();
 
+	// 掴み判定用：一番近い敵を探す
+	Enemy* targetEnemy = nullptr;
+	float minDist = 9999.0f;
+	float grabRange = 3.0f; // 掴める距離の閾値（適宜調整してください）
+
+	for (auto& enemy : enemyManager->GetEnemies()) {
+		if (enemy->IsDead())
+			continue;
+
+		// プレイヤーと敵の距離を計算（適当な距離計算関数を使用）
+		Vector3 ePos = enemy->GetPos();
+		Vector3 diff = {ePos.x - transform_.translate.x, ePos.y - transform_.translate.y, ePos.z - transform_.translate.z};
+		float dist = std::sqrt(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
+
+		if (dist < minDist && dist < grabRange) {
+			minDist = dist;
+			targetEnemy = enemy.get();
+		}
+	}
+
+	// 掴み・投げ処理の更新
 	if (enableAttack_ && input->KeyDown(DIK_J)) {
-		isHold_ = true;
-		enemy->SetPos(transform_.translate);
-		enemy->SetEnableMove(false);
+		if (!isHold_ && targetEnemy != nullptr) {
+			isHold_ = true;
+			heldEnemy_ = targetEnemy; // 掴んだ敵を記憶
+			heldEnemy_->SetEnableMove(false);
+		}
+
+		// 掴んでいる間はプレイヤーの位置に敵を固定
+		if (isHold_ && heldEnemy_ != nullptr) {
+			heldEnemy_->SetPos(transform_.translate);
+		}
 	}
 
 	if (isHold_ && input->KeyReleased(DIK_J)) {
 		isHold_ = false;
-		enemy->SetEnableMove(true);
+		if (heldEnemy_) {
+			heldEnemy_->SetEnableMove(true);
+			heldEnemy_ = nullptr; // 手放す
+		}
 	}
 
-	if (enableAttack_ && input->KeyTriggered(DIK_K)) {
+	if (enableAttack_ && input->KeyTriggered(DIK_K) && heldEnemy_ != nullptr) {
 		isHold_ = false;
 		enableAttack_ = false;
-		enemy->SetEnableMove(true);
-		enemy->StartKnockBack({lastMoveDirection_.x, 0.0f, lastMoveDirection_.y});
+		heldEnemy_->SetEnableMove(true);
+		heldEnemy_->StartKnockBack({lastMoveDirection_.x, 0.0f, lastMoveDirection_.y});
+		heldEnemy_ = nullptr; // 投げたのでポインタをクリア
 	}
 
 #ifdef USE_IMGUI

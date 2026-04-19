@@ -5,7 +5,7 @@
 #include "PlayerHealth.h"
 #include "PlayerMove.h"
 
-class Enemy;
+class EnemyManager;
 
 /// <summary>
 /// プレイヤーの処理をまとめたクラス
@@ -16,7 +16,7 @@ public:
 	void Initialize(EngineContext* ctx);
 
 	// 更新処理
-	void Update(float deltaTime, DirectInput* input, Enemy* enemy);
+	void Update(float deltaTime, DirectInput* input, EnemyManager* enemyManager);
 
 	// 当たり判定などの解決後に行う最終更新処理
 	void PostUpdate();
@@ -63,6 +63,9 @@ private:
 	bool enableAttack_ = false;
 
 	bool isHold_ = false;
+
+	// つかんでいる敵のポインタを記憶するための変数
+	class Enemy* heldEnemy_ = nullptr;
 
 	std::unique_ptr<ObjectRender> render_; // 描画用インスタンス
 	std::unique_ptr<PlayerMove> move_;     // 移動用インスタンス

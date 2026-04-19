@@ -21,8 +21,8 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	player_->Initialize(ctx);
 
 	// 敵の生成&初期化
-	enemy_ = std::make_unique<Enemy>();
-	enemy_->Initialize(ctx);
+	enemyManager_ = std::make_unique<EnemyManager>();
+	enemyManager_->Initialize(ctx);
 
 	// 敵の弾管理インスタンス生成
 	enemyBulletManager_ = std::make_unique<EnemyBulletManager>();
@@ -32,16 +32,16 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	wallManager_->Initialize(ctx);
 
 	// ゴール判定インスタンス生成&初期化
-	goal_=std::make_unique<Goal>();
+	goal_ = std::make_unique<Goal>();
 	goal_->Initialize(ctx);
 }
 
 void GamePlayScene::Update() {
 	// プレイヤーの更新処理
-	player_->Update(timeManager_->GetDeltaTime(), keyboard_, enemy_.get());
+	player_->Update(timeManager_->GetDeltaTime(), keyboard_, enemyManager_.get());
 
 	// 敵の更新処理
-	enemy_->Update(timeManager_->GetDeltaTime(), player_.get(), enemyBulletManager_.get(), wallManager_.get());
+	enemyManager_->Update(timeManager_->GetDeltaTime(), player_.get(), enemyBulletManager_.get(), wallManager_.get());
 
 	// 敵の弾の更新処理
 	enemyBulletManager_->Update(timeManager_->GetDeltaTime());
@@ -57,13 +57,7 @@ void GamePlayScene::Update() {
 
 	// 押し戻し完了後の最終的な座標で、描画更新&AABB更新
 	player_->PostUpdate();
-
-	if (!enemy_->IsDead()) {
-		enemy_->PostUpdate();
-	}
-
-	// 壁の管理インスタンスImGui
-	wallManager_->DrawImGui();
+	enemyManager_->PostUpdate();
 
 	// プレイヤーが死亡したらシーン遷移
 	if (player_->IsDead()) {
@@ -71,9 +65,15 @@ void GamePlayScene::Update() {
 	}
 
 	// ゴールしていたらシーン遷移
-	if(goal_->GetGoal()){
+	if (goal_->GetGoal()) {
 		sceneManager_->ChangeScene("Title");
 	}
+
+	// 壁の管理インスタンスImGui
+	wallManager_->DrawImGui();
+
+	// 敵の管理インスタンスImGui
+	enemyManager_->DrawImGui();
 
 #ifdef USE_IMGUI
 	ImGui::Begin("Camera");
@@ -88,7 +88,7 @@ void GamePlayScene::Draw() {
 	player_->Draw();
 
 	// 敵の描画処理
-	enemy_->Draw();
+	enemyManager_->Draw();
 
 	// 敵の弾の描画処理
 	enemyBulletManager_->Draw();
@@ -120,12 +120,14 @@ void GamePlayScene::CollisionGameObjects() {
 	// ==========================================
 	// プレイヤーの攻撃用範囲と敵の当たり判定
 	// ==========================================
-	if (Collision::Intersect(player_->GetAttackCol(), enemy_->GetBodyCol())) {
-		// プレイヤーの攻撃フラグを立てる
-		player_->SetEnableAttack(true);
-	} else {
-		// プレイヤーの攻撃フラグを下す
-		player_->SetEnableAttack(false);
+	for (auto& enemy : enemyManager_->GetEnemies()) {
+		if (Collision::Intersect(player_->GetAttackCol(), enemy->GetBodyCol())) {
+			// プレイヤーの攻撃フラグを立てる
+			player_->SetEnableAttack(true);
+		} else {
+			// プレイヤーの攻撃フラグを下す
+			player_->SetEnableAttack(false);
+		}
 	}
 
 	// ==========================================
@@ -184,9 +186,12 @@ void GamePlayScene::CollisionGameObjects() {
 	// ==========================================
 	// 敵と壁の判定（めり込み防止 ＆ ノックバック時死亡）
 	// ==========================================
-	if (!enemy_->IsDead()) {
-		AABB enemyAABB = enemy_->GetBodyCol();
-		Vector3 enemyPos = enemy_->GetPos();
+	for (auto& enemy : enemyManager_->GetEnemies()) {
+		if (enemy->IsDead())
+			continue;
+
+		AABB enemyAABB = enemy->GetBodyCol();
+		Vector3 enemyPos = enemy->GetPos();
 
 		for (const auto& wall : wallManager_->GetWalls()) {
 			AABB wallAABB = wall->GetCollision();
@@ -198,8 +203,8 @@ void GamePlayScene::CollisionGameObjects() {
 				// ----------------------------------------
 				// 壁激突死の判定：もしノックバック中なら死亡させて処理を抜ける
 				// ----------------------------------------
-				if (enemy_->IsKnockBack()) {
-					enemy_->Kill();
+				if (enemy->IsKnockBack()) {
+					enemy->Kill();
 					break;
 				}
 
@@ -229,7 +234,7 @@ void GamePlayScene::CollisionGameObjects() {
 				}
 
 				// 結果を敵の座標に反映
-				enemy_->SetPos(enemyPos);
+				enemy->SetPos(enemyPos);
 
 				// 連続で壁に当たるケースを考慮してAABB更新
 				enemyAABB.max.x = enemyPos.x + 0.5f;

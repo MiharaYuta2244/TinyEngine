@@ -11,7 +11,7 @@ class WallManager;
 class Enemy {
 public:
 	// 初期化処理
-	void Initialize(EngineContext* ctx);
+	void Initialize(EngineContext* ctx, Vector3 pos);
 
 	// 更新処理
 	void Update(float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, WallManager* wallManager);
