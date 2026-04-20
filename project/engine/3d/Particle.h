@@ -51,7 +51,7 @@ public:
 	/// <param name="texturePath">テクスチャのパス</param>
 	/// <param name="srvIndex">SRVインデックス</param>
 	/// <param name="particleType">パーティクルの種類</param>
-	void Initialize(EngineContext* ctx, Vector3 emitterPos, std::string texturePath, UINT srvIndex = 3, const std::string& particleType = "");
+	void Initialize(EngineContext* ctx, Vector3 emitterPos, const std::string& texturePath, UINT srvIndex = 3, const std::string& particleType = "");
 
 	/// <summary>
 	/// 更新関数
@@ -82,7 +82,7 @@ public:
 
 private:
 	// 四角形の作成
-	ModelData CreatePrimitive(std::string texturePath);
+	ModelData CreatePrimitive(const std::string& texturePath);
 
 	// 頂点データの初期化
 	void CreateVertexData();

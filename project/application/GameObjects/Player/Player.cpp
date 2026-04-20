@@ -57,8 +57,8 @@ void Player::Update(float deltaTime, DirectInput* input, EnemyManager* enemyMana
 
 	// 掴み判定用：一番近い敵を探す
 	Enemy* targetEnemy = nullptr;
-	float minDist = 9999.0f;
-	float grabRange = 3.0f; // 掴める距離の閾値（適宜調整してください）
+	float minDist = FLT_MAX;
+	float grabRange = 3.0f; // 掴める距離の閾値
 
 	for (auto& enemy : enemyManager->GetEnemies()) {
 		if (enemy->IsDead())

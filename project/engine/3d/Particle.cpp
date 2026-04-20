@@ -20,7 +20,7 @@ using namespace Microsoft::WRL;
 using namespace DirectX;
 using namespace TinyEngine;
 
-void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos, std::string texturePath, UINT srvIndex, const std::string& particleType) {
+void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos, const std::string& texturePath, UINT srvIndex, const std::string& particleType) {
 	ctx_ = ctx;
 
 	// particleTypeに応じてモジュールを作成
@@ -220,7 +220,7 @@ void Particle::Draw() {
 	commandList->DrawInstanced(UINT(modelData_.vertices.size()), numInstance_, 0, 0);
 }
 
-ModelData Particle::CreatePrimitive(std::string texturePath) {
+ModelData Particle::CreatePrimitive(const std::string& texturePath) {
 	ModelData modelData;
 
 	modelData.vertices.push_back({

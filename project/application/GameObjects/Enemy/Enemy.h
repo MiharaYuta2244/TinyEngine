@@ -3,6 +3,7 @@
 #include "AnimationBundle.h"
 #include "EnemyAI.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
+#include "Particle.h"
 
 class EnemyBulletManager;
 class Player;
@@ -43,7 +44,7 @@ public:
 	bool IsKnockBack() const { return knockBackAnim_.anim.GetIsActive(); }
 
 	// 死亡させる処理
-	void Kill() { isDead_ = true; }
+	void Kill();
 
 private:
 	// 当たり判定の更新
@@ -61,4 +62,7 @@ private:
 
 	std::unique_ptr<ObjectRender> render_; // 描画用インスタンス
 	std::unique_ptr<EnemyAI> ai_;          // AI
+	std::unique_ptr<TinyEngine::Particle> particle_;   // 死亡時パーティクル
+
+	EngineContext* ctx_ = nullptr;
 };

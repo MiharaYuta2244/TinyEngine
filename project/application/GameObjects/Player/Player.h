@@ -6,6 +6,7 @@
 #include "PlayerMove.h"
 
 class EnemyManager;
+class Enemy;
 
 /// <summary>
 /// プレイヤーの処理をまとめたクラス
@@ -45,6 +46,8 @@ public:
 	// 本体の当たり判定
 	AABB GetBodyCol() const { return bodyCol_; }
 
+	Enemy* GetTargetEnemy() const { return heldEnemy_; }
+
 private:
 	// 当たり判定の更新処理
 	void UpdateCollision();
@@ -65,7 +68,7 @@ private:
 	bool isHold_ = false;
 
 	// つかんでいる敵のポインタを記憶するための変数
-	class Enemy* heldEnemy_ = nullptr;
+	Enemy* heldEnemy_ = nullptr;
 
 	std::unique_ptr<ObjectRender> render_; // 描画用インスタンス
 	std::unique_ptr<PlayerMove> move_;     // 移動用インスタンス

@@ -1,10 +1,14 @@
 #include "Enemy.h"
 #include "EnemyBulletManager.h"
 
+using namespace TinyEngine;
+
 void Enemy::Initialize(EngineContext* ctx, Vector3 pos) {
 	transform_.scale = {1.0f, 1.0f, 1.0f};
 	transform_.rotate = {0.0f, 0.0f, 0.0f};
 	transform_.translate = pos;
+
+	ctx_ = ctx;
 
 	// 描画用インスタンスの生成&初期化
 	render_ = std::make_unique<ObjectRender>();
@@ -40,15 +44,23 @@ void Enemy::PostUpdate() {
 
 	// 正しい座標で描画用インスタンスの更新
 	render_->Update(transform_);
+
+	// パーティクルの更新
+	if (particle_) {
+		particle_->Update();
+	}
 }
 
 void Enemy::Draw() {
-	if (isDead_) {
-		return;
+	if (!isDead_) {
+		// 描画
+		render_->Draw();
 	}
 
-	// 描画
-	render_->Draw();
+	// パーティクルの描画
+	if (particle_) {
+		particle_->Draw();
+	}
 }
 
 void Enemy::StartKnockBack(Vector3 dir) {
@@ -67,6 +79,15 @@ void Enemy::StartKnockBack(Vector3 dir) {
 	    pos.z + dir.z * knockBackPower_,
 	};
 	knockBackAnim_.anim.Start(transform_.translate, targetPos, 0.5f, EaseType::EASEOUTCUBIC);
+}
+
+void Enemy::Kill() {
+	if (isDead_)
+		return;
+
+	isDead_ = true;
+	particle_ = std::make_unique<Particle>();
+	particle_->Initialize(ctx_, transform_.translate, "white.png", 10, "ShockWave");
 }
 
 void Enemy::UpdateCollision() {

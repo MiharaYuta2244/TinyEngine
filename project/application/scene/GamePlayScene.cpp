@@ -34,6 +34,10 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	// ゴール判定インスタンス生成&初期化
 	goal_ = std::make_unique<Goal>();
 	goal_->Initialize(ctx);
+
+	// カメラの初期位置
+	debugCamera_->SetTranslation({1.3f, 60.0f, -4.0f});
+	debugCamera_->SetEuler({1.5f, 0.0f, 0.0f});
 }
 
 void GamePlayScene::Update() {
@@ -75,11 +79,19 @@ void GamePlayScene::Update() {
 	// 敵の管理インスタンスImGui
 	enemyManager_->DrawImGui();
 
+	// カメラの追従
+	debugCamera_->SetPivot(player_->GetPosition());
+
 #ifdef USE_IMGUI
+	Vector3 rot = debugCamera_->GetEuler();
+
 	ImGui::Begin("Camera");
-	ImGui::DragFloat3("Rotate", &debugCamera_->GetRotate().x, 0.01f);
+	ImGui::DragFloat("Pitch", &rot.x, 0.01f);
+	ImGui::DragFloat("Yaw", &rot.y, 0.01f);
 	ImGui::DragFloat3("Translate", &debugCamera_->GetTranslation().x, 0.01f);
 	ImGui::End();
+
+	debugCamera_->SetEuler(rot);
 #endif // USE_IMGUI
 }
 
@@ -124,9 +136,6 @@ void GamePlayScene::CollisionGameObjects() {
 		if (Collision::Intersect(player_->GetAttackCol(), enemy->GetBodyCol())) {
 			// プレイヤーの攻撃フラグを立てる
 			player_->SetEnableAttack(true);
-		} else {
-			// プレイヤーの攻撃フラグを下す
-			player_->SetEnableAttack(false);
 		}
 	}
 

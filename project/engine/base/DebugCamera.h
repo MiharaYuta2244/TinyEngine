@@ -1,9 +1,9 @@
 #pragma once
-#include "Vector3.h"
-#include "Matrix4x4.h"
 #include "DirectInput.h"
 #include "GamePad.h"
 #include "MathUtility.h"
+#include "Matrix4x4.h"
+#include "Vector3.h"
 #include <Transform.h>
 
 /// <summary>
@@ -24,7 +24,8 @@ public:
 	Matrix4x4& GetViewProjectionMatrix() { return viewProjectionMatrix_; }
 	Vector3& GetTranslation() { return transform_.translate; }
 	Vector3& GetRotate() { return transform_.rotate; }
-	
+	const Vector3& GetEuler()const {return euler_;}
+
 	// Setter
 	void SetTranslation(Vector3 translation) { transform_.translate = translation; }
 	void SetRotate(const Vector3& rotate);
@@ -32,6 +33,15 @@ public:
 	void SetAspectRatio(float aspectRatio) { aspectRatio_ = aspectRatio; }
 	void SetNearClip(float nearClip) { nearClip_ = nearClip; }
 	void SetFarClip(float farClip) { farClip_ = farClip; }
+	void SetEuler(const Vector3& euler){
+		euler_ = euler;
+		euler_.z = 0.0f;
+		UpdateOrientation();
+		UpdateViewMatrix();
+	}
+
+private:
+	void UpdateOrientation();
 
 private:
 	// 累積回転行列
@@ -56,4 +66,6 @@ private:
 	float farClip_;
 	// ビュープロジェクション行列
 	Matrix4x4 viewProjectionMatrix_;
+	// オイラー
+	Vector3 euler_;
 };
