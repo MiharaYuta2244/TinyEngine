@@ -3,7 +3,6 @@
 #include "AnimationBundle.h"
 #include "EnemyAI.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
-#include "Particle.h"
 
 class EnemyBulletManager;
 class Player;
@@ -46,6 +45,9 @@ public:
 	// 死亡させる処理
 	void Kill();
 
+	// TransformのGetter
+	Transform GetTransform() const { return transform_; }
+
 private:
 	// 当たり判定の更新
 	void UpdateCollision();
@@ -60,9 +62,8 @@ private:
 	// ノックバックの強さ
 	float knockBackPower_ = 10.0f;
 
-	std::unique_ptr<ObjectRender> render_; // 描画用インスタンス
-	std::unique_ptr<EnemyAI> ai_;          // AI
-	std::unique_ptr<TinyEngine::Particle> particle_;   // 死亡時パーティクル
+	std::unique_ptr<ObjectRender> render_;           // 描画用インスタンス
+	std::unique_ptr<EnemyAI> ai_;                    // AI
 
 	EngineContext* ctx_ = nullptr;
 };

@@ -17,6 +17,10 @@
 #include "Transform.h"
 #include "TransformationMatrix.h"
 #include "VertexData.h"
+#include "modules/DustModule.h"
+#include "modules/RadialRingModule.h"
+#include "modules/RisingModule.h"
+#include "modules/ShockWaveModule.h"
 #include <d3d12.h>
 #include <memory>
 #include <string>
@@ -29,7 +33,7 @@ namespace TinyEngine {
 /// パーティクルクラス
 /// </summary>
 class Particle {
-private:
+public:
 	struct Emitter {
 		Transform transform; // エミッタのトランスフォーム
 		uint32_t count;      // 発生数
@@ -37,6 +41,7 @@ private:
 		float frequencyTime; // 頻度用時刻
 	};
 
+private:
 	struct AccelerationField {
 		Vector3 acceleration; // 加速度
 		AABB area;            // 範囲
@@ -49,9 +54,9 @@ public:
 	/// <param name="ctx">エンジンコンテキスト</param>
 	/// <param name="emitterPos">エミッタの位置</param>
 	/// <param name="texturePath">テクスチャのパス</param>
-	/// <param name="srvIndex">SRVインデックス</param>
-	/// <param name="particleType">パーティクルの種類</param>
-	void Initialize(EngineContext* ctx, Vector3 emitterPos, const std::string& texturePath, UINT srvIndex = 3, const std::string& particleType = "");
+	/// <param name="module">適用する挙動モジュール（nullptrでデフォルト）</param>
+	/// <param name="customEmitter">カスタムエミッタ設定（nullptrでデフォルト）</param>
+	void Initialize(EngineContext* ctx, Vector3 emitterPos, const std::string& texturePath, std::unique_ptr<ParticleModule> module = nullptr, const Emitter* customEmitter = nullptr);
 
 	/// <summary>
 	/// 更新関数
@@ -70,6 +75,15 @@ public:
 	void SetCamera(DebugCamera* camera) { camera_ = camera; }
 	void SetIsBillboard(bool isBillboard) { isBillboard_ = isBillboard; }
 	void SetTranslate(Vector3 translate) { emitter.transform.translate = translate; }
+	void SetEmitMode(bool isLoop, float duration = 0.0f) {
+		isLoop_ = isLoop;
+		duration_ = duration;
+	}
+	void SetEmitterParam(uint32_t count, float frequency) {
+		emitter.count = count;
+		emitter.frequency = frequency;
+		emitter.frequencyTime = frequency;
+	}
 
 	// モジュールごとのエミッタを登録する
 	void SetEmitterForModule(const std::string& moduleName, const Emitter& emitter);
@@ -79,6 +93,7 @@ public:
 	Vector4& GetColor() { return material_.color; }
 	Matrix4x4& GetWorldMatrix() { return worldMatrix_; }
 	Material& GetMaterial() { return material_; }
+	bool IsFinished() const { return isFinished_; }
 
 private:
 	// 四角形の作成
@@ -110,7 +125,6 @@ private:
 
 	// エミッタの初期化（モジュール名指定オーバーロードあり）
 	void InitializeEmitter(Vector3 emitterPos);
-	void InitializeEmitter(Vector3 emitterPos, const std::string& particleType);
 
 	// 加速度フィールドの初期化
 	void InitializeAccelerationField();
@@ -157,7 +171,7 @@ private:
 	// VertexBufferView
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_;
 
-	// Rsource
+	// Resource
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource_;
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResource_;
 
@@ -189,5 +203,11 @@ private:
 
 	// 挙動モジュール
 	std::unique_ptr<ParticleModule> module_;
+
+	// エミッタの寿命管理用パラメータ
+	float duration_ = 0.0f;    // エミッタの稼働時間
+	float elapsedTime_ = 0.0f; // エミッタの経過時間
+	bool isLoop_ = true;       // ループするかどうか
+	bool isFinished_ = false;  // すべての処理が終わり、削除可能かどうか
 };
 } // namespace TinyEngine

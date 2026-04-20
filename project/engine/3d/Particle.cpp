@@ -1,49 +1,36 @@
-#include <DirectXMath.h>
-#include <fstream>
-#include <sstream>
 #include "particle.h"
 #include "Collision.h"
+#include "DirectXUtils.h"
+#include "DustModule.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
 #include "Model.h"
+#include "ParticleModule.h"
+#include "RadialRingModule.h"
 #include "Random.h"
+#include "RisingModule.h"
+#include "ShockWaveModule.h"
 #include "TextureManager.h"
 #include "particleCommon.h"
-#include "ParticleModule.h"
-#include "ShockWaveModule.h"
-#include "DustModule.h"
-#include "RisingModule.h"
-#include "RadialRingModule.h"
-#include "DirectXUtils.h"
+#include <DirectXMath.h>
+#include <fstream>
+#include <sstream>
 
 using namespace Microsoft::WRL;
 using namespace DirectX;
 using namespace TinyEngine;
 
-void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos, const std::string& texturePath, UINT srvIndex, const std::string& particleType) {
+void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos, const std::string& texturePath, std::unique_ptr<ParticleModule> module, const Emitter* customEmitter) {
 	ctx_ = ctx;
 
-	// particleTypeに応じてモジュールを作成
-	if (!particleType.empty()) {
-		if (particleType == "ShockWave") {
-			module_ = std::make_unique<ShockWaveModule>();
-		} else if (particleType == "Dust") {
-			module_ = std::make_unique<DustModule>();
-		} else if (particleType == "Rising") {
-			module_ = std::make_unique<RisingModule>();
-		} else if (particleType == "RadialRing") {
-			module_ = std::make_unique<RadialRingModule>();
-		}
-		
-	} else {
-		module_.reset();
-	}
+	// モジュールのセット
+	module_ = std::move(module);
 
 	// インスタンシングデータ作成
 	CreateInstancingResource();
 
 	// SRVの作成（インスタンシング用）
-	CreateInstancingSRV(srvIndex);
+	CreateInstancingSRV(ctx->srvManager->Allocate());
 
 	// プリミティブモデルの作成
 	modelData_ = CreatePrimitive(texturePath);
@@ -63,8 +50,13 @@ void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos, const std::str
 	// カメラをセットする
 	camera_ = ctx_->particleCommon->GetDefaultCamera();
 
-	// エミッタの初期化(モジュール固有の初期化があれば反映)
-	InitializeEmitter(emitterPos, particleType);
+	// エミッタの初期化
+	if (customEmitter) {
+		emitter = *customEmitter;
+		emitter.transform.translate = emitterPos; // 位置だけは引数で上書き
+	} else {
+		InitializeEmitter(emitterPos); // デフォルトのエミッタ設定
+	}
 
 	// パーティクルに加速度を与える構造体の初期化
 	InitializeAccelerationField();
@@ -84,52 +76,19 @@ void Particle::InitializeEmitter(Vector3 emitterPos) {
 	emitter.transform.scale = {1.0f, 1.0f, 1.0f};
 }
 
-void Particle::InitializeEmitter(Vector3 emitterPos, const std::string& particleType) {
-	// まずデフォルトをセット
-	InitializeEmitter(emitterPos);
-
-	// モジュール名が指定されていれば、登録済みのエミッタ設定を優先して使う
-	if (!particleType.empty()) {
-		auto it = emitters_.find(particleType);
-		if (it != emitters_.end()) {
-			emitter = it->second;
-			// 位置だけは呼び出し側のemitterPosを適用しておく
-			emitter.transform.translate = emitterPos;
-			return;
-		}
-
-		// 未登録ならモジュールごとのデフォルトを設定する
-		if (particleType == "ShockWave") {
-			emitter.count = 1;
-			emitter.frequency = 1.0f;
-			emitter.frequencyTime = 0.0f;
-			emitter.transform.translate = emitterPos;
-			emitter.transform.scale = {1.0f, 1.0f, 1.0f};
-		} else if (particleType == "Dust") {
-			emitter.count = 1;
-			emitter.frequency = 0.1f;
-			emitter.frequencyTime = 0.0f;
-			emitter.transform.translate = emitterPos;
-			emitter.transform.scale = {1.0f, 1.0f, 1.0f};
-		} else if (particleType == "Rising") {
-			emitter.count = 10;
-			emitter.frequency = 1.0f;
-			emitter.frequencyTime = 0.0f;
-			emitter.transform.translate = emitterPos + Vector3(20.0f,-15.0f,0);
-			emitter.transform.scale = {30.0f, 10.0f, 10.0f};
-		} else if (particleType == "RadialRing") {
-			emitter.count = 10;
-			emitter.frequency = 1.0f;
-			emitter.frequencyTime = 0.0f;
-			emitter.transform.translate = emitterPos;
-			emitter.transform.scale = {1.0f, 1.0f, 1.0f};
-		}
-	}
-}
-
 void Particle::Update() {
 	// 経過時間
 	deltaTime_->Update();
+	float dt = deltaTime_->GetDeltaTime();
+
+	// エミッタの稼働時間を更新
+	elapsedTime_ += dt;
+
+	// 新たなパーティクルを発生させる状態かどうか
+	bool isActive = true;
+	if (!isLoop_ && duration_ > 0.0f && elapsedTime_ >= duration_) {
+		isActive = false; // 指定した稼働時間を超えたら新規発生をストップ
+	}
 
 	// エミッタのImGui
 #ifdef USE_IMGUI
@@ -138,60 +97,34 @@ void Particle::Update() {
 	ImGui::End();
 #endif
 
-	// エミッタの更新処理
-	emitter.frequencyTime += deltaTime_->GetDeltaTime();
-	if (emitter.frequency <= emitter.frequencyTime) {
-		particles_.splice(particles_.end(), Emit(emitter, emitter.transform.translate)); // 発生処理
-		emitter.frequencyTime -= emitter.frequency;                                      // 余計に過ぎた時間も加味して頻度計算する
+	// エミッタの更新とパーティクル発生
+	if (isActive) {
+		UpdateEmitter();
 	}
 
 	numInstance_ = 0;
-	for (std::list<ParticleState>::iterator particleIterator = particles_.begin(); particleIterator != particles_.end();) {
-		if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
-			particleIterator = particles_.erase(particleIterator); // 生存期間が過ぎたParticleはlistから消す。戻り値が次のイテレータとなる
+	for (auto it = particles_.begin(); it != particles_.end();) {
+		if (it->lifeTime <= it->currentTime) {
+			it = particles_.erase(it);
 			continue;
 		}
 
-		// Fieldの範囲内のParticleには加速度を適用する
-		if (Collision::Intersect(accelerationField_.area, (*particleIterator).transform.translate)) {
-			(*particleIterator).velocity += accelerationField_.acceleration * deltaTime_->GetDeltaTime();
-		}
-
-		// 速度を設定
-		(*particleIterator).transform.translate += (*particleIterator).velocity * deltaTime_->GetDeltaTime();
-		(*particleIterator).currentTime += deltaTime_->GetDeltaTime();
-
-		// モジュールがあれば挙動更新を委譲（スケールやアルファなど）
-		if (module_) {
-			module_->Update(*particleIterator, deltaTime_->GetDeltaTime(), ctx_);
-		}
-
-		// 座標変換（モジュールでスケールが変わっていても対応）
-		CoordinateTransformation(particleIterator);
-
-		// 透明度の変更（モジュールがある場合はモジュール側のcolor.wを優先）
-		float alpha;
-		if (module_) {
-			alpha = (*particleIterator).color.w;
-		} else {
-			alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
-		}
+		// 個々のパーティクルの更新
+		UpdateParticle(it);
 
 		if (numInstance_ < kNumMaxInstance) {
-			instancingData_[numInstance_].WVP = worldViewProjectionMatrix_;
-			instancingData_[numInstance_].World = worldMatrix_;
-			instancingData_[numInstance_].color = (*particleIterator).color;
-			instancingData_[numInstance_].color.w = alpha;
-
-			// 生きているParticleの数を1カウントする
+			// インスタンシング用データへ書き込み
+			WriteParticleToGPU(*it, numInstance_);
 			++numInstance_;
 		}
 
-		// 次のイテレータに進める
-		++particleIterator;
+		++it;
 	}
 
-	//*materialData_ = material_;
+	// ループ再生ではなく、新規発生も止まっており、画面上のパーティクルも全て消滅したら終了
+	if (!isLoop_ && !isActive && particles_.empty()) {
+		isFinished_ = true;
+	}
 }
 
 void Particle::Draw() {
@@ -254,7 +187,7 @@ ModelData Particle::CreatePrimitive(const std::string& texturePath) {
           .normal = {0.0f, 0.0f, 1.0f}
     }); // 右下
 
-	modelData.material.textureFilePath = texturePath;
+	modelData.material.textureFilePath = "resources/textures/" + texturePath;
 
 	return modelData;
 }
@@ -321,11 +254,7 @@ ParticleState Particle::MakeParticle(const Emitter& emitter, Vector3 translate) 
 	Vector3 extent = emitter.transform.scale;
 
 	// ランダムオフセットを作る（ボックス内）
-	Vector3 randomOffset = {
-		RandomUtils::RangeFloat(-extent.x, extent.x),
-		RandomUtils::RangeFloat(-extent.y, extent.y),
-		RandomUtils::RangeFloat(-extent.z, extent.z)
-	};
+	Vector3 randomOffset = {RandomUtils::RangeFloat(-extent.x, extent.x), RandomUtils::RangeFloat(-extent.y, extent.y), RandomUtils::RangeFloat(-extent.z, extent.z)};
 
 	// モジュールがある場合はモジュール側で初期化をまかせる
 	if (module_) {
@@ -427,11 +356,24 @@ void Particle::UpdateParticle(std::list<ParticleState>::iterator& itr) {
 
 	itr->transform.translate += itr->velocity * deltaTime_->GetDeltaTime();
 	itr->currentTime += deltaTime_->GetDeltaTime();
+
+	// モジュールの更新処理を追加
+	if (module_) {
+		module_->Update(*itr, deltaTime_->GetDeltaTime(), ctx_);
+	}
+
 	CoordinateTransformation(itr);
 }
 
 void Particle::WriteParticleToGPU(const ParticleState& p, uint32_t index) {
-	float alpha = 1.0f - (p.currentTime / p.lifeTime);
+	// モジュールがある場合はモジュール側のアルファを優先する
+	float alpha;
+	if (module_) {
+		alpha = p.color.w;
+	} else {
+		alpha = 1.0f - (p.currentTime / p.lifeTime);
+	}
+
 	instancingData_[index].WVP = worldViewProjectionMatrix_;
 	instancingData_[index].World = worldMatrix_;
 	instancingData_[index].color = p.color;

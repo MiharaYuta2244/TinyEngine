@@ -44,22 +44,12 @@ void Enemy::PostUpdate() {
 
 	// 正しい座標で描画用インスタンスの更新
 	render_->Update(transform_);
-
-	// パーティクルの更新
-	if (particle_) {
-		particle_->Update();
-	}
 }
 
 void Enemy::Draw() {
 	if (!isDead_) {
 		// 描画
 		render_->Draw();
-	}
-
-	// パーティクルの描画
-	if (particle_) {
-		particle_->Draw();
 	}
 }
 
@@ -86,8 +76,6 @@ void Enemy::Kill() {
 		return;
 
 	isDead_ = true;
-	particle_ = std::make_unique<Particle>();
-	particle_->Initialize(ctx_, transform_.translate, "white.png", 10, "ShockWave");
 }
 
 void Enemy::UpdateCollision() {

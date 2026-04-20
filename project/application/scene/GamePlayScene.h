@@ -43,4 +43,7 @@ private:
 
 	// ゴール判定用クラス
 	std::unique_ptr<Goal> goal_;
+
+	// 死亡パーティクルリスト
+	std::list<std::unique_ptr<TinyEngine::Particle>> enemyDeathParticle_;
 };

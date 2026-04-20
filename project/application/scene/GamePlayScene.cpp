@@ -82,6 +82,11 @@ void GamePlayScene::Update() {
 	// カメラの追従
 	debugCamera_->SetPivot(player_->GetPosition());
 
+	// パーティクルの更新
+	for (auto& particle : enemyDeathParticle_) {
+		particle->Update();
+	}
+
 #ifdef USE_IMGUI
 	Vector3 rot = debugCamera_->GetEuler();
 
@@ -110,6 +115,13 @@ void GamePlayScene::Draw() {
 
 	// ゴール判定インスタンス描画
 	goal_->Draw();
+
+	// パーティクルの描画
+	for (auto& particle : enemyDeathParticle_){
+		particle->Draw();
+	}
+
+	std::erase_if(enemyDeathParticle_, [](const std::unique_ptr<TinyEngine::Particle>& p) { return p->IsFinished(); });
 }
 
 void GamePlayScene::Finalize() {}
@@ -214,6 +226,14 @@ void GamePlayScene::CollisionGameObjects() {
 				// ----------------------------------------
 				if (enemy->IsKnockBack()) {
 					enemy->Kill();
+
+					// パーティクルの生成
+					auto particle = std::make_unique<Particle>();
+					particle->Initialize(engineContext_, enemy->GetPos(), "white.png", std::make_unique<ShockWaveModule>());
+					particle->SetEmitMode(false, 0.1f);
+					particle->SetEmitterParam(20, 0.05f);
+					enemyDeathParticle_.push_back(std::move(particle));
+
 					break;
 				}
 
