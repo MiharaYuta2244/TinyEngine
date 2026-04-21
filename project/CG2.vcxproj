@@ -245,6 +245,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\GameObjects\Player\PlayerHealth.cpp" />
     <ClCompile Include="application\GameObjects\Wall\Wall.cpp" />
     <ClCompile Include="application\GameObjects\Wall\WallManager.cpp" />
+    <ClCompile Include="application\GameObjects\Player\PlayerHPGauge.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -318,6 +319,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\GameObjects\Enemy\EnemyBullet.h" />
     <ClInclude Include="application\GameObjects\Enemy\EnemyBulletManager.h" />
     <ClInclude Include="application\GameObjects\Enemy\EnemyManager.h" />
+    <ClInclude Include="application\GameObjects\Player\IHPGauge.h" />
     <ClInclude Include="engine\math\mathLib\Rect.h" />
     <ClInclude Include="engine\utility\DirectXUtils.h" />
     <ClInclude Include="engine\base\Outline.h" />
@@ -412,6 +414,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\GameObjects\Wall\Wall.h" />
     <ClInclude Include="application\GameObjects\Wall\WallManager.h" />
     <ClInclude Include="application\GameObjects\Goal\Goal.h" />
+    <ClInclude Include="application\GameObjects\Player\PlayerHPGauge.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

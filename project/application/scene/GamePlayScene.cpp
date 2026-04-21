@@ -38,6 +38,11 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	// カメラの初期位置
 	debugCamera_->SetTranslation({1.3f, 60.0f, -4.0f});
 	debugCamera_->SetEuler({1.5f, 0.0f, 0.0f});
+
+	// プレイヤーのHPゲージ生成&初期化
+	playerHPGauge_ = std::make_unique<PlayerHPGauge>();
+	playerHPGauge_->Initialize(ctx);
+	playerHPGauge_->HPBarSpriteApply(static_cast<int>(player_->GetCurrentHP()), static_cast<int>(player_->GetMaxHP()));
 }
 
 void GamePlayScene::Update() {
@@ -79,13 +84,27 @@ void GamePlayScene::Update() {
 	// 敵の管理インスタンスImGui
 	enemyManager_->DrawImGui();
 
+	// プレイヤーのHPゲージImGui
+	playerHPGauge_->DrawImGui();
+
 	// カメラの追従
 	debugCamera_->SetPivot(player_->GetPosition());
+
+	// プレイヤーのHPゲージ更新
+	playerHPGauge_->HPBarSpriteApply(static_cast<int>(player_->GetCurrentHP()), static_cast<int>(player_->GetMaxHP()));
+	playerHPGauge_->Update(timeManager_->GetDeltaTime());
 
 	// パーティクルの更新
 	for (auto& particle : enemyDeathParticle_) {
 		particle->Update();
 	}
+	std::erase_if(enemyDeathParticle_, [this](const std::unique_ptr<TinyEngine::Particle>& p) {
+		debugCamera_->StartShake(0.2f, 0.2f);
+		return p->IsFinished();
+	});
+
+	// カメラのシェイク更新
+	debugCamera_->ShakeCamera(timeManager_->GetDeltaTime());
 
 #ifdef USE_IMGUI
 	Vector3 rot = debugCamera_->GetEuler();
@@ -117,11 +136,12 @@ void GamePlayScene::Draw() {
 	goal_->Draw();
 
 	// パーティクルの描画
-	for (auto& particle : enemyDeathParticle_){
+	for (auto& particle : enemyDeathParticle_) {
 		particle->Draw();
 	}
 
-	std::erase_if(enemyDeathParticle_, [](const std::unique_ptr<TinyEngine::Particle>& p) { return p->IsFinished(); });
+	// プレイヤーのHPゲージ描画
+	playerHPGauge_->Draw();
 }
 
 void GamePlayScene::Finalize() {}

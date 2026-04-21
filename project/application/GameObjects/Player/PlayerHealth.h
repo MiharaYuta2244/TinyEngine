@@ -24,9 +24,15 @@ public:
 	// 死亡フラグGetter
 	bool IsDead() const;
 
+	// 現在のHP取得Getter
+	float GetCurrentHP() const { return hp_; }
+
+	// HPの最大値取得Getter
+	float GetMaxHP() const { return maxHP_; }
+
 private:
 	float maxHP_ = 3.0f; // 最大HP
-	float hp_ = maxHP_; // 現在のHP
+	float hp_ = maxHP_;  // 現在のHP
 
 	// 無敵状態フラグ
 	bool isInvincible_ = false;

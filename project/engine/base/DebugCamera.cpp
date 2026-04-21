@@ -2,6 +2,7 @@
 #include "MathUtility.h"
 #include "WinApp.h"
 #include "MathOperator.h"
+#include "Random.h"
 #include <numbers>
 
 DebugCamera::DebugCamera()
@@ -113,4 +114,33 @@ void DebugCamera::UpdateViewMatrix() {
 	projectionMatrix_ = MathUtility::MakePerspectiveFovMatrix(fovY_, aspectRatio_, nearClip_, farClip_);
 
 	viewProjectionMatrix_ = MathUtility::Multiply(viewMatrix_, projectionMatrix_);
+}
+
+void DebugCamera::StartShake(float duration, float magnitude) {
+	isShake_ = true;
+	shakeDuration_ = duration;
+	shakeTimer_ = 0.0f;
+	magnitude_ = magnitude;
+	originalPos_ = transform_.translate;
+}
+
+void DebugCamera::ShakeCamera(float deltaTime) {
+	if (!isShake_)
+		return;
+
+	const float decay = 0.9f;
+
+	float offsetX = RandomUtils::RangeFloat(-1, 1) * magnitude_;
+	float offsetY = RandomUtils::RangeFloat(-1, 1) * magnitude_;
+
+	transform_.translate = {originalPos_.x + offsetX, originalPos_.y + offsetY, originalPos_.z};
+
+	magnitude_ *= decay;
+	shakeTimer_ += deltaTime;
+
+	if (shakeTimer_ >= shakeDuration_) {
+		transform_.translate = originalPos_;
+		isShake_ = false;
+		shakeTimer_ = 0.0f;
+	}
 }

@@ -10,6 +10,7 @@
 #include "GameObjects/Wall/WallManager.h"
 #include "GameObjects/Goal/Goal.h"
 #include "GameObjects/Enemy/EnemyManager.h"
+#include "GameObjects/Player/PlayerHPGauge.h"
 #include <array>
 #include <memory>
 #include <vector>
@@ -46,4 +47,7 @@ private:
 
 	// 死亡パーティクルリスト
 	std::list<std::unique_ptr<TinyEngine::Particle>> enemyDeathParticle_;
+
+	// プレイヤーのHPゲージ
+	std::unique_ptr<PlayerHPGauge> playerHPGauge_;
 };

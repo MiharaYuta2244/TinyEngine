@@ -48,6 +48,12 @@ public:
 
 	Enemy* GetTargetEnemy() const { return heldEnemy_; }
 
+	// 現在のHP取得Getter
+	float GetCurrentHP() const { return hp_->GetCurrentHP(); }
+
+	// HPの最大値取得Getter
+	float GetMaxHP() const { return hp_->GetMaxHP(); }
+
 private:
 	// 当たり判定の更新処理
 	void UpdateCollision();

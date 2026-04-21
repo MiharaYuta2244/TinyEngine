@@ -24,7 +24,7 @@ public:
 	Matrix4x4& GetViewProjectionMatrix() { return viewProjectionMatrix_; }
 	Vector3& GetTranslation() { return transform_.translate; }
 	Vector3& GetRotate() { return transform_.rotate; }
-	const Vector3& GetEuler()const {return euler_;}
+	const Vector3& GetEuler() const { return euler_; }
 
 	// Setter
 	void SetTranslation(Vector3 translation) { transform_.translate = translation; }
@@ -33,12 +33,18 @@ public:
 	void SetAspectRatio(float aspectRatio) { aspectRatio_ = aspectRatio; }
 	void SetNearClip(float nearClip) { nearClip_ = nearClip; }
 	void SetFarClip(float farClip) { farClip_ = farClip; }
-	void SetEuler(const Vector3& euler){
+	void SetEuler(const Vector3& euler) {
 		euler_ = euler;
 		euler_.z = 0.0f;
 		UpdateOrientation();
 		UpdateViewMatrix();
 	}
+
+	// シェイク開始処理
+	void StartShake(float duration, float magnitude);
+
+	// シェイクの更新処理
+	void ShakeCamera(float deltaTime);
 
 private:
 	void UpdateOrientation();
@@ -68,4 +74,13 @@ private:
 	Matrix4x4 viewProjectionMatrix_;
 	// オイラー
 	Vector3 euler_;
+
+	// ===================================
+	// シェイク用の変数
+	// ===================================
+	bool isShake_ = false;
+	float shakeDuration_;
+	float shakeTimer_ = 0;
+	float magnitude_;
+	Vector3 originalPos_;
 };
