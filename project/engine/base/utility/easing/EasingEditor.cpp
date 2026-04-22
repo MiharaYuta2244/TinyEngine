@@ -10,6 +10,7 @@ EasingEditor::EasingEditor() {
 }
 
 void EasingEditor::DrawWindow(float deltaTime) {
+#ifdef USE_IMGUI
 	ImGui::Begin("Easing Editor");
 
 	// イージングタイプの選択
@@ -26,9 +27,11 @@ void EasingEditor::DrawWindow(float deltaTime) {
 	DrawPreview(deltaTime);
 
 	ImGui::End();
+#endif
 }
 
 void EasingEditor::DrawEaseSelector() {
+#ifdef USE_IMGUI
 	if (ImGui::Combo("Ease Type", &currentEaseIndex_, easeNames_, IM_ARRAYSIZE(easeNames_))) {
 		// タイプが変更されたらプレビューをリセット
 		ResetPreview();
@@ -37,9 +40,11 @@ void EasingEditor::DrawEaseSelector() {
 	if (ImGui::SliderFloat("Duration", &duration_, 0.1f, 5.0f, "%.2f s")) {
 		ResetPreview();
 	}
+#endif
 }
 
 void EasingEditor::DrawCurveGraph() {
+#ifdef USE_IMGUI
 	ImGui::Text("Curve Preview");
 
 	const int resolution = 100;
@@ -53,9 +58,11 @@ void EasingEditor::DrawCurveGraph() {
 
 	// グラフの描画
 	ImGui::PlotLines("", values, resolution, 0, nullptr, -0.5f, 1.5f, ImVec2(ImGui::GetContentRegionAvail().x, 150));
+#endif
 }
 
 void EasingEditor::DrawPreview(float deltaTime) {
+#ifdef USE_IMGUI
 	ImGui::Text("Animation Preview");
 
 	// 再生
@@ -89,6 +96,7 @@ void EasingEditor::DrawPreview(float deltaTime) {
 
 	// 次のUI要素が被らないようにカーソルを進める
 	ImGui::Dummy(ImVec2(trackWidth, boxSize));
+#endif
 }
 
 void EasingEditor::ResetPreview() {
