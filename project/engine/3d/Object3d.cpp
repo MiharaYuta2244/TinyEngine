@@ -164,6 +164,7 @@ void Object3d::Draw() {
 }
 
 void TinyEngine::Object3d::DrawGizmo(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix, ImGuizmo::OPERATION operation, ImGuizmo::MODE mode) {
+#ifdef USE_IMGUI
 	float* v = const_cast<float*>(&viewMatrix.m[0][0]);
 	float* p = const_cast<float*>(&projectionMatrix.m[0][0]);
 	float* m = &worldMatrix_.m[0][0];
@@ -181,6 +182,7 @@ void TinyEngine::Object3d::DrawGizmo(const Matrix4x4& viewMatrix, const Matrix4x
 		transform_.rotate = {MathUtility::DegreeToRadian(rotation[0]), MathUtility::DegreeToRadian(rotation[1]), MathUtility::DegreeToRadian(rotation[2])};
 		transform_.scale = {scale[0], scale[1], scale[2]};
 	}
+#endif // USE_IMGUI
 }
 
 void Object3d::SetModel(const std::string& filePath) {

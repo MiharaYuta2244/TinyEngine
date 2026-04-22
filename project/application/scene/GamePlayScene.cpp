@@ -354,6 +354,7 @@ void GamePlayScene::CollisionGameObjects() {
 }
 
 void GamePlayScene::UpdateImGui() {
+#ifdef USE_IMGUI
 	ImGui::Begin("Object Manager");
 
 	// 操作モードの選択
@@ -414,4 +415,5 @@ void GamePlayScene::UpdateImGui() {
 		ImGui::End();
 		ImGui::PopStyleColor();
 	}
+#endif // USE_IMGUI
 }
