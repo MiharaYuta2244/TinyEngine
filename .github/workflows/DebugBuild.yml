@@ -31,5 +31,5 @@ jobs:
       - name: Build with VS2026 (v145)
         shell: cmd
         run: |
-          call "C:\Program Files\Microsoft Visual Studio\18\BuildTools\Common7\Tools\VsDevCmd.bat"
+          call "C:\Program Files\Microsoft Visual Studio\18\Community\Common7\Tools\VsDevCmd.bat"
           msbuild %SOLUTION_FILE_PATH% /p:Platform=x64 /p:Configuration=%CONFIGURATION%
