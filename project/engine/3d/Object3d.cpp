@@ -3,16 +3,26 @@
 #include "MathUtility.h"
 #include "Model.h"
 #include "DirectXUtils.h"
-#include <DirectXMath.h>
-#include <fstream>
-#include <sstream>
 
 using namespace Microsoft::WRL;
 using namespace DirectX;
 using namespace TinyEngine;
 
-void Object3d::Initialize(EngineContext* ctx) {
+// 静的変数の定義
+uint32_t Object3d::s_nextID_ = 0;
+
+void Object3d::Initialize(EngineContext* ctx, const std::string& name) {
 	ctx_ = ctx;
+
+	// IDの割り振り
+	id_ = ++s_nextID_;
+
+	// 名前の設定
+	if(name.empty() || name == "Object"){
+		name_="Object_"+std::to_string(id_);
+	}else {
+		name_=name;
+	}
 
 	// 座標変換行列データ作成
 	CreateTransformationMatrixData();
@@ -150,6 +160,26 @@ void Object3d::Draw() {
 	// 3Dモデルが割り当てられれば描画する
 	if (model_) {
 		model_->Draw();
+	}
+}
+
+void TinyEngine::Object3d::DrawGizmo(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix, ImGuizmo::OPERATION operation, ImGuizmo::MODE mode) {
+	float* v = const_cast<float*>(&viewMatrix.m[0][0]);
+	float* p = const_cast<float*>(&projectionMatrix.m[0][0]);
+	float* m = &worldMatrix_.m[0][0];
+
+	// ギズモの操作
+	ImGuizmo::Manipulate(v, p, operation, mode, m);
+
+	// 操作された場合、行列を分解してTransformに書き戻す
+	if (ImGuizmo::IsUsing()) {
+		float translation[3], rotation[3], scale[3];
+		ImGuizmo::DecomposeMatrixToComponents(m, translation, rotation, scale);
+
+		transform_.translate = {translation[0], translation[1], translation[2]};
+		// ImGuizmoはDegreeなのでRadianに変換
+		transform_.rotate = {MathUtility::DegreeToRadian(rotation[0]), MathUtility::DegreeToRadian(rotation[1]), MathUtility::DegreeToRadian(rotation[2])};
+		transform_.scale = {scale[0], scale[1], scale[2]};
 	}
 }
 

@@ -27,6 +27,7 @@ public:
 
 	// 座標のGetter
 	Vector3 GetPosition() const { return transform_.translate; }
+	Vector3& GetPosition() { return transform_.translate; }
 
 	// 座標のSetter
 	void SetPosition(const Vector3& pos) { transform_.translate = pos; }
@@ -53,6 +54,9 @@ public:
 
 	// HPの最大値取得Getter
 	float GetMaxHP() const { return hp_->GetMaxHP(); }
+
+	// 描画用のオブジェクトを返すGetter
+	TinyEngine::Object3d* GetObject3d() { return render_->GetObject3d(); }
 
 private:
 	// 当たり判定の更新処理

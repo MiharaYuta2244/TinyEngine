@@ -1,24 +1,18 @@
 #pragma once
 #include "CameraForGPU.h"
 #include "DebugCamera.h"
-#include "DirectionalLight.h"
 #include "EngineContext.h"
 #include "FogParam.h"
 #include "Material.h"
-#include "MaterialData.h"
 #include "Model.h"
 #include "ModelData.h"
-#include "ModelManager.h"
 #include "Outline.h"
-#include "PointLight.h"
-#include "SpotLight.h"
 #include "TimeParam.h"
 #include "Transform.h"
 #include "TransformationMatrix.h"
-#include "VertexData.h"
+#include <ImGuizmo.h>
 #include <d3d12.h>
 #include <string>
-#include <vector>
 #include <wrl.h>
 
 namespace TinyEngine {
@@ -31,7 +25,7 @@ public:
 	/// 初期化関数
 	/// </summary>
 	/// <param name="ctx">エンジンコンテキスト</param>
-	void Initialize(EngineContext* ctx);
+	void Initialize(EngineContext* ctx, const std::string& name = "Object");
 
 	/// <summary>
 	/// 更新関数
@@ -42,6 +36,14 @@ public:
 	/// 描画関数
 	/// </summary>
 	void Draw();
+
+	/// <summary>
+	/// ギズモの描画
+	/// </summary>
+	/// <param name="camera">カメラ</param>
+	/// <param name="operation">SRTのどれか</param>
+	/// <param name="mode">扱う座標系</param>
+	void DrawGizmo(const Matrix4x4& viewMatrix, const Matrix4x4& projectionMatrix, ImGuizmo::OPERATION operation, ImGuizmo::MODE mode);
 
 	// setter
 	void SetModel(const std::string& filePath);
@@ -57,6 +59,7 @@ public:
 	void SetCamera(Camera* camera) { camera_ = camera; }
 	void SetOutlineColor(const Vector4& color) { outline_.color = color; }
 	void SetOutlineColor(float thickness) { outline_.thickness = thickness; }
+	void SetName(const std::string& name) { name_ = name; }
 
 	// getter
 	Vector3& GetScale() { return transform_.scale; }
@@ -64,10 +67,10 @@ public:
 	Vector3& GetTranslate() { return transform_.translate; }
 	Vector4& GetColor() { return material_.color; }
 	Transform& GetTransform() { return transform_; }
-
 	Matrix4x4& GetWorldMatrix() { return worldMatrix_; }
-
 	Material& GetMaterial() { return material_; }
+	uint32_t GetID() const { return id_; }
+	const std::string& GetName() const { return name_; }
 
 private:
 	/// <summary>
@@ -152,5 +155,14 @@ private:
 
 	// モデルデータ
 	ModelData modelData_;
+
+	// オブジェクト識別用のID
+	uint32_t id_;
+
+	// オブジェクト識別用の名前
+	std::string name_;
+
+	// 全Object3dで共有する次に割り当てるID
+	static uint32_t s_nextID_;
 };
 } // namespace TinyEngine

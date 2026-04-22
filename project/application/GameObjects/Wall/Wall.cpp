@@ -9,6 +9,7 @@ void Wall::Initialize(EngineContext* ctx, WallStatus wallStatus) {
 	// 描画用インスタンス生成&初期化
 	render_ = std::make_unique<ObjectRender>();
 	render_->Initialize(ctx, "Cube.obj");
+	render_->SetTransform(transform_);
 }
 
 void Wall::Update() {

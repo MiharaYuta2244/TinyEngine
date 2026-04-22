@@ -8,11 +8,11 @@
 
 using namespace TinyEngine;
 
-void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, DeltaTime* timeManager, SceneManager* sceneManager) {
+void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* mainCamera, DeltaTime* timeManager, SceneManager* sceneManager) {
 	engineContext_ = ctx;
 	keyboard_ = keyboard;
 	gamePad_ = gamePad;
-	mainCamera_ = debugCamera;
+	mainCamera_ = mainCamera;
 	timeManager_ = timeManager;
 	sceneManager_ = sceneManager;
 
@@ -47,6 +47,8 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	playerHPGauge_ = std::make_unique<PlayerHPGauge>();
 	playerHPGauge_->Initialize(ctx);
 	playerHPGauge_->HPBarSpriteApply(static_cast<int>(player_->GetCurrentHP()), static_cast<int>(player_->GetMaxHP()));
+
+	objects_.push_back(player_->GetObject3d());
 }
 
 void GamePlayScene::Update() {
@@ -91,6 +93,9 @@ void GamePlayScene::Update() {
 	// プレイヤーのHPゲージImGui
 	playerHPGauge_->DrawImGui();
 
+	// ギズモ用ImGui更新
+	UpdateImGui();
+
 	// カメラの追従
 	mainCamera_->SetPivot(player_->GetPosition());
 
@@ -109,6 +114,8 @@ void GamePlayScene::Update() {
 
 	// カメラのシェイク更新
 	mainCamera_->ShakeCamera(timeManager_->GetDeltaTime());
+
+	debugCamera_->Update(*keyboard_, *gamePad_);
 
 #ifdef USE_IMGUI
 	Vector3 rot = mainCamera_->GetEuler();
@@ -307,5 +314,104 @@ void GamePlayScene::CollisionGameObjects() {
 	if (Collision::Intersect(player_->GetBodyCol(), goal_->GetCol())) {
 		// ゴールフラグを立てる
 		goal_->SetGoal(true);
+	}
+
+	// ==========================================
+	// 敵同士の当たり判定
+	// ==========================================
+	auto& enemies = enemyManager_->GetEnemies();
+
+	for (auto itA = enemies.begin(); itA != enemies.end(); ++itA) {
+		Enemy* a = itA->get();
+		if (a->IsDead())
+			continue;
+
+		auto itB = itA;
+		++itB;
+
+		for (; itB != enemies.end(); ++itB) {
+			Enemy* b = itB->get();
+			if (b->IsDead())
+				continue;
+
+			// 当たり判定
+			if (Collision::Intersect(a->GetBodyCol(), b->GetBodyCol())) {
+				// どちらかがノックバック状態であれば
+				if (a->IsKnockBack() || b->IsKnockBack()) {
+					a->Kill();
+					b->Kill();
+
+					// パーティクルの生成
+					auto particle = std::make_unique<Particle>();
+					particle->Initialize(engineContext_, a->GetPos(), "white.png", std::make_unique<ShockWaveModule>());
+					particle->SetEmitMode(false, 0.1f);
+					particle->SetEmitterParam(20, 0.05f);
+					enemyDeathParticle_.push_back(std::move(particle));
+				}
+			}
+		}
+	}
+}
+
+void GamePlayScene::UpdateImGui() {
+	ImGui::Begin("Object Manager");
+
+	// 操作モードの選択
+	if (ImGui::RadioButton("Translate", currentGizmoOperation_ == ImGuizmo::TRANSLATE)) {
+		currentGizmoOperation_ = ImGuizmo::TRANSLATE;
+	}
+
+	ImGui::SameLine();
+
+	if (ImGui::RadioButton("Rotate", currentGizmoOperation_ == ImGuizmo::ROTATE)) {
+		currentGizmoOperation_ = ImGuizmo::ROTATE;
+	}
+
+	ImGui::SameLine();
+
+	if (ImGui::RadioButton("Scale", currentGizmoOperation_ == ImGuizmo::SCALE)) {
+		currentGizmoOperation_ = ImGuizmo::SCALE;
+	}
+
+	ImGui::Separator();
+
+	// リストから選択
+	if (ImGui::BeginListBox("Objects")) {
+		for (auto& obj : objects_) {
+			std::string label = obj->GetName() + " (ID: " + std::to_string(obj->GetID()) + ")";
+			bool isSelected = (selectedObject_ == obj);
+			if (ImGui::Selectable(label.c_str(), isSelected)) {
+				selectedObject_ = obj;
+			}
+		}
+		ImGui::EndListBox();
+	}
+	ImGui::End();
+
+	// ギズモ描画レイヤー
+	if (selectedObject_ != nullptr) {
+		// ウィンドウ位置とサイズを画面全体に固定
+		ImGui::SetNextWindowPos(ImVec2(0, 0), ImGuiCond_Always);
+		ImGui::SetNextWindowSize(ImVec2(1280, 720), ImGuiCond_Always); // 解像度に合わせて調整
+
+		// 背景を完全に透明にする設定
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
+		ImGui::Begin("GizmoLayer", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoScrollbar);
+
+		ImGuizmo::BeginFrame();
+		ImGuizmo::SetOrthographic(false);
+		ImGuizmo::Enable(true);
+		ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList()); // 現在のウィンドウのDrawListを使用
+
+		// 描画範囲の設定
+		float windowWidth = (float)ImGui::GetWindowWidth();
+		float windowHeight = (float)ImGui::GetWindowHeight();
+		ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+
+		// 選択中オブジェクトのギズモを描画
+		selectedObject_->DrawGizmo(mainCamera_->GetViewMatrix(), mainCamera_->GetProjection(), currentGizmoOperation_, ImGuizmo::LOCAL);
+
+		ImGui::End();
+		ImGui::PopStyleColor();
 	}
 }

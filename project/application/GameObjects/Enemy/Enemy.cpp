@@ -13,6 +13,7 @@ void Enemy::Initialize(EngineContext* ctx, Vector3 pos) {
 	// 描画用インスタンスの生成&初期化
 	render_ = std::make_unique<ObjectRender>();
 	render_->Initialize(ctx, "Hiyoko.obj");
+	render_->SetTransform(transform_);
 
 	// AIインスタンス生成&初期化
 	ai_ = std::make_unique<EnemyAI>();

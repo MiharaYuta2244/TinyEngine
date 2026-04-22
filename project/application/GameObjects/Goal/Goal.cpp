@@ -9,6 +9,7 @@ void Goal::Initialize(EngineContext* ctx) {
 	render_ = std::make_unique<ObjectRender>();
 	render_->Initialize(ctx, "Cube.obj");
 	render_->SetColor({0.0f, 1.0f, 0.0f, 1.0f});
+	render_->SetTransform(transform_);
 }
 
 void Goal::Update() {

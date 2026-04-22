@@ -17,7 +17,7 @@
 
 class GamePlayScene : public BaseScene {
 public:
-	void Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, DeltaTime* timeManager, SceneManager* sceneManager) override;
+	void Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* mainCamera, DeltaTime* timeManager, SceneManager* sceneManager) override;
 
 	void Update() override;
 
@@ -28,6 +28,9 @@ public:
 private:
 	// 当たり判定
 	void CollisionGameObjects();
+
+	// ギズモ用ImGuiの更新
+	void UpdateImGui();
 
 private:
 	// プレイヤー
@@ -53,4 +56,16 @@ private:
 
 	// デバッグカメラ
 	std::unique_ptr<Camera> debugCamera_;
+
+	// オブジェクトのリスト
+	std::vector<TinyEngine::Object3d*> objects_;
+
+	// 選択中のオブジェクトポインタ
+	TinyEngine::Object3d* selectedObject_ = nullptr;
+
+	// SRTの内扱うパラメータ
+	ImGuizmo::OPERATION currentGizmoOperation_ = ImGuizmo::TRANSLATE;
+	
+	// 座標系の設定
+	ImGuizmo::MODE currentGizmoMode_ = ImGuizmo::LOCAL;
 };

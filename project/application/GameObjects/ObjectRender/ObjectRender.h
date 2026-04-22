@@ -18,6 +18,12 @@ public:
 	// 色のSetter
 	void SetColor(Vector4 color) { object3d_->SetColor(color); }
 
+	// TransformのSetter
+	void SetTransform(Transform transform) { object3d_->SetTransform(transform); }
+
+	// 描画用オブジェクトを返すGetter
+	TinyEngine::Object3d* GetObject3d() { return object3d_.get(); }
+
 private:
 	// モデル
 	std::unique_ptr<TinyEngine::Object3d> object3d_;

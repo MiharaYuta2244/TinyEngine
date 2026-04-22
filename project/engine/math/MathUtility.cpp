@@ -522,3 +522,7 @@ Vector3 MathUtility::Lerp(const Vector3& start, const Vector3& end, float t) {
 	result.z = start.z + (end.z - start.z) * t;
 	return result;
 }
+
+float MathUtility::DegreeToRadian(const float& degree) { 
+	return degree * std::numbers::pi_v<float> / 180.0f;
+}

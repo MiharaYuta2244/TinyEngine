@@ -9,7 +9,6 @@ void ObjectRender::Initialize(EngineContext* ctx, const std::string& filepath) {
 }
 
 void ObjectRender::Update(Transform transform) {
-	object3d_->SetTransform(transform);
 	object3d_->Update();
 }
 

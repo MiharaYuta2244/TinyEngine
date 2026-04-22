@@ -11,6 +11,7 @@ void Player::Initialize(EngineContext* ctx) {
 	render_ = std::make_unique<ObjectRender>();
 	render_->Initialize(ctx, "suzanne.obj");
 	render_->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+	render_->SetTransform(transform_);
 
 	// 移動用インスタンス生成
 	move_ = std::make_unique<PlayerMove>();

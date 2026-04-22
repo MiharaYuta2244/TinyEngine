@@ -4,7 +4,6 @@
 #include "DirectInput.h"
 #include "EngineContext.h"
 #include "GamePad.h"
-#include <memory>
 
 class SceneManager;
 
