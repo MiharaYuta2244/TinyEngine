@@ -18,7 +18,7 @@ void Wall::Update() {
 	collision_.max = {pos.x + scale.x, pos.y, pos.z + scale.z};
 	collision_.min = {pos.x - scale.x, pos.y, pos.z - scale.z};
 
-	// 描画用インスタンス更新
+	// 描画用インスタンス更新 
 	render_->Update(transform_);
 }
 
