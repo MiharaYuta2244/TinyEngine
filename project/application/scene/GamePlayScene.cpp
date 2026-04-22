@@ -49,6 +49,9 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	playerHPGauge_->HPBarSpriteApply(static_cast<int>(player_->GetCurrentHP()), static_cast<int>(player_->GetMaxHP()));
 
 	objects_.push_back(player_->GetObject3d());
+
+	// イージングエディターの生成
+	easingEditor_ = std::make_unique<EasingEditor>();
 }
 
 void GamePlayScene::Update() {
@@ -116,6 +119,9 @@ void GamePlayScene::Update() {
 	mainCamera_->ShakeCamera(timeManager_->GetDeltaTime());
 
 	debugCamera_->Update(*keyboard_, *gamePad_);
+
+	// イージングエディター更新処理
+	easingEditor_->DrawWindow(timeManager_->GetDeltaTime());
 
 #ifdef USE_IMGUI
 	Vector3 rot = mainCamera_->GetEuler();

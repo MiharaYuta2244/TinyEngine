@@ -1,7 +1,5 @@
 #pragma once
 #include "EaseType.h"
-#include <cmath>
-#include <numbers>
 
 using EaseFunc = float (*)(float);
 

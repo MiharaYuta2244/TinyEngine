@@ -11,6 +11,7 @@
 #include "GameObjects/Goal/Goal.h"
 #include "GameObjects/Enemy/EnemyManager.h"
 #include "GameObjects/Player/PlayerHPGauge.h"
+#include "EasingEditor.h"
 #include <array>
 #include <memory>
 #include <vector>
@@ -68,4 +69,7 @@ private:
 	
 	// 座標系の設定
 	ImGuizmo::MODE currentGizmoMode_ = ImGuizmo::LOCAL;
+
+	// イージングエディター
+	std::unique_ptr<EasingEditor> easingEditor_;
 };

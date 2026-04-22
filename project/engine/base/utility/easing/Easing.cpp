@@ -1,4 +1,6 @@
 #include "Easing.h"
+#include <cmath>
+#include <numbers>
 
 // --- Sine ---
 float Easing::EaseInSine(float t) { return 1.0f - cos((t * std::numbers::pi_v<float>) / 2.0f); }
