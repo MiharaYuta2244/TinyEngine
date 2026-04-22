@@ -54,7 +54,7 @@ public:
 	void SetTranslate(const Vector3& translate) { transform_.translate = translate; }
 	void SetTransform(const Transform& transform) { transform_ = transform; }
 	void SetWorldMatrix(Matrix4x4 worldMatrix) { worldMatrix_ = worldMatrix; }
-	void SetCamera(DebugCamera* camera) { camera_ = camera; }
+	void SetCamera(Camera* camera) { camera_ = camera; }
 	void SetOutlineColor(const Vector4& color) { outline_.color = color; }
 	void SetOutlineColor(float thickness) { outline_.thickness = thickness; }
 
@@ -145,7 +145,7 @@ private:
 	static const uint32_t kNumInstance = 10;
 
 	// カメラ
-	DebugCamera* camera_ = nullptr;
+	Camera* camera_ = nullptr;
 
 	// コンテキスト構造体
 	EngineContext* ctx_;

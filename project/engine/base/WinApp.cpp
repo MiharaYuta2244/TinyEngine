@@ -17,22 +17,22 @@ WinApp::WinApp() {
 	// ウィンドウサイズを表す構造体にクライアント領域を入れる
 	RECT wrc = {0, 0, kClientWidth, kClientHeight};
 
-	// クライアント領域を基に実際のサイズにwrcを変更してもらう                                       
+	// クライアント領域を基に実際のサイズにwrcを変更してもらう
 	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
 
 	// ウィンドウの生成
 	hwnd_ = CreateWindow(
-	    wc_.lpszClassName,    // 利用するクラス名
-	    L"LE2A_16_ミハラ_ユウタ_ClimbDrop",               // タイトルバーの文字
-	    WS_OVERLAPPEDWINDOW,  // よく見るウィンドウスタイル
-	    CW_USEDEFAULT,        // 表示X座標 (Windowsに任せる)
-	    CW_USEDEFAULT,        // 表示Y座標 (WindowsOSに任せる)
-	    wrc.right - wrc.left, // ウィンドウ横幅
-	    wrc.bottom - wrc.top, // ウィンドウ縦幅
-	    nullptr,              // 親ウィンドウハンドル
-	    nullptr,              // メニューハンドル
-	    wc_.hInstance,        // インスタンスハンドル
-	    nullptr);             // オプション
+	    wc_.lpszClassName,        // 利用するクラス名
+	    L"LE3A_17_ミハラ_ユウタ", // タイトルバーの文字
+	    WS_OVERLAPPEDWINDOW,      // よく見るウィンドウスタイル
+	    CW_USEDEFAULT,            // 表示X座標 (Windowsに任せる)
+	    CW_USEDEFAULT,            // 表示Y座標 (WindowsOSに任せる)
+	    wrc.right - wrc.left,     // ウィンドウ横幅
+	    wrc.bottom - wrc.top,     // ウィンドウ縦幅
+	    nullptr,                  // 親ウィンドウハンドル
+	    nullptr,                  // メニューハンドル
+	    wc_.hInstance,            // インスタンスハンドル
+	    nullptr);                 // オプション
 
 	// ウィンドウを表示する
 	ShowWindow(hwnd_, SW_SHOW);

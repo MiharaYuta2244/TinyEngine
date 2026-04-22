@@ -7,11 +7,11 @@
 #include <Transform.h>
 
 /// <summary>
-/// デバッグ用カメラのクラス
+/// カメラのクラス
 /// </summary>
-class DebugCamera {
+class Camera {
 public:
-	DebugCamera();
+	Camera();
 	void Initialize();
 	void SetPivot(const Vector3& p);
 	void Update(const DirectInput& input, const GamePad& gamePad);

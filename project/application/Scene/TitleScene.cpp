@@ -1,11 +1,11 @@
 #include "TitleScene.h"
 #include "SceneManager.h"
 
-void TitleScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, DebugCamera* debugCamera, DeltaTime* timeManager, SceneManager* sceneManager) {
+void TitleScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, DeltaTime* timeManager, SceneManager* sceneManager) {
 	engineContext_ = ctx;
 	keyboard_ = keyboard;
 	gamePad_ = gamePad;
-	debugCamera_ = debugCamera;
+	mainCamera_ = debugCamera;
 	timeManager_ = timeManager;
 	sceneManager_ = sceneManager;
 

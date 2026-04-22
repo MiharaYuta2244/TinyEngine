@@ -19,11 +19,11 @@ public:
 	void Initialize(DirectXCommon* dxCommon);
 
 	// setter
-	void SetDefaultCamera(DebugCamera* camera) { defaultCamera_ = camera; }
+	void SetDefaultCamera(Camera* camera) { defaultCamera_ = camera; }
 
 	// getter
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
-	DebugCamera* GetDefaultCamera() { return defaultCamera_; }
+	Camera* GetDefaultCamera() { return defaultCamera_; }
 
 private:
 	/// <summary>
@@ -54,5 +54,5 @@ private:
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_;
 
 	// カメラ
-	DebugCamera* defaultCamera_ = nullptr;
+	Camera* defaultCamera_ = nullptr;
 };

@@ -71,7 +71,7 @@ public:
 	DeltaTime* GetTimeManager() { return timeManager_.get(); }
 
 	// デバッグカメラのGetter
-	DebugCamera* GetDebugCamera() { return debugCamera_.get(); }
+	Camera* GetDebugCamera() { return debugCamera_.get(); }
 
 	// フレームレートのGetter
 	float GetFPS() { return fps_; }
@@ -121,7 +121,7 @@ private:
 	std::unique_ptr<GamePad> gamePad_ = std::make_unique<GamePad>();
 
 	// DebugCamera
-	std::unique_ptr<DebugCamera> debugCamera_ = std::make_unique<DebugCamera>();
+	std::unique_ptr<Camera> debugCamera_ = std::make_unique<Camera>();
 
 	// コンテキスト構造体
 	EngineContext engineContext_;

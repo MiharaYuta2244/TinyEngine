@@ -32,12 +32,12 @@ public:
 	void Update();
 
 	// Setter
-	void SetDefaultCamera(DebugCamera* camera) { defaultCamera_ = camera; }
+	void SetDefaultCamera(Camera* camera) { defaultCamera_ = camera; }
 	void SetDirectionalLightIntensity(const float& intensity) { globalDirectionalLight_.intensity = intensity; }
 
 	// getter
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
-	DebugCamera* GetDefaultCamera() { return defaultCamera_; }
+	Camera* GetDefaultCamera() { return defaultCamera_; }
 	DirectionalLight& GetDirectionalLight() { return globalDirectionalLight_; }
 	PointLight& GetPointLight() { return globalPointLight_; }
 	SpotLight& GetSpotLight() { return globalSpotLight_; }
@@ -89,7 +89,7 @@ private:
 	Microsoft::WRL::ComPtr<IDxcIncludeHandler> includeHandler_;
 
 	// カメラ
-	DebugCamera* defaultCamera_ = nullptr;
+	Camera* defaultCamera_ = nullptr;
 
 	// グローバルライティングリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> globalDirectionalLightResource_;

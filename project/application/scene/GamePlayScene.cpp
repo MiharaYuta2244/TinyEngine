@@ -8,13 +8,17 @@
 
 using namespace TinyEngine;
 
-void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, DebugCamera* debugCamera, DeltaTime* timeManager, SceneManager* sceneManager) {
+void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, DeltaTime* timeManager, SceneManager* sceneManager) {
 	engineContext_ = ctx;
 	keyboard_ = keyboard;
 	gamePad_ = gamePad;
-	debugCamera_ = debugCamera;
+	mainCamera_ = debugCamera;
 	timeManager_ = timeManager;
 	sceneManager_ = sceneManager;
+
+	// デバッグカメラ
+	debugCamera_ = std::make_unique<Camera>();
+	debugCamera_->Initialize();
 
 	// プレイヤーの生成&初期化
 	player_ = std::make_unique<Player>();
@@ -36,8 +40,8 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	goal_->Initialize(ctx);
 
 	// カメラの初期位置
-	debugCamera_->SetTranslation({1.3f, 60.0f, -4.0f});
-	debugCamera_->SetEuler({1.5f, 0.0f, 0.0f});
+	mainCamera_->SetTranslation({1.3f, 60.0f, -4.0f});
+	mainCamera_->SetEuler({1.5f, 0.0f, 0.0f});
 
 	// プレイヤーのHPゲージ生成&初期化
 	playerHPGauge_ = std::make_unique<PlayerHPGauge>();
@@ -88,7 +92,7 @@ void GamePlayScene::Update() {
 	playerHPGauge_->DrawImGui();
 
 	// カメラの追従
-	debugCamera_->SetPivot(player_->GetPosition());
+	mainCamera_->SetPivot(player_->GetPosition());
 
 	// プレイヤーのHPゲージ更新
 	playerHPGauge_->HPBarSpriteApply(static_cast<int>(player_->GetCurrentHP()), static_cast<int>(player_->GetMaxHP()));
@@ -99,23 +103,23 @@ void GamePlayScene::Update() {
 		particle->Update();
 	}
 	std::erase_if(enemyDeathParticle_, [this](const std::unique_ptr<TinyEngine::Particle>& p) {
-		debugCamera_->StartShake(0.2f, 0.2f);
+		mainCamera_->StartShake(0.2f, 0.2f);
 		return p->IsFinished();
 	});
 
 	// カメラのシェイク更新
-	debugCamera_->ShakeCamera(timeManager_->GetDeltaTime());
+	mainCamera_->ShakeCamera(timeManager_->GetDeltaTime());
 
 #ifdef USE_IMGUI
-	Vector3 rot = debugCamera_->GetEuler();
+	Vector3 rot = mainCamera_->GetEuler();
 
 	ImGui::Begin("Camera");
 	ImGui::DragFloat("Pitch", &rot.x, 0.01f);
 	ImGui::DragFloat("Yaw", &rot.y, 0.01f);
-	ImGui::DragFloat3("Translate", &debugCamera_->GetTranslation().x, 0.01f);
+	ImGui::DragFloat3("Translate", &mainCamera_->GetTranslation().x, 0.01f);
 	ImGui::End();
 
-	debugCamera_->SetEuler(rot);
+	mainCamera_->SetEuler(rot);
 #endif // USE_IMGUI
 }
 
@@ -158,6 +162,9 @@ void GamePlayScene::CollisionGameObjects() {
 		if (Collision::Intersect(playerSphere, bulletSphere)) {
 			// プレイヤーにダメージを与える処理
 			player_->Damage(1.0f);
+
+			// カメラシェイク開始
+			mainCamera_->StartShake(0.2f, 0.2f);
 		}
 	}
 

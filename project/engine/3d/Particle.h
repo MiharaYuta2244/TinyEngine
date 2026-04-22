@@ -72,7 +72,7 @@ public:
 	void SetModel(const std::string& filePath);
 	void SetColor(Vector4 color) { materialData_->color = color; }
 	void SetWorldMatrix(Matrix4x4 worldMatrix) { worldMatrix_ = worldMatrix; }
-	void SetCamera(DebugCamera* camera) { camera_ = camera; }
+	void SetCamera(Camera* camera) { camera_ = camera; }
 	void SetIsBillboard(bool isBillboard) { isBillboard_ = isBillboard; }
 	void SetTranslate(Vector3 translate) { emitter.transform.translate = translate; }
 	void SetEmitMode(bool isLoop, float duration = 0.0f) {
@@ -163,7 +163,7 @@ private:
 	Matrix4x4 worldViewProjectionMatrix_;
 
 	// カメラ
-	DebugCamera* camera_ = nullptr;
+	Camera* camera_ = nullptr;
 
 	// モデルデータ
 	ModelData modelData_;

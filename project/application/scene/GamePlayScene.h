@@ -17,7 +17,7 @@
 
 class GamePlayScene : public BaseScene {
 public:
-	void Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, DebugCamera* debugCamera, DeltaTime* timeManager, SceneManager* sceneManager) override;
+	void Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, DeltaTime* timeManager, SceneManager* sceneManager) override;
 
 	void Update() override;
 
@@ -50,4 +50,7 @@ private:
 
 	// プレイヤーのHPゲージ
 	std::unique_ptr<PlayerHPGauge> playerHPGauge_;
+
+	// デバッグカメラ
+	std::unique_ptr<Camera> debugCamera_;
 };

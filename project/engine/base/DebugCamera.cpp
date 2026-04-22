@@ -5,7 +5,7 @@
 #include "Random.h"
 #include <numbers>
 
-DebugCamera::DebugCamera()
+Camera::Camera()
     : transform_({
           {1.0f, 1.0f, 1.0f  },
           {0.0f, 0.0f, 0.0f  },
@@ -16,22 +16,22 @@ DebugCamera::DebugCamera()
 	UpdateViewMatrix();
 }
 
-void DebugCamera::Initialize() { UpdateViewMatrix(); }
+void Camera::Initialize() { UpdateViewMatrix(); }
 
-void DebugCamera::SetPivot(const Vector3& p) {
+void Camera::SetPivot(const Vector3& p) {
 	Vector3 offset = MathUtility::Subtract(transform_.translate, pivot_);
 	pivot_ = p;
 	transform_.translate = MathUtility::Add(pivot_, offset);
 }
 
-void DebugCamera::SetRotate(const Vector3& rotate) {
+void Camera::SetRotate(const Vector3& rotate) {
 	euler_ = rotate;
 	euler_.z = 0.0f; // roll は常に禁止
 	UpdateOrientation();
 	UpdateViewMatrix();
 }
 
-void DebugCamera::UpdateOrientation() {
+void Camera::UpdateOrientation() {
 	Matrix4x4 pitch = MathUtility::MakePitchRotateMatrix(euler_.x);
 	Matrix4x4 yaw = MathUtility::MakeYawRotateMatrix(euler_.y);
 
@@ -39,7 +39,7 @@ void DebugCamera::UpdateOrientation() {
 	orientation_ = MathUtility::Multiply(pitch, yaw);
 }
 
-void DebugCamera::Update(const DirectInput& input, const GamePad& gamePad) {
+void Camera::Update(const DirectInput& input, const GamePad& gamePad) {
 
 	// ============================
 	//  マウス右ドラッグ：自由回転
@@ -107,7 +107,7 @@ void DebugCamera::Update(const DirectInput& input, const GamePad& gamePad) {
 	UpdateViewMatrix();
 }
 
-void DebugCamera::UpdateViewMatrix() {
+void Camera::UpdateViewMatrix() {
 	worldMatrix_ = MathUtility::Multiply(orientation_, MathUtility::MakeTranslateMatrix(transform_.translate));
 
 	viewMatrix_ = MathUtility::Inverse(worldMatrix_);
@@ -116,7 +116,7 @@ void DebugCamera::UpdateViewMatrix() {
 	viewProjectionMatrix_ = MathUtility::Multiply(viewMatrix_, projectionMatrix_);
 }
 
-void DebugCamera::StartShake(float duration, float magnitude) {
+void Camera::StartShake(float duration, float magnitude) {
 	isShake_ = true;
 	shakeDuration_ = duration;
 	shakeTimer_ = 0.0f;
@@ -124,7 +124,7 @@ void DebugCamera::StartShake(float duration, float magnitude) {
 	originalPos_ = transform_.translate;
 }
 
-void DebugCamera::ShakeCamera(float deltaTime) {
+void Camera::ShakeCamera(float deltaTime) {
 	if (!isShake_)
 		return;
 
