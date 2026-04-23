@@ -72,15 +72,14 @@ void Player::Update(float deltaTime, DirectInput* input, EnemyManager* enemyMana
 
 		if (dist < minDist && dist < grabRange) {
 			minDist = dist;
-			targetEnemy = enemy.get();
+			heldEnemy_ = enemy.get();
 		}
 	}
 
 	// 掴み・投げ処理の更新
 	if (enableAttack_ && input->KeyDown(DIK_J)) {
-		if (!isHold_ && targetEnemy != nullptr) {
+		if (!isHold_ && heldEnemy_ != nullptr) {
 			isHold_ = true;
-			heldEnemy_ = targetEnemy; // 掴んだ敵を記憶
 			heldEnemy_->SetEnableMove(false);
 		}
 

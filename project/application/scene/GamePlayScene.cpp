@@ -1,10 +1,7 @@
 #include "GamePlayScene.h"
 #include "Collision.h"
-#include "Easing.h"
-#include "Random.h"
 #include "SceneManager.h"
 #include <algorithm>
-#include <fstream>
 
 using namespace TinyEngine;
 
@@ -41,14 +38,14 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 
 	// カメラの初期位置
 	mainCamera_->SetTranslation({1.3f, 60.0f, -4.0f});
-	mainCamera_->SetEuler({1.5f, 0.0f, 0.0f});
+	mainCamera_->SetEuler({std::numbers::pi_v<float> / 2.0f, 0.0f, 0.0f});
 
 	// プレイヤーのHPゲージ生成&初期化
 	playerHPGauge_ = std::make_unique<PlayerHPGauge>();
 	playerHPGauge_->Initialize(ctx);
 	playerHPGauge_->HPBarSpriteApply(static_cast<int>(player_->GetCurrentHP()), static_cast<int>(player_->GetMaxHP()));
 
-	//objects_.push_back(player_->GetObject3d());
+	// objects_.push_back(player_->GetObject3d());
 
 	// イージングエディターの生成
 	easingEditor_ = std::make_unique<EasingEditor>();
@@ -134,6 +131,12 @@ void GamePlayScene::Update() {
 
 	mainCamera_->SetEuler(rot);
 #endif // USE_IMGUI
+
+#ifdef _DEBUG
+	if (keyboard_->KeyTriggered(DIK_F1)) {
+		sceneManager_->ChangeScene("EasingEditorScene");
+	}
+#endif // _DEBUG
 }
 
 void GamePlayScene::Draw() {

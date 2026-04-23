@@ -1,4 +1,7 @@
 #include "EasingEditor.h"
+#include <fstream>
+#include <sstream>
+#include <iostream>
 
 #ifdef USE_IMGUI
 #include "ImGuiManager.h"
@@ -7,6 +10,9 @@
 EasingEditor::EasingEditor() {
 	// プレビュー用のアニメーションの初期化
 	previewAnim_.Start(0.0f, 300.0f, 1.0f, EaseType::EASEOUTSINE);
+
+	// 3Dオブジェクト用のアニメーション初期化
+	objectAnim_.Start(startValue_, endValue_, duration_, EaseType::EASEOUTSINE);
 }
 
 void EasingEditor::DrawWindow(float deltaTime) {
@@ -15,6 +21,20 @@ void EasingEditor::DrawWindow(float deltaTime) {
 
 	// イージングタイプの選択
 	DrawEaseSelector();
+
+	ImGui::Separator();
+
+	// ファイルのセーブUI
+	if(ImGui::Button("Save to CSV")){
+		SaveToCSV("easing_data.csv");
+	}
+
+	ImGui::Separator();
+
+	// ファイルのロードUI
+	if (ImGui::Button("Load from CSV")) {
+		LoadFromCSV("easing_data.csv");
+	}
 
 	ImGui::Separator();
 
@@ -32,6 +52,23 @@ void EasingEditor::DrawWindow(float deltaTime) {
 
 void EasingEditor::DrawEaseSelector() {
 #ifdef USE_IMGUI
+	// 対象の選択(SRT)
+	if(ImGui::Combo("Target", &currentTargetIndex_, targetNames_, IM_ARRAYSIZE(targetNames_))){
+		ResetPreview();
+	}
+
+	// 始点と終点の入力
+	float* startPtr = reinterpret_cast<float*>(&startValue_);
+	float* endPtr = reinterpret_cast<float*>(&endValue_);
+
+	if(ImGui::DragFloat3("Start Value", startPtr, 0.1f)){
+		ResetPreview();
+	}
+
+	if (ImGui::DragFloat3("End Value", endPtr, 0.1f)) {
+		ResetPreview();
+	}
+
 	if (ImGui::Combo("Ease Type", &currentEaseIndex_, easeNames_, IM_ARRAYSIZE(easeNames_))) {
 		// タイプが変更されたらプレビューをリセット
 		ResetPreview();
@@ -75,11 +112,14 @@ void EasingEditor::DrawPreview(float deltaTime) {
 	// 停止
 	if (ImGui::Button("Stop")) {
 		previewAnim_.Reset();
+		objectAnim_.Reset();
 		currentValue_ = 0.0f;
+		currentObjectValue_ = startValue_;
 	}
 
 	// アニメーションの更新
 	previewAnim_.Update(deltaTime, currentValue_);
+	objectAnim_.Update(deltaTime, currentObjectValue_);
 
 	// 実際の動きを視覚化
 	ImDrawList* drawList = ImGui::GetWindowDrawList();
@@ -102,4 +142,54 @@ void EasingEditor::DrawPreview(float deltaTime) {
 void EasingEditor::ResetPreview() {
 	// 現在の設定でアニメーションをリスタート
 	previewAnim_.Start(0.0f, 300.0f, duration_, static_cast<EaseType>(currentEaseIndex_));
+
+	// 3Dオブジェクト用のアニメーションもリスタート
+	objectAnim_.Start(startValue_, endValue_, duration_, static_cast<EaseType>(currentEaseIndex_));
+}
+
+void EasingEditor::SaveToCSV(const std::string& filename) {
+	std::ofstream file(filename);
+	if (file.is_open()) {
+		// ヘッダー
+		file << "TargetIndex,StartX,StartY,StartZ,EndX,EndY,EndZ,Duration,EaseTypeIndex\n";
+		// データ
+		file << currentTargetIndex_ << "," << startValue_.x << "," << startValue_.y << "," << startValue_.z << "," << endValue_.x << "," << endValue_.y << "," << endValue_.z << "," << duration_ << ","
+		     << currentEaseIndex_ << "\n";
+		file.close();
+	}
+}
+
+void EasingEditor::LoadFromCSV(const std::string& filename) {
+	std::ifstream file(filename);
+	if (file.is_open()) {
+		std::string line;
+		std::getline(file, line);
+
+		if (std::getline(file, line)) {
+			std::stringstream ss(line);
+			std::string item;
+
+			std::getline(ss, item, ',');
+			currentTargetIndex_ = std::stoi(item);
+			std::getline(ss, item, ',');
+			startValue_.x = std::stof(item);
+			std::getline(ss, item, ',');
+			startValue_.y = std::stof(item);
+			std::getline(ss, item, ',');
+			startValue_.z = std::stof(item);
+			std::getline(ss, item, ',');
+			endValue_.x = std::stof(item);
+			std::getline(ss, item, ',');
+			endValue_.y = std::stof(item);
+			std::getline(ss, item, ',');
+			endValue_.z = std::stof(item);
+			std::getline(ss, item, ',');
+			duration_ = std::stof(item);
+			std::getline(ss, item, ',');
+			currentEaseIndex_ = std::stoi(item);
+
+			ResetPreview(); // ロードした設定でプレビューを更新
+		}
+		file.close();
+	}
 }
