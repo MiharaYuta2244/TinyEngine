@@ -48,7 +48,7 @@ void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePa
 	playerHPGauge_->Initialize(ctx);
 	playerHPGauge_->HPBarSpriteApply(static_cast<int>(player_->GetCurrentHP()), static_cast<int>(player_->GetMaxHP()));
 
-	objects_.push_back(player_->GetObject3d());
+	//objects_.push_back(player_->GetObject3d());
 
 	// イージングエディターの生成
 	easingEditor_ = std::make_unique<EasingEditor>();
@@ -237,10 +237,10 @@ void GamePlayScene::CollisionGameObjects() {
 			player_->SetPosition(playerPos);
 
 			// 複数の壁と連続で当たるケースを考慮し、判定用AABBもその場で更新
-			playerAABB.max.x = playerPos.x + 0.4f;
-			playerAABB.min.x = playerPos.x - 0.4f;
-			playerAABB.max.z = playerPos.z + 0.4f;
-			playerAABB.min.z = playerPos.z - 0.4f;
+			playerAABB.max.x = playerPos.x + 0.5f;
+			playerAABB.min.x = playerPos.x - 0.5f;
+			playerAABB.max.z = playerPos.z + 0.5f;
+			playerAABB.min.z = playerPos.z - 0.5f;
 		}
 	}
 
