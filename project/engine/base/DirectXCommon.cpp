@@ -155,7 +155,7 @@ void DirectXCommon::InitializeDXGIDevice() {
 		// ソフトウェアアダプタでなければ採用！
 		if (!(adapterDesc.Flags & DXGI_ADAPTER_FLAG3_SOFTWARE)) {
 			// 採用したアダプタの情報をログに出力。wstringの方なので注意
-			Logger::Log(StringUtility::ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)));
+			Logger::Log(StringUtility::ConvertString(std::format(L"Use Adapter:{}\n", adapterDesc.Description)), LogLevel::Info);
 			break;
 		}
 		useAdapter_ = nullptr; // ソフトウェアアダプタの場合は見なかったことにする
@@ -173,13 +173,13 @@ void DirectXCommon::InitializeDXGIDevice() {
 		// 指定した機能レベルでデバイスが生成できたかを確認
 		if (SUCCEEDED(hr)) {
 			// 生成できたのでログ出力を行ってループを抜ける
-			Logger::Log(std::format("FeatureLevel : {}\n", featureLevelStrings[i]));
+			Logger::Log(std::format("FeatureLevel : {}\n", featureLevelStrings[i]), LogLevel::Info);
 			break;
 		}
 	}
 	// デバイスの生成がうまくいかなかったので起動できない
 	assert(device_ != nullptr);
-	Logger::Log("Complete create D3D12Device!!!\n"); // 初期化完了のログをだす
+	Logger::Log("Complete create D3D12Device!!!\n", LogLevel::Info); // 初期化完了のログをだす
 }
 
 void DirectXCommon::CreateCommandObjects() {
@@ -330,7 +330,7 @@ IDxcBlob* DirectXCommon::CompileShader(
     // 初期化で生成したものを3つ
     IDxcUtils* dxcUtils, IDxcCompiler3* dxcCompiler, IDxcIncludeHandler* includeHandler) {
 	// これからシェーダーをコンパイルする旨をログに出す
-	Logger::Log(StringUtility::ConvertString(std::format(L"Begin CompileShader, path:{},profile:{}\n", filePath, profile)));
+	Logger::Log(StringUtility::ConvertString(std::format(L"Begin CompileShader, path:{},profile:{}\n", filePath, profile)), LogLevel::Info);
 	// hlslファイルを読む
 	IDxcBlobEncoding* shaderSource = nullptr;
 	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
@@ -362,7 +362,7 @@ IDxcBlob* DirectXCommon::CompileShader(
 	IDxcBlobUtf8* shaderError = nullptr;
 	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
 	if (shaderError != nullptr && shaderError->GetStringLength() != 0) {
-		Logger::Log(shaderError->GetStringPointer());
+		Logger::Log(shaderError->GetStringPointer(), LogLevel::Error);
 		// 警告・エラーダメゼッタイ
 		assert(false);
 	}
@@ -371,7 +371,7 @@ IDxcBlob* DirectXCommon::CompileShader(
 	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
 	assert(SUCCEEDED(hr));
 	// 成功したログを出す
-	Logger::Log(StringUtility::ConvertString(std::format(L"Compile Succeeded,path:{}, profile:{}\n", filePath, profile)));
+	Logger::Log(StringUtility::ConvertString(std::format(L"Compile Succeeded,path:{}, profile:{}\n", filePath, profile)), LogLevel::Info);
 	// もう使わないソースを解放
 	shaderSource->Release();
 	shaderResult->Release();
