@@ -5,7 +5,7 @@
 
 using namespace TinyEngine;
 
-void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* mainCamera, DeltaTime* timeManager, SceneManager* sceneManager) {
+void GamePlayScene::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* mainCamera, TimeManager* timeManager, SceneManager* sceneManager) {
 	engineContext_ = ctx;
 	keyboard_ = keyboard;
 	gamePad_ = gamePad;
@@ -76,12 +76,12 @@ void GamePlayScene::Update() {
 
 	// プレイヤーが死亡したらシーン遷移
 	if (player_->IsDead()) {
-		sceneManager_->ChangeScene("Title");
+		RequestSceneChange("Title");
 	}
 
 	// ゴールしていたらシーン遷移
 	if (goal_->GetGoal()) {
-		sceneManager_->ChangeScene("Title");
+		RequestSceneChange("Title");
 	}
 
 	// 壁の管理インスタンスImGui

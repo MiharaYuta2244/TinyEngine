@@ -4,7 +4,7 @@
 /// <summary>
 /// フレーム間の経過時間を管理するクラス
 /// </summary>
-class DeltaTime {
+class TimeManager {
 public:
 	void Update();
 

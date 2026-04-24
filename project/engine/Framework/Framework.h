@@ -12,7 +12,7 @@
 #include "SrvManager.h"
 #include "TextureManager.h"
 #include "WinApp.h"
-#include "DeltaTime.h"
+#include "TimeManager.h"
 #include "DebugCamera.h"
 #include "DirectInput.h"
 #include "GamePad.h"
@@ -68,7 +68,7 @@ public:
 	GamePad* GetGamePad() { return gamePad_.get(); }
 
 	// タイムマネージャーのGetter
-	DeltaTime* GetTimeManager() { return timeManager_.get(); }
+	TimeManager* GetTimeManager() { return timeManager_.get(); }
 
 	// デバッグカメラのGetter
 	Camera* GetDebugCamera() { return debugCamera_.get(); }
@@ -109,7 +109,7 @@ private:
 	std::unique_ptr<SpriteCommon> spriteCommon_ = std::make_unique<SpriteCommon>();
 
 	// 経過時間
-	std::unique_ptr<DeltaTime> timeManager_ = std::make_unique<DeltaTime>();
+	std::unique_ptr<TimeManager> timeManager_ = std::make_unique<TimeManager>();
 
 	// パーティクルコモン
 	std::unique_ptr<ParticleCommon> particleCommon_ = std::make_unique<ParticleCommon>();

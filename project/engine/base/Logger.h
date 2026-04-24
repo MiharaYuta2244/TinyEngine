@@ -20,6 +20,9 @@ public:
 	// ログ出力
 	static void Log(const std::string& message, LogLevel level);
 
+	// 終了処理
+	static void Finalize();
+
 private:
 	// ログファイルの生成
 	static void CreateLogFile();

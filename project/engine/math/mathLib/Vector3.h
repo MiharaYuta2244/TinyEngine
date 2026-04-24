@@ -1,4 +1,8 @@
 #pragma once
+#include <nlohmann/json.hpp>
+
+using Json = nlohmann::json;
+
 struct Vector3 final
 {
 	float x;
@@ -7,3 +11,19 @@ struct Vector3 final
 
 	bool operator==(const Vector3& other) const { return x == other.x && y == other.y && z == other.z; }
 };
+
+// セーブ用 Vector3 -> Jsonへの変換ルール
+inline void to_json(Json& j, const Vector3& v) {
+	j = Json{
+	    {"x", v.x},
+        {"y", v.y},
+        {"z", v.z}
+    };
+}
+
+// ロード用 Json -> Vector3への変換ルール
+inline void from_json(const Json& j, Vector3& v) {
+	v.x = j.value("x", 0.0f);
+	v.y = j.value("y", 0.0f);
+	v.z = j.value("z", 0.0f);
+}

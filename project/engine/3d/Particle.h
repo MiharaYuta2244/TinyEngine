@@ -2,7 +2,7 @@
 #include "AABB.h"
 #include "CameraForGPU.h"
 #include "DebugCamera.h"
-#include "DeltaTime.h"
+#include "TimeManager.h"
 #include "DirectionalLight.h"
 #include "EngineContext.h"
 #include "FogParam.h"
@@ -196,7 +196,7 @@ private:
 	AccelerationField accelerationField_;
 
 	// 経過時間
-	std::unique_ptr<DeltaTime> deltaTime_ = std::make_unique<DeltaTime>();
+	std::unique_ptr<TimeManager> timeManager_ = std::make_unique<TimeManager>();
 
 	// コンテキスト構造体
 	EngineContext* ctx_;

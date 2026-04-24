@@ -171,7 +171,7 @@
     <ClCompile Include="engine\input\GamePad.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="engine\base\utility\deltaTime\DeltaTime.cpp">
+    <ClCompile Include="engine\base\utility\timeManager\TimeManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="engine\base\SrvManager.cpp">
@@ -282,6 +282,9 @@
     <ClCompile Include="application\Scene\EasingEditorScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="engine\tool\json\JsonManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -316,7 +319,7 @@
     <ClInclude Include="engine\math\MathUtility.h">
       <Filter>ヘッダー ファイル\engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="engine\base\Transform.h">
+    <ClInclude Include="engine\math\mathLib\Transform.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -460,7 +463,7 @@
     <ClInclude Include="engine\input\GamePad.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="engine\base\utility\deltaTime\DeltaTime.h">
+    <ClInclude Include="engine\base\utility\timeManager\TimeManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="engine\base\SrvManager.h">
@@ -617,6 +620,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="application\Scene\EasingEditorScene.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="engine\tool\json\JsonManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

@@ -51,6 +51,9 @@ void Framework::Initialize() {
 
 	// DirectInput
 	input_->Initialize(winApp_.get());
+
+	// ログファイルの作成
+	Logger::Initialize();
 }
 
 void Framework::Update() {
@@ -73,6 +76,8 @@ void Framework::Finalize() {
 #ifdef USE_IMGUI
 	imGuiManager_->Finalize();
 #endif
+
+	Logger::Finalize();
 
 	CloseHandle(dxCommon_->GetFenceEvent());
 

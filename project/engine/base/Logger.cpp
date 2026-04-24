@@ -17,11 +17,16 @@ void Logger::Log(const std::string& message, LogLevel level) {
 
 	// ファイル
 	if (logStream_.is_open()) {
-		logStream_ << logLine << '\n';
+		logStream_ << logLine << std::endl;
 	}
 
 	// Visual Studio Output
-	OutputDebugStringA(message.c_str());
+	std::string debugOutput = logLine + "\n";
+	OutputDebugStringA(debugOutput.c_str());
+}
+
+void Logger::Finalize() {
+	logStream_.close();
 }
 
 void Logger::CreateLogFile() {

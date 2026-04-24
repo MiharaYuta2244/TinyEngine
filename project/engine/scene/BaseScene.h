@@ -1,6 +1,6 @@
 #pragma once
 #include "DebugCamera.h"
-#include "DeltaTime.h"
+#include "TimeManager.h"
 #include "DirectInput.h"
 #include "EngineContext.h"
 #include "GamePad.h"
@@ -15,7 +15,7 @@ public:
 	virtual ~BaseScene() = default;
 
 	// シーン初期化
-	virtual void Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, DeltaTime* timeManager, SceneManager* sceneManager) = 0;
+	virtual void Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, TimeManager* timeManager, SceneManager* sceneManager) = 0;
 
 	// シーン更新
 	virtual void Update() = 0;
@@ -33,6 +33,6 @@ protected:
 	DirectInput* keyboard_ = nullptr;
 	GamePad* gamePad_ = nullptr;
 	Camera* mainCamera_ = nullptr;
-	DeltaTime* timeManager_ = nullptr;
+	TimeManager* timeManager_ = nullptr;
 	SceneManager* sceneManager_ = nullptr;
 };

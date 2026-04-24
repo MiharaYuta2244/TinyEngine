@@ -13,7 +13,7 @@ public:
 	~SceneManager() = default;
 
 	// シーン初期化（共通リソースを渡す）
-	void Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, DeltaTime* timeManager);
+	void Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, TimeManager* timeManager);
 
 	// シーン追加
 	void AddScene(const std::string& sceneName, std::unique_ptr<BaseScene> scene);
@@ -65,5 +65,5 @@ private:
 	DirectInput* keyboard_ = nullptr;
 	GamePad* gamePad_ = nullptr;
 	Camera* debugCamera_ = nullptr;
-	DeltaTime* timeManager_ = nullptr;
+	TimeManager* timeManager_ = nullptr;
 };

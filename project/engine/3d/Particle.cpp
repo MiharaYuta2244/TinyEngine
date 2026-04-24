@@ -78,8 +78,8 @@ void Particle::InitializeEmitter(Vector3 emitterPos) {
 
 void Particle::Update() {
 	// 経過時間
-	deltaTime_->Update();
-	float dt = deltaTime_->GetDeltaTime();
+	timeManager_->Update();
+	float dt = timeManager_->GetDeltaTime();
 
 	// エミッタの稼働時間を更新
 	elapsedTime_ += dt;
@@ -342,7 +342,7 @@ void Particle::InitializeAccelerationField() {
 }
 
 void Particle::UpdateEmitter() {
-	emitter.frequencyTime += deltaTime_->GetDeltaTime();
+	emitter.frequencyTime += timeManager_->GetDeltaTime();
 	if (emitter.frequency <= emitter.frequencyTime) {
 		particles_.splice(particles_.end(), Emit(emitter, emitter.transform.translate));
 		emitter.frequencyTime -= emitter.frequency;
@@ -351,15 +351,15 @@ void Particle::UpdateEmitter() {
 
 void Particle::UpdateParticle(std::list<ParticleState>::iterator& itr) {
 	if (Collision::Intersect(accelerationField_.area, itr->transform.translate)) {
-		itr->velocity += accelerationField_.acceleration * deltaTime_->GetDeltaTime();
+		itr->velocity += accelerationField_.acceleration * timeManager_->GetDeltaTime();
 	}
 
-	itr->transform.translate += itr->velocity * deltaTime_->GetDeltaTime();
-	itr->currentTime += deltaTime_->GetDeltaTime();
+	itr->transform.translate += itr->velocity * timeManager_->GetDeltaTime();
+	itr->currentTime += timeManager_->GetDeltaTime();
 
 	// モジュールの更新処理を追加
 	if (module_) {
-		module_->Update(*itr, deltaTime_->GetDeltaTime(), ctx_);
+		module_->Update(*itr, timeManager_->GetDeltaTime(), ctx_);
 	}
 
 	CoordinateTransformation(itr);

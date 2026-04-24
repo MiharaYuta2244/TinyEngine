@@ -42,10 +42,10 @@ public:
 	void ChangeState(std::unique_ptr<IFadeState> newState);
 
 	/// <summary>
-	/// フェードの透明度を設定する
+	/// フェードの進行度を設定する
 	/// </summary>
-	/// <param name="alpha">透明度</param>
-	void SetFadeAlpha(float alpha);
+	/// <param name="progress">進行度</param>
+	void SetFadeAlpha(float progress);
 
 	// Getter Setter
 	bool IsWaitingForSceneShange() const { return isWaitingForSceneChange_; }
@@ -59,7 +59,14 @@ public:
 	float GetFadeDuration() const { return fadeDuration_; }
 
 private:
-	std::unique_ptr<TinyEngine::Sprite> fadeSprite_;
+	// スプライトの数
+	static const int kStripeCount = 10;
+	std::array<std::unique_ptr<TinyEngine::Sprite>, kStripeCount> fadeSprites_;
+
+	// 各帯が動き出すまでの遅延時間
+	std::array<float, kStripeCount> stripeDelays_;
+
+	// 状態
 	std::unique_ptr<IFadeState> currentState_;
 
 	float fadeDuration_ = 1.0f; // フェード時間

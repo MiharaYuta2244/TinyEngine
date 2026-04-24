@@ -80,7 +80,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)externals\imguizmo;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)resources\shaders;$(ProjectDir)engine\math;$(ProjectDir)engine\input;$(ProjectDir)engine\base;$(ProjectDir)engine\audio;$(ProjectDir)engine\3d;$(ProjectDir)engine\2d;$(ProjectDir)engine;$(ProjectDir)engine\Collision;$(WindowsSdkDir)Include\10.0.26100.0\um;$(ProjectDir)engine\base\utility\easing;$(ProjectDir)engine\utility;$(ProjectDir)engine\base\utility\screenSpaceUtility;$(ProjectDir)engine\base\utility\gameTimer;$(ProjectDir)application;$(ProjectDir)engine\math\mathLib;$(ProjectDir)engine\base\imGuiManager;$(ProjectDir)engine\base\utility\deltaTime;$(ProjectDir)engine\3d\modules;$(ProjectDir)engine\Framework;$(ProjectDir)engine\base\utility\random;$(ProjectDir)engine\base\utility\easing;$(ProjectDir)engine\scene;$(ProjectDir)externals\assimp\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)externals;$(ProjectDir)externals\imguizmo;$(ProjectDir)externals\imgui;$(ProjectDir)externals\DirectXTex;$(ProjectDir)resources\shaders;$(ProjectDir)engine\math;$(ProjectDir)engine\input;$(ProjectDir)engine\base;$(ProjectDir)engine\audio;$(ProjectDir)engine\3d;$(ProjectDir)engine\2d;$(ProjectDir)engine;$(ProjectDir)engine\Collision;$(WindowsSdkDir)Include\10.0.26100.0\um;$(ProjectDir)engine\base\utility\easing;$(ProjectDir)engine\utility;$(ProjectDir)engine\base\utility\screenSpaceUtility;$(ProjectDir)engine\base\utility\gameTimer;$(ProjectDir)application;$(ProjectDir)engine\math\mathLib;$(ProjectDir)engine\base\imGuiManager;$(ProjectDir)engine\base\utility\deltaTime;$(ProjectDir)engine\3d\modules;$(ProjectDir)engine\Framework;$(ProjectDir)engine\base\utility\random;$(ProjectDir)engine\scene;$(ProjectDir)externals\assimp\include;$(ProjectDir)engine\tool\json;$(ProjectDir)engine\base\utility\timeManager</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
     </ClCompile>
@@ -175,7 +175,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="engine\base\utility\easing\Easing.cpp" />
     <ClCompile Include="engine\3d\modules\DustModule.cpp" />
     <ClCompile Include="engine\3d\modules\ShockWaveModule.cpp" />
-    <ClCompile Include="engine\base\utility\deltaTime\DeltaTime.cpp" />
+    <ClCompile Include="engine\base\utility\timeManager\TimeManager.cpp" />
     <ClCompile Include="engine\base\D3DResourceLeakChecker.cpp" />
     <ClCompile Include="engine\base\DebugCamera.cpp" />
     <ClCompile Include="engine\input\DirectInput.cpp" />
@@ -215,6 +215,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="application\Fade\FadeManager.cpp" />
     <ClCompile Include="engine\base\utility\gameTimer\GameTimer.cpp" />
     <ClCompile Include="application\GameObjects\Goal\Goal.cpp" />
+    <ClCompile Include="engine\tool\json\JsonManager.cpp" />
     <ClCompile Include="main.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -343,7 +344,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="engine\base\ParticleForGPU.h" />
     <ClInclude Include="engine\base\ParticleState.h" />
     <ClInclude Include="engine\base\PointLight.h" />
-    <ClInclude Include="engine\base\utility\deltaTime\DeltaTime.h" />
+    <ClInclude Include="engine\base\utility\timeManager\TimeManager.h" />
     <ClInclude Include="engine\base\CameraForGPU.h" />
     <ClInclude Include="engine\base\D3DResourceLeakChecker.h" />
     <ClInclude Include="engine\base\DebugCamera.h" />
@@ -386,7 +387,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="engine\base\TextureData.h" />
     <ClInclude Include="engine\base\TextureManager.h" />
     <ClInclude Include="engine\base\TimeParam.h" />
-    <ClInclude Include="engine\base\Transform.h" />
+    <ClInclude Include="engine\math\mathLib\Transform.h" />
     <ClInclude Include="engine\base\TransformationMatrix.h" />
     <ClInclude Include="engine\math\mathLib\Vector2.h" />
     <ClInclude Include="engine\math\mathLib\Vector3.h" />
@@ -419,6 +420,7 @@ copy "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="application\GameObjects\Wall\WallManager.h" />
     <ClInclude Include="application\GameObjects\Goal\Goal.h" />
     <ClInclude Include="application\GameObjects\Player\PlayerHPGauge.h" />
+    <ClInclude Include="engine\tool\json\JsonManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

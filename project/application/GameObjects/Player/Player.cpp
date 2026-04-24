@@ -1,11 +1,14 @@
 #include "Player.h"
 #include "GameObjects/Enemy/Enemy.h"
 #include "GameObjects/Enemy/EnemyManager.h"
+#include "JsonManager.h"
 
 void Player::Initialize(EngineContext* ctx) {
 	transform_.scale = {1.0f, 1.0f, 1.0f};
 	transform_.rotate = {0.0f, 0.0f, 0.0f};
 	transform_.translate = {0.0f, 0.0f, 0.0f};
+
+	JsonManager::Save("player_transform.json", transform_);
 
 	// 描画用インスタンス生成&初期化
 	render_ = std::make_unique<ObjectRender>();

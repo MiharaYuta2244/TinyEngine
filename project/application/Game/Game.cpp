@@ -59,7 +59,7 @@ void Game::Draw() {
 	sceneManager_->Draw();
 
 	// フェードスプライトを上書きで描画
-	//fadeManager_->Draw();
+	fadeManager_->Draw();
 
 	// 描画後処理
 	Framework::PostDraw();
