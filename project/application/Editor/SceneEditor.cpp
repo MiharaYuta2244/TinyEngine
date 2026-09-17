@@ -70,6 +70,12 @@ void SceneEditor::UpdateImGui(const SceneContext& ctx, Player* player, float& ca
 	}
 
 	ImGui::Separator();
+	ImGui::Checkbox("Use Snap", &useSnap_);
+	ImGui::SameLine();
+	// スナップ量が0になると操作できなくなるのを防止
+	ImGui::DragFloat3("Snap Value", snapValue_, 0.1f, 0.01f, 100.0f);
+
+	ImGui::Separator();
 
 	ImGui::Text("Objects");
 	ImGui::BeginChild("ObjectList", ImVec2(0, 400), true);
@@ -140,7 +146,13 @@ void SceneEditor::UpdateImGui(const SceneContext& ctx, Player* player, float& ca
 					gizmoBeginSnapshot_ = CaptureTransform(transform);
 				}
 
-				ImGuizmo::Manipulate(&viewMat.m[0][0], &projMat.m[0][0], currentGizmoOperation_, currentGizmoMode_, objectMatrix);
+				// Translateモードの時のみ移動量を0.5にスナップさせる
+				float* snap = nullptr;
+				if (useSnap_) {
+					snap = snapValue_;
+				}
+
+				ImGuizmo::Manipulate(&viewMat.m[0][0], &projMat.m[0][0], currentGizmoOperation_, currentGizmoMode_, objectMatrix, nullptr, snap);
 
 				if (isUsingNow) {
 					float newTrans[3], newRot[3], newScale[3];

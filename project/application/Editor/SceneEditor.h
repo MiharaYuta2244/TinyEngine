@@ -1,13 +1,13 @@
 #pragma once
 #include "Cinematic/CameraDeathZoomController.h"
+#include "EditorCommand.h"
 #include "GameObjects/Enemy/EnemyManager.h"
-#include "GameObjects/Player/Player.h"
 #include "GameObjects/IGameObject.h"
+#include "GameObjects/Player/Player.h"
 #include "ImGuizmo.h"
 #include "SceneContext.h"
-#include "EditorCommand.h"
-#include <vector>
 #include <deque>
+#include <vector>
 
 /// <summary>
 /// ゲームシーンのデバッグ・エディタ機能を担うクラス
@@ -70,4 +70,6 @@ private:
 
 	// 手動SRT編集用の操作開始スナップショット
 	TransformSnapshot dragBeginSnapshot_{};
+	bool useSnap_ = true;                     // スナップを有効にするか
+	float snapValue_[3] = {0.5f, 0.5f, 0.5f}; // XYZのスナップ量
 };
