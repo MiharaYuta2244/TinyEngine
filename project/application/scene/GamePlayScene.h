@@ -17,6 +17,14 @@
 #include "Particle.h"
 #include <memory>
 
+// ゲーム開始時カメラ演出用
+enum class CameraAnimState {
+	ToGoal,  // ゴール地点へ移動
+	Waiting, // ゴール地点で待機
+	ToStart, // 開始地点へ移動
+	End      // 終了
+};
+
 /// <summary>
 /// ゲームシーン
 /// </summary>
@@ -35,6 +43,12 @@ public:
 private:
 	// 敵死亡時パーティクル生成
 	void GenerateEnemyDeathEffect(const Vector3& pos);
+
+	// ゴール確認用カメラ演出の更新
+	void UpdateCameraIntro(float deltaTime);
+
+	// ゲームシーン用カメラ初期化関数
+	void InitializeGameSceneCamera();
 
 private:
 	// プレイヤー
@@ -102,4 +116,29 @@ private:
 
 	// ステージ番号
 	int stageNo_;
+
+	// 演出再生中かどうか
+	bool isIntroPlaying_ = true;
+
+	// 演出の段階
+	CameraAnimState introPhase_ = CameraAnimState::ToGoal;
+
+	// カメラのpivotを補間するアニメーション
+	AnimationBundle<Vector3> introPivotAnim_;
+
+	// 開始地点・ゴール地点それぞれのカメラ注視点
+	Vector3 introStartPivot_{};
+	Vector3 introGoalPivot_{};
+
+	// 移動にかける時間
+	float introMoveDuration_ = 3.0f;
+
+	// ゴール地点での待機時間
+	float introHoldDuration_ = 1.0f;
+
+	// ゴール地点待機用タイマー
+	GameTimer introHoldTimer_;
+
+	// 演出中のカメラの高さ
+	float cameraPosYAnim_ = 120.0f;
 };

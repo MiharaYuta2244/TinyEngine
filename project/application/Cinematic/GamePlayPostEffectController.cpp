@@ -59,6 +59,7 @@ void GamePlayPostEffectController::Update(float deltaTime, float playerHP, bool 
 		if (vignette) {
 			float intensity = playerHP <= 1.0f ? 0.5f : 0.0f;
 			vignette->SetVignetteIntensity(intensity);
+			vignette->SetVignetteColor({1.0f, 0.0f, 0.0f, 0.0f});
 		}
 		if (radialBlur) {
 			RadialBlurParam param;

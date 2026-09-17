@@ -48,9 +48,7 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	ctx_.currentCamera->SetTranslation({0.0f, 60.0f, 0.0f});
 
 	// カメラのパラメータ初期化
-	Vector3 playerPos = player_->GetPosition();
-	Vector3 playerRot = player_->GetRotation();
-	ctx_.currentCamera->InitializeFollow(playerPos, playerRot, offsetDistance_, cameraPosY_, cameraAngle_);
+	InitializeGameSceneCamera();
 
 	// 敵の生成&初期化
 	enemyManager_ = std::make_unique<EnemyManager>();
@@ -74,6 +72,22 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	stage_ = std::make_unique<Stage>();
 	stage_->Initialize(ctx, decalManager_.get(), stagePath_);
 
+	// ゴールの座標を取得
+	Vector3 goalPos = stage_->GetGoal()->GetTransform().translate;
+
+	// カメラのpivotを求める
+	Vector3 playerPos = player_->GetPosition();
+	Vector3 playerRot = player_->GetRotation();
+	Vector3 forward = {std::sin(playerRot.y), 0.0f, std::cos(playerRot.y)};
+	introStartPivot_ = {playerPos.x + forward.x * offsetDistance_, cameraPosYAnim_, playerPos.z + forward.z * offsetDistance_};
+	introGoalPivot_ = {goalPos.x + forward.x * offsetDistance_, cameraPosYAnim_, goalPos.z + forward.z * offsetDistance_};
+
+	// 開始地点からゴールへのアニメーションを開始
+	introPivotAnim_.anim.Start(introStartPivot_, introGoalPivot_, introMoveDuration_, EaseType::EASEINOUTSINE);
+	introHoldTimer_.Initialize(introHoldDuration_);
+	introPhase_ = CameraAnimState::ToGoal;
+	isIntroPlaying_ = true;
+
 	// シーン遷移要求制御変数
 	isTransitionRequested_ = false;
 
@@ -95,6 +109,7 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	controlUI_ = std::make_unique<ControlUI>();
 	controlUI_->Initialize(ctx.engineContext, decalManager_.get());
 
+	// ステージ1の時のみ操作説明用のUIを表示
 	if (stagePath_ == "Stage1/") {
 		controlUI_->AddAttackUIDecal({2, 2, 2});
 		controlUI_->AddHoldUIDecal({2, 2, 2});
@@ -112,6 +127,24 @@ void GamePlayScene::Update() {
 
 	// 音声更新
 	audioManager_->Update();
+
+	// カメラの動きだけを進める
+	if (isIntroPlaying_) {
+		// カメラ演出中に止めたい処理
+		UpdateCameraIntro(deltaTime);
+		stage_->Update(deltaTime, player_->GetPosition(), ctx_.currentCamera);
+		player_->PostUpdate();
+		enemyManager_->PostUpdate();
+		decalManager_->SetCamera(ctx_.currentCamera);
+		decalManager_->Update();
+
+		// カメラ演出をスキップ
+		if (ctx_.keyboard->KeyDown(DIK_SPACE)) {
+			isIntroPlaying_ = false;
+		}
+
+		return;
+	}
 
 	// ポーズ画面
 	if (ctx_.keyboard->KeyTriggered(DIK_TAB) || ctx_.gamePad->GetState().buttonsPressed.start) {
@@ -338,4 +371,53 @@ void GamePlayScene::Finalize() {
 void GamePlayScene::GenerateEnemyDeathEffect(const Vector3& pos) {
 	// エフェクトの生成
 	EffectGenerator::CreateEnemyDeathEffect(ctx_.engineContext, pos, enemyDeathEffect_);
+}
+
+void GamePlayScene::UpdateCameraIntro(float deltaTime) {
+	switch (introPhase_) {
+	case CameraAnimState::ToGoal: {
+		// ゴール地点へ移動
+		bool playing = introPivotAnim_.anim.Update(deltaTime, introPivotAnim_.temp);
+		ctx_.currentCamera->SetPivot(introPivotAnim_.temp);
+		ctx_.currentCamera->UpdateViewMatrix();
+
+		if (!playing) {
+			introHoldTimer_.Initialize(introHoldDuration_);
+			introPhase_ = CameraAnimState::Waiting;
+		}
+		break;
+	}
+	case CameraAnimState::Waiting: {
+		// ゴール地点で少し待機
+		introHoldTimer_.Update(deltaTime);
+		if (introHoldTimer_.IsEnd()) {
+			introPivotAnim_.anim.Start(introGoalPivot_, introStartPivot_, introMoveDuration_, EaseType::EASEINOUTSINE);
+			introPhase_ = CameraAnimState::ToStart;
+		}
+		break;
+	}
+	case CameraAnimState::ToStart: {
+		// 開始地点へ戻る
+		bool playing = introPivotAnim_.anim.Update(deltaTime, introPivotAnim_.temp);
+		ctx_.currentCamera->SetPivot(introPivotAnim_.temp);
+		ctx_.currentCamera->UpdateViewMatrix();
+
+		if (!playing) {
+			introPhase_ = CameraAnimState::End;
+		}
+		break;
+	}
+	case CameraAnimState::End:
+	default:
+		// 演出終了
+		isIntroPlaying_ = false;
+		InitializeGameSceneCamera();
+		break;
+	}
+}
+
+void GamePlayScene::InitializeGameSceneCamera() {
+	Vector3 playerPos = player_->GetPosition();
+	Vector3 playerRot = player_->GetRotation();
+	ctx_.currentCamera->InitializeFollow(playerPos, playerRot, offsetDistance_, cameraPosY_, cameraAngle_);
 }
