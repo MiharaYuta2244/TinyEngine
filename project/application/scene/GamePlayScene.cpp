@@ -128,13 +128,14 @@ void GamePlayScene::Update() {
 
 	// カメラの動きだけを進める
 	if (isIntroPlaying_) {
-		// カメラ演出中に止めたい処理
+		// カメラ演出中にも動かしたい処理
 		UpdateCameraIntro(deltaTime);
 		stage_->Update(deltaTime, player_->GetPosition(), ctx_.currentCamera);
 		player_->PostUpdate();
 		enemyManager_->PostUpdate();
 		decalManager_->SetCamera(ctx_.currentCamera);
 		decalManager_->Update();
+		postEffectController_->Update(deltaTime, player_->GetCurrentHP(), player_->IsDead());
 
 		// カメラ演出をスキップ
 		if (ctx_.keyboard->KeyDown(DIK_SPACE)) {
