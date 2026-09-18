@@ -31,6 +31,10 @@ void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalMan
 		hp_ = 1;
 		color_ = {0, 0, 1, 1};
 		break;
+	case EnemyType::Assault:
+		hp_ = 1;
+		color_ = {1.0f, 0.5f, 0, 1};
+		break;
 	}
 
 	transform_.scale = {0.2f, 0.2f, 0.2f};

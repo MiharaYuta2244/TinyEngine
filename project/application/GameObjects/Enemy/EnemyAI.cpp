@@ -15,6 +15,13 @@ void EnemyAI::Initialize(Transform* transform, EngineContext* ctx, EnemyType typ
 	ctx_ = ctx;
 	type_ = type;
 	audioManager_ = audioManager;
+
+	// アサルト型なら射撃間隔を短くする
+	if (type_ == EnemyType::Assault) {
+		shotIntervalNormal_ = shotIntervalAssault_; // 連射間隔
+	} else {
+		shotIntervalNormal_ = 1.5f; // 通常の間隔
+	}
 }
 
 void EnemyAI::Update(
@@ -393,7 +400,7 @@ void EnemyAI::Shot(Vector3 toTarget, EnemyBulletManager* enemyBulletManager, Ene
 			enemyBulletManager->AddBullet(std::move(bullet));
 		}
 		break;
-	case EnemyType::Bomber:
+	case EnemyType::Bomber: {
 		float distSq = toTarget.x * toTarget.x + toTarget.z * toTarget.z;
 		const float kThrowBombDistance = 15.0f; // 爆弾を投げる距離の閾値
 
@@ -416,5 +423,25 @@ void EnemyAI::Shot(Vector3 toTarget, EnemyBulletManager* enemyBulletManager, Ene
 			enemyBombManager->AddBomb(std::move(bomb));
 		}
 		break;
+	}
+
+	case EnemyType::Assault: {
+		// 精度を下げるためにランダムなブレを計算
+		float angleOffset = RandomUtils::RangeFloat(-shotRangeAssault_, shotRangeAssault_) * (std::numbers::pi_v<float> / 180.0f);
+		float assaultAngle = baseAngle + angleOffset;
+
+		// ブレを加えた新しい方向ベクトル
+		Vector2 assaultDir2D = {std::sin(assaultAngle), std::cos(assaultAngle)};
+		Vector3 assaultDir3D = {assaultDir2D.x, 0.0f, assaultDir2D.y};
+
+		// 弾の出現位置を計算
+		spawnPos.x += assaultDir3D.x * bulletMargin_;
+		spawnPos.z += assaultDir3D.z * bulletMargin_;
+		spawnPos.y += 1.0f;
+
+		bullet->Initialize(ctx_, assaultDir2D, spawnPos);
+		enemyBulletManager->AddBullet(std::move(bullet));
+		break;
+	}
 	}
 }

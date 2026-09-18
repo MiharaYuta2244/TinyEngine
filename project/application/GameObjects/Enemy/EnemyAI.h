@@ -135,4 +135,8 @@ private:
 
 	// オーディオマネージャーポインタ
 	TinyEngine::AudioManager* audioManager_ = nullptr;
+
+	// アサルト敵パラメータ
+	float shotIntervalAssault_ = 0.4f; // 弾の発射間隔
+	float shotRangeAssault_ = 20.0f;   // 弾の発射角度（ブレ）
 };
