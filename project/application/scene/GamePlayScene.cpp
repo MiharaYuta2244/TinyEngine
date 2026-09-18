@@ -82,10 +82,8 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	introStartPivot_ = {playerPos.x + forward.x * offsetDistance_, cameraPosYAnim_, playerPos.z + forward.z * offsetDistance_};
 	introGoalPivot_ = {goalPos.x + forward.x * offsetDistance_, cameraPosYAnim_, goalPos.z + forward.z * offsetDistance_};
 
-	// 開始地点からゴールへのアニメーションを開始
-	introPivotAnim_.anim.Start(introStartPivot_, introGoalPivot_, introMoveDuration_, EaseType::EASEINOUTSINE);
-	introHoldTimer_.Initialize(introHoldDuration_);
-	introPhase_ = CameraAnimState::ToGoal;
+	// フェード待ち状態に設定
+	introPhase_ = CameraAnimState::WaitingForFade;
 	isIntroPlaying_ = true;
 
 	// シーン遷移要求制御変数
@@ -375,6 +373,19 @@ void GamePlayScene::GenerateEnemyDeathEffect(const Vector3& pos) {
 
 void GamePlayScene::UpdateCameraIntro(float deltaTime) {
 	switch (introPhase_) {
+	case CameraAnimState::WaitingForFade: {
+		// フェードマネージャーのタイマーがフェード完了時間を超えたら演出開始
+		if (ctx_.fadeManager->GetFadeTimer() >= ctx_.fadeManager->GetFadeDuration()) {
+			introPivotAnim_.anim.Start(introStartPivot_, introGoalPivot_, introMoveDuration_, EaseType::EASEINOUTSINE);
+			introHoldTimer_.Initialize(introHoldDuration_);
+			introPhase_ = CameraAnimState::ToGoal;
+		} else {
+			// フェード中はカメラの位置を開始地点で固定しておく
+			ctx_.currentCamera->SetPivot(introStartPivot_);
+			ctx_.currentCamera->UpdateViewMatrix();
+		}
+		break;
+	}
 	case CameraAnimState::ToGoal: {
 		// ゴール地点へ移動
 		bool playing = introPivotAnim_.anim.Update(deltaTime, introPivotAnim_.temp);

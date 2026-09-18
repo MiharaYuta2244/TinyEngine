@@ -7,3 +7,8 @@ void TimeManager::Update() {
 	fps_ = 1.0f / deltaTime_;
 	lastTime_ = now;
 }
+
+void TimeManager::ResetDeltaTime() {
+	lastTime_ = std::chrono::high_resolution_clock::now();
+	deltaTime_ = 0.0f;
+}

@@ -19,10 +19,11 @@
 
 // ゲーム開始時カメラ演出用
 enum class CameraAnimState {
-	ToGoal,  // ゴール地点へ移動
-	Waiting, // ゴール地点で待機
-	ToStart, // 開始地点へ移動
-	End      // 終了
+	WaitingForFade, // フェードイン完了待ち
+	ToGoal,         // ゴール地点へ移動
+	Waiting,        // ゴール地点で待機
+	ToStart,        // 開始地点へ移動
+	End             // 終了
 };
 
 /// <summary>

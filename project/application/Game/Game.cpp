@@ -13,9 +13,13 @@ void Game::Initialize() {
 	// 基底クラスの初期化処理
 	Framework::Initialize();
 
+	// フェードマネージャーの生成&初期化
+	fadeManager_ = std::make_unique<FadeManager>();
+	fadeManager_->Initialize(&GetEngineContext());
+
 	// シーンマネージャーの生成&初期化
 	sceneManager_ = std::make_unique<SceneManager>();
-	sceneManager_->Initialize(&GetEngineContext(), GetKeyboard(), GetGamePad(), GetDebugCamera(), GetTimeManager());
+	sceneManager_->Initialize(&GetEngineContext(), GetKeyboard(), GetGamePad(), GetDebugCamera(), GetTimeManager(), fadeManager_.get());
 
 	// シーン追加
 	sceneManager_->AddScene("Title", std::make_unique<TitleScene>());
@@ -30,10 +34,6 @@ void Game::Initialize() {
 
 	// 最初のシーンを初期化
 	sceneManager_->ChangeScene("Title");
-
-	// フェードマネージャーの生成&初期化
-	fadeManager_ = std::make_unique<FadeManager>();
-	fadeManager_->Initialize(&GetEngineContext());
 }
 
 void Game::Update() {

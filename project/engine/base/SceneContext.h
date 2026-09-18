@@ -4,6 +4,7 @@
 #include "EngineContext.h"
 #include "GamePad.h"
 #include "TimeManager.h"
+#include "Fade/FadeManager.h"
 
 class SceneManager;
 
@@ -14,4 +15,5 @@ struct SceneContext {
 	Camera* currentCamera = nullptr;
 	TimeManager* timeManager = nullptr;
 	SceneManager* sceneManager = nullptr;
+	FadeManager* fadeManager = nullptr;
 };

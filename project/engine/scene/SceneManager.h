@@ -17,7 +17,7 @@ public:
 	~SceneManager() = default;
 
 	// シーン初期化（共通リソースを渡す）
-	void Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, TimeManager* timeManager);
+	void Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, TimeManager* timeManager, FadeManager* fadeManager);
 
 	// シーン追加
 	void AddScene(const std::string& sceneName, std::unique_ptr<BaseScene> scene);
@@ -74,6 +74,7 @@ private:
 	GamePad* gamePad_ = nullptr;
 	Camera* debugCamera_ = nullptr;
 	TimeManager* timeManager_ = nullptr;
+	FadeManager* fadeManager_ = nullptr;
 
 	// シーン間で共有するデータ
 	std::unique_ptr<CommonData> commonData_;

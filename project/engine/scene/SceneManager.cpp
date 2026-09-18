@@ -1,11 +1,12 @@
 #include "SceneManager.h"
 
-void SceneManager::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, TimeManager* timeManager) {
+void SceneManager::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, TimeManager* timeManager, FadeManager* fadeManager) {
 	engineContext_ = ctx;
 	keyboard_ = keyboard;
 	gamePad_ = gamePad;
 	debugCamera_ = debugCamera;
 	timeManager_ = timeManager;
+	fadeManager_ = fadeManager;
 	commonData_ = std::make_unique<CommonData>();
 }
 
@@ -47,14 +48,19 @@ void SceneManager::Update() {
 
 			// 新しいシーンを追加
 			BaseScene* next = scenes_[nextSceneName_].get();
-			SceneContext ctx = {engineContext_, keyboard_, gamePad_, debugCamera_, timeManager_, this};
+			SceneContext ctx = {engineContext_, keyboard_, gamePad_, debugCamera_, timeManager_, this, fadeManager_};
 			next->Initialize(ctx);
 			sceneStack_.push_back(next);
+
+			// 重い初期化の時間が次フレームのDeltaTimeに乗ってフェードやカメラ演出が一気に進むのを防ぐ
+			if(timeManager_){
+				timeManager_->ResetDeltaTime();
+			}
 
 		} else if (requestedTransition_ == SceneTransition::Push) {
 			// 現在のシーンは終了せずに、新しいシーンを上に重ねる
 			BaseScene* next = scenes_[nextSceneName_].get();
-			SceneContext ctx = {engineContext_, keyboard_, gamePad_, debugCamera_, timeManager_, this};
+			SceneContext ctx = {engineContext_, keyboard_, gamePad_, debugCamera_, timeManager_, this, fadeManager_};
 			next->Initialize(ctx);
 			sceneStack_.push_back(next);
 

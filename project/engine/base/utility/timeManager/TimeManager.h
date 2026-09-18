@@ -7,6 +7,7 @@
 class TimeManager {
 public:
 	void Update();
+	void ResetDeltaTime();
 
 	float GetDeltaTime() const { return deltaTime_; }
 	float GetFPS() const { return fps_; }
