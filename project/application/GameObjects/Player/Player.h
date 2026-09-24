@@ -118,6 +118,12 @@ private:
 	// HPが2以下の時の出血処理
 	void Bleeding(float deltaTime);
 
+	// 投げ軌道プレビューの更新
+	void UpdateThrowPreview();
+
+	// 投げ軌道プレビューを隠す
+	void HideThrowPreview();
+
 private:
 	Vector2 velocity_;
 	OBB attackCol_;
@@ -208,4 +214,10 @@ private:
 
 	// オーディオマネージャー
 	std::unique_ptr<TinyEngine::AudioManager> audioManager_;
+
+	// 投げ軌道プレビュー用ドットの数
+	static const int kThrowPreviewDotCount_ = 12;
+
+	// 投げ軌道プレビュー用デカール
+	std::array<TinyEngine::DecalManager::DecalData*, kThrowPreviewDotCount_> throwPreviewDecals_{};
 };

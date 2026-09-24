@@ -41,6 +41,11 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 	audioManager_ = std::make_unique<AudioManager>();
 	audioManager_->Initialize();
 	audioManager_->LoadWave("Heal", "resources/sounds/se/Heal.mp3");
+
+	// 投げ軌道プレビュー用ドットをあらかじめ生成しておく（最初は画面外に隠す）
+	for (auto& decal : throwPreviewDecals_) {
+		decal = bloodDecalManager_->AddDecal("white.png", {0.0f, -1000.0f, 0.0f}, {std::numbers::pi_v<float> / 2.0f, 0, 0}, {0.15f, 0.15f, 1.0f}, {1.0f, 0.85f, 0.2f, 0.0f});
+	}
 }
 
 void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, EnemyManager* enemyManager) {
@@ -365,6 +370,9 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 	// 出血処理
 	Bleeding(deltaTime);
 
+	// 投げ軌道プレビューの更新
+	UpdateThrowPreview();
+
 	// ギズモ用当たり判定更新
 	UpdateAABBForGizmo();
 }
@@ -561,4 +569,107 @@ void Player::DrawImGui() {
 
 	ImGui::End();
 #endif
+}
+
+void Player::UpdateThrowPreview() {
+	// 敵を掴んでいて、攻撃可能な状態でなければ非表示
+	if (!isHold_ || heldEnemy_ == nullptr || !enableAttack_) {
+		HideThrowPreview();
+		return;
+	}
+
+	// 投げる方向
+	Vector3 dir = {lastMoveDirection_.x, 0.0f, lastMoveDirection_.y};
+	float dirLen = std::sqrtf(dir.x * dir.x + dir.z * dir.z);
+	if (dirLen < 0.0001f) {
+		HideThrowPreview();
+		return;
+	}
+
+	dir.x /= dirLen;
+	dir.z /= dirLen;
+
+	float power = heldEnemy_->GetKnockBackPower();
+	float friction = heldEnemy_->GetKnockBackFriction();
+
+	Vector3 pos = heldEnemy_->GetPos();
+	Vector2 velocity = {dir.x * power, dir.z * power};
+
+	constexpr float kSimDeltaTime = 1.0f / 60.0f;
+	constexpr int kMaxSimSteps = 240; // 最大4秒分
+
+	std::vector<Vector3> points;
+	points.reserve(kMaxSimSteps);
+
+	for (int step = 0; step < kMaxSimSteps; ++step) {
+		pos.x += velocity.x * kSimDeltaTime;
+		pos.z += velocity.y * kSimDeltaTime;
+
+		velocity.x = MathUtility::Lerp(velocity.x, 0.0f, friction * kSimDeltaTime);
+		velocity.y = MathUtility::Lerp(velocity.y, 0.0f, friction * kSimDeltaTime);
+
+		if (std::abs(velocity.x) < 0.1f && std::abs(velocity.y) < 0.1f) {
+			velocity = {0.0f, 0.0f};
+		}
+
+		points.push_back(pos);
+
+		if (velocity.x == 0.0f && velocity.y == 0.0f) {
+			break;
+		}
+	}
+
+	// 各点の累積距離を計算
+	std::vector<float> accumulatedDistances;
+	accumulatedDistances.reserve(points.size());
+	accumulatedDistances.push_back(0.0f);
+	float totalDistance = 0.0f;
+
+	for (size_t i = 1; i < points.size(); ++i) {
+		float dx = points[i].x - points[i - 1].x;
+		float dz = points[i].z - points[i - 1].z;
+		float dist = std::sqrtf(dx * dx + dz * dz);
+		totalDistance += dist;
+		accumulatedDistances.push_back(totalDistance);
+	}
+
+	// 空間的な等間隔にドットを配置
+	for (int i = 0; i < kThrowPreviewDotCount_; ++i) {
+		// 目標とする距離
+		float targetDist = 0.0f;
+		if (kThrowPreviewDotCount_ > 1) {
+			targetDist = totalDistance * (static_cast<float>(i) / static_cast<float>(kThrowPreviewDotCount_ - 1));
+		}
+
+		Vector3 dotPos = points.front(); // 初期値
+
+		// 目標距離に対応する軌道上の位置を線形補間で探す
+		for (size_t j = 1; j < points.size(); ++j) {
+			if (accumulatedDistances[j] >= targetDist) {
+				float segmentLen = accumulatedDistances[j] - accumulatedDistances[j - 1];
+				if (segmentLen > 0.0001f) {
+					float t = (targetDist - accumulatedDistances[j - 1]) / segmentLen;
+					dotPos.x = points[j - 1].x + (points[j].x - points[j - 1].x) * t;
+					dotPos.z = points[j - 1].z + (points[j].z - points[j - 1].z) * t;
+				} else {
+					dotPos = points[j];
+				}
+				break;
+			}
+		}
+
+		dotPos.y = 0.1f;
+		throwPreviewDecals_[i]->transform.translate = dotPos;
+		throwPreviewDecals_[i]->color = {1.0f, 0.85f, 0.2f, 0.8f};
+	}
+}
+
+void Player::HideThrowPreview() {
+	for (auto& decal : throwPreviewDecals_) {
+		if (decal) {
+			// 透明&画面外に
+			decal->color.w = 0.0f;
+			decal->transform.translate.y = -1000.0f;
+		}
+	}
 }

@@ -102,6 +102,12 @@ public:
 	// アクティブ状態のSetter
 	void SetActive(bool isActive) { isActive_ = isActive; }
 
+	// ノックバックパワーのGetter
+	float GetKnockBackPower() const { return knockBackPower_; }
+
+	// ノックバック摩擦のGetter
+	float GetKnockBackFriction() const { return knockBackFriction_; }
+
 private:
 	// 当たり判定の更新
 	void UpdateCollision();
