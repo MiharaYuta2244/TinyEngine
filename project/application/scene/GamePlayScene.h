@@ -15,6 +15,8 @@
 #include "GameObjects/Player/Player.h"
 #include "GameObjects/StageObjects/Stage.h"
 #include "Particle.h"
+#include "Font.h"
+#include "TextSprite.h"
 #include <memory>
 
 // ゲーム開始時カメラ演出用
@@ -142,4 +144,10 @@ private:
 
 	// 演出中のカメラの高さ
 	float cameraPosYAnim_ = 120.0f;
+
+	// フォント
+	std::unique_ptr<Font> font_;
+
+	// テキスト
+	std::unique_ptr<TextSprite> textSprite_;
 };

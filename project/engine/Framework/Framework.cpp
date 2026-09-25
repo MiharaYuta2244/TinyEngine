@@ -1,4 +1,5 @@
 #include "Framework.h"
+#include "Font.h"
 
 void Framework::Initialize() {
 	CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -67,6 +68,11 @@ void Framework::Initialize() {
 	postEffectPipeline_ = std::make_unique<PostEffectPipeline>();
 	postEffectPipeline_->Inititlize(dxCommon_.get(), srvManager_.get(), textureManager_.get());
 	postEffectPipeline_->SetEffects({PostEffectType::FullScreen});
+
+	// FontCommon
+	fontCommon_ = std::make_unique<FontCommon>();
+	fontCommon_->Initialize(dxCommon_.get());
+	engineContext_.fontCommon = fontCommon_.get();
 
 #ifdef USE_IMGUI
 	// ImGuiManagerの初期化
@@ -185,6 +191,9 @@ void Framework::Initialize() {
 
 	// DirectInput
 	input_->Initialize(winApp_.get());
+
+	// フォントの登録
+	TinyEngine::Font::LoadFontFile(L"resources/fonts/DelaGothicOne-Regular.ttf");
 
 	// ログファイルの作成
 	Logger::Initialize();

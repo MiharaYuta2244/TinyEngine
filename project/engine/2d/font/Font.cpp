@@ -94,3 +94,27 @@ void Font::BuildAtlas(const std::wstring& fontFamily, int pixelHeight, const std
 	texturePath_ = "font/" + StringUtility::ConvertString(fontFamily) + "_" + std::to_string(pixelHeight);
 	ctx_->textureManager->RegisterTextureFromMemory(texturePath_, rgba.data(), atlasW, atlasH);
 }
+
+const GlyphInfo* Font::GetGlyph(wchar_t c) const {
+	auto it = glyphs_.find(c);
+	if (it != glyphs_.end()) {
+		return &it->second;
+	}
+	return nullptr;
+}
+
+bool Font::LoadFontFile(const std::wstring& ttfPath) {
+	int added = AddFontResourceExW(ttfPath.c_str(), FR_PRIVATE | FR_NOT_ENUM, nullptr);
+	if (added == 0) {
+		Logger::Log("Failed to load font file: " + StringUtility::ConvertString(ttfPath), LogLevel::Error);
+		return false;
+	}
+	loadedFontPaths_.push_back(ttfPath);
+	return true;
+}
+
+Font::~Font() {
+	for (auto& path : loadedFontPaths_) {
+		RemoveFontResourceExW(path.c_str(), FR_PRIVATE | FR_NOT_ENUM, nullptr);
+	}
+}

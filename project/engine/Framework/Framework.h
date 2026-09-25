@@ -5,6 +5,7 @@
 #include "DirectInput.h"
 #include "DirectXCommon.h"
 #include "EngineContext.h"
+#include "FontCommon.h"
 #include "GamePad.h"
 #ifdef USE_IMGUI
 #include "ImGuiManager.h"
@@ -116,6 +117,9 @@ private:
 
 	// パーティクルコモン
 	std::unique_ptr<ParticleCommon> particleCommon_;
+
+	// FontCommon
+	std::unique_ptr<FontCommon> fontCommon_;
 
 	// DirectInput
 	std::unique_ptr<DirectInput> input_;

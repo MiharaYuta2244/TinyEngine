@@ -118,6 +118,15 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	audioManager_->Initialize();
 	audioManager_->LoadWave("GameSceneBGM", "resources/sounds/bgm/GameScene.mp3");
 	audioManager_->PlayBGM("GameSceneBGM");
+
+	// フォント生成&初期化
+	font_ = std::make_unique<TinyEngine::Font>();
+	font_->Initialize(ctx.engineContext, L"Dela Gothic One", 32);
+
+	// テキスト生成&初期化
+	textSprite_ = std::make_unique<TinyEngine::TextSprite>();
+	textSprite_->Initialize(ctx.engineContext, font_.get(), L"HP: 100");
+	textSprite_->SetPosition({50.0f, 50.0f});
 }
 
 void GamePlayScene::Update() {
@@ -309,6 +318,10 @@ void GamePlayScene::Update() {
 	decalManager_->SetCamera(ctx_.currentCamera);
 	decalManager_->Update();
 
+	// テキスト更新
+	textSprite_->SetText(L"HP: " + std::to_wstring(100));
+	textSprite_->Update();
+
 #ifdef USE_IMGUI
 	ImGui::Begin("Camera");
 	ImGui::DragFloat("angle", &cameraAngle_, 0.01f);
@@ -355,6 +368,9 @@ void GamePlayScene::Draw() {
 
 	// ガラスの描画
 	stage_->DrawTransparent();
+
+	// テキスト描画
+	textSprite_->Draw();
 }
 
 void GamePlayScene::Finalize() {

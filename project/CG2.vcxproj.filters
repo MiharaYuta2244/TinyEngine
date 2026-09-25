@@ -1032,5 +1032,6 @@
       <Filter>リソース ファイル\shaders</Filter>
     </None>
     <None Include="resources\shaders\PostEffect\FullScreen.hlsli" />
+    <None Include="resources\shaders\Text.hlsli" />
   </ItemGroup>
 </Project>
