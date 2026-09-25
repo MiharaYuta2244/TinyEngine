@@ -76,7 +76,9 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		inputDir.y -= 1.0f;
 
 	// マウスカーソル位置からプレイヤーの向く方向を計算
-	if (ctx_ && ctx_->object3dCommon) {
+	bool isGamePadConnected = (gamePad && gamePad->GetState().connected);
+
+	if (!isGamePadConnected && ctx_ && ctx_->object3dCommon) {
 		Camera* camera = ctx_->object3dCommon->GetDefaultCamera();
 		if (camera) {
 			Vector2 mousePos = input->GetMousePosition();

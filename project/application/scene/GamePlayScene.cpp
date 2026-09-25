@@ -147,7 +147,7 @@ void GamePlayScene::Update() {
 		postEffectController_->Update(deltaTime, player_->GetCurrentHP(), player_->IsDead());
 
 		// カメラ演出をスキップ
-		if (ctx_.keyboard->KeyDown(DIK_SPACE)) {
+		if (ctx_.keyboard->KeyDown(DIK_SPACE) || ctx_.gamePad->GetState().buttons.a) {
 			isIntroPlaying_ = false;
 		}
 
