@@ -7,6 +7,7 @@
 #include "SpriteCommon.h"
 #include "SrvManager.h"
 #include "TextureManager.h"
+#include "FontCommon.h"
 
 /// <summary>
 /// エンジンのコンテキストを保持する構造体
@@ -20,4 +21,5 @@ struct EngineContext {
 	SrvManager* srvManager = nullptr;
 	SkyboxCommon* skyboxCommon = nullptr;
 	PostEffectPipeline* postEffectPipeline = nullptr;
+	FontCommon* fontCommon = nullptr;
 };

@@ -189,3 +189,24 @@ ComPtr<ID3D12Resource>
 
 	return intermediateResource;
 }
+
+void TextureManager::RegisterTextureFromMemory(const std::string& key, const uint8_t* rgbaPixels, uint32_t width, uint32_t height) {
+	if (textureDatas_.contains(key))
+		return;
+	assert(srvManager_->CheckTextureMax());
+
+	DirectX::ScratchImage scratch;
+	scratch.Initialize2D(DXGI_FORMAT_R8G8B8A8_UNORM, width, height, 1, 1);
+	memcpy(scratch.GetImages()[0].pixels, rgbaPixels, size_t(width) * height * 4);
+
+	TextureData& textureData = textureDatas_[key];
+	textureData.srvIndex = srvManager_->Allocate();
+	textureData.metaData = scratch.GetMetadata();
+	textureData.resource = CreateTextureResource(textureData.metaData);
+	srvManager_->CreateSRVforTexture2D(textureData.srvIndex, textureData.resource.Get(), textureData.metaData.format, 1);
+	textureData.srvHandleCPU = directXCommon_->GetSRVCPUDescriptorHandle(textureData.srvIndex);
+	textureData.srvHandleGPU = directXCommon_->GetSRVGPUDescriptorHandle(textureData.srvIndex);
+
+	ComPtr<ID3D12Resource> intermediate = UploadTextureData(textureData.resource, scratch, directXCommon_->GetDevice(), directXCommon_->GetCommandList());
+	directXCommon_->ExecuteCommandListAndWait();
+}

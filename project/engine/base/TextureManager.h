@@ -25,6 +25,9 @@ public:
 	// プロジェクト内のテクスチャの読み込み
 	void AllTextureLoad();
 
+	// メモリ上のピクセルデータから登録する関数
+	void RegisterTextureFromMemory(const std::string& key, const uint8_t* rgbaPixels, uint32_t width, uint32_t height);
+
 	// テクスチャ番号からGPUハンドルを取得
 	D3D12_GPU_DESCRIPTOR_HANDLE GetSrvHandleGPU(const std::string& filePath);
 
