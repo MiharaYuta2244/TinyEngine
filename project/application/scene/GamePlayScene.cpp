@@ -222,12 +222,17 @@ void GamePlayScene::Update() {
 	// プレイヤーが死亡したらシーン遷移
 	if (player_->IsDead()) {
 		// カメラ演出開始
-		cameraZoomController_->Start(ctx_.currentCamera->GetTranslation().y);
+		Vector3 stageCenterPos = {
+		    (introStartPivot_.x + introGoalPivot_.x) * 0.5f,
+		    0.0f,
+		    (introStartPivot_.z + introGoalPivot_.z) * 0.5f,
+		};
+		cameraZoomController_->Start(ctx_.currentCamera->GetTranslation(), ctx_.currentCamera->GetEuler(), stageCenterPos);
 
 		// カメラ演出更新
-		Vector3 currentPos = ctx_.currentCamera->GetTranslation();
-		Vector3 nextPos = {currentPos.x, cameraZoomController_->Update(deltaTime), currentPos.z};
+		Vector3 nextPos = cameraZoomController_->Update(deltaTime);
 		ctx_.currentCamera->SetTranslation(nextPos);
+		ctx_.currentCamera->SetEuler(cameraZoomController_->GetRotation());
 
 		if (!isTransitionRequested_ && cameraZoomController_->GetIsFinished()) {
 			RequestSceneChange("Result");
