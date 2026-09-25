@@ -3,6 +3,8 @@
 #include "GameObjects/Effect/EffectGenerator.h"
 #include "GameObjects/Enemy/Enemy.h"
 #include "GameObjects/Enemy/EnemyManager.h"
+#include "MathOperator.h"
+#include "MathUtility.h"
 
 using namespace TinyEngine;
 
@@ -72,6 +74,43 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		inputDir.y += 1.0f;
 	if (input->KeyDown(DIK_S))
 		inputDir.y -= 1.0f;
+
+	// マウスカーソル位置からプレイヤーの向く方向を計算
+	if (ctx_ && ctx_->object3dCommon) {
+		Camera* camera = ctx_->object3dCommon->GetDefaultCamera();
+		if (camera) {
+			Vector2 mousePos = input->GetMousePosition();
+
+			// スクリーン座標からNDC座標
+			float nx = (2.0f * mousePos.x) / static_cast<float>(WinApp::kClientWidth) - 1.0f;
+			float ny = 1.0f - (2.0f * mousePos.y) / static_cast<float>(WinApp::kClientHeight);
+
+			Matrix4x4 viewMat = camera->GetViewMatrix();
+			Matrix4x4 projMat = camera->GetProjection();
+			Matrix4x4 vpInv = MathUtility::Inverse(MathUtility::Multiply(viewMat, projMat));
+
+			Vector3 nearPos = {nx, ny, 0.0f};
+			Vector3 farPos = {nx, ny, 1.0f};
+			Vector3 nearWorld = MathUtility::Transform(nearPos, vpInv);
+			Vector3 farWorld = MathUtility::Transform(farPos, vpInv);
+			Vector3 rayDir = MathUtility::Normalize(farWorld - nearWorld);
+
+			// プレイヤーの足元の高さの平面とレイの交点を求める
+			float planeY = transform_.translate.y;
+			if (std::abs(rayDir.y) > 0.0001f) {
+				float t = (planeY - nearWorld.y) / rayDir.y;
+				if (t > 0.0f) {
+					Vector3 hitPos = nearWorld + rayDir * t;
+					Vector3 toCursor = hitPos - transform_.translate;
+					toCursor.y = 0.0f;
+
+					if (MathUtility::LengthSquared(toCursor) > 0.0001f) {
+						aimDir = {toCursor.x, toCursor.z};
+					}
+				}
+			}
+		}
+	}
 
 	// ゲームパッド入力
 	if (gamePad && gamePad->GetState().connected) {
@@ -192,12 +231,12 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		}
 	}
 
-	isGrab_ = input->KeyDown(DIK_J);
-	isGrabReleased_ = input->KeyReleased(DIK_J);
-	isAttackTriggered_ = input->KeyTriggered(DIK_K);
+	isGrab_ = input->MouseButtonDown(1);
+	isGrabReleased_ = input->MouseButtonReleased(1);
+	isAttackTriggered_ = input->MouseButtonTriggered(0);
 
 	// 掴みボタンが押された瞬間のフラグ
-	bool isGrabJustPressed = input->KeyTriggered(DIK_J);
+	bool isGrabJustPressed = input->MouseButtonTriggered(1);
 
 	if (gamePad && gamePad->GetState().connected) {
 		const auto& padState = gamePad->GetState();

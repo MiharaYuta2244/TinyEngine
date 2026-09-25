@@ -40,7 +40,7 @@ void Camera::UpdateOrientation() {
 }
 
 void Camera::Update(const DirectInput& input, const GamePad& gamePad) {
-
+#ifdef _DEBUG
 	// ============================
 	//  マウス右ドラッグ：自由回転
 	// ============================
@@ -103,6 +103,7 @@ void Camera::Update(const DirectInput& input, const GamePad& gamePad) {
 		Vector3 moveVec = {-dx, dy, 0.0f};
 		MoveLocal(moveVec);
 	}
+#endif
 
 	UpdateViewMatrix();
 }

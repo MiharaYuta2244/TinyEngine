@@ -1,10 +1,11 @@
 #pragma once
 #define DIRECTINPUT_VERSION 0x0800 // DirectInputのバージョン指定
+#include "Vector2.h"
+#include <WinApp.h>
 #include <dinput.h>
 #include <functional>
 #include <memory>
 #include <wrl.h>
-#include <WinApp.h>
 
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
@@ -34,6 +35,9 @@ public:
 	float GetMouseDeltaX() const { return static_cast<float>(mouseState_.lX); }
 	float GetMouseDeltaY() const { return static_cast<float>(mouseState_.lY); }
 	float GetMouseWheel() const { return static_cast<float>(mouseState_.lZ); }
+
+	// カーソルのクライアント座標を取得
+	Vector2 GetMousePosition() const;
 
 	// 入力状態をリセット
 	void Reset();

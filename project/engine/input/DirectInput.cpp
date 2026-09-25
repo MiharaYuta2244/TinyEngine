@@ -101,3 +101,10 @@ void DirectInput::Reset() {
 	accumX_ = 0;
 	accumY_ = 0;
 }
+
+Vector2 DirectInput::GetMousePosition() const {
+	POINT pt{};
+	GetCursorPos(&pt);
+	ScreenToClient(winApp_->GetHWND(), &pt);
+	return {static_cast<float>(pt.x), static_cast<float>(pt.y)};
+}
