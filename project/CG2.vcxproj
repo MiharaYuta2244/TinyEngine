@@ -307,6 +307,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="application\Menu\ResultScoreDisplay.cpp" />
     <ClCompile Include="application\Scene\StageSelectScene.cpp" />
     <ClCompile Include="engine\2d\font\TextSprite.cpp" />
+    <ClCompile Include="application\GameObjects\Item\Soup.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -551,6 +552,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="engine\2d\font\Font.h" />
     <ClInclude Include="engine\2d\font\FontCommon.h" />
     <ClInclude Include="engine\2d\font\TextSprite.h" />
+    <ClInclude Include="application\GameObjects\Item\Soup.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
