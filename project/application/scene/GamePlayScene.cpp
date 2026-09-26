@@ -375,7 +375,7 @@ void GamePlayScene::Draw() {
 	stage_->DrawTransparent();
 
 	// テキスト描画
-	textSprite_->Draw();
+	//textSprite_->Draw();
 }
 
 void GamePlayScene::Finalize() {
