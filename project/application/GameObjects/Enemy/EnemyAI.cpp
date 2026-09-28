@@ -39,6 +39,9 @@ void EnemyAI::Update(
 	case State::Hold:
 		UpdateHold(deltaTime, player, enemyBulletManager, enemyBombManager);
 		break;
+	case State::Down:
+		// EnemyのUpdate側で早期returnするため何もしない
+		break;
 	}
 }
 

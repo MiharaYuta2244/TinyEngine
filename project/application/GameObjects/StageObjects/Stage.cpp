@@ -57,6 +57,16 @@ void Stage::Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalM
             {0, 0,  0}
     });
 
+	// SoapManagerの生成&初期化
+	soapManager_ = std::make_unique<SoapManager>();
+	soapManager_->Initialize(
+	    ctx.engineContext, "SoapEditor", stagePath + "Soap.json",
+	    Transform{
+	        {1, 50, 1},
+            {0, 0,  0},
+            {0, 0,  0}
+    });
+
 	// 地面の生成&初期化
 	ground_ = std::make_unique<Ground>();
 	ground_->Initialize(ctx.engineContext);

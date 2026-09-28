@@ -281,7 +281,7 @@ void Enemy::Draw() {
 		}
 
 		// 視界
-		if (enableMove_) {
+		if (enableMove_ && !isDown_) {
 			visionCone_->Draw();
 		}
 
@@ -438,3 +438,18 @@ void Enemy::SetEnemyType(EnemyType type) {
 }
 
 void Enemy::GenerateBombEffect() { EffectGenerator::CreateHitEffect(ctx_, transform_.translate, bombEffects_); }
+
+void Enemy::StartDown(float duration) {
+	if (isDead_ || isDown_) {
+		return;
+	}
+
+	isDown_ = true;
+	downDuration_ = duration;
+	downTimer_.Initialize(downDuration_);
+
+	ai_->SetState(EnemyAI::State::Down);
+
+	// 吹き飛び中などの速度も止めておく
+	velocity_ = {0.0f, 0.0f, 0.0f};
+}

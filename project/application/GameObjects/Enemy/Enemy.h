@@ -7,6 +7,7 @@
 #include "ExclamationMark.h"
 #include "GameObjects/IGameObject.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
+#include "GameTimer.h"
 #include "Particle.h"
 #include "VisionCone.h"
 
@@ -108,6 +109,12 @@ public:
 	// ノックバック摩擦のGetter
 	float GetKnockBackFriction() const { return knockBackFriction_; }
 
+	// ダウン状態にする
+	void StartDown(float duration = 3.0f);
+
+	// ダウン状態かどうか
+	bool IsDown() const { return isDown_; }
+
 private:
 	// 当たり判定の更新
 	void UpdateCollision();
@@ -196,4 +203,9 @@ private:
 
 	// アクティブフラグ
 	bool isActive_ = true;
+
+	// ダウン関連
+	bool isDown_ = false;
+	GameTimer downTimer_;
+	float downDuration_ = 3.0f;
 };
