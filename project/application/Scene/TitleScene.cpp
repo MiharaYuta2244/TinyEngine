@@ -71,6 +71,24 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 	audioManager_->Initialize();
 	audioManager_->LoadWave("TitleBGM", "resources/sounds/bgm/TitleScene.mp3");
 	audioManager_->PlayBGM("TitleBGM");
+
+	// 黒背景生成&初期化
+	blackBg_ = std::make_unique<Sprite>();
+	blackBg_->Initialize(ctx.engineContext, "white.png");
+	blackBg_->SetSize({1280.0f, 720.0f});
+	blackBg_->SetColor({0, 0, 0, 1});
+
+	// コントローラー画像生成&初期化
+	controllerImage_ = std::make_unique<Sprite>();
+	controllerImage_->Initialize(ctx.engineContext, "Controller.png");
+	controllerImage_->SetPosition({640.0f, 360.0f});
+	controllerImage_->SetAnchorPoint({0.5f, 0.5f});
+
+	// コントローラー推奨テキスト生成&初期化
+	recommended_ = std::make_unique<Sprite>();
+	recommended_->Initialize(ctx.engineContext, "Recommended.png");
+	recommended_->SetPosition({640.0f, 600.0f});
+	recommended_->SetAnchorPoint({0.5f, 0.5f});
 }
 
 void TitleScene::Update() {
@@ -79,11 +97,33 @@ void TitleScene::Update() {
 	// 音声更新
 	audioManager_->Update();
 
+	// 黒背景＆コントローラー画像のフェードアウト処理
+	float totalFadeTime = fadeWaitDuration_ + fadeOutDuration_;
+	bool isFading = (fadeTimer_ < totalFadeTime);
+
+	if (isFading) {
+		fadeTimer_ += deltaTime;
+		float alpha = 1.0f;
+
+		// 透明度を下げる
+		if (fadeTimer_ > fadeWaitDuration_) {
+			float progress = (fadeTimer_ - fadeWaitDuration_) / fadeOutDuration_;
+			alpha = std::clamp(1.0f - progress, 0.0f, 1.0f);
+		}
+
+		// アルファ値を適用
+		blackBg_->SetColor({0.0f, 0.0f, 0.0f, alpha});
+		controllerImage_->SetColor({1.0f, 1.0f, 1.0f, alpha});
+		recommended_->SetColor({1.0f, 1.0f, 1.0f, alpha});
+	}
+
 	// メニューの更新
-	if (menuState_ == TitleMenuState::Main) {
-		menu_->Update(ctx_.keyboard, ctx_.gamePad, deltaTime);
-	} else {
-		optionMenu_->Update(ctx_.keyboard, ctx_.gamePad, deltaTime);
+	if (!isFading) {
+		if (menuState_ == TitleMenuState::Main) {
+			menu_->Update(ctx_.keyboard, ctx_.gamePad, deltaTime);
+		} else {
+			optionMenu_->Update(ctx_.keyboard, ctx_.gamePad, deltaTime);
+		}
 	}
 
 	// タイトルロゴ更新
@@ -97,6 +137,15 @@ void TitleScene::Update() {
 	background_->SetColor(backgroundColor_);
 	background_->SetVoronoiColor(voronoiColor_);
 	background_->Update();
+
+	// 黒背景更新
+	blackBg_->Update();
+
+	// コントローラー画像更新
+	controllerImage_->Update();
+
+	// コントローラー推奨テキスト更新
+	recommended_->Update();
 
 	// 歪みのパラメータにDeltaTime加算
 	glitchParam_.time += deltaTime;
@@ -171,6 +220,15 @@ void TitleScene::Draw() {
 
 	// タイトルロゴ描画
 	titleLogo_->Draw();
+
+	// 黒背景描画
+	blackBg_->Draw();
+
+	// コントローラー画像描画
+	controllerImage_->Draw();
+
+	// コントローラー推奨テキスト描画
+	recommended_->Draw();
 }
 
 void TitleScene::Finalize() { audioManager_->StopBGM(); }

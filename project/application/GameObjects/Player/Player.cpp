@@ -188,7 +188,6 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 	}
 
 	if (!hp_->IsDead()) {
-
 		// 移動入力がある場合のみ方向による速度補正
 		if (length > 0.05f) {
 

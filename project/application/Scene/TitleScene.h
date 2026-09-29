@@ -45,4 +45,17 @@ private:
 
 	// ゲーム終了までのタイマー
 	std::unique_ptr<GameTimer> finishTimer_;
+
+	// ゲーム機同時の黒背景
+	std::unique_ptr<TinyEngine::Sprite> blackBg_;
+
+	// コントローラー画像
+	std::unique_ptr<TinyEngine::Sprite> controllerImage_;
+
+	// コントローラー推奨テキスト
+	std::unique_ptr<TinyEngine::Sprite> recommended_;
+
+	float fadeTimer_ = 0.0f;              // フェード用タイマー
+	const float fadeWaitDuration_ = 2.0f; // 表示を維持する時間
+	const float fadeOutDuration_ = 2.0f;  // フェードアウトにかける時間
 };
