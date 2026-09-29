@@ -49,7 +49,7 @@ void Glass::AddGlassesDecal(Vector3 scale) {
 		    basePos.z + RandomUtils::RangeFloat(-2.0f, 2.0f),
 		};
 		Vector3 rotate = {std::numbers::pi_v<float> / 2.0f, RandomUtils::RangeFloat(0.0f, std::numbers::pi_v<float>), 0.0f};
-		glassesDecalManager_->AddDecal("white.png", pos, {rotate.x, rotate.y, rotate.z}, scale, ColorPalette::PastelBlue());
+		glassesDecalManager_->AddDecal("Cross.png", pos, {rotate.x, rotate.y, rotate.z}, scale, ColorPalette::PastelBlue());
 	}
 }
 

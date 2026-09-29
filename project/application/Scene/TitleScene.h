@@ -25,7 +25,7 @@ private:
 
 	// タイトルロゴ
 	std::unique_ptr<TinyEngine::Sprite> titleLogo_;
-	Vector2 titleLogoPos_ = {0.0f, 100.0f};        // ロゴの座標
+	Vector2 titleLogoPos_ = {70.0f, 100.0f};        // ロゴの座標
 	Vector4 logoColor_ = {1.0f, 0.7f, 0.1f, 1.0f}; // 色
 
 	// 背景

@@ -42,6 +42,7 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 	titleLogo_ = std::make_unique<Sprite>();
 	titleLogo_->Initialize(ctx.engineContext, "Title_Logo.png");
 	titleLogo_->SetPosition(titleLogoPos_);
+	titleLogo_->SetEnableShine(true);
 
 	// 背景の生成&初期化
 	background_ = std::make_unique<Sprite>();

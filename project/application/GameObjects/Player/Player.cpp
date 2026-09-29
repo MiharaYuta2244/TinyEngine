@@ -412,7 +412,7 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 	Bleeding(deltaTime);
 
 	// 投げ軌道プレビューの更新
-	UpdateThrowPreview();
+	UpdateThrowPreview(deltaTime);
 
 	// ギズモ用当たり判定更新
 	UpdateAABBForGizmo();
@@ -612,16 +612,21 @@ void Player::DrawImGui() {
 #endif
 }
 
-void Player::UpdateThrowPreview() {
+void Player::UpdateThrowPreview(float deltaTime) {
 	// 敵を掴んでいて、攻撃可能な状態でなければ非表示
 	if (!isHold_ || heldEnemy_ == nullptr || !enableAttack_) {
 		HideThrowPreview();
+
+		// 非表示中はスクロール位置をリセット
+		throwPreviewScrollOffset_ = 0.0f;
+
 		return;
 	}
 
 	// 投げる方向
 	Vector3 dir = {lastMoveDirection_.x, 0.0f, lastMoveDirection_.y};
 	float dirLen = std::sqrtf(dir.x * dir.x + dir.z * dir.z);
+
 	if (dirLen < 0.0001f) {
 		HideThrowPreview();
 		return;
@@ -637,7 +642,7 @@ void Player::UpdateThrowPreview() {
 	Vector2 velocity = {dir.x * power, dir.z * power};
 
 	constexpr float kSimDeltaTime = 1.0f / 60.0f;
-	constexpr int kMaxSimSteps = 240; // 最大4秒分
+	constexpr int kMaxSimSteps = 240;
 
 	std::vector<Vector3> points;
 	points.reserve(kMaxSimSteps);
@@ -660,47 +665,92 @@ void Player::UpdateThrowPreview() {
 		}
 	}
 
+	if (points.empty()) {
+		HideThrowPreview();
+		return;
+	}
+
 	// 各点の累積距離を計算
 	std::vector<float> accumulatedDistances;
 	accumulatedDistances.reserve(points.size());
 	accumulatedDistances.push_back(0.0f);
+
 	float totalDistance = 0.0f;
 
 	for (size_t i = 1; i < points.size(); ++i) {
 		float dx = points[i].x - points[i - 1].x;
 		float dz = points[i].z - points[i - 1].z;
+
 		float dist = std::sqrtf(dx * dx + dz * dz);
+
 		totalDistance += dist;
 		accumulatedDistances.push_back(totalDistance);
 	}
 
-	// 空間的な等間隔にドットを配置
+	if (totalDistance <= 0.0001f) {
+		HideThrowPreview();
+		return;
+	}
+
+	// スクロール処理
+	throwPreviewScrollOffset_ += throwPreviewScrollSpeed_ * deltaTime;
+
+	// 軌道の終端まで行ったら先頭に戻す
+	while (throwPreviewScrollOffset_ >= totalDistance) {
+		throwPreviewScrollOffset_ -= totalDistance;
+	}
+
+	// 各ドットを配置
 	for (int i = 0; i < kThrowPreviewDotCount_; ++i) {
-		// 目標とする距離
-		float targetDist = 0.0f;
+		float baseDist = 0.0f;
+
 		if (kThrowPreviewDotCount_ > 1) {
-			targetDist = totalDistance * (static_cast<float>(i) / static_cast<float>(kThrowPreviewDotCount_ - 1));
+			baseDist = totalDistance * (static_cast<float>(i) / static_cast<float>(kThrowPreviewDotCount_ - 1));
 		}
 
-		Vector3 dotPos = points.front(); // 初期値
+		// スクロール分だけ前へずらす
+		float targetDist = baseDist + throwPreviewScrollOffset_;
 
-		// 目標距離に対応する軌道上の位置を線形補間で探す
+		// 軌道の終端を超えたら先頭へループ
+		while (targetDist >= totalDistance) {
+			targetDist -= totalDistance;
+		}
+
+		Vector3 dotPos = points.front();
+
+		// 軌道上のtargetDistに対応する位置を探す
 		for (size_t j = 1; j < points.size(); ++j) {
 			if (accumulatedDistances[j] >= targetDist) {
 				float segmentLen = accumulatedDistances[j] - accumulatedDistances[j - 1];
+
 				if (segmentLen > 0.0001f) {
 					float t = (targetDist - accumulatedDistances[j - 1]) / segmentLen;
+
 					dotPos.x = points[j - 1].x + (points[j].x - points[j - 1].x) * t;
+
 					dotPos.z = points[j - 1].z + (points[j].z - points[j - 1].z) * t;
 				} else {
 					dotPos = points[j];
 				}
+
 				break;
 			}
 		}
 
 		dotPos.y = 0.1f;
 		throwPreviewDecals_[i]->transform.translate = dotPos;
+
+		// ドットサイズ
+		float sizeT = targetDist / totalDistance;
+
+		// 先頭ほど大きく、後ろほど小さく
+		constexpr float kMaxDotScale = 0.28f;
+		constexpr float kMinDotScale = 0.03f;
+
+		float dotScale = MathUtility::Lerp(kMaxDotScale, kMinDotScale, sizeT);
+
+		throwPreviewDecals_[i]->transform.scale = {dotScale, dotScale, 1.0f};
+
 		throwPreviewDecals_[i]->color = {1.0f, 0.85f, 0.2f, 0.8f};
 	}
 }

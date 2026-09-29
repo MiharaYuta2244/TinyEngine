@@ -119,7 +119,7 @@ private:
 	void Bleeding(float deltaTime);
 
 	// 投げ軌道プレビューの更新
-	void UpdateThrowPreview();
+	void UpdateThrowPreview(float deltaTime);
 
 	// 投げ軌道プレビューを隠す
 	void HideThrowPreview();
@@ -220,4 +220,8 @@ private:
 
 	// 投げ軌道プレビュー用デカール
 	std::array<TinyEngine::DecalManager::DecalData*, kThrowPreviewDotCount_> throwPreviewDecals_{};
+
+	// 投げ軌道プレビューのスクロール
+	float throwPreviewScrollOffset_ = 0.0f;
+	float throwPreviewScrollSpeed_ = 4.0f;
 };
