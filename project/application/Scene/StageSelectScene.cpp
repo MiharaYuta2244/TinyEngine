@@ -32,6 +32,13 @@ void StageSelectScene::Initialize(const SceneContext& ctx) {
 		RequestSceneChange("Stage2");
 	});
 
+	// Stage3
+	menu_->AddItem("Stage3", "Stage3_Button.png", [this]() {
+		commonData_->currentStageNo = 3;
+		commonData_->currentStageKey = "Stage3";
+		RequestSceneChange("Stage3");
+	});
+
 	// タイトルに戻るボタン
 	menu_->AddItem("BacktoTitle", "Title.png", [this]() { RequestSceneChange("Title"); });
 

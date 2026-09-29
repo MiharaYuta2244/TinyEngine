@@ -14,6 +14,7 @@ struct MenuItem {
 	Vector2 originalSize;
 	bool* toggleValue = nullptr;
 	std::unique_ptr<TinyEngine::Sprite> checkIcon;
+	float wiggleTimer = 999.0f;
 };
 
 /// <summary>
@@ -81,4 +82,12 @@ private:
 
 	// チェックアイコンのXオフセット
 	float checkIconOffsetX_ = 400.0f;
+
+	// 前フレームの選択インデックス(選択変更の検知用)
+	int prevIndex_ = -1;
+
+	// 選択時の揺れ演出パラメータ
+	float wiggleDuration_ = 0.3f; // 揺れる時間
+	float wiggleAngle_ = 0.25f;   // 最大角度
+	float wiggleCycles_ = 2.0f;   // 往復回数
 };

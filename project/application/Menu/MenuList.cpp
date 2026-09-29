@@ -31,6 +31,7 @@ void MenuList::AddItem(const std::string& label, const std::string& texturePath,
 	item.sprite = std::make_unique<Sprite>();
 	item.sprite->Initialize(ctx_, texturePath);
 	item.originalSize = item.sprite->GetSize();
+	item.sprite->SetAnchorPoint({0.5f, 0.5f});
 	items_.push_back(std::move(item));
 }
 
@@ -43,6 +44,7 @@ void MenuList::AddToggleItem(const std::string& label, const std::string& textur
 	item.sprite = std::make_unique<Sprite>();
 	item.sprite->Initialize(ctx_, texturePath);
 	item.originalSize = item.sprite->GetSize();
+	item.sprite->SetAnchorPoint({0.5f, 0.5f});
 
 	item.checkIcon = std::make_unique<Sprite>();
 	item.checkIcon->Initialize(ctx_, "Check.png");
@@ -119,6 +121,21 @@ void MenuList::Update(DirectInput* input, GamePad* gamePad, float deltaTime) {
 		}
 	}
 
+	// 選択が変わったら揺れ開始
+	if (currentIndex_ != prevIndex_) {
+		if (!items_.empty()) {
+			items_[currentIndex_].wiggleTimer = 0.0f;
+		}
+		prevIndex_ = currentIndex_;
+	}
+
+	// 揺れタイマー更新
+	for (auto& item : items_) {
+		if (item.wiggleTimer < wiggleDuration_) {
+			item.wiggleTimer += deltaTime;
+		}
+	}
+
 	// 背景スプライトの座標を選択中アイテムに合わせる
 	selectorBg_->SetPosition({startPos_.x, startPos_.y + offsetY_ * currentIndex_});
 	selectorBg_->Update();
@@ -152,7 +169,17 @@ void MenuList::Draw() {
 			sprite->SetColor(normalColor_);
 		}
 
-		sprite->SetPosition({startPos_.x, startPos_.y + offsetY_ * i});
+		// 左上基準の座標にサイズの半分を足す
+		sprite->SetPosition({startPos_.x + item.originalSize.x * 0.5f, startPos_.y + offsetY_ * i + item.originalSize.y * 0.5f});
+
+		// 揺れ
+		float angle = 0.0f;
+		if (item.wiggleTimer < wiggleDuration_) {
+			float t = item.wiggleTimer / wiggleDuration_;
+			angle = wiggleAngle_ * std::sin(t * wiggleCycles_ * 2.0f * std::numbers::pi_v<float>) * (1.0f - t);
+		}
+		sprite->SetRotation(angle);
+
 		sprite->Update();
 		sprite->Draw();
 
