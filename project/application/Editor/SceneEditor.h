@@ -21,6 +21,9 @@ public:
 	    const SceneContext& ctx, const std::vector<IGameObject*>& objects, Player* player, EnemyManager* enemyManager, CameraDeathZoomController* cameraZoomController, float& cameraPosY,
 	    bool& isDebugCameraActive, Vector3& currentCameraPivot);
 
+	// デバッグフラグのSetter
+	void SetIsDebug(bool isDebug) { isDebug_ = isDebug; }
+
 private:
 	// ImGuiの統合更新
 	void UpdateImGui(const SceneContext& ctx, Player* player, float& cameraPosY);
@@ -72,4 +75,7 @@ private:
 	TransformSnapshot dragBeginSnapshot_{};
 	bool useSnap_ = true;                     // スナップを有効にするか
 	float snapValue_[3] = {0.5f, 0.5f, 0.5f}; // XYZのスナップ量
+
+	// デバッグフラグ
+	bool isDebug_ = false;
 };

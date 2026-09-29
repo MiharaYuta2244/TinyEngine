@@ -16,7 +16,7 @@ void StageSelectScene::Initialize(const SceneContext& ctx) {
 	// メニューの生成&初期化
 	menu_ = std::make_unique<MenuList>();
 	menu_->Initialize(ctx.engineContext);
-	menu_->SetStartPos({520.0f, 300.0f});
+	menu_->SetStartPos({520.0f, 260.0f});
 
 	// Stage1
 	menu_->AddItem("Stage1", "Stage1_Button.png", [this]() {

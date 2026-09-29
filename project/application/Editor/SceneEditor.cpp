@@ -16,11 +16,19 @@ void SceneEditor::Update(
 	// 毎フレーム最新のオブジェクトリストを保持
 	objects_ = objects;
 
+	// 入力系のデバッグ機能
+	DebugInput(ctx, player, enemyManager, cameraZoomController, isDebugCameraActive, currentCameraPivot);
+
+	// デバッグフラグが立っていなければ早期リターン
+	if (!isDebug_)
+		return;
+
 	// 最初のオブジェクトを選択
 	if (selectedGameObject_ == nullptr && !objects_.empty()) {
-		selectedGameObject_ = objects_.front(); 
+		selectedGameObject_ = objects_.front();
 	}
 
+	// 選択中のオブジェクトにアウトラインを適用
 	for (IGameObject* obj : objects_) {
 		if (obj == selectedGameObject_) {
 			obj->SetEnableOutline(true);
@@ -30,10 +38,8 @@ void SceneEditor::Update(
 	}
 
 	HandleUndoRedoInput(ctx);
-
 	UpdatePicking(ctx);
 	UpdateImGui(ctx, player, cameraPosY);
-	DebugInput(ctx, player, enemyManager, cameraZoomController, isDebugCameraActive, currentCameraPivot);
 }
 
 void SceneEditor::UpdateImGui(const SceneContext& ctx, Player* player, float& cameraPosY) {
@@ -291,9 +297,11 @@ void SceneEditor::DebugInput(
 
 		if (isDebugCameraActive) {
 			ctx.currentCamera->SetTranslation({0.0f, 200.0f, 0.0f});
+			isDebug_ = true;
 		} else {
 			ctx.currentCamera->SetTranslation({player->GetPosition().x, 60.0f, player->GetPosition().z});
 			ctx.currentCamera->SetPivot(currentCameraPivot);
+			isDebug_ = false;
 		}
 	}
 
