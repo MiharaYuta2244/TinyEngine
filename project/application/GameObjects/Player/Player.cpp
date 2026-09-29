@@ -179,16 +179,41 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		}
 	}
 
-	// 敵を掴んでいる場合は速度を半減させる
-	speedMultiplier_ = isHold_ ? 0.3f : 1.0f;
+	// 基本速度
+	speedMultiplier_ = 1.0f;
+
+	// 掴んでいる場合は速度を低下
+	if (isHold_) {
+		speedMultiplier_ *= 0.3f;
+	}
 
 	if (!hp_->IsDead()) {
+
+		// 移動入力がある場合のみ方向による速度補正
+		if (length > 0.05f) {
+
+			// プレイヤーが向いている方向
+			Vector2 forward = {std::sinf(transform_.rotate.y), std::cosf(transform_.rotate.y)};
+
+			// 移動方向を正規化
+			Vector2 moveDir = {inputDir.x / length, inputDir.y / length};
+
+			// 向いている方向と移動方向の内積
+			float dot = forward.x * moveDir.x + forward.y * moveDir.y;
+
+			// 内積から速度倍率を計算
+			float directionSpeedMultiplier = -0.05f * dot * dot + 0.25f * dot + 0.8f;
+
+			// 掴み中の速度倍率に加えて適用
+			speedMultiplier_ *= directionSpeedMultiplier;
+		}
+
 		// 移動更新
 		move_->Update(&transform_, inputDir, aimDir, deltaTime, speedMultiplier_, isHold_);
 
 		// 攻撃等に使うベクトルの更新
-		lastMoveDirection_.x = std::sin(transform_.rotate.y);
-		lastMoveDirection_.y = std::cos(transform_.rotate.y);
+		lastMoveDirection_.x = std::sinf(transform_.rotate.y);
+		lastMoveDirection_.y = std::cosf(transform_.rotate.y);
 	}
 
 	// HP管理インスタンス更新
