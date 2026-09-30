@@ -117,6 +117,7 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	audioManager_ = std::make_unique<AudioManager>();
 	audioManager_->Initialize();
 	audioManager_->LoadWave("GameSceneBGM", "resources/sounds/bgm/GameScene.mp3");
+	audioManager_->LoadWave("GlassBreak", "resources/sounds/se/GlassBreak.mp3");
 	audioManager_->PlayBGM("GameSceneBGM");
 
 	// フォント生成&初期化
@@ -466,4 +467,9 @@ void GamePlayScene::InitializeGameSceneCamera() {
 	ctx_.currentCamera->InitializeFollow(playerPos, playerRot, offsetDistance_, cameraPosY_, cameraAngle_);
 }
 
-void GamePlayScene::GenerateGlassBreakEffect(const Vector3& pos, const Vector3& extent) { EffectGenerator::CreateGlassBreakEffect(ctx_.engineContext, pos, extent, glassBreakEffect_); }
+void GamePlayScene::GenerateGlassBreakEffect(const Vector3& pos, const Vector3& extent) { 
+	EffectGenerator::CreateGlassBreakEffect(ctx_.engineContext, pos, extent, glassBreakEffect_);
+
+	// SE再生
+	audioManager_->PlaySE("GlassBreak", 0.4f);
+}
