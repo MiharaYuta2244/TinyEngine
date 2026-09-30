@@ -252,6 +252,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="application\Cinematic\GamePlayPostEffectController.cpp" />
     <ClCompile Include="engine\2d\font\Font.cpp" />
     <ClCompile Include="engine\2d\font\FontCommon.cpp" />
+    <ClCompile Include="engine\3d\particle\modules\GlassShardModule.cpp" />
     <ClCompile Include="main.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -553,6 +554,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="engine\2d\font\FontCommon.h" />
     <ClInclude Include="engine\2d\font\TextSprite.h" />
     <ClInclude Include="application\GameObjects\Item\Soap.h" />
+    <ClInclude Include="engine\3d\particle\modules\GlassShardModule.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

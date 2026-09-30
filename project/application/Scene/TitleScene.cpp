@@ -231,4 +231,7 @@ void TitleScene::Draw() {
 	recommended_->Draw();
 }
 
-void TitleScene::Finalize() { audioManager_->StopBGM(); }
+void TitleScene::Finalize() {
+	audioManager_->StopBGM();
+	fadeTimer_ = 0.0f;
+}

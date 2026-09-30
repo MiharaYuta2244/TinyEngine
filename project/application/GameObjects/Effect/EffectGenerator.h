@@ -17,4 +17,7 @@ public:
 
 	// 回復エフェクト
 	static void CreateHealEffect(EngineContext* ctx, const Vector3& pos, std::vector<std::unique_ptr<TinyEngine::Particle>>& container);
+
+	// ガラス破壊エフェクト
+	static void CreateGlassBreakEffect(EngineContext* ctx, const Vector3& pos, const Vector3& extent, std::list<std::unique_ptr<TinyEngine::Particle>>& container);
 };

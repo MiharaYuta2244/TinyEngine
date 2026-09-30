@@ -101,3 +101,23 @@ void EffectGenerator::CreateHealEffect(EngineContext* ctx, const Vector3& pos, s
 	ringWave->SetEmitterParam(1, 0.0f);
 	container.push_back(std::move(ringWave));
 }
+
+void EffectGenerator::CreateGlassBreakEffect(EngineContext* ctx, const Vector3& pos, const Vector3& extent, std::list<std::unique_ptr<Particle>>& container) {
+	// 破片の発生範囲はエミッタのscaleで指定する
+	Particle::Emitter emitter{};
+	emitter.transform.scale = extent;
+
+	// 飛び散る破片
+	auto shards = std::make_unique<Particle>();
+	shards->Initialize(ctx, pos, "Shard.png", std::make_unique<GlassShardModule>(), &emitter, ParticleMeshType::Square);
+	shards->SetEmitMode(false, 0.05f);
+	shards->SetEmitterParam(60, 0.01f);
+	container.push_back(std::move(shards));
+
+	// 水色の衝撃波リング
+	auto ring = std::make_unique<Particle>();
+	ring->Initialize(ctx, pos, "gradationLine.png", std::make_unique<HitRingModule>(Vector4(0.6f, 0.9f, 1.0f, 0.8f), 3.0f), nullptr, ParticleMeshType::Cylinder);
+	ring->SetEmitMode(false, 0.05f);
+	ring->SetEmitterParam(1, 0.01f);
+	container.push_back(std::move(ring));
+}

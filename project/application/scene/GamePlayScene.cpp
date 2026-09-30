@@ -189,7 +189,8 @@ void GamePlayScene::Update() {
 	// 当たり判定
 	collisionManager_->CheckCollisions(
 	    player_.get(), enemyManager_.get(), enemyBulletManager_.get(), enemyBombManager_.get(), stage_.get(), ctx_.currentCamera, commonData_,
-	    [this](const Vector3& pos) { GenerateEnemyDeathEffect(pos); }, postEffectController_->GetGlitchTimer(), postEffectController_->GetDamageBlurTimer());
+	    [this](const Vector3& pos) { GenerateEnemyDeathEffect(pos); }, [this](const Vector3& pos, const Vector3& extent) { GenerateGlassBreakEffect(pos, extent); },
+	    postEffectController_->GetGlitchTimer(), postEffectController_->GetDamageBlurTimer());
 
 	// 押し戻し完了後の最終的な座標で、描画更新&AABB更新
 	player_->PostUpdate();
@@ -296,6 +297,12 @@ void GamePlayScene::Update() {
 		return isFinished;
 	});
 
+	// ガラス破壊エフェクト
+	for (auto& particle : glassBreakEffect_) {
+		particle->Update();
+	}
+	std::erase_if(glassBreakEffect_, [](const std::unique_ptr<TinyEngine::Particle>& p) { return p->IsFinished(); });
+
 	// カメラの追従
 	if (!isDebugCameraActive_) {
 		ctx_.currentCamera->UpdateFollow(player_->GetPosition(), player_->GetRotation(), offsetDistance_, cameraPosY_, cameraAngle_, tiltSpeed_, deltaTime);
@@ -356,6 +363,10 @@ void GamePlayScene::Draw() {
 
 	// パーティクルの描画
 	for (auto& particle : enemyDeathEffect_) {
+		particle->Draw();
+	}
+
+	for (auto& particle : glassBreakEffect_) {
 		particle->Draw();
 	}
 
@@ -454,3 +465,5 @@ void GamePlayScene::InitializeGameSceneCamera() {
 	Vector3 playerRot = player_->GetRotation();
 	ctx_.currentCamera->InitializeFollow(playerPos, playerRot, offsetDistance_, cameraPosY_, cameraAngle_);
 }
+
+void GamePlayScene::GenerateGlassBreakEffect(const Vector3& pos, const Vector3& extent) { EffectGenerator::CreateGlassBreakEffect(ctx_.engineContext, pos, extent, glassBreakEffect_); }

@@ -13,7 +13,7 @@ using namespace TinyEngine;
 
 void CollisionManager::CheckCollisions(
     Player* player, EnemyManager* enemyManager, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager, Stage* stage, Camera* camera, CommonData* commonData,
-    std::function<void(const Vector3&)> generateParticleCallback, float& glitchTimer, float& blurTimer) {
+    std::function<void(const Vector3&)> generateParticleCallback, std::function<void(const Vector3&, const Vector3&)> glassBreakCallback, float& glitchTimer, float& blurTimer) {
 
 	// ==========================================
 	// 敵死亡時の共通処理
@@ -104,7 +104,16 @@ void CollisionManager::CheckCollisions(
 		for (auto& glass : stage->GetGlassManager()->GetObjects()) {
 			if (Collision::Intersect(player->GetAttackCol(), glass->GetCollision())) {
 				// ガラス破片生成
-				glass->AddGlassesDecal({0.3f, 0.3f, 0.3f});
+				glass->AddGlassesDecal({0.1f, 0.1f, 0.1f});
+
+				// 破壊エフェクト
+				Transform& t = glass->GetTransform();
+				glassBreakCallback({t.translate.x, 1.0f, t.translate.z}, {t.scale.x, 1.0f, t.scale.z});
+
+				// 軽くカメラを揺らす
+				if (!camera->GetIsShake()) {
+					camera->StartShake(0.15f, 0.15f);
+				}
 
 				// ガラス削除
 				stage->GetGlassManager()->RemoveObject(glass.get());

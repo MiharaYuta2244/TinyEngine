@@ -15,3 +15,4 @@
 #include "modules/MuzzleFlashModule.h"
 #include "modules/MuzzleSparkModule.h"
 #include "modules/MuzzleSmokeModule.h"
+#include "modules/GlassShardModule.h"

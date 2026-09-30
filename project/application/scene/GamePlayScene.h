@@ -53,6 +53,9 @@ private:
 	// ゲームシーン用カメラ初期化関数
 	void InitializeGameSceneCamera();
 
+	// ガラス破壊エフェクトの生成
+	void GenerateGlassBreakEffect(const Vector3& pos, const Vector3& extent);
+
 private:
 	// プレイヤー
 	std::unique_ptr<Player> player_;
@@ -150,4 +153,7 @@ private:
 
 	// テキスト
 	std::unique_ptr<TextSprite> textSprite_;
+
+	// ガラス破壊エフェクト
+	std::list<std::unique_ptr<TinyEngine::Particle>> glassBreakEffect_;
 };

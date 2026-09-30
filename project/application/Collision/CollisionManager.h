@@ -20,5 +20,5 @@ public:
 	/// </summary>
 	void CheckCollisions(
 	    Player* player, EnemyManager* enemyManager, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager, Stage* stage, Camera* camera, CommonData* commonData,
-	    std::function<void(const Vector3&)> generateParticleCallback, float& glitchTimer, float& blurTimer);
+	    std::function<void(const Vector3&)> generateParticleCallback, std::function<void(const Vector3&, const Vector3&)> glassBreakCallback, float& glitchTimer, float& blurTimer);
 };
