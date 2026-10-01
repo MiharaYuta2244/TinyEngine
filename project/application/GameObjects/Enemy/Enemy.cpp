@@ -83,6 +83,22 @@ void Enemy::Update(
 		return;
 	}
 
+	if (isDown_) {
+		downTimer_.Update(deltaTime);
+		if (downTimer_.IsEnd()) {
+			isDown_ = false;
+			// 復帰時に掴まれている場合はHold状態を壊さない
+			if (ai_->GetState() == EnemyAI::State::Down) {
+				ai_->SetState(EnemyAI::State::Normal);
+				ai_->ResetShotTimer();
+			}
+		}
+
+		UpdateCollision();
+		UpdateAABBForGizmo();
+		return;
+	}
+
 	// 速度による移動と減衰
 	if (velocity_.x != 0.0f || velocity_.z != 0.0f) {
 		// 速度による座標の更新

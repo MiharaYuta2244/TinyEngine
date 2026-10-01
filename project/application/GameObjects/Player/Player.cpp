@@ -48,9 +48,16 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 	for (auto& decal : throwPreviewDecals_) {
 		decal = bloodDecalManager_->AddDecal("white.png", {0.0f, -1000.0f, 0.0f}, {std::numbers::pi_v<float> / 2.0f, 0, 0}, {0.15f, 0.15f, 1.0f}, {1.0f, 0.85f, 0.2f, 0.0f});
 	}
+
+	// 振動マネージャーの生成と初期化
+	rumbleManager_ = std::make_unique<RumbleManager>();
 }
 
-void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, EnemyManager* enemyManager) {
+void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps) {
+	// RumbleManagerの初期化と更新
+	rumbleManager_->Initialize(gamePad);
+	rumbleManager_->Update(deltaTime);
+
 	// アクションアニメーションのタイマー更新
 	if (isActionAnimating_) {
 		actionAnimTimer_ -= deltaTime;
@@ -237,22 +244,46 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 
 	// 掴み判定用：一番近い敵を探す
 	Enemy* targetEnemy = nullptr;
+	float enemyMinDist = FLT_MAX;
 
 	// 敵を掴んでいない時のみ新しいターゲットを探す
 	if (!isHold_) {
-		float minDist = FLT_MAX;
 		for (auto& enemy : enemyManager->GetEnemies()) {
 			if (enemy->IsDead())
 				continue;
 
-			// プレイヤーと敵の距離を計算
 			Vector3 ePos = enemy->GetPos();
 			Vector3 diff = {ePos.x - transform_.translate.x, ePos.y - transform_.translate.y, ePos.z - transform_.translate.z};
 			float dist = std::sqrt(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
 
-			if (dist < minDist && dist < grabRange_) {
-				minDist = dist;
+			if (dist < enemyMinDist && dist < grabRange_) {
+				enemyMinDist = dist;
 				targetEnemy = enemy.get();
+			}
+		}
+	}
+
+	// 掴める/突き飛ばせる一番近い石鹸を探す
+	Soap* targetSoap = nullptr;
+	if (!isHold_) {
+		float soapMinDist = FLT_MAX;
+		for (const auto& soap : soaps) {
+			Vector3 diff = soap->GetPos() - transform_.translate;
+			diff.y = 0.0f;
+			float dist = MathUtility::Length(diff);
+
+			if (dist < soapMinDist && dist < grabRange_) {
+				soapMinDist = dist;
+				targetSoap = soap.get();
+			}
+		}
+
+		// 敵の方が近ければ敵を、石鹸の方が近ければ石鹸を優先
+		if (targetSoap && targetEnemy) {
+			if (soapMinDist < enemyMinDist) {
+				targetEnemy = nullptr;
+			} else {
+				targetSoap = nullptr;
 			}
 		}
 	}
@@ -291,6 +322,45 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 	} else {
 		// パッドが繋がっていない場合はリセット
 		preLt_ = 0.0f;
+	}
+
+	// 石鹸の掴み・投げ処理
+	if (!isHold_ && isGrabJustPressed && targetSoap != nullptr) {
+		heldSoap_ = targetSoap;
+		heldSoap_->Grab();
+		isHold_ = true; // 掴みアニメーション・移動速度低下は敵と共通
+		isGrabTriggered_ = true;
+		move_->ResetVelocity();
+		PlayActionAnimation("GorillaHold.gltf");
+	}
+
+	if (heldSoap_ != nullptr) {
+		if (isAttackTriggered_) {
+			// 掴んでいる石鹸を投げる
+			Vector3 velocity = {lastMoveDirection_.x * soapThrowPower_, 0.0f, lastMoveDirection_.y * soapThrowPower_};
+			heldSoap_->Throw(velocity);
+			heldSoap_ = nullptr;
+			isHold_ = false;
+			move_->ResetVelocity();
+			PlayActionAnimation("GorillaPush.gltf");
+		} else if (isGrab_) {
+			// 掴んでいる間はプレイヤーの前方に固定
+			Vector3 forward = {lastMoveDirection_.x, 0.0f, lastMoveDirection_.y};
+			Vector3 holdPos = heldSoap_->GetPos();
+			holdPos.x = transform_.translate.x + forward.x * attackOffset_;
+			holdPos.z = transform_.translate.z + forward.z * attackOffset_;
+			heldSoap_->SetPos(holdPos);
+		} else {
+			// 掴みボタンを離したらその場に置く
+			heldSoap_ = nullptr;
+			isHold_ = false;
+		}
+	} else if (targetSoap != nullptr && isAttackTriggered_) {
+		// 掴まずに直接突き飛ばす
+		Vector3 velocity = {lastMoveDirection_.x * soapThrowPower_, 0.0f, lastMoveDirection_.y * soapThrowPower_};
+		targetSoap->Throw(velocity);
+		move_->ResetVelocity();
+		PlayActionAnimation("GorillaPush.gltf");
 	}
 
 	// 掴み・投げ処理の更新
@@ -498,6 +568,9 @@ void Player::Damage(float value) {
 
 	// 出血用のタイマー初期化
 	bleedingTimer_.Initialize(0.5f);
+
+	// 被弾振動呼び出し
+	rumbleManager_->TriggerPlayerDamage();
 }
 
 void Player::Heal(float value) {
@@ -633,6 +706,11 @@ void Player::DrawImGui() {
 	ImGui::DragFloat("Decay", &pointLightDecay_, 0.05f, 0.0f, 10.0f);
 
 	ImGui::End();
+
+	// 振動用のImGui描画呼び出し
+	if (rumbleManager_) {
+		rumbleManager_->DrawImGui();
+	}
 #endif
 }
 
@@ -787,4 +865,18 @@ void Player::HideThrowPreview() {
 			decal->transform.translate.y = -1000.0f;
 		}
 	}
+}
+
+void Player::PlayActionAnimation(const std::string& modelName) {
+	if (render_->GetFilepath() == modelName) {
+		return;
+	}
+
+	render_->SetModel(modelName);
+	KeyframeAnimation keyframeAnimation;
+	Animation animation = keyframeAnimation.LoadAnimationFile(modelName);
+	render_->GetObject3d()->PlayAnimation(animation);
+
+	isActionAnimating_ = true;
+	actionAnimTimer_ = 0.2f;
 }

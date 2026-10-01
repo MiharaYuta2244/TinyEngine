@@ -309,6 +309,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="application\Scene\StageSelectScene.cpp" />
     <ClCompile Include="engine\2d\font\TextSprite.cpp" />
     <ClCompile Include="application\GameObjects\Item\Soap.cpp" />
+    <ClCompile Include="application\Utility\RumbleManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -555,6 +556,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="engine\2d\font\TextSprite.h" />
     <ClInclude Include="application\GameObjects\Item\Soap.h" />
     <ClInclude Include="engine\3d\particle\modules\GlassShardModule.h" />
+    <ClInclude Include="application\Utility\RumbleManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

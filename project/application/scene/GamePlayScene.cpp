@@ -31,7 +31,7 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	// カメラの生成&初期化
 	mainCamera_ = std::make_unique<Camera>();
 	mainCamera_->Initialize();
-
+	
 	// カメラの設定
 	ctx_.currentCamera = mainCamera_.get();
 	ctx_.engineContext->object3dCommon->SetDefaultCamera(ctx_.currentCamera);
@@ -173,7 +173,7 @@ void GamePlayScene::Update() {
 	postEffectController_->Update(deltaTime, player_->GetCurrentHP(), player_->IsDead());
 
 	// プレイヤーの更新処理
-	player_->Update(deltaTime, ctx_.keyboard, ctx_.gamePad, enemyManager_.get());
+	player_->Update(deltaTime, ctx_.keyboard, ctx_.gamePad, enemyManager_.get(), stage_->GetSoapManager()->GetObjects());
 
 	// 敵の更新処理
 	enemyManager_->Update(deltaTime, player_.get(), enemyBulletManager_.get(), stage_->GetWallManager(), stage_->GetDoorManager(), stage_->GetGlassManager(), enemyBombManager_.get());
@@ -279,6 +279,9 @@ void GamePlayScene::Update() {
 	}
 	for (auto& healArea : stage_->GetHealAreaManager()->GetObjects()) {
 		editObjects.push_back(healArea.get());
+	}
+	for (auto& soap : stage_->GetSoapManager()->GetObjects()) {
+		editObjects.push_back(soap.get());
 	}
 
 	// シーンエディターの更新

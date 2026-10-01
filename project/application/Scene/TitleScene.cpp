@@ -161,6 +161,11 @@ void TitleScene::Update() {
 		}
 	}
 
+	// ゲームパッド推奨スキップ
+	if(ctx_.keyboard->KeyTriggered(DIK_SPACE) || ctx_.gamePad->GetState().buttons.a){
+		fadeTimer_ = totalFadeTime;
+	}
+
 #ifdef USE_IMGUI
 	ImGui::Begin("PostEffect");
 

@@ -45,6 +45,15 @@ public:
 	// アウトライン有効フラグSetter
 	void SetEnableOutline(bool isEnable) override;
 
+	// プレイヤーに掴まれた時の処理
+	void Grab();
+
+	// 壁などにぶつかった時の処理
+	void Stop();
+
+	// 投げられて飛んでいる最中かどうか
+	bool IsThrown() const { return isThrown_; }
+
 private:
 	// 速度・摩擦の適用
 	void UpdateMove(float deltaTime);
@@ -79,4 +88,7 @@ private:
 	// オブジェクト数カウント用
 	static int index;
 	int id_ = 0;
+
+	// 1フレーム前の座標
+	Vector3 prevPos_ = {0.0f, 0.0f, 0.0f};
 };

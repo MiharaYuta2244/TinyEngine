@@ -10,6 +10,8 @@
 #include "Particle.h"
 #include "PlayerHealth.h"
 #include "PlayerMove.h"
+#include "GameObjects/Item/Soap.h"
+#include "Utility/RumbleManager.h"
 
 class EnemyManager;
 class Enemy;
@@ -23,7 +25,7 @@ public:
 	void Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecalManager);
 
 	// 更新処理
-	void Update(float deltaTime, DirectInput* input, GamePad* gamePad, EnemyManager* enemyManager);
+	void Update(float deltaTime, DirectInput* input, GamePad* gamePad, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps);
 
 	// 当たり判定などの解決後に行う最終更新処理
 	void PostUpdate();
@@ -102,6 +104,9 @@ public:
 	// ImGui描画
 	void DrawImGui();
 
+	// 振動マネージャーGetter
+	RumbleManager* GetRumbleManager() { return rumbleManager_.get(); }
+
 private:
 	// 当たり判定の更新処理
 	void UpdateCollision();
@@ -124,6 +129,9 @@ private:
 	// 投げ軌道プレビューを隠す
 	void HideThrowPreview();
 
+	// アニメーションヘルパー関数
+	void PlayActionAnimation(const std::string& modelName);
+
 private:
 	Vector2 velocity_;
 	OBB attackCol_;
@@ -135,7 +143,7 @@ private:
 	Vector4 color_ = {1.0f, 0.1568f, 0.0f, 1.0f};
 
 	// プレイヤーの最大HP
-	float maxHP_ = 3.0f;
+	float maxHP_ = 100.0f;
 
 	// 攻撃可能かどうかを表す変数
 	bool enableAttack_ = false;
@@ -224,4 +232,10 @@ private:
 	// 投げ軌道プレビューのスクロール
 	float throwPreviewScrollOffset_ = 0.0f;
 	float throwPreviewScrollSpeed_ = 4.0f;
+
+	Soap* heldSoap_ = nullptr;     // 掴んでいる石鹸
+	float soapThrowPower_ = 15.0f; // 石鹸を投げる初速
+
+	// 振動マネージャー
+	std::unique_ptr<RumbleManager> rumbleManager_;
 };

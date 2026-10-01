@@ -62,7 +62,7 @@ void Stage::Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalM
 	soapManager_->Initialize(
 	    ctx.engineContext, "SoapEditor", stagePath + "Soap.json",
 	    Transform{
-	        {1, 50, 1},
+	        {1, 1, 1},
             {0, 0,  0},
             {0, 0,  0}
     });
@@ -88,6 +88,7 @@ void Stage::Update(float deltaTime, const Vector3& playerPos, Camera* camera) {
 	glassManager_->Update();
 	cageManager_->Update(deltaTime);
 	healAreaManager_->Update(deltaTime);
+	soapManager_->Update(deltaTime);
 	ground_->Update();
 	goal_->Update(deltaTime);
 }
@@ -97,6 +98,7 @@ void Stage::Draw() {
 	doorManager_->Draw();
 	wallManager_->Draw();
 	cageManager_->Draw();
+	soapManager_->Draw();
 	goal_->Draw();
 }
 
@@ -111,6 +113,7 @@ void Stage::DrawImGui() {
 	glassManager_->DrawImGui();
 	cageManager_->DrawImGui();
 	healAreaManager_->DrawImGui();
+	soapManager_->DrawImGui();
 
 #ifdef USE_IMGUI
 	ImGui::Begin("StageObject Add Buttons");
@@ -134,6 +137,10 @@ void Stage::DrawImGui() {
 
 	if (ImGui::Button("Add HealArea")) {
 		healAreaManager_->AddObject();
+	}
+
+	if (ImGui::Button("Add Soap")) {
+		soapManager_->AddObject();
 	}
 
 	ImGui::End();

@@ -51,6 +51,7 @@ void Soap::Draw() {
 }
 
 void Soap::Throw(const Vector3& velocity) {
+	prevPos_ = transform_.translate;
 	velocity_ = velocity;
 	isThrown_ = true;
 	isBubbleActive_ = false; // 投げ直された場合は前回の泡を消す
@@ -68,6 +69,8 @@ void Soap::SetEnableOutline(bool isEnable) {
 }
 
 void Soap::UpdateMove(float deltaTime) {
+	prevPos_ = transform_.translate;
+
 	if (!isThrown_) {
 		return;
 	}
@@ -130,4 +133,19 @@ void Soap::UpdateBubble(float deltaTime) {
 	if (bubbleTimer_.IsEnd()) {
 		isBubbleActive_ = false;
 	}
+}
+
+void Soap::Grab() {
+	velocity_ = {0.0f, 0.0f, 0.0f};
+	isThrown_ = false;
+	isBubbleActive_ = false; // 持ち上げたら泡は消す
+}
+
+void Soap::Stop() {
+	transform_.translate = prevPos_;
+	velocity_ = {0.0f, 0.0f, 0.0f};
+	isThrown_ = false;
+
+	isBubbleActive_ = true;
+	bubbleTimer_.Initialize(bubbleDuration_);
 }

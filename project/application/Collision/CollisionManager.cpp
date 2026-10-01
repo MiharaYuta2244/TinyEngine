@@ -22,6 +22,11 @@ void CollisionManager::CheckCollisions(
 		commonData->killCount += 1;
 		generateParticleCallback(enemy->GetPos());
 
+		// 敵死亡時の振動
+		if (player->GetRumbleManager()) {
+			player->GetRumbleManager()->TriggerEnemyDeath();
+		}
+
 		// Bomberタイプの死亡時の爆発判定
 		if (enemy->GetEnemyType() == EnemyType::Bomber) {
 			Vector3 pPos = player->GetPosition();
@@ -113,6 +118,11 @@ void CollisionManager::CheckCollisions(
 				// 軽くカメラを揺らす
 				if (!camera->GetIsShake()) {
 					camera->StartShake(0.15f, 0.15f);
+				}
+
+				// ガラス破壊時の振動
+				if (player->GetRumbleManager()) {
+					player->GetRumbleManager()->TriggerGlassBreak();
 				}
 
 				// ガラス削除
@@ -495,6 +505,65 @@ void CollisionManager::CheckCollisions(
 			if (bomb->IsExploded()) {
 				// プレイヤー死亡
 				player->Damage(3);
+			}
+		}
+	}
+
+	// ==========================================
+	// 投げられた石鹼と障害物の判定
+	// ==========================================
+	auto Overlap2D = [](const AABB& a, const AABB& b) { return a.min.x <= b.max.x && a.max.x >= b.min.x && a.min.z <= b.max.z && a.max.z >= b.min.z; };
+
+	auto HitAny = [&](const AABB& col, const auto& objects) {
+		for (const auto& obj : objects) {
+			if (Overlap2D(col, obj->GetCollision())) {
+				return true;
+			}
+		}
+		return false;
+	};
+
+	for (const auto& soap : stage->GetSoapManager()->GetObjects()) {
+		if (!soap->IsThrown()) {
+			continue;
+		}
+
+		AABB col = soap->GetCollision();
+		bool hit = HitAny(col, stage->GetWallManager()->GetObjects()) || HitAny(col, stage->GetGlassManager()->GetObjects()) || HitAny(col, stage->GetCageManager()->GetObjects());
+
+		// 閉じているドアのみ障害物扱い
+		if (!hit) {
+			for (const auto& door : stage->GetDoorManager()->GetObjects()) {
+				if (!door->GetIsOpen() && Overlap2D(col, door->GetCollision())) {
+					hit = true;
+					break;
+				}
+			}
+		}
+
+		if (hit) {
+			soap->Stop();
+		}
+	}
+
+	// ==========================================
+	// 敵と石鹸の判定
+	// ==========================================
+	for (const auto& soap : stage->GetSoapManager()->GetObjects()) {
+		for (auto& enemy : enemyManager->GetEnemies()) {
+			if (enemy->IsDead() || enemy->IsDown()) {
+				continue;
+			}
+
+			// 勢いよく直接ぶつかった場合は即ダウン
+			if (soap->IsDangerous() && Collision::Intersect(enemy->GetBodyCol(), soap->GetCollision())) {
+				enemy->StartDown();
+				continue;
+			}
+
+			// 泡エリアに重なっていてもダウン
+			if (soap->GetIsBubbleActive() && Collision::Intersect(enemy->GetBodyCol(), soap->GetBubbleArea())) {
+				enemy->StartDown();
 			}
 		}
 	}
