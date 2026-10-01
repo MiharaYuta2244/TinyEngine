@@ -143,7 +143,7 @@ private:
 	Vector4 color_ = {1.0f, 0.1568f, 0.0f, 1.0f};
 
 	// プレイヤーの最大HP
-	float maxHP_ = 100.0f;
+	float maxHP_ = 3.0f;
 
 	// 攻撃可能かどうかを表す変数
 	bool enableAttack_ = false;

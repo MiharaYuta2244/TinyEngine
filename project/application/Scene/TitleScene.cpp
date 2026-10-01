@@ -164,6 +164,11 @@ void TitleScene::Update() {
 	// ゲームパッド推奨スキップ
 	if(ctx_.keyboard->KeyTriggered(DIK_SPACE) || ctx_.gamePad->GetState().buttons.a){
 		fadeTimer_ = totalFadeTime;
+
+		// 画像をすべて透明にする
+		blackBg_->SetColor({0.0f, 0.0f, 0.0f, 0.0f});
+		controllerImage_->SetColor({1.0f, 1.0f, 1.0f, 0.0f});
+		recommended_->SetColor({1.0f, 1.0f, 1.0f, 0.0f});
 	}
 
 #ifdef USE_IMGUI

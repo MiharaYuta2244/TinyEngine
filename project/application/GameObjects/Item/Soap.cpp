@@ -1,6 +1,4 @@
 #include "Soap.h"
-#include "MathOperator.h"
-#include "MathUtility.h"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
