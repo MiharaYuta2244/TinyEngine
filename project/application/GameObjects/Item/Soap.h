@@ -54,6 +54,13 @@ public:
 	// 投げられて飛んでいる最中かどうか
 	bool IsThrown() const { return isThrown_; }
 
+	// 破壊されたかどうかのGetter
+	bool IsBroken() const { return isBroken_; }
+
+	// 投げるスピードのGetter/Setter
+	float GetThrowSpeed() const { return throwSpeed_; }
+	void SetThrowSpeed(float speed) { throwSpeed_ = speed; }
+
 private:
 	// 速度・摩擦の適用
 	void UpdateMove(float deltaTime);
@@ -72,11 +79,11 @@ private:
 	AABB bubbleArea_{}; // 泡の当たり判定
 
 	Vector3 velocity_ = {0.0f, 0.0f, 0.0f}; // 移動速度
-	float friction_ = 4.0f;                 // 減衰率
+	float friction_ = 1.0f;                 // 減衰率
 	float stopThreshold_ = 0.3f;            // これ以下で停止扱い
 
 	Vector3 halfSize_ = {0.5f, 0.3f, 0.5f};       // 本体当たり判定の半径
-	Vector3 bubbleHalfSize_ = {2.0f, 0.5f, 2.0f}; // 泡の当たり判定の半径
+	Vector3 bubbleHalfSize_ = {2.0f, 2.0f, 0.5f}; // 泡の当たり判定の半径
 
 	bool isThrown_ = false;       // 投げられて飛んでいる最中か
 	bool isBubbleActive_ = false; // 泡が発生しているか
@@ -91,4 +98,10 @@ private:
 
 	// 1フレーム前の座標
 	Vector3 prevPos_ = {0.0f, 0.0f, 0.0f};
+
+	// 破壊済みフラグ
+	bool isBroken_ = false;
+
+	// 投げるスピード
+	float throwSpeed_ = 30.0f;
 };

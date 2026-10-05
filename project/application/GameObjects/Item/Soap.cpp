@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <numbers>
+#include "MathUtility.h"
 
 int Soap::index = 0;
 
@@ -41,7 +42,9 @@ void Soap::Update(float deltaTime) {
 }
 
 void Soap::Draw() {
-	render_->Draw();
+	if (!isBroken_) {
+		render_->Draw();
+	}
 
 	if (isBubbleActive_) {
 		bubbleRender_->Draw();
@@ -50,7 +53,14 @@ void Soap::Draw() {
 
 void Soap::Throw(const Vector3& velocity) {
 	prevPos_ = transform_.translate;
-	velocity_ = velocity;
+	
+	// ベクトルの長さが十分あれば正規化して設定したスピードを適用
+	if (MathUtility::LengthSquared(velocity) > 0.0001f) {
+		velocity_ = MathUtility::Scale(MathUtility::Normalize(velocity), throwSpeed_);
+	} else {
+		velocity_ = {0.0f, 0.0f, 0.0f};
+	}
+
 	isThrown_ = true;
 	isBubbleActive_ = false; // 投げ直された場合は前回の泡を消す
 }
@@ -77,22 +87,17 @@ void Soap::UpdateMove(float deltaTime) {
 	transform_.translate.z += velocity_.z * deltaTime;
 
 	// 摩擦による減速
-	float speed = std::sqrtf(velocity_.x * velocity_.x + velocity_.z * velocity_.z);
-	if (speed > 0.0f) {
-		float drop = friction_ * deltaTime;
-		float multiplier = std::max(0.0f, speed - drop) / speed;
-		velocity_.x *= multiplier;
-		velocity_.z *= multiplier;
-	}
+	velocity_.x = MathUtility::Lerp(velocity_.x, 0.0f, friction_ * deltaTime);
+	velocity_.z = MathUtility::Lerp(velocity_.z, 0.0f, friction_ * deltaTime);
 
 	// 十分減速したら停止扱いにして泡を発生させる
-	float speedAfter = std::sqrtf(velocity_.x * velocity_.x + velocity_.z * velocity_.z);
-	if (speedAfter <= stopThreshold_) {
+	if (std::abs(velocity_.x) < 0.1f && std::abs(velocity_.z) < 0.1f) {
 		velocity_ = {0.0f, 0.0f, 0.0f};
 		isThrown_ = false;
 
 		if (!isBubbleActive_) {
 			isBubbleActive_ = true;
+			isBroken_ = true;
 			bubbleTimer_.Initialize(bubbleDuration_);
 		}
 	}
@@ -145,5 +150,6 @@ void Soap::Stop() {
 	isThrown_ = false;
 
 	isBubbleActive_ = true;
+	isBroken_ = true;
 	bubbleTimer_.Initialize(bubbleDuration_);
 }

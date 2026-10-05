@@ -56,22 +56,6 @@ void Enemy::Update(
 	if (isDead_)
 		return;
 
-	if (isDown_) {
-		downTimer_.Update(deltaTime);
-		if (downTimer_.IsEnd()) {
-			isDown_ = false;
-			// 復帰時に掴まれている場合はHold状態を壊さない
-			if (ai_->GetState() == EnemyAI::State::Down) {
-				ai_->SetState(EnemyAI::State::Normal);
-				ai_->ResetShotTimer();
-			}
-		}
-
-		UpdateCollision();
-		UpdateAABBForGizmo();
-		return;
-	}
-
 	// 速度による移動と減衰
 	if (velocity_.x != 0.0f || velocity_.z != 0.0f) {
 		// 速度による座標の更新
@@ -86,6 +70,22 @@ void Enemy::Update(
 		if (std::abs(velocity_.x) < 0.1f && std::abs(velocity_.z) < 0.1f) {
 			velocity_ = {0.0f, 0.0f, 0.0f};
 		}
+	}
+
+	if (isDown_) {
+		downTimer_.Update(deltaTime);
+		if (downTimer_.IsEnd()) {
+			isDown_ = false;
+			// 復帰時に掴まれている場合はHold状態を壊さない
+			if (ai_->GetState() == EnemyAI::State::Down) {
+				ai_->SetState(EnemyAI::State::Normal);
+				ai_->ResetShotTimer();
+			}
+		}
+
+		UpdateCollision();
+		UpdateAABBForGizmo();
+		return;
 	}
 
 	if (!isMove_) {
@@ -270,12 +270,12 @@ void Enemy::Draw() {
 		}
 
 		// 視界
-		if (enableMove_ && !isDown_) {
+		if (enableMove_ && !isDown_ && isMove_) {
 			visionCone_->Draw();
 		}
 
 		// 「!」マークの描画
-		if (exclamationMark_) {
+		if (!isDown_ && isMove_ && exclamationMark_) {
 			exclamationMark_->Draw();
 		}
 
@@ -285,12 +285,12 @@ void Enemy::Draw() {
 		}
 
 		// チャージパーティクルの描画
-		if (chargeParticle_) {
+		if (!isDown_ && isMove_ && chargeParticle_) {
 			chargeParticle_->Draw();
 		}
 
-		// 描画
-		if ((ai_->GetState() == EnemyAI::State::Vigilance || ai_->GetState() == EnemyAI::State::Hold) && chargeCylinderParticle_) {
+		// シリンダーチャージパーティクル描画
+		if (!isDown_ && isMove_ && (ai_->GetState() == EnemyAI::State::Vigilance || ai_->GetState() == EnemyAI::State::Hold) && chargeCylinderParticle_) {
 			chargeCylinderParticle_->Draw();
 		}
 	}
@@ -406,6 +406,12 @@ void Enemy::StartDown(float duration) {
 	downTimer_.Initialize(downDuration_);
 
 	ai_->SetState(EnemyAI::State::Down);
+	ai_->ResetShotTimer();
+
+	// チャージエフェクトや「!」マークを消去
+	exclamationMark_.reset();
+	chargeParticle_.reset();
+	chargeCylinderParticle_.reset();
 
 	// 吹き飛び中などの速度も止めておく
 	velocity_ = {0.0f, 0.0f, 0.0f};

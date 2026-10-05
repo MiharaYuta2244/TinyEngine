@@ -565,6 +565,12 @@ void CollisionManager::CheckCollisions(
 			// 泡エリアに重なっていてもダウン
 			if (soap->GetIsBubbleActive() && Collision::Intersect(enemy->GetBodyCol(), soap->GetBubbleArea())) {
 				enemy->StartDown();
+
+				// 泡と敵が当たったので石鹸オブジェクトを削除
+				stage->GetSoapManager()->RemoveObject(soap.get());
+
+				// 石鹸が削除されるため、他の敵との判定を抜ける
+				break;
 			}
 		}
 	}

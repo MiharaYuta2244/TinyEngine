@@ -268,6 +268,11 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 	if (!isHold_) {
 		float soapMinDist = FLT_MAX;
 		for (const auto& soap : soaps) {
+			// 破壊済みの石鹸は掴めないようにスキップする
+			if (soap->IsBroken()) {
+				continue;
+			}
+
 			Vector3 diff = soap->GetPos() - transform_.translate;
 			diff.y = 0.0f;
 			float dist = MathUtility::Length(diff);
@@ -618,8 +623,8 @@ void Player::UpdateCollision() {
 	Vector3 right = {forward.z, 0.0f, -forward.x};
 	Vector3 up = {0.0f, 1.0f, 0.0f};
 
-	float attackLength = 1.5f; // 前方に伸びる距離
-	float attackWidth = 0.6f;  // 横幅
+	float attackLength = 1.4f; // 前方に伸びる距離
+	float attackWidth = 0.4f;  // 横幅
 	float attackHeight = 1.0f; // 高さ
 
 	Vector3 center = {pos.x + forward.x * attackLength * 0.5f, pos.y, pos.z + forward.z * attackLength * 0.5f};
@@ -715,8 +720,11 @@ void Player::DrawImGui() {
 }
 
 void Player::UpdateThrowPreview(float deltaTime) {
-	// 敵を掴んでいて、攻撃可能な状態でなければ非表示
-	if (!isHold_ || heldEnemy_ == nullptr || !enableAttack_) {
+	// 敵（攻撃可能な状態）か石鹸のどちらかを掴んでいない場合は非表示
+	bool isEnemyTarget = (heldEnemy_ != nullptr && enableAttack_);
+	bool isSoapTarget = (heldSoap_ != nullptr);
+
+	if (!isHold_ || (!isEnemyTarget && !isSoapTarget)) {
 		HideThrowPreview();
 
 		// 非表示中はスクロール位置をリセット
@@ -725,7 +733,7 @@ void Player::UpdateThrowPreview(float deltaTime) {
 		return;
 	}
 
-	// 投げる方向
+	// 投げる方向の計算
 	Vector3 dir = {lastMoveDirection_.x, 0.0f, lastMoveDirection_.y};
 	float dirLen = std::sqrtf(dir.x * dir.x + dir.z * dir.z);
 
@@ -737,10 +745,21 @@ void Player::UpdateThrowPreview(float deltaTime) {
 	dir.x /= dirLen;
 	dir.z /= dirLen;
 
-	float power = heldEnemy_->GetKnockBackPower();
-	float friction = heldEnemy_->GetKnockBackFriction();
+	// 掴んでいるオブジェクトに応じた物理パラメータの取得
+	Vector3 pos{};
+	float power = 0.0f;
+	float friction = 1.0f;
 
-	Vector3 pos = heldEnemy_->GetPos();
+	if (isSoapTarget) {
+		pos = heldSoap_->GetPos();
+		power = soapThrowPower_;
+		friction = 1.0f; // Soapクラスの摩擦係数（friction_）
+	} else if (isEnemyTarget) {
+		pos = heldEnemy_->GetPos();
+		power = heldEnemy_->GetKnockBackPower();
+		friction = heldEnemy_->GetKnockBackFriction();
+	}
+
 	Vector2 velocity = {dir.x * power, dir.z * power};
 
 	constexpr float kSimDeltaTime = 1.0f / 60.0f;
@@ -749,6 +768,7 @@ void Player::UpdateThrowPreview(float deltaTime) {
 	std::vector<Vector3> points;
 	points.reserve(kMaxSimSteps);
 
+	// 軌道シミュレーション
 	for (int step = 0; step < kMaxSimSteps; ++step) {
 		pos.x += velocity.x * kSimDeltaTime;
 		pos.z += velocity.y * kSimDeltaTime;
@@ -829,7 +849,6 @@ void Player::UpdateThrowPreview(float deltaTime) {
 					float t = (targetDist - accumulatedDistances[j - 1]) / segmentLen;
 
 					dotPos.x = points[j - 1].x + (points[j].x - points[j - 1].x) * t;
-
 					dotPos.z = points[j - 1].z + (points[j].z - points[j - 1].z) * t;
 				} else {
 					dotPos = points[j];
