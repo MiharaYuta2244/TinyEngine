@@ -1,7 +1,9 @@
 #pragma once
+#include "ColorPalette.h"
+#include "EngineContext.h"
 #include "IFadeState.h"
 #include "Sprite.h"
-#include "EngineContext.h"
+#include <array>
 #include <memory>
 #include <string>
 
@@ -50,6 +52,21 @@ public:
 	/// <param name="progress">進行度</param>
 	void SetFadeAlpha(float progress);
 
+	/// <summary>
+	/// 指定したレイヤーの色を設定する (Vector4)
+	/// </summary>
+	void SetLayerColor(size_t layerIndex, const Vector4& color);
+
+	/// <summary>
+	/// 指定したレイヤーの色を設定する (float)
+	/// </summary>
+	void SetLayerColor(size_t layerIndex, float r, float g, float b, float a = 1.0f);
+
+	/// <summary>
+	/// 3層分の色を一括で設定する
+	/// </summary>
+	void SetLayerColors(const Vector4& color0, const Vector4& color1, const Vector4& color2);
+
 	// Getter Setter
 	bool IsWaitingForSceneShange() const { return isWaitingForSceneChange_; }
 	void SetWaitingForSceneChange(bool waiting) { isWaitingForSceneChange_ = waiting; }
@@ -64,7 +81,21 @@ public:
 private:
 	// スプライトの数
 	static const int kStripeCount = 10;
-	std::array<std::unique_ptr<TinyEngine::Sprite>, kStripeCount> fadeSprites_;
+
+	// 重ねるレイヤーの数
+	static const int kLayerCount = 3;
+
+	// フェード用スプライト
+	std::array<std::array<std::unique_ptr<TinyEngine::Sprite>, kLayerCount>, kStripeCount> fadeSprites_;
+
+	// 各レイヤーのRGBAカラー初期値
+	std::array<Vector4, kLayerCount> layerColors_ = {
+	    {
+         ColorPalette::NeonPurple(),   // 奥
+	        ColorPalette::NeonBlue(), // 中
+	        ColorPalette::Black()       // 手前
+	    }
+    };
 
 	// 各帯が動き出すまでの遅延時間
 	std::array<float, kStripeCount> stripeDelays_;
