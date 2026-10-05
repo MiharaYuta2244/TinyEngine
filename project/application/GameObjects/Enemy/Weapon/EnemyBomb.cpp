@@ -1,6 +1,9 @@
 #include "EnemyBomb.h"
-#include "GameObjects/Effect/EffectGenerator.h"
 #include "ColorPalette.h"
+#include "GameObjects/Effect/EffectGenerator.h"
+#include "Particle.h"
+
+EnemyBomb::~EnemyBomb() = default;
 
 void EnemyBomb::Initialize(EngineContext* ctx, Vector3 pos, Vector3 velocity, Vector3 targetPos) {
 	ctx_ = ctx;

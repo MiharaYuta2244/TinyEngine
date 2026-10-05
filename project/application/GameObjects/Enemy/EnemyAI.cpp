@@ -1,7 +1,7 @@
 #include "EnemyAI.h"
 #include "AStarPathfinder.h"
-#include "EnemyBombManager.h"
-#include "EnemyBulletManager.h"
+#include "Gameobjects/Enemy/Weapon/EnemyBombManager.h"
+#include "Gameobjects/Enemy/Weapon/EnemyBulletManager.h"
 #include "GameObjects/Player/Player.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
@@ -10,18 +10,12 @@
 
 using namespace TinyEngine;
 
-void EnemyAI::Initialize(Transform* transform, EngineContext* ctx, EnemyType type, AudioManager* audioManager) {
+void EnemyAI::Initialize(Transform* transform, EngineContext* ctx, IEnemyBehavior* behavior, AudioManager* audioManager) {
 	transform_ = transform;
 	ctx_ = ctx;
-	type_ = type;
 	audioManager_ = audioManager;
-
-	// アサルト型なら射撃間隔を短くする
-	if (type_ == EnemyType::Assault) {
-		shotIntervalNormal_ = shotIntervalAssault_; // 連射間隔
-	} else {
-		shotIntervalNormal_ = 1.5f; // 通常の間隔
-	}
+	behavior_ = behavior;
+	shotIntervalNormal_ = behavior_->GetShotInterval();
 }
 
 void EnemyAI::Update(
@@ -369,82 +363,8 @@ bool EnemyAI::IsSegmentIntersectAABB(const Vector3& start, const Vector3& end, c
 }
 
 void EnemyAI::Shot(Vector3 toTarget, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager) {
-	auto bullet = std::make_unique<EnemyBullet>();
-	Vector3 dir3D = MathUtility::Normalize(toTarget);
-	Vector2 dir2D = {dir3D.x, dir3D.z};
-	Vector3 spawnPos = transform_->translate;
-	float baseAngle = std::atan2(dir3D.x, dir3D.z);
-
 	isShotThisFrame_ = true;
-	shotDirection_ = dir3D;
+	shotDirection_ = MathUtility::Normalize(toTarget);
 	shotTimer_ = 0.0f;
-
-	switch (type_) {
-	case EnemyType::Normal:
-		// 通常の単発処理
-		spawnPos.x += dir3D.x * bulletMargin_;
-		spawnPos.z += dir3D.z * bulletMargin_;
-		spawnPos.y += 1.0f;
-		bullet->Initialize(ctx_, dir2D, spawnPos);
-		enemyBulletManager->AddBullet(std::move(bullet));
-		break;
-	case EnemyType::Shotgun:
-		// 散弾の実装
-		for (int i = -1; i <= 1; ++i) {
-			auto bullet = std::make_unique<EnemyBullet>();
-			float angle = baseAngle + i * (15.0f * std::numbers::pi_v<float> / 180.0f); // 15度ずつずらす
-			dir2D = {std::sin(angle), std::cos(angle)};
-			spawnPos = transform_->translate;
-			spawnPos.x += dir2D.x * bulletMargin_;
-			spawnPos.z += dir2D.y * bulletMargin_;
-			spawnPos.y += 1.0f;
-
-			bullet->Initialize(ctx_, dir2D, spawnPos);
-			enemyBulletManager->AddBullet(std::move(bullet));
-		}
-		break;
-	case EnemyType::Bomber: {
-		float distSq = toTarget.x * toTarget.x + toTarget.z * toTarget.z;
-		const float kThrowBombDistance = 15.0f; // 爆弾を投げる距離の閾値
-
-		if (distSq <= kThrowBombDistance * kThrowBombDistance && enemyBombManager) {
-			// 一定距離より遠ければ単発弾を撃つ
-			spawnPos.x += dir3D.x * bulletMargin_;
-			spawnPos.z += dir3D.z * bulletMargin_;
-			spawnPos.y += 1.0f;
-			bullet->Initialize(ctx_, dir2D, spawnPos);
-			enemyBulletManager->AddBullet(std::move(bullet));
-		} else {
-			// 一定距離以内なら爆弾を投げる
-			auto bomb = std::make_unique<EnemyBomb>();
-
-			// 爆弾の初速
-			float throwSpeed = 18.0f;
-			Vector3 velocity = {dir3D.x * throwSpeed, 0.0f, dir3D.z * throwSpeed};
-
-			bomb->Initialize(ctx_, spawnPos, velocity, lastKnownPlayerPos_);
-			enemyBombManager->AddBomb(std::move(bomb));
-		}
-		break;
-	}
-
-	case EnemyType::Assault: {
-		// 精度を下げるためにランダムなブレを計算
-		float angleOffset = RandomUtils::RangeFloat(-shotRangeAssault_, shotRangeAssault_) * (std::numbers::pi_v<float> / 180.0f);
-		float assaultAngle = baseAngle + angleOffset;
-
-		// ブレを加えた新しい方向ベクトル
-		Vector2 assaultDir2D = {std::sin(assaultAngle), std::cos(assaultAngle)};
-		Vector3 assaultDir3D = {assaultDir2D.x, 0.0f, assaultDir2D.y};
-
-		// 弾の出現位置を計算
-		spawnPos.x += assaultDir3D.x * bulletMargin_;
-		spawnPos.z += assaultDir3D.z * bulletMargin_;
-		spawnPos.y += 1.0f;
-
-		bullet->Initialize(ctx_, assaultDir2D, spawnPos);
-		enemyBulletManager->AddBullet(std::move(bullet));
-		break;
-	}
-	}
+	behavior_->Shot({ctx_, transform_->translate, toTarget, lastKnownPlayerPos_, bulletMargin_, enemyBulletManager, enemyBombManager});
 }

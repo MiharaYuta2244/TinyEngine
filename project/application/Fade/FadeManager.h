@@ -72,7 +72,7 @@ private:
 	// 状態
 	std::unique_ptr<IFadeState> currentState_;
 
-	float fadeDuration_ = 1.0f; // フェード時間
+	float fadeDuration_ = 0.8f; // フェード時間
 	float fadeTimer_ = 0.0f;    // カウント用のタイマー
 
 	std::string requestedSceneName_;       // フェードアウト開始時に切り替えるシーン名

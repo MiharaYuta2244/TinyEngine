@@ -1,9 +1,10 @@
 #include "Enemy.h"
 #include "ChargeModule.h"
 #include "ColorPalette.h"
-#include "EnemyBulletManager.h"
 #include "GameObjects/Effect/EffectGenerator.h"
 #include "GameObjects/Player/Player.h"
+#include "Gameobjects/Enemy/Behavior/EnemyBehaviorFactory.h"
+#include "Gameobjects/Enemy/Weapon/EnemyBulletManager.h"
 
 using namespace TinyEngine;
 
@@ -13,29 +14,8 @@ Enemy::Enemy() { id_ = index++; }
 
 void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalManager* bloodDecalManager, AudioManager* audioManager) {
 	ctx_ = ctx;
-	type_ = type;
+	behavior_ = EnemyBehaviorFactory::Create(type);
 	audioManager_ = audioManager;
-
-	switch (type_) {
-	case EnemyType::Normal:
-		hp_ = 1;
-		color_ = {1, 1, 1, 1};
-		break;
-
-	case EnemyType::Shotgun:
-		hp_ = 2;
-		color_ = {1, 0, 0, 1};
-		break;
-
-	case EnemyType::Bomber:
-		hp_ = 1;
-		color_ = {0, 0, 1, 1};
-		break;
-	case EnemyType::Assault:
-		hp_ = 1;
-		color_ = {1.0f, 0.5f, 0, 1};
-		break;
-	}
 
 	transform_.scale = {0.2f, 0.2f, 0.2f};
 	transform_.rotate = {0.0f, 0.0f, 0.0f};
@@ -60,7 +40,7 @@ void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalMan
 
 	// AIインスタンス生成&初期化
 	ai_ = std::make_unique<EnemyAI>();
-	ai_->Initialize(&transform_, ctx, type, audioManager_);
+	ai_->Initialize(&transform_, ctx, behavior_.get(), audioManager_);
 
 	// 視界インスタンス生成&初期化
 	visionCone_ = std::make_unique<VisionCone>();
@@ -351,10 +331,8 @@ void Enemy::Kill() {
 	// 血痕の生成
 	AddBloodDecal();
 
-	// Bomberタイプなら爆発エフェクトを生成
-	if (type_ == EnemyType::Bomber) {
-		GenerateBombEffect();
-	}
+	// 爆発エフェクトを生成
+	behavior_->OnDeath(ctx_, transform_.translate, bombEffects_);
 }
 
 void Enemy::Damage() {
@@ -419,37 +397,13 @@ void Enemy::AddBloodDecal() {
 	bloodDecalManager_->AddDecal("Bleeding.png", finalPos, {std::numbers::pi_v<float> / 2.0f, 0, 0}, {4, 4, 1}, ColorPalette::DarkRed());
 }
 
-void Enemy::SetEnemyType(EnemyType type) {
-	type_ = type;
+void Enemy::ApplyType(EnemyType type) {
+	behavior_ = EnemyBehaviorFactory::Create(type);
+	hp_ = behavior_->GetMaxHP();
+	color_ = behavior_->GetColor();
 
-	// タイプに応じてステータスを変更
-	switch (type_) {
-	case EnemyType::Normal:
-		hp_ = 1;
-		color_ = {1, 1, 1, 1};
-		break;
-
-	case EnemyType::Shotgun:
-		hp_ = 2;
-		color_ = {1, 0, 0, 1};
-		break;
-
-	case EnemyType::Bomber:
-		hp_ = 1;
-		color_ = {0, 0, 1, 1};
-		break;
-	}
-
-	// 描画用の色を更新
 	if (render_) {
 		render_->SetColor(color_);
-	}
-
-	// AIと視界を再初期化
-	if (ai_ && visionCone_) {
-		ai_->Initialize(&transform_, ctx_, type_, audioManager_);
-		Visionparam param = ai_->GetVisionParam();
-		visionCone_->Initialize(ctx_, param.radius, param.angle);
 	}
 }
 

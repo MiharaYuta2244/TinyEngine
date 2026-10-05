@@ -249,7 +249,7 @@
     <ClCompile Include="application\GameObjects\Enemy\EnemyAI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="application\GameObjects\Enemy\EnemyBullet.cpp">
+    <ClCompile Include="application\GameObjects\Enemy\Weapon\EnemyBullet.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="application\GameObjects\Player\PlayerHealth.cpp">
@@ -258,7 +258,7 @@
     <ClCompile Include="engine\base\utility\gameTimer\GameTimer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="application\GameObjects\Enemy\EnemyBulletManager.cpp">
+    <ClCompile Include="application\GameObjects\Enemy\Weapon\EnemyBulletManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="application\GameObjects\StageObjects\Wall\Wall.cpp">
@@ -378,9 +378,6 @@
     <ClCompile Include="engine\3d\particle\modules\MuzzleSmokeModule.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="application\GameObjects\Enemy\IEnemy.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="application\GameObjects\StageObjects\Glass\Glass.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -432,10 +429,10 @@
     <ClCompile Include="application\GameObjects\ControlUI\ControlUI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="application\GameObjects\Enemy\EnemyBomb.cpp">
+    <ClCompile Include="application\GameObjects\Enemy\Weapon\EnemyBomb.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="application\GameObjects\Enemy\EnemyBombManager.cpp">
+    <ClCompile Include="application\GameObjects\Enemy\Weapon\EnemyBombManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="application\Editor\EditorCommand.cpp">
@@ -466,6 +463,24 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="application\Utility\RumbleManager.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="application\GameObjects\Enemy\Behavior\EnemyBehaviorBase.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="application\GameObjects\Enemy\Behavior\NormalBehavior.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="application\GameObjects\Enemy\Behavior\ShotgunBehavior.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="application\GameObjects\Enemy\Behavior\AssaultBehavior.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="application\GameObjects\Enemy\Behavior\BomberBehavior.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="application\GameObjects\Enemy\Behavior\EnemyBehaviorFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -763,7 +778,7 @@
     <ClInclude Include="application\GameObjects\Enemy\EnemyAI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="application\GameObjects\Enemy\EnemyBullet.h">
+    <ClInclude Include="application\GameObjects\Enemy\Weapon\EnemyBullet.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="application\GameObjects\Player\PlayerHealth.h">
@@ -775,7 +790,7 @@
     <ClInclude Include="engine\math\mathLib\Rect.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="application\GameObjects\Enemy\EnemyBulletManager.h">
+    <ClInclude Include="application\GameObjects\Enemy\Weapon\EnemyBulletManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="application\GameObjects\StageObjects\Wall\Wall.h">
@@ -925,9 +940,6 @@
     <ClInclude Include="engine\3d\particle\modules\MuzzleSmokeModule.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="application\GameObjects\Enemy\IEnemy.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="application\GameObjects\Enemy\EnemyType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -985,10 +997,10 @@
     <ClInclude Include="application\GameObjects\ControlUI\ControlUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="application\GameObjects\Enemy\EnemyBomb.h">
+    <ClInclude Include="application\GameObjects\Enemy\Weapon\EnemyBomb.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="application\GameObjects\Enemy\EnemyBombManager.h">
+    <ClInclude Include="application\GameObjects\Enemy\Weapon\EnemyBombManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="application\GameObjects\PlaceableObject.h">
@@ -1031,6 +1043,27 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="application\Utility\RumbleManager.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\EnemyBehavior.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\EnemyBehaviorBase.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\NormalBehavior.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\ShotgunBehavior.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\AssaultBehavior.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\BomberBehavior.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\EnemyBehaviorFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

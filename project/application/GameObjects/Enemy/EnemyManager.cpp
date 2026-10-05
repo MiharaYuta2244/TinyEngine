@@ -124,7 +124,7 @@ void EnemyManager::DrawImGui() {
 			int currentType = static_cast<int>(enemy->GetEnemyType());
 			const char* typeNames[] = {"Normal", "Shotgun", "Bomber", "Assault"};
 			if (ImGui::Combo("Type", &currentType, typeNames, IM_ARRAYSIZE(typeNames))) {
-				enemy->SetEnemyType(static_cast<EnemyType>(currentType));
+				enemy->ApplyType(static_cast<EnemyType>(currentType));
 			}
 
 			// 敵の削除ボタン

@@ -1,6 +1,7 @@
 #pragma once
 #include "AABB.h"
 #include "AudioManager.h"
+#include "Behavior/EnemyBehavior.h"
 #include "EnemyType.h"
 #include "GameObjects/GameObjectManager.h"
 #include "GameObjects/StageObjects/Door/Door.h"
@@ -35,7 +36,7 @@ public:
 	};
 
 	// 初期化
-	void Initialize(Transform* transform, EngineContext* ctx, EnemyType type, TinyEngine::AudioManager* audioManager);
+	void Initialize(Transform* transform, EngineContext* ctx, IEnemyBehavior* behavior, TinyEngine::AudioManager* audioManager);
 
 	// 更新処理
 	void Update(
@@ -140,4 +141,7 @@ private:
 	// アサルト敵パラメータ
 	float shotIntervalAssault_ = 0.4f; // 弾の発射間隔
 	float shotRangeAssault_ = 20.0f;   // 弾の発射角度（ブレ）
+
+	// 敵の挙動ポインタ
+	IEnemyBehavior* behavior_ = nullptr;
 };

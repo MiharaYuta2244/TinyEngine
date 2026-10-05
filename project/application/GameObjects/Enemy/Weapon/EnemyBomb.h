@@ -2,13 +2,20 @@
 #include "AABB.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "GameTimer.h"
-#include "Particle.h"
+#include <memory>
+#include <vector>
+
+namespace TinyEngine {
+class Particle;
+}
 
 /// <summary>
 /// 敵の爆弾
 /// </summary>
 class EnemyBomb {
 public:
+	~EnemyBomb();
+
 	// 初期化処理
 	void Initialize(EngineContext* ctx, Vector3 pos, Vector3 velocity, Vector3 targetPos);
 

@@ -163,7 +163,6 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
   <ItemGroup>
     <ClCompile Include="application\Editor\EditorCommand.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\AStarPathfinder.cpp" />
-    <ClCompile Include="application\GameObjects\Enemy\IEnemy.cpp" />
     <ClCompile Include="application\GameObjects\IGameObject.cpp" />
     <ClCompile Include="application\GameObjects\StageObjects\Door\Door.cpp" />
     <ClCompile Include="application\Cinematic\CameraDeathZoomController.cpp" />
@@ -172,8 +171,12 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="application\Collision\CollisionManager.cpp" />
     <ClCompile Include="application\GameObjects\Effect\EffectGenerator.cpp" />
     <ClCompile Include="application\GameObjects\ControlUI\ControlUI.cpp" />
-    <ClCompile Include="application\GameObjects\Enemy\EnemyBomb.cpp" />
-    <ClCompile Include="application\GameObjects\Enemy\EnemyBombManager.cpp" />
+    <ClCompile Include="application\GameObjects\Enemy\Weapon\EnemyBomb.cpp" />
+    <ClCompile Include="application\GameObjects\Enemy\Weapon\EnemyBombManager.cpp" />
+    <ClCompile Include="application\GameObjects\Enemy\Behavior\EnemyBehaviorBase.cpp" />
+    <ClCompile Include="application\GameObjects\Enemy\Behavior\AssaultBehavior.cpp" />
+    <ClCompile Include="application\GameObjects\Enemy\Behavior\BomberBehavior.cpp" />
+    <ClCompile Include="application\GameObjects\Enemy\Behavior\EnemyBehaviorFactory.cpp" />
     <ClCompile Include="engine\3d\decal\DecalManager.cpp" />
     <ClCompile Include="engine\3d\particle\modules\ChargeCylinderModule.cpp" />
     <ClCompile Include="engine\3d\particle\modules\ChargeModule.cpp" />
@@ -181,8 +184,8 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="engine\Animation\KeyframeAnimation.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\Enemy.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\EnemyAI.cpp" />
-    <ClCompile Include="application\GameObjects\Enemy\EnemyBullet.cpp" />
-    <ClCompile Include="application\GameObjects\Enemy\EnemyBulletManager.cpp" />
+    <ClCompile Include="application\GameObjects\Enemy\Weapon\EnemyBullet.cpp" />
+    <ClCompile Include="application\GameObjects\Enemy\Weapon\EnemyBulletManager.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\EnemyManager.cpp" />
     <ClCompile Include="application\GameObjects\ResultUI\Button\IButton.cpp" />
     <ClCompile Include="application\Scene\EasingEditorScene.cpp" />
@@ -310,6 +313,8 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="engine\2d\font\TextSprite.cpp" />
     <ClCompile Include="application\GameObjects\Item\Soap.cpp" />
     <ClCompile Include="application\Utility\RumbleManager.cpp" />
+    <ClCompile Include="application\GameObjects\Enemy\Behavior\NormalBehavior.cpp" />
+    <ClCompile Include="application\GameObjects\Enemy\Behavior\ShotgunBehavior.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -380,8 +385,8 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
   <ItemGroup>
     <ClInclude Include="application\Editor\EditorCommand.h" />
     <ClInclude Include="application\GameObjects\Enemy\AStarPathfinder.h" />
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\EnemyBehavior.h" />
     <ClInclude Include="application\GameObjects\Enemy\EnemyType.h" />
-    <ClInclude Include="application\GameObjects\Enemy\IEnemy.h" />
     <ClInclude Include="application\GameObjects\CommonData.h" />
     <ClInclude Include="application\GameObjects\IGameObject.h" />
     <ClInclude Include="application\GameObjects\StageObjects\Door\Door.h" />
@@ -391,8 +396,12 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="application\Collision\CollisionManager.h" />
     <ClInclude Include="application\GameObjects\Effect\EffectGenerator.h" />
     <ClInclude Include="application\GameObjects\ControlUI\ControlUI.h" />
-    <ClInclude Include="application\GameObjects\Enemy\EnemyBomb.h" />
-    <ClInclude Include="application\GameObjects\Enemy\EnemyBombManager.h" />
+    <ClInclude Include="application\GameObjects\Enemy\Weapon\EnemyBomb.h" />
+    <ClInclude Include="application\GameObjects\Enemy\Weapon\EnemyBombManager.h" />
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\EnemyBehaviorBase.h" />
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\AssaultBehavior.h" />
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\BomberBehavior.h" />
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\EnemyBehaviorFactory.h" />
     <ClInclude Include="engine\2d\font\GlyphInfo.h" />
     <ClInclude Include="engine\3d\decal\DecalManager.h" />
     <ClInclude Include="engine\3d\particle\modules\ChargeCylinderModule.h" />
@@ -402,8 +411,8 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="engine\Animation\KeyframeAnimation.h" />
     <ClInclude Include="application\GameObjects\Enemy\Enemy.h" />
     <ClInclude Include="application\GameObjects\Enemy\EnemyAI.h" />
-    <ClInclude Include="application\GameObjects\Enemy\EnemyBullet.h" />
-    <ClInclude Include="application\GameObjects\Enemy\EnemyBulletManager.h" />
+    <ClInclude Include="application\GameObjects\Enemy\Weapon\EnemyBullet.h" />
+    <ClInclude Include="application\GameObjects\Enemy\Weapon\EnemyBulletManager.h" />
     <ClInclude Include="application\GameObjects\Enemy\EnemyManager.h" />
     <ClInclude Include="application\GameObjects\Player\IHPGauge.h" />
     <ClInclude Include="application\GameObjects\ResultUI\Button\IButton.h" />
@@ -557,6 +566,8 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="application\GameObjects\Item\Soap.h" />
     <ClInclude Include="engine\3d\particle\modules\GlassShardModule.h" />
     <ClInclude Include="application\Utility\RumbleManager.h" />
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\NormalBehavior.h" />
+    <ClInclude Include="application\GameObjects\Enemy\Behavior\ShotgunBehavior.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

@@ -1,6 +1,7 @@
 #pragma once
 #include "AABB.h"
 #include "AudioManager.h"
+#include "Behavior/EnemyBehavior.h"
 #include "DecalManager.h"
 #include "EnemyAI.h"
 #include "EnemyType.h"
@@ -89,10 +90,13 @@ public:
 	void StopKnockback();
 
 	// 敵の種類Setter
-	void SetEnemyType(EnemyType type);
+	void ApplyType(EnemyType type);
 
 	// 敵の種類Getter
-	EnemyType GetEnemyType() const { return type_; }
+	EnemyType GetEnemyType() const { return behavior_->GetType(); }
+
+	// 敵の爆発半径
+	float GetDeathBlastRadius() const { return behavior_->GetDeathBlastRadius(); }
 
 	// 血痕を出さずに敵を消す
 	void Dead() { isDead_ = true; };
@@ -173,7 +177,7 @@ private:
 	bool isMove_ = true;
 
 	// 敵のタイプ
-	EnemyType type_ = EnemyType::Normal;
+	std::unique_ptr<IEnemyBehavior> behavior_;
 
 	// HP
 	int hp_ = 1;
