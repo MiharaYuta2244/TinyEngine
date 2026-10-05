@@ -7,5 +7,7 @@ enum class EnemyType {
 	Normal,
 	Shotgun,
 	Bomber, 
-	Assault 
+	Assault,
+
+	Count
 };

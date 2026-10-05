@@ -7,7 +7,6 @@
 class BomberBehavior : public EnemyBehaviorBase {
 public:
 	EnemyType GetType() const override { return EnemyType::Bomber; }
-	const char* GetName() const override { return "Bomber"; }
 	int GetMaxHP() const override { return 1; }
 	Vector4 GetColor() const override { return {0, 0, 1, 1}; }
 
@@ -15,5 +14,5 @@ public:
 
 	void Shot(const ShotContext& c) override;
 
-	void OnDeath(EngineContext* ctx, const Vector3& pos, std::vector<std::unique_ptr<TinyEngine::Particle>>& deathEffect) override;
+	void OnDeath(EngineContext* ctx, const Vector3& pos, std::list<std::unique_ptr<TinyEngine::Particle>>& container) override;
 };

@@ -30,7 +30,7 @@ inline void from_json(const Json& j, EnemyData& e) {
 	e.pos = j.at("pos").get<Vector3>();
 	e.rot = j.at("rot").get<Vector3>();
 	e.isMove = j.value("isMove", true);
-	e.type = j.value("type", 0);
+	e.type = std::clamp(j.value("type", 0), 0, static_cast<int>(EnemyType::Count) - 1);
 }
 
 /// <summary>

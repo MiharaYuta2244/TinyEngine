@@ -2,7 +2,7 @@
 #include "EngineContext.h"
 #include "GameObjects/Enemy/EnemyType.h"
 #include <memory>
-#include <vector>
+#include <list>
 
 class EnemyBulletManager;
 class EnemyBombManager;
@@ -44,6 +44,6 @@ public:
 	virtual void Shot(const ShotContext& c) = 0;
 
 	// 死亡時
-	virtual void OnDeath(EngineContext* ctx, const Vector3& pos, std::vector<std::unique_ptr<TinyEngine::Particle>>& deathEffect) {}
+	virtual void OnDeath(EngineContext* ctx, const Vector3& pos, std::list<std::unique_ptr<TinyEngine::Particle>>& deathEffect) {}
 	virtual float GetDeathBlastRadius() const { return 0.0f; } 
 };

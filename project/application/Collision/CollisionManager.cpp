@@ -2,9 +2,10 @@
 #include "Collision.h"
 #include "DebugCamera.h"
 #include "GameObjects/CommonData.h"
+#include "GameObjects/Enemy/Enemy.h"
+#include "GameObjects/Enemy/EnemyManager.h"
 #include "GameObjects/Enemy/Weapon/EnemyBombManager.h"
 #include "GameObjects/Enemy/Weapon/EnemyBulletManager.h"
-#include "GameObjects/Enemy/EnemyManager.h"
 #include "GameObjects/Player/Player.h"
 #include "GameObjects/StageObjects/Stage.h"
 #include <algorithm>
@@ -13,14 +14,14 @@ using namespace TinyEngine;
 
 void CollisionManager::CheckCollisions(
     Player* player, EnemyManager* enemyManager, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager, Stage* stage, Camera* camera, CommonData* commonData,
-    std::function<void(const Vector3&)> generateParticleCallback, std::function<void(const Vector3&, const Vector3&)> glassBreakCallback, float& glitchTimer, float& blurTimer) {
+    std::function<void(Enemy*)> generateParticleCallback, std::function<void(const Vector3&, const Vector3&)> glassBreakCallback, float& glitchTimer, float& blurTimer) {
 
 	// ==========================================
 	// 敵死亡時の共通処理
 	// ==========================================
 	auto ProcessEnemyDeath = [&](Enemy* enemy) {
 		commonData->killCount += 1;
-		generateParticleCallback(enemy->GetPos());
+		generateParticleCallback(enemy);
 
 		// 敵死亡時の振動
 		if (player->GetRumbleManager()) {

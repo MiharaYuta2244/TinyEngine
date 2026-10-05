@@ -45,7 +45,7 @@ public:
 
 private:
 	// 敵死亡時パーティクル生成
-	void GenerateEnemyDeathEffect(const Vector3& pos);
+	void GenerateEnemyDeathEffect(Enemy* enemy);
 
 	// ゴール確認用カメラ演出の更新
 	void UpdateCameraIntro(float deltaTime);

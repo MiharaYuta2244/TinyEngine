@@ -121,3 +121,11 @@ void EffectGenerator::CreateGlassBreakEffect(EngineContext* ctx, const Vector3& 
 	ring->SetEmitterParam(1, 0.01f);
 	container.push_back(std::move(ring));
 }
+
+void EffectGenerator::CreateBomberExplosionEffect(EngineContext* ctx, const Vector3& pos, float radius, std::list<std::unique_ptr<Particle>>& container) {
+	auto ring = std::make_unique<Particle>();
+	ring->Initialize(ctx, pos, "gradationLine.png", std::make_unique<HitRingModule>(Vector4(0.2f, 0.4f, 1.0f, 0.8f), radius), nullptr, ParticleMeshType::Cylinder);
+	ring->SetEmitMode(false, 0.05f);
+	ring->SetEmitterParam(1, 0.01f);
+	container.push_back(std::move(ring));
+}

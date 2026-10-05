@@ -31,7 +31,7 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	// カメラの生成&初期化
 	mainCamera_ = std::make_unique<Camera>();
 	mainCamera_->Initialize();
-	
+
 	// カメラの設定
 	ctx_.currentCamera = mainCamera_.get();
 	ctx_.engineContext->object3dCommon->SetDefaultCamera(ctx_.currentCamera);
@@ -190,7 +190,7 @@ void GamePlayScene::Update() {
 	// 当たり判定
 	collisionManager_->CheckCollisions(
 	    player_.get(), enemyManager_.get(), enemyBulletManager_.get(), enemyBombManager_.get(), stage_.get(), ctx_.currentCamera, commonData_,
-	    [this](const Vector3& pos) { GenerateEnemyDeathEffect(pos); }, [this](const Vector3& pos, const Vector3& extent) { GenerateGlassBreakEffect(pos, extent); },
+	    [this](Enemy* enemy) { GenerateEnemyDeathEffect(enemy); }, [this](const Vector3& pos, const Vector3& extent) { GenerateGlassBreakEffect(pos, extent); },
 	    postEffectController_->GetGlitchTimer(), postEffectController_->GetDamageBlurTimer());
 
 	// 押し戻し完了後の最終的な座標で、描画更新&AABB更新
@@ -390,7 +390,7 @@ void GamePlayScene::Draw() {
 	stage_->DrawTransparent();
 
 	// テキスト描画
-	//textSprite_->Draw();
+	// textSprite_->Draw();
 }
 
 void GamePlayScene::Finalize() {
@@ -403,9 +403,10 @@ void GamePlayScene::Finalize() {
 	audioManager_->StopBGM();
 }
 
-void GamePlayScene::GenerateEnemyDeathEffect(const Vector3& pos) {
+void GamePlayScene::GenerateEnemyDeathEffect(Enemy* enemy) {
 	// エフェクトの生成
-	EffectGenerator::CreateEnemyDeathEffect(ctx_.engineContext, pos, enemyDeathEffect_);
+	EffectGenerator::CreateEnemyDeathEffect(ctx_.engineContext, enemy->GetPos(), enemyDeathEffect_); // 共通
+	enemy->PlayDeathEffect(enemyDeathEffect_);                                                       // 種類固有
 }
 
 void GamePlayScene::UpdateCameraIntro(float deltaTime) {
@@ -470,7 +471,7 @@ void GamePlayScene::InitializeGameSceneCamera() {
 	ctx_.currentCamera->InitializeFollow(playerPos, playerRot, offsetDistance_, cameraPosY_, cameraAngle_);
 }
 
-void GamePlayScene::GenerateGlassBreakEffect(const Vector3& pos, const Vector3& extent) { 
+void GamePlayScene::GenerateGlassBreakEffect(const Vector3& pos, const Vector3& extent) {
 	EffectGenerator::CreateGlassBreakEffect(ctx_.engineContext, pos, extent, glassBreakEffect_);
 
 	// SE再生

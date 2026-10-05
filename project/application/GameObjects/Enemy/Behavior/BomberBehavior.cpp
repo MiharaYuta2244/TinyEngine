@@ -14,4 +14,6 @@ void BomberBehavior::Shot(const ShotContext& c) {
 	}
 }
 
-void BomberBehavior::OnDeath(EngineContext* ctx, const Vector3& pos, std::vector<std::unique_ptr<TinyEngine::Particle>>& deathEffect) { EffectGenerator::CreateHitEffect(ctx, pos, deathEffect); }
+void BomberBehavior::OnDeath(EngineContext* ctx, const Vector3& pos, std::list<std::unique_ptr<TinyEngine::Particle>>& container) {
+	EffectGenerator::CreateBomberExplosionEffect(ctx, pos, GetDeathBlastRadius(), container);
+}

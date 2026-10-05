@@ -119,6 +119,9 @@ public:
 	// ダウン状態かどうか
 	bool IsDown() const { return isDown_; }
 
+	// 爆発エフェクト生成用の窓口
+	void PlayDeathEffect(std::list<std::unique_ptr<TinyEngine::Particle>>& container);
+
 private:
 	// 当たり判定の更新
 	void UpdateCollision();
@@ -166,9 +169,6 @@ private:
 	// チャージパーティクル
 	std::unique_ptr<TinyEngine::Particle> chargeParticle_;
 	std::unique_ptr<TinyEngine::Particle> chargeCylinderParticle_;
-
-	// 爆発エフェクト管理用コンテナ
-	std::vector<std::unique_ptr<TinyEngine::Particle>> bombEffects_;
 
 	// 移動フラグ
 	bool isMove_ = true;

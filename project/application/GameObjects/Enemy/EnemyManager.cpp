@@ -1,6 +1,7 @@
 #include "EnemyManager.h"
 #include "JsonManager.h"
 #include "GameObjects/Player/Player.h"
+#include "Behavior/EnemyBehaviorFactory.h"
 
 #ifdef USE_IMGUI
 #include "ImGuiManager.h"
@@ -122,8 +123,7 @@ void EnemyManager::DrawImGui() {
 
 			// --- Type ---
 			int currentType = static_cast<int>(enemy->GetEnemyType());
-			const char* typeNames[] = {"Normal", "Shotgun", "Bomber", "Assault"};
-			if (ImGui::Combo("Type", &currentType, typeNames, IM_ARRAYSIZE(typeNames))) {
+			if (ImGui::Combo("Type", &currentType, EnemyBehaviorFactory::kTypeNames, static_cast<int>(EnemyType::Count))) {
 				enemy->ApplyType(static_cast<EnemyType>(currentType));
 			}
 

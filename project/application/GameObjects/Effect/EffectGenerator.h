@@ -20,4 +20,7 @@ public:
 
 	// ガラス破壊エフェクト
 	static void CreateGlassBreakEffect(EngineContext* ctx, const Vector3& pos, const Vector3& extent, std::list<std::unique_ptr<TinyEngine::Particle>>& container);
+
+	// 爆発エフェクト
+	static void CreateBomberExplosionEffect(EngineContext* ctx, const Vector3& pos, float radius, std::list<std::unique_ptr<Particle>>& container);
 };

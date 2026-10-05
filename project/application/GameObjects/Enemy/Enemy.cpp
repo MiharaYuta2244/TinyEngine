@@ -53,15 +53,8 @@ void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalMan
 
 void Enemy::Update(
     float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager) {
-	if (isDead_) {
-		// 死亡後も爆発エフェクトの更新と終了したエフェクトの削除を行う
-		for (auto& particle : bombEffects_) {
-			particle->Update();
-		}
-		std::erase_if(bombEffects_, [](const std::unique_ptr<Particle>& p) { return p->IsFinished(); });
-
+	if (isDead_)
 		return;
-	}
 
 	if (isDown_) {
 		downTimer_.Update(deltaTime);
@@ -301,11 +294,6 @@ void Enemy::Draw() {
 			chargeCylinderParticle_->Draw();
 		}
 	}
-
-	// 爆発エフェクトの描画
-	for (auto& particle : bombEffects_) {
-		particle->Draw();
-	}
 }
 
 void Enemy::StartKnockBack(Vector3 dir) {
@@ -330,9 +318,6 @@ void Enemy::Kill() {
 
 	// 血痕の生成
 	AddBloodDecal();
-
-	// 爆発エフェクトを生成
-	behavior_->OnDeath(ctx_, transform_.translate, bombEffects_);
 }
 
 void Enemy::Damage() {
@@ -425,3 +410,5 @@ void Enemy::StartDown(float duration) {
 	// 吹き飛び中などの速度も止めておく
 	velocity_ = {0.0f, 0.0f, 0.0f};
 }
+
+void Enemy::PlayDeathEffect(std::list<std::unique_ptr<Particle>>& container) { behavior_->OnDeath(ctx_, transform_.translate, container); }
