@@ -128,6 +128,10 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	textSprite_ = std::make_unique<TinyEngine::TextSprite>();
 	textSprite_->Initialize(ctx.engineContext, font_.get(), L"HP: 100");
 	textSprite_->SetPosition({50.0f, 50.0f});
+
+	// ステージ開始演出用レターボックスの生成&初期化
+	introLetterBox_ = std::make_unique<LetterBox>();
+	introLetterBox_->Initialize(ctx_.engineContext);
 }
 
 void GamePlayScene::Update() {
@@ -138,7 +142,6 @@ void GamePlayScene::Update() {
 
 	// カメラの動きだけを進める
 	if (isIntroPlaying_) {
-		// カメラ演出中にも動かしたい処理
 		UpdateCameraIntro(deltaTime);
 		stage_->Update(deltaTime, player_->GetPosition(), ctx_.currentCamera);
 		player_->PostUpdate();
@@ -147,9 +150,13 @@ void GamePlayScene::Update() {
 		decalManager_->Update();
 		postEffectController_->Update(deltaTime, player_->GetCurrentHP(), player_->IsDead());
 
+		// 演出用レターボックス更新
+		introLetterBox_->Update(deltaTime);
+
 		// カメラ演出をスキップ
 		if (ctx_.keyboard->KeyDown(DIK_SPACE) || ctx_.gamePad->GetState().buttons.a) {
 			isIntroPlaying_ = false;
+			introLetterBox_->Hide(); // スキップ時も退場させる
 		}
 
 		return;
@@ -329,6 +336,7 @@ void GamePlayScene::Update() {
 
 	// レターボックス更新
 	letterBox_->Update(deltaTime);
+	introLetterBox_->Update(deltaTime);
 
 	// 血痕管理インスタンス更新
 	decalManager_->SetCamera(ctx_.currentCamera);
@@ -382,6 +390,7 @@ void GamePlayScene::Draw() {
 
 	// レターボックス描画
 	letterBox_->Draw();
+	introLetterBox_->Draw();
 
 	// 半透明オブジェクトの描画準備
 	ctx_.engineContext->object3dCommon->DrawSettingTransparent(ctx_.engineContext->textureManager);
@@ -417,6 +426,9 @@ void GamePlayScene::UpdateCameraIntro(float deltaTime) {
 			introPivotAnim_.anim.Start(introStartPivot_, introGoalPivot_, introMoveDuration_, EaseType::EASEINOUTSINE);
 			introHoldTimer_.Initialize(introHoldDuration_);
 			introPhase_ = CameraAnimState::ToGoal;
+
+			// 演出開始と同時にレターボックスを出す
+			introLetterBox_->Trigger();
 		} else {
 			// フェード中はカメラの位置を開始地点で固定しておく
 			ctx_.currentCamera->SetPivot(introStartPivot_);
@@ -460,6 +472,7 @@ void GamePlayScene::UpdateCameraIntro(float deltaTime) {
 	default:
 		// 演出終了
 		isIntroPlaying_ = false;
+		introLetterBox_->Hide();
 		InitializeGameSceneCamera();
 		break;
 	}

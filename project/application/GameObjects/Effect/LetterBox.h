@@ -25,6 +25,15 @@ public:
 	// イージングアクティブ状態 Getter
 	bool GetIsActive() const { return easing_.GetIsActive(); }
 
+	// 画面外へ退場するアニメーションの開始処理
+	void Hide();
+
+	// 退場アニメーション中かどうか
+	bool GetIsHiding() const { return isHiding_; }
+
+	// 退場が完了して非表示になったかどうか
+	bool GetIsHidden() const { return isHidden_; }
+
 private:
 	std::array<std::unique_ptr<TinyEngine::Sprite>, 2> sprites_;
 	Vector2 positionTop_;
@@ -37,4 +46,8 @@ private:
 	float screenWidth_ = 1280.0f;
 	float screenHeight_ = 720.0f;
 	float boxHeight_ = 100.0f;
+
+	EasingAnimation<float> hideEasing_; // 退場用イージング
+	bool isHiding_ = false;
+	bool isHidden_ = false;
 };

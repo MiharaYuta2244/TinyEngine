@@ -156,4 +156,7 @@ private:
 
 	// ガラス破壊エフェクト
 	std::list<std::unique_ptr<TinyEngine::Particle>> glassBreakEffect_;
+
+	// ステージ開始演出用レターボックス
+	std::unique_ptr<LetterBox> introLetterBox_;
 };

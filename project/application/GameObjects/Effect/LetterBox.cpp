@@ -14,10 +14,19 @@ void LetterBox::Initialize(EngineContext* ctx) {
 }
 
 void LetterBox::Update(float deltaTime) {
-	if (!isTriggered_)
+	if (!isTriggered_ || isHidden_)
 		return;
 
-	easing_.Update(deltaTime, progress_);
+	if (isHiding_) {
+		// 退場中
+		hideEasing_.Update(deltaTime, progress_);
+		if (!hideEasing_.GetIsActive()) {
+			isHiding_ = false;
+			isHidden_ = true;
+		}
+	} else {
+		easing_.Update(deltaTime, progress_);
+	}
 
 	float topStartY = -boxHeight_;
 	float topEndY = 0.0f;
@@ -31,13 +40,13 @@ void LetterBox::Update(float deltaTime) {
 	sprites_[0]->SetPosition(positionTop_);
 	sprites_[1]->SetPosition(positionBottom_);
 
-	for (auto& sprite : sprites_){
+	for (auto& sprite : sprites_) {
 		sprite->Update();
 	}
 }
 
 void LetterBox::Draw() {
-	if (!isTriggered_)
+	if (!isTriggered_ || isHidden_)
 		return;
 
 	for (auto& sprite : sprites_) {
@@ -50,4 +59,14 @@ void LetterBox::Trigger() {
 		isTriggered_ = true;
 		easing_.Start(0.0f, 1.0f, 1.5f, EaseType::EASEOUTQUART);
 	}
+}
+
+void LetterBox::Hide() {
+	if (!isTriggered_ || isHiding_ || isHidden_)
+		return;
+
+	// 登場アニメーション途中でも、現在位置から退場できるようにする
+	easing_.Reset();
+	isHiding_ = true;
+	hideEasing_.Start(progress_, 0.0f, 0.6f, EaseType::EASEINCUBIC);
 }
