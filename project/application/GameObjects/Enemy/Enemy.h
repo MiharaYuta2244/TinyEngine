@@ -132,9 +132,6 @@ private:
 	// 血痕の生成
 	void AddBloodDecal();
 
-	// 爆発エフェクト生成関数
-	void GenerateBombEffect();
-
 private:
 	AABB bodyCol_{}; // 本体のAABB
 	bool enableMove_ = true;

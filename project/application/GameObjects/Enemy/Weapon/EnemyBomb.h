@@ -17,7 +17,7 @@ public:
 	~EnemyBomb();
 
 	// 初期化処理
-	void Initialize(EngineContext* ctx, Vector3 pos, Vector3 velocity, Vector3 targetPos);
+	void Initialize(EngineContext* ctx, Vector3 pos, Vector3 targetPos);
 
 	// 更新処理
 	void Update(float deltaTime);

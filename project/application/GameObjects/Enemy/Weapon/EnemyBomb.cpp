@@ -5,7 +5,7 @@
 
 EnemyBomb::~EnemyBomb() = default;
 
-void EnemyBomb::Initialize(EngineContext* ctx, Vector3 pos, Vector3 velocity, Vector3 targetPos) {
+void EnemyBomb::Initialize(EngineContext* ctx, Vector3 pos, Vector3 targetPos) {
 	ctx_ = ctx;
 	render_ = std::make_unique<ObjectRender>();
 	render_->Initialize(ctx, "Cube.obj");

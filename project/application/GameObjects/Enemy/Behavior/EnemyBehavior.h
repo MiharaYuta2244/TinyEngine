@@ -31,9 +31,6 @@ public:
 	// 敵の種類Getter
 	virtual EnemyType GetType() const = 0;
 
-	// 敵の名前Getter
-	virtual const char* GetName() const = 0;
-
 	// 最大HPGetter
 	virtual int GetMaxHP() const = 0;
 

@@ -2,7 +2,6 @@
 #include "AABB.h"
 #include "AudioManager.h"
 #include "Behavior/EnemyBehavior.h"
-#include "EnemyType.h"
 #include "GameObjects/GameObjectManager.h"
 #include "GameObjects/StageObjects/Door/Door.h"
 #include "GameObjects/StageObjects/Glass/Glass.h"
@@ -70,6 +69,12 @@ public:
 		return 0.0f;
 	}
 
+	// 挙動のSetter
+	void SetBehavior(IEnemyBehavior* behavior) {
+		behavior_ = behavior;
+		shotIntervalNormal_ = behavior_->GetShotInterval();
+	}
+
 private:
 	// プレーヤー方向に回転する
 	void LookatPlayer(float deltaTime, Vector3 playerPos, Vector3 enemyPos, float turnSpeed = 6.0f);
@@ -99,9 +104,6 @@ private:
 
 	// 敵の状態
 	State state_ = State::Normal;
-
-	// 敵のタイプ
-	EnemyType type_;
 
 	// 視界のパラメータ
 	Visionparam visionParam_ = {20.0f, 30.0f};
@@ -137,10 +139,6 @@ private:
 
 	// オーディオマネージャーポインタ
 	TinyEngine::AudioManager* audioManager_ = nullptr;
-
-	// アサルト敵パラメータ
-	float shotIntervalAssault_ = 0.4f; // 弾の発射間隔
-	float shotRangeAssault_ = 20.0f;   // 弾の発射角度（ブレ）
 
 	// 敵の挙動ポインタ
 	IEnemyBehavior* behavior_ = nullptr;

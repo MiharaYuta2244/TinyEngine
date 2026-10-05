@@ -14,8 +14,8 @@ Enemy::Enemy() { id_ = index++; }
 
 void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalManager* bloodDecalManager, AudioManager* audioManager) {
 	ctx_ = ctx;
-	behavior_ = EnemyBehaviorFactory::Create(type);
 	audioManager_ = audioManager;
+	ApplyType(type);
 
 	transform_.scale = {0.2f, 0.2f, 0.2f};
 	transform_.rotate = {0.0f, 0.0f, 0.0f};
@@ -405,9 +405,11 @@ void Enemy::ApplyType(EnemyType type) {
 	if (render_) {
 		render_->SetColor(color_);
 	}
-}
 
-void Enemy::GenerateBombEffect() { EffectGenerator::CreateHitEffect(ctx_, transform_.translate, bombEffects_); }
+	if (ai_) {
+		ai_->SetBehavior(behavior_.get());
+	}
+}
 
 void Enemy::StartDown(float duration) {
 	if (isDead_ || isDown_) {
