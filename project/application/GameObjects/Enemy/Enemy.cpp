@@ -269,11 +269,6 @@ void Enemy::Draw() {
 			renderGun_->Draw();
 		}
 
-		// 視界
-		if (enableMove_ && !isDown_ && isMove_) {
-			visionCone_->Draw();
-		}
-
 		// 「!」マークの描画
 		if (!isDown_ && isMove_ && exclamationMark_) {
 			exclamationMark_->Draw();
@@ -293,6 +288,16 @@ void Enemy::Draw() {
 		if (!isDown_ && isMove_ && (ai_->GetState() == EnemyAI::State::Vigilance || ai_->GetState() == EnemyAI::State::Hold) && chargeCylinderParticle_) {
 			chargeCylinderParticle_->Draw();
 		}
+	}
+}
+
+void Enemy::DrawVision() {
+	if (isDead_)
+		return;
+
+	// 視界の描画
+	if (enableMove_ && !isDown_) {
+		visionCone_->Draw();
 	}
 }
 

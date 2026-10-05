@@ -43,6 +43,7 @@ public:
 	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager);
 	void PostUpdate();
 	void Draw();
+	void DrawVision();
 	void DrawImGui();
 	void SetMove();
 	void SetStop();

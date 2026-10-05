@@ -386,11 +386,11 @@ void GamePlayScene::Draw() {
 	// 半透明オブジェクトの描画準備
 	ctx_.engineContext->object3dCommon->DrawSettingTransparent(ctx_.engineContext->textureManager);
 
+	// 敵の視界
+	enemyManager_->DrawVision();
+
 	// ガラスの描画
 	stage_->DrawTransparent();
-
-	// テキスト描画
-	// textSprite_->Draw();
 }
 
 void GamePlayScene::Finalize() {

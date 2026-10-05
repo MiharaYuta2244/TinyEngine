@@ -219,7 +219,7 @@ void VisionCone::Update(const std::list<std::unique_ptr<Wall>>& walls, const std
 
 void VisionCone::Draw(const std::string& texturePath) {
 	auto commandList = ctx_->object3dCommon->GetDxCommon()->GetCommandList();
-	ctx_->object3dCommon->DrawSettingCommon(ctx_->textureManager);
+	ctx_->object3dCommon->DrawSettingTransparent(ctx_->textureManager);
 	std::string path = texturePath.empty() ? "resources/textures/white.png" : texturePath; // 任意のデフォルト白テクスチャ
 	commandList->SetGraphicsRootDescriptorTable(2, ctx_->textureManager->GetSrvHandleGPU(path));
 	commandList->SetGraphicsRootConstantBufferView(1, wvpResource_->GetGPUVirtualAddress());

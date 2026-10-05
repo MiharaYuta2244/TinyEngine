@@ -37,6 +37,9 @@ public:
 	// 描画処理
 	void Draw();
 
+	// 視界の描画
+	void DrawVision();
+
 	// 死亡フラグGetter
 	bool IsDead() const { return isDead_; }
 

@@ -88,6 +88,15 @@ void EnemyManager::Draw() {
 	}
 }
 
+void EnemyManager::DrawVision() {
+	for (auto& enemy : enemies_) {
+		// アクティブな敵のみ視界描画
+		if (enemy->IsActive()) {
+			enemy->DrawVision();
+		}
+	}
+}
+
 void EnemyManager::DrawImGui() {
 #ifdef USE_IMGUI
 	ImGui::Begin("Enemy Manager");
