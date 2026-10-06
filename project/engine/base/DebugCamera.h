@@ -1,10 +1,17 @@
 #pragma once
 #include "DirectInput.h"
+#include "EaseType.h"
 #include "GamePad.h"
 #include "MathUtility.h"
 #include "Matrix4x4.h"
 #include "Vector3.h"
 #include <Transform.h>
+
+// シェイクの種類
+enum class ShakeType {
+	Random, // 従来のランダム揺れ
+	Seesaw, // シーソーのように回転で揺れる
+};
 
 /// <summary>
 /// カメラのクラス
@@ -16,6 +23,9 @@ public:
 	void SetPivot(const Vector3& p);
 	void Update(const DirectInput& input, const GamePad& gamePad);
 	void UpdateViewMatrix();
+
+	// シーソー揺れの開始処理
+	void StartSeesawShake(float duration, float angleDegree, float frequency = 2.0f, const Vector3& axisWeight = {0.0f, 0.0f, 1.0f}, EaseType easeType = EaseType::EASEOUTQUAD);
 
 	// Getter
 	Matrix4x4& GetWorldMatrix() { return worldMatrix_; }
@@ -91,4 +101,10 @@ private:
 	float shakeTimer_ = 0;
 	float magnitude_;
 	Vector3 shakeOffset_ = {0.0f, 0.0f, 0.0f};
+	ShakeType shakeType_ = ShakeType::Random;
+	float seesawAngle_ = 0.0f;                       // 最大角度
+	float seesawFrequency_ = 2.0f;                   // 周波数
+	Vector3 seesawAxis_ = {0.0f, 0.0f, 1.0f};        // 揺らす軸の重み
+	EaseType seesawEaseType_ = EaseType::EASEOUTQUAD; // シーソー減衰用イージング
+	Vector3 shakeRotateOffset_ = {0.0f, 0.0f, 0.0f}; // 回転オフセット
 };

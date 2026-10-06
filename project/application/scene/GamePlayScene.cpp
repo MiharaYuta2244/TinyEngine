@@ -303,7 +303,7 @@ void GamePlayScene::Update() {
 		bool isFinished = p->IsFinished();
 		if (isFinished) {
 			// パーティクルが終了して削除される瞬間だけカメラを揺らす
-			ctx_.currentCamera->StartShake(0.2f, 0.3f);
+			ctx_.currentCamera->StartSeesawShake(0.2f, 2.0f, 5.0f, {1.0f, 0.0f, 1.0f}, EaseType::EASEOUTEXPO);
 		}
 		return isFinished;
 	});

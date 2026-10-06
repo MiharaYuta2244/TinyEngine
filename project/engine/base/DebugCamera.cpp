@@ -1,4 +1,5 @@
 #include "DebugCamera.h"
+#include "Easing.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
 #include "Random.h"
@@ -31,9 +32,11 @@ void Camera::SetRotate(const Vector3& rotate) {
 }
 
 void Camera::UpdateOrientation() {
-	Matrix4x4 pitch = MathUtility::MakePitchRotateMatrix(euler_.x);
-	Matrix4x4 yaw = MathUtility::MakeYawRotateMatrix(euler_.y);
-	Matrix4x4 roll = MathUtility::MakeRollRotateMatrix(euler_.z);
+	Vector3 e = euler_ + shakeRotateOffset_;
+
+	Matrix4x4 pitch = MathUtility::MakePitchRotateMatrix(e.x);
+	Matrix4x4 yaw = MathUtility::MakeYawRotateMatrix(e.y);
+	Matrix4x4 roll = MathUtility::MakeRollRotateMatrix(e.z);
 
 	Matrix4x4 pitchYaw = MathUtility::Multiply(pitch, yaw);
 	orientation_ = MathUtility::Multiply(pitchYaw, roll);
@@ -118,6 +121,7 @@ void Camera::UpdateViewMatrix() {
 
 void Camera::StartShake(float duration, float magnitude) {
 	isShake_ = true;
+	shakeType_ = ShakeType::Random;
 	shakeDuration_ = duration;
 	shakeTimer_ = 0.0f;
 	magnitude_ = magnitude;
@@ -126,11 +130,38 @@ void Camera::StartShake(float duration, float magnitude) {
 void Camera::ShakeCamera(float deltaTime, float shakePower) {
 	if (!isShake_) {
 		shakeOffset_ = {0.0f, 0.0f, 0.0f};
+
+		// 回転オフセットが残っていたら戻す
+		if (shakeRotateOffset_.x != 0.0f || shakeRotateOffset_.y != 0.0f || shakeRotateOffset_.z != 0.0f) {
+			shakeRotateOffset_ = {0.0f, 0.0f, 0.0f};
+			UpdateOrientation();
+		}
 		return;
 	}
 
-	const float decay = 0.9f;
+	// シーソー揺れ
+	if (shakeType_ == ShakeType::Seesaw) {
+		shakeTimer_ += deltaTime;
 
+		float t = std::clamp(shakeTimer_ / shakeDuration_, 0.0f, 1.0f);
+		float eased = Easing::ApplyEasing(seesawEaseType_, t);
+		float decay = 1.0f - eased;
+		float angle = std::sin(2.0f * std::numbers::pi_v<float> * seesawFrequency_ * shakeTimer_) * seesawAngle_ * decay;
+
+		shakeRotateOffset_ = seesawAxis_ * angle;
+		UpdateOrientation();
+
+		if (shakeTimer_ >= shakeDuration_) {
+			shakeRotateOffset_ = {0.0f, 0.0f, 0.0f};
+			UpdateOrientation();
+			isShake_ = false;
+			shakeTimer_ = 0.0f;
+		}
+		return;
+	}
+
+	// ランダム揺れ
+	const float decay = 0.9f;
 	float offsetX = RandomUtils::RangeFloat(-shakePower, shakePower) * magnitude_;
 	float offsetY = RandomUtils::RangeFloat(-shakePower, shakePower) * magnitude_;
 
@@ -192,4 +223,15 @@ void Camera::UpdateFollow(const Vector3& targetPos, const Vector3& targetRot, fl
 	UpdateOrientation();
 	SetPivot(nextPivot);
 	UpdateViewMatrix();
+}
+
+void Camera::StartSeesawShake(float duration, float angleDegree, float frequency, const Vector3& axisWeight, EaseType easeType) {
+	isShake_ = true;
+	shakeType_ = ShakeType::Seesaw;
+	shakeDuration_ = duration;
+	shakeTimer_ = 0.0f;
+	seesawAngle_ = MathUtility::DegreeToRadian(angleDegree);
+	seesawFrequency_ = frequency;
+	seesawAxis_ = axisWeight;
+	seesawEaseType_ = easeType;
 }
