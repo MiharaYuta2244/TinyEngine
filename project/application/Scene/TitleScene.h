@@ -58,4 +58,7 @@ private:
 	float fadeTimer_ = 0.0f;              // フェード用タイマー
 	const float fadeWaitDuration_ = 2.0f; // 表示を維持する時間
 	const float fadeOutDuration_ = 2.0f;  // フェードアウトにかける時間
+
+	// 一度表示したら以降はタイトル画面で表示しない為のフラグ
+	static inline bool isReccomended_ = true;
 };

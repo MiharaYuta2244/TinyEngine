@@ -101,20 +101,35 @@ void TitleScene::Update() {
 	float totalFadeTime = fadeWaitDuration_ + fadeOutDuration_;
 	bool isFading = (fadeTimer_ < totalFadeTime);
 
-	if (isFading) {
-		fadeTimer_ += deltaTime;
-		float alpha = 1.0f;
+	// 初回のみフェード処理およびスキップ入力チェックを行う
+	if (isReccomended_) {
+		isFading = (fadeTimer_ < totalFadeTime);
 
-		// 透明度を下げる
-		if (fadeTimer_ > fadeWaitDuration_) {
-			float progress = (fadeTimer_ - fadeWaitDuration_) / fadeOutDuration_;
-			alpha = std::clamp(1.0f - progress, 0.0f, 1.0f);
+		if (isFading) {
+			fadeTimer_ += deltaTime;
+			float alpha = 1.0f;
+
+			// 透明度を下げる
+			if (fadeTimer_ > fadeWaitDuration_) {
+				float progress = (fadeTimer_ - fadeWaitDuration_) / fadeOutDuration_;
+				alpha = std::clamp(1.0f - progress, 0.0f, 1.0f);
+			}
+
+			// アルファ値を適用
+			blackBg_->SetColor({0.0f, 0.0f, 0.0f, alpha});
+			controllerImage_->SetColor({1.0f, 1.0f, 1.0f, alpha});
+			recommended_->SetColor({1.0f, 1.0f, 1.0f, alpha});
+
+			// ゲームパッド推奨スキップ
+			if (ctx_.keyboard->KeyTriggered(DIK_SPACE) || ctx_.gamePad->GetState().buttons.a) {
+				fadeTimer_ = totalFadeTime;
+				isFading = false;
+				isReccomended_ = false; // 次回以降表示しないようにフラグを倒す
+			}
+		} else {
+			// フェード時間が終了したら表示完了とみなす
+			isReccomended_ = false;
 		}
-
-		// アルファ値を適用
-		blackBg_->SetColor({0.0f, 0.0f, 0.0f, alpha});
-		controllerImage_->SetColor({1.0f, 1.0f, 1.0f, alpha});
-		recommended_->SetColor({1.0f, 1.0f, 1.0f, alpha});
 	}
 
 	// メニューの更新
@@ -159,16 +174,6 @@ void TitleScene::Update() {
 			// ゲーム終了
 			PostQuitMessage(0);
 		}
-	}
-
-	// ゲームパッド推奨スキップ
-	if(ctx_.keyboard->KeyTriggered(DIK_SPACE) || ctx_.gamePad->GetState().buttons.a){
-		fadeTimer_ = totalFadeTime;
-
-		// 画像をすべて透明にする
-		blackBg_->SetColor({0.0f, 0.0f, 0.0f, 0.0f});
-		controllerImage_->SetColor({1.0f, 1.0f, 1.0f, 0.0f});
-		recommended_->SetColor({1.0f, 1.0f, 1.0f, 0.0f});
 	}
 
 #ifdef USE_IMGUI
@@ -231,17 +236,18 @@ void TitleScene::Draw() {
 	// タイトルロゴ描画
 	titleLogo_->Draw();
 
-	// 黒背景描画
-	blackBg_->Draw();
+	if (isReccomended_) {
+		// 黒背景描画
+		blackBg_->Draw();
 
-	// コントローラー画像描画
-	controllerImage_->Draw();
+		// コントローラー画像描画
+		controllerImage_->Draw();
 
-	// コントローラー推奨テキスト描画
-	recommended_->Draw();
+		// コントローラー推奨テキスト描画
+		recommended_->Draw();
+	}
 }
 
 void TitleScene::Finalize() {
 	audioManager_->StopBGM();
-	fadeTimer_ = 0.0f;
 }
