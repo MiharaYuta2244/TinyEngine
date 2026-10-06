@@ -1,6 +1,7 @@
 #pragma once
 #include "AudioManager.h"
 #include "Enemy.h"
+#include "GameObjects/Effect/FootprintManager.h"
 #include <list>
 #include <memory>
 #include <string>
@@ -70,4 +71,7 @@ private:
 
 	// オーディオマネージャーインスタンス
 	std::unique_ptr<TinyEngine::AudioManager> audioManager_;
+
+	// 足跡管理インスタンス
+	std::unique_ptr<FootprintManager> footprintManager_;
 };

@@ -13,6 +13,10 @@ void EnemyManager::Initialize(EngineContext* ctx, DecalManager* bloodDecalManage
 	ctx_ = ctx;
 	bloodDecalManager_ = bloodDecalManager;
 
+	// 足跡管理インスタンス生成&初期化
+	footprintManager_ = std::make_unique<FootprintManager>();
+	footprintManager_->Initialize(bloodDecalManager);
+
 	// オーディオマネージャー生成&初期化
 	audioManager_ = std::make_unique<AudioManager>();
 	audioManager_->Initialize();
@@ -27,6 +31,9 @@ void EnemyManager::Initialize(EngineContext* ctx, DecalManager* bloodDecalManage
 
 void EnemyManager::Update(
     float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager) {
+
+	// 敵がアクティブかどうかに関わらず、足跡は毎フレーム更新
+	footprintManager_->Update(deltaTime);
 
 	// 削除前の敵の数を取得
 	size_t beforeCount = enemies_.size();
@@ -158,6 +165,7 @@ void EnemyManager::DrawImGui() {
 		newEnemy->SetPos({0.0f, 0.0f, 0.0f});
 		newEnemy->SetRotate({0.0f, 0.0f, 0.0f});
 		newEnemy->SetIsMove(false);
+		newEnemy->SetFootprintManager(footprintManager_.get());
 		enemies_.push_back(std::move(newEnemy));
 	}
 
@@ -196,6 +204,7 @@ void EnemyManager::LoadFromJson(const std::string& filepath) {
 		enemy->SetPos(data.pos);
 		enemy->SetRotate(data.rot);
 		enemy->SetIsMove(data.isMove);
+		enemy->SetFootprintManager(footprintManager_.get());
 		enemies_.push_back(std::move(enemy));
 	}
 }

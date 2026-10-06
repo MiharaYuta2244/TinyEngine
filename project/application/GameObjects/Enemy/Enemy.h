@@ -11,6 +11,7 @@
 #include "GameTimer.h"
 #include "Particle.h"
 #include "VisionCone.h"
+#include "GameObjects/Effect/FootprintManager.h"
 
 class EnemyBulletManager;
 class Player;
@@ -125,6 +126,9 @@ public:
 	// 爆発エフェクト生成用の窓口
 	void PlayDeathEffect(std::list<std::unique_ptr<TinyEngine::Particle>>& container);
 
+	// 足跡管理インスタンスSetter
+	void SetFootprintManager(FootprintManager* footprintManager) { footprintManager_ = footprintManager; }
+
 private:
 	// 当たり判定の更新
 	void UpdateCollision();
@@ -137,6 +141,9 @@ private:
 
 	// 血痕の生成
 	void AddBloodDecal();
+
+	// 足跡の生成処理
+	void UpdateFootprint();
 
 private:
 	AABB bodyCol_{}; // 本体のAABB
@@ -212,4 +219,12 @@ private:
 	bool isDown_ = false;
 	GameTimer downTimer_;
 	float downDuration_ = 3.0f;
+
+	// 足跡関連
+	FootprintManager* footprintManager_ = nullptr;
+	Vector3 lastFootprintCheckPos_ = {0.0f, 0.0f, 0.0f};
+	bool hasLastFootprintPos_ = false;
+	float strideAccum_ = 0.0f;   // 前回の足跡からの移動距離
+	float strideLength_ = 1.2f;  // 足跡を置く間隔
+	bool isNextFootLeft_ = true; // 次に踏む足
 };

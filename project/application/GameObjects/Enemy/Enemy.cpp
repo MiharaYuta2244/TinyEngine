@@ -250,6 +250,9 @@ void Enemy::PostUpdate() {
 	// 正しい座標で描画用インスタンスの更新
 	render_->Update(transform_);
 
+	// ボーン座標が最新になった後で足跡を置く
+	UpdateFootprint();
+
 	Transform gunTransform;
 	gunTransform.scale = {0.7f, 0.2f, 0.1f};
 	float gunYaw = transform_.rotate.y - (std::numbers::pi_v<float> / 2.0f);
@@ -423,3 +426,44 @@ void Enemy::StartDown(float duration) {
 }
 
 void Enemy::PlayDeathEffect(std::list<std::unique_ptr<Particle>>& container) { behavior_->OnDeath(ctx_, transform_.translate, container); }
+
+void Enemy::UpdateFootprint() {
+	if (!footprintManager_) {
+		return;
+	}
+
+	// 初回は基準位置を記録するだけ
+	if (!hasLastFootprintPos_) {
+		lastFootprintCheckPos_ = transform_.translate;
+		hasLastFootprintPos_ = true;
+		return;
+	}
+
+	Vector3 delta = transform_.translate - lastFootprintCheckPos_;
+	delta.y = 0.0f;
+	lastFootprintCheckPos_ = transform_.translate;
+
+	// ノックバック・ダウン・拘束中は歩いていないので足跡を残さない
+	if (isDown_ || IsKnockBack() || ai_->GetState() == EnemyAI::State::Hold) {
+		strideAccum_ = 0.0f;
+		return;
+	}
+
+	strideAccum_ += MathUtility::Length(delta);
+	if (strideAccum_ < strideLength_) {
+		return;
+	}
+	strideAccum_ -= strideLength_;
+
+	// 左右交互にその足のボーン座標へ配置
+	const std::wstring boneName = isNextFootLeft_ ? L"ボーン.011" : L"ボーン.019";
+	Vector3 footPos = render_->GetBonePos(boneName);
+
+	// ボーンが見つからない場合はGetBonePosが(0,0,0)を返すので、本体座標で代用
+	if (footPos.x == 0.0f && footPos.y == 0.0f && footPos.z == 0.0f) {
+		footPos = transform_.translate;
+	}
+
+	footprintManager_->Add(footPos, transform_.rotate.y, isNextFootLeft_);
+	isNextFootLeft_ = !isNextFootLeft_;
+}

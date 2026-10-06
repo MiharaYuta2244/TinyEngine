@@ -256,6 +256,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="engine\2d\font\Font.cpp" />
     <ClCompile Include="engine\2d\font\FontCommon.cpp" />
     <ClCompile Include="engine\3d\particle\modules\GlassShardModule.cpp" />
+    <ClCompile Include="application\GameObjects\Effect\FootprintManager.cpp" />
     <ClCompile Include="main.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">MaxSpeed</Optimization>
       <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Development|x64'">true</WholeProgramOptimization>
@@ -568,6 +569,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="application\Utility\RumbleManager.h" />
     <ClInclude Include="application\GameObjects\Enemy\Behavior\NormalBehavior.h" />
     <ClInclude Include="application\GameObjects\Enemy\Behavior\ShotgunBehavior.h" />
+    <ClInclude Include="application\GameObjects\Effect\FootprintManager.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

@@ -100,6 +100,7 @@ void TitleScene::Update() {
 	// 黒背景＆コントローラー画像のフェードアウト処理
 	float totalFadeTime = fadeWaitDuration_ + fadeOutDuration_;
 	bool isFading = (fadeTimer_ < totalFadeTime);
+	bool skippedThisFrame = false;
 
 	// 初回のみフェード処理およびスキップ入力チェックを行う
 	if (isReccomended_) {
@@ -124,7 +125,8 @@ void TitleScene::Update() {
 			if (ctx_.keyboard->KeyTriggered(DIK_SPACE) || ctx_.gamePad->GetState().buttons.a) {
 				fadeTimer_ = totalFadeTime;
 				isFading = false;
-				isReccomended_ = false; // 次回以降表示しないようにフラグを倒す
+				isReccomended_ = false;  // 次回以降表示しないようにフラグを倒す
+				skippedThisFrame = true; // このフレームでスキップされたことを記録
 			}
 		} else {
 			// フェード時間が終了したら表示完了とみなす
@@ -133,7 +135,7 @@ void TitleScene::Update() {
 	}
 
 	// メニューの更新
-	if (!isFading) {
+	if (!isFading && !skippedThisFrame) {
 		if (menuState_ == TitleMenuState::Main) {
 			menu_->Update(ctx_.keyboard, ctx_.gamePad, deltaTime);
 		} else {
