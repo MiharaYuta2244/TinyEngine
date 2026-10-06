@@ -329,7 +329,9 @@ void GamePlayScene::Update() {
 	ctx_.currentCamera->ShakeCamera(deltaTime, shakePower_);
 
 	// カメラの更新
-	ctx_.currentCamera->Update(*ctx_.keyboard, *ctx_.gamePad);
+	if (isDebugCameraActive_) {
+		ctx_.currentCamera->Update(*ctx_.keyboard, *ctx_.gamePad);
+	}
 
 	// フラッシュエフェクト更新
 	flashEffect_->Update(deltaTime);

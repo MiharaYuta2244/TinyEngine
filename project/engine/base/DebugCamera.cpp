@@ -40,7 +40,7 @@ void Camera::UpdateOrientation() {
 }
 
 void Camera::Update(const DirectInput& input, const GamePad& gamePad) {
-#ifdef _DEBUG
+#if defined(NDEBUG) || defined(_DEBUG)
 	// ============================
 	//  マウス右ドラッグ：自由回転
 	// ============================
