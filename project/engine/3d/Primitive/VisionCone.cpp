@@ -125,6 +125,9 @@ void VisionCone::CreateConstantBuffers() {
 	// Materialバッファ
 	materialResource_ = DirectXUtils::CreateBufferResource(device, sizeof(Material));
 	materialResource_->Map(0, nullptr, reinterpret_cast<void**>(&materialData_));
+
+	cameraResource_ = DirectXUtils::CreateBufferResource(device, sizeof(CameraForGPU));
+	cameraResource_->Map(0, nullptr, reinterpret_cast<void**>(&cameraData_));
 }
 
 void VisionCone::Update(const std::list<std::unique_ptr<Wall>>& walls, const std::list<std::unique_ptr<Door>>& doors, const std::list<std::unique_ptr<Glass>>& glasses) {
@@ -203,6 +206,7 @@ void VisionCone::Update(const std::list<std::unique_ptr<Wall>>& walls, const std
 	// WVP行列の計算
 	Camera* camera = ctx_->object3dCommon->GetDefaultCamera();
 	if (camera) {
+		cameraData_->worldPosition = camera->GetTranslation();
 		const Matrix4x4& viewProjectionMatrix = camera->GetViewProjectionMatrix();
 		worldViewProjectionMatrix_ = MathUtility::Multiply(worldMatrix_, viewProjectionMatrix);
 	} else {
@@ -224,6 +228,7 @@ void VisionCone::Draw(const std::string& texturePath) {
 	commandList->SetGraphicsRootDescriptorTable(2, ctx_->textureManager->GetSrvHandleGPU(path));
 	commandList->SetGraphicsRootConstantBufferView(1, wvpResource_->GetGPUVirtualAddress());
 	commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());
+	commandList->SetGraphicsRootConstantBufferView(4, cameraResource_->GetGPUVirtualAddress());
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView_);
 	commandList->IASetIndexBuffer(&indexBufferView_);
 	commandList->DrawIndexedInstanced(indexCount_, 1, 0, 0, 0);

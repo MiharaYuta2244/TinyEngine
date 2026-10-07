@@ -3,6 +3,7 @@
 #include "Material.h"
 #include "Transform.h"
 #include "TransformationMatrix.h"
+#include "CameraForGPU.h"
 #include <d3d12.h>
 #include <string>
 #include <wrl.h>
@@ -96,6 +97,9 @@ private:
 	float radius_ = 0.0f;
 	float angleDegrees_ = 0.0f;
 	uint32_t segments_ = 0;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource_;
+	CameraForGPU* cameraData_ = nullptr;
 };
 
 } // namespace TinyEngine
