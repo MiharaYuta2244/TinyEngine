@@ -191,6 +191,13 @@ void GamePlayScene::Update() {
 	    [this](Enemy* enemy) { GenerateEnemyDeathEffect(enemy); }, [this](const Vector3& pos, const Vector3& extent) { GenerateGlassBreakEffect(pos, extent); },
 	    postEffectController_->GetGlitchTimer(), postEffectController_->GetDamageBlurTimer());
 
+	// 壊れた石鹸のエフェクト生成
+	for (auto& soap : stage_->GetSoapManager()->GetObjects()) {
+		if (soap->ConsumeJustBroken()) {
+			GenerateSoapBreakEffect(soap->GetPos());
+		}
+	}
+
 	// 押し戻し完了後の最終的な座標で、描画更新&AABB更新
 	player_->PostUpdate();
 	enemyManager_->PostUpdate();
@@ -305,6 +312,12 @@ void GamePlayScene::Update() {
 	}
 	std::erase_if(glassBreakEffect_, [](const std::unique_ptr<TinyEngine::Particle>& p) { return p->IsFinished(); });
 
+	// 石鹸の箱破壊エフェクト
+	for (auto& particle : soapBreakEffect_) {
+		particle->Update();
+	}
+	std::erase_if(soapBreakEffect_, [](const std::unique_ptr<TinyEngine::Particle>& p) { return p->IsFinished(); });
+
 	// カメラの追従
 	if (!isDebugCameraActive_) {
 		ctx_.currentCamera->UpdateFollow(player_->GetPosition(), player_->GetRotation(), offsetDistance_, cameraPosY_, cameraAngle_, tiltSpeed_, deltaTime);
@@ -368,6 +381,10 @@ void GamePlayScene::Draw() {
 	}
 
 	for (auto& particle : glassBreakEffect_) {
+		particle->Draw();
+	}
+
+	for (auto& particle : soapBreakEffect_) {
 		particle->Draw();
 	}
 
@@ -479,3 +496,5 @@ void GamePlayScene::GenerateGlassBreakEffect(const Vector3& pos, const Vector3& 
 	// SE再生
 	audioManager_->PlaySE("GlassBreak", 0.4f);
 }
+
+void GamePlayScene::GenerateSoapBreakEffect(const Vector3& pos) { EffectGenerator::CreateSoapBreakEffect(ctx_.engineContext, {pos.x, pos.y + 0.5f, pos.z}, soapBreakEffect_); }

@@ -33,6 +33,6 @@ private:
 	float holdTime_ = 3.0f;                         // 薄くなり始めるまでの時間
 	float fadeTime_ = 4.0f;                         // 薄くなって消えるまでの時間
 	float maxAlpha_ = 0.8f;                         // 初期の透明度
-	Vector3 scale_ = {0.3f, 0.45f, 1.0f};           // スケール
+	Vector3 scale_ = {0.5f, 0.5f, 1.0f};            // スケール
 	Vector4 baseColor_ = {0.4f, 0.25f, 0.1f, 1.0f}; // 色
 };

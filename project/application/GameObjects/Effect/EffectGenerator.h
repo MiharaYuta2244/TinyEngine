@@ -23,4 +23,7 @@ public:
 
 	// 爆発エフェクト
 	static void CreateBomberExplosionEffect(EngineContext* ctx, const Vector3& pos, float radius, std::list<std::unique_ptr<Particle>>& container);
+
+	// 石鹸破壊エフェクト
+	static void CreateSoapBreakEffect(EngineContext* ctx, const Vector3& pos, std::list<std::unique_ptr<TinyEngine::Particle>>& container);
 };

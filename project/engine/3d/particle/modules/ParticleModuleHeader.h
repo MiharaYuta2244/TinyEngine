@@ -16,3 +16,4 @@
 #include "modules/MuzzleSparkModule.h"
 #include "modules/MuzzleSmokeModule.h"
 #include "modules/GlassShardModule.h"
+#include "modules/WoodShardModule.h"

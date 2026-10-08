@@ -27,6 +27,7 @@ void PauseScene::Initialize(const SceneContext& ctx) {
 	textSprite_ = std::make_unique<TextSprite>();
 	textSprite_->Initialize(ctx.engineContext, font_.get(), L"Pause");
 	textSprite_->SetPosition({518.0f, 50.0f});
+	textSprite_->SetColor({0.5f, 0.5f, 0.0f, 1.0f});
 }
 
 void PauseScene::Update() {

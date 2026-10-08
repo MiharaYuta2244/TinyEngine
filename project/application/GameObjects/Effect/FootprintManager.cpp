@@ -8,7 +8,7 @@ void FootprintManager::Initialize(DecalManager* decalManager) {
 
 	// 最初に全部作って画面外に隠しておく
 	for (auto& fp : pool_) {
-		fp.decal = decalManager->AddDecal("white.png", {0.0f, -1000.0f, 0.0f}, {std::numbers::pi_v<float> / 2.0f, 0.0f, 0.0f}, scale_, {baseColor_.x, baseColor_.y, baseColor_.z, 0.0f});
+		fp.decal = decalManager->AddDecal("Footprint.png", {0.0f, -1000.0f, 0.0f}, {std::numbers::pi_v<float> / 2.0f, 0.0f, 0.0f}, scale_, {baseColor_.x, baseColor_.y, baseColor_.z, 0.0f});
 		fp.active = false;
 	}
 }

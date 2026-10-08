@@ -56,6 +56,9 @@ private:
 	// ガラス破壊エフェクトの生成
 	void GenerateGlassBreakEffect(const Vector3& pos, const Vector3& extent);
 
+	// 石鹸の箱破壊時のエフェクトの生成
+	void GenerateSoapBreakEffect(const Vector3& pos);
+
 private:
 	// プレイヤー
 	std::unique_ptr<Player> player_;
@@ -153,4 +156,7 @@ private:
 
 	// ステージ開始演出用レターボックス
 	std::unique_ptr<LetterBox> introLetterBox_;
+
+	// 石鹸の箱破壊時のエフェクト
+	std::list<std::unique_ptr<TinyEngine::Particle>> soapBreakEffect_;
 };

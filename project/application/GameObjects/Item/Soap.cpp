@@ -1,8 +1,7 @@
 #include "Soap.h"
-#include <algorithm>
-#include <cmath>
-#include <numbers>
 #include "MathUtility.h"
+#include <algorithm>
+#include <numbers>
 
 int Soap::index = 0;
 
@@ -42,10 +41,12 @@ void Soap::Update(float deltaTime) {
 }
 
 void Soap::Draw() {
+	// 本体描画
 	if (!isBroken_) {
 		render_->Draw();
 	}
 
+	// 泡描画
 	if (isBubbleActive_) {
 		bubbleRender_->Draw();
 	}
@@ -53,7 +54,7 @@ void Soap::Draw() {
 
 void Soap::Throw(const Vector3& velocity) {
 	prevPos_ = transform_.translate;
-	
+
 	// ベクトルの長さが十分あれば正規化して設定したスピードを適用
 	if (MathUtility::LengthSquared(velocity) > 0.0001f) {
 		velocity_ = MathUtility::Scale(MathUtility::Normalize(velocity), throwSpeed_);
@@ -97,6 +98,11 @@ void Soap::UpdateMove(float deltaTime) {
 
 		if (!isBubbleActive_) {
 			isBubbleActive_ = true;
+
+			if (!isBroken_) {
+				justBroken_ = true;
+			}
+
 			isBroken_ = true;
 			bubbleTimer_.Initialize(bubbleDuration_);
 		}
@@ -149,7 +155,17 @@ void Soap::Stop() {
 	velocity_ = {0.0f, 0.0f, 0.0f};
 	isThrown_ = false;
 
+	if (!isBroken_) {
+		justBroken_ = true;
+	}
+
 	isBubbleActive_ = true;
 	isBroken_ = true;
 	bubbleTimer_.Initialize(bubbleDuration_);
+}
+
+bool Soap::ConsumeJustBroken() {
+	bool result = justBroken_;
+	justBroken_ = false;
+	return result;
 }

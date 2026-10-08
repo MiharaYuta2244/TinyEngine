@@ -387,7 +387,7 @@ void Enemy::AddBloodDecal() {
 	finalPos.x = basePos.x;
 	finalPos.y = 0.1f;
 	finalPos.z = basePos.z;
-	bloodDecalManager_->AddDecal("Bleeding.png", finalPos, {std::numbers::pi_v<float> / 2.0f, 0, 0}, {4, 4, 1}, ColorPalette::DarkRed());
+	bloodDecalManager_->AddDecal("Blood.png", finalPos, {std::numbers::pi_v<float> / 2.0f, 0, 0}, {4, 4, 1}, ColorPalette::DarkRed());
 }
 
 void Enemy::ApplyType(EnemyType type) {

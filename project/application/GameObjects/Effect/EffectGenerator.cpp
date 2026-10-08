@@ -129,3 +129,19 @@ void EffectGenerator::CreateBomberExplosionEffect(EngineContext* ctx, const Vect
 	ring->SetEmitterParam(1, 0.01f);
 	container.push_back(std::move(ring));
 }
+
+void EffectGenerator::CreateSoapBreakEffect(EngineContext* ctx, const Vector3& pos, std::list<std::unique_ptr<Particle>>& container) {
+	// 飛び散る木の破片
+	auto shards = std::make_unique<Particle>();
+	shards->Initialize(ctx, pos, "white.png", std::make_unique<WoodShardModule>(), nullptr, ParticleMeshType::Square);
+	shards->SetEmitMode(false, 0.05f);
+	shards->SetEmitterParam(25, 0.01f);
+	container.push_back(std::move(shards));
+
+	// 破壊時の土煙
+	auto dust = std::make_unique<Particle>();
+	dust->Initialize(ctx, pos, "Dust.png", std::make_unique<DustModule>(), nullptr, ParticleMeshType::Square);
+	dust->SetEmitMode(false, 0.05f);
+	dust->SetEmitterParam(6, 0.01f);
+	container.push_back(std::move(dust));
+}

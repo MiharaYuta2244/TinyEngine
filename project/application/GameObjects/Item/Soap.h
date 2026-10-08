@@ -61,6 +61,9 @@ public:
 	float GetThrowSpeed() const { return throwSpeed_; }
 	void SetThrowSpeed(float speed) { throwSpeed_ = speed; }
 
+	// 壊れた瞬間の処理
+	bool ConsumeJustBroken();
+
 private:
 	// 速度・摩擦の適用
 	void UpdateMove(float deltaTime);
@@ -104,4 +107,7 @@ private:
 
 	// 投げるスピード
 	float throwSpeed_ = 30.0f;
+
+	// 破壊された瞬間のフラグ
+	bool justBroken_ = false;
 };
