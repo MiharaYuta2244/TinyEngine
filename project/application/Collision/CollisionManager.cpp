@@ -41,7 +41,7 @@ void CollisionManager::CheckCollisions(
 			const float blastRadius = enemy->GetDeathBlastRadius();
 
 			// プレイヤーが爆風範囲内にいた場合
-			if (blastRadius > 0.0f) {
+			if (blastRadius > 0.0f && distSq <= blastRadius * blastRadius) {
 				player->Damage(player->GetMaxHP()); // プレイヤーを一撃死させる
 				glitchTimer = 0.5f;
 				blurTimer = 1.0f;
