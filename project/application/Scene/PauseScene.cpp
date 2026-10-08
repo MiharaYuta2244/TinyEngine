@@ -18,6 +18,15 @@ void PauseScene::Initialize(const SceneContext& ctx) {
 	bgSprite_->Initialize(ctx.engineContext, "white.png");
 	bgSprite_->SetColor({0, 0, 0, 0.8f});
 	bgSprite_->SetSize({1280.0f, 720.0f});
+
+	// フォント生成&初期化
+	font_ = std::make_unique<Font>();
+	font_->Initialize(ctx.engineContext, L"Dela Gothic One", 64);
+
+	// テキスト生成&初期化
+	textSprite_ = std::make_unique<TextSprite>();
+	textSprite_->Initialize(ctx.engineContext, font_.get(), L"Pause");
+	textSprite_->SetPosition({518.0f, 50.0f});
 }
 
 void PauseScene::Update() {
@@ -30,6 +39,9 @@ void PauseScene::Update() {
 
 	// メニューの更新
 	menuList_->Update(ctx_.keyboard, ctx_.gamePad, ctx_.timeManager->GetDeltaTime());
+
+	// ポーズテキストの更新
+	textSprite_->Update();
 
 #ifdef USE_IMGUI
 	ImGui::Begin("Pause Menu");
@@ -60,6 +72,9 @@ void PauseScene::Draw() {
 
 	// メニューの描画
 	menuList_->Draw();
+
+	// ポーズテキスト描画
+	textSprite_->Draw();
 }
 
 void PauseScene::Finalize() {}

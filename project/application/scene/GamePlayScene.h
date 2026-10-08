@@ -148,12 +148,6 @@ private:
 	// 演出中のカメラの高さ
 	float cameraPosYAnim_ = 120.0f;
 
-	// フォント
-	std::unique_ptr<Font> font_;
-
-	// テキスト
-	std::unique_ptr<TextSprite> textSprite_;
-
 	// ガラス破壊エフェクト
 	std::list<std::unique_ptr<TinyEngine::Particle>> glassBreakEffect_;
 

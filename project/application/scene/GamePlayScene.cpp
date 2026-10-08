@@ -120,15 +120,6 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	audioManager_->LoadWave("GlassBreak", "resources/sounds/se/GlassBreak.mp3");
 	audioManager_->PlayBGM("GameSceneBGM");
 
-	// フォント生成&初期化
-	font_ = std::make_unique<TinyEngine::Font>();
-	font_->Initialize(ctx.engineContext, L"Dela Gothic One", 32);
-
-	// テキスト生成&初期化
-	textSprite_ = std::make_unique<TinyEngine::TextSprite>();
-	textSprite_->Initialize(ctx.engineContext, font_.get(), L"HP: 100");
-	textSprite_->SetPosition({50.0f, 50.0f});
-
 	// ステージ開始演出用レターボックスの生成&初期化
 	introLetterBox_ = std::make_unique<LetterBox>();
 	introLetterBox_->Initialize(ctx_.engineContext);
@@ -343,10 +334,6 @@ void GamePlayScene::Update() {
 	// 血痕管理インスタンス更新
 	decalManager_->SetCamera(ctx_.currentCamera);
 	decalManager_->Update();
-
-	// テキスト更新
-	textSprite_->SetText(L"HP: " + std::to_wstring(100));
-	textSprite_->Update();
 
 #ifdef USE_IMGUI
 	ImGui::Begin("Camera");

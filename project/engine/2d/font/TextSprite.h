@@ -15,6 +15,7 @@ public:
 	void SetScale(float scale) { scale_ = scale; }
 	void SetAnchorPoint(const Vector2& anchor) { anchorPoint_ = anchor; }
 	Vector2 GetTextSize() const { return textSize_; }
+	Vector2& GetPos() { return position_; }
 
 private:
 	struct VertexData {
