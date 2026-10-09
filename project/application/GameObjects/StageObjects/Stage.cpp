@@ -75,7 +75,10 @@ void Stage::Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalM
 	goal_ = std::make_unique<Goal>();
 	goal_->Initialize(ctx.engineContext);
 
-	if (stagePath == "Stage2/"){
+	// ステージごとのゴール初期配置
+	if (stagePath == "Stage1/") {
+		goal_->SetPos({548.0f, 0.0f, -17.0f});
+	} else if (stagePath == "Stage2/") {
 		goal_->SetPos({556.0f, 0.0f, 0.0f});
 	} else if (stagePath == "Stage3/") {
 		goal_->SetPos({601.0f, 0.0f, 0.0f});

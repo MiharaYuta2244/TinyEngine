@@ -47,8 +47,18 @@ public:
 	bool IsShotThisFrame() const { return isShotThisFrame_; }
 	Vector3 GetShotDirection() const { return shotDirection_; }
 
-	// Setter
-	void SetShotHoldState(bool isShotHoldState) { isShotHoldState_ = isShotHoldState; }
+	// 掴み状態かどうかのSetter
+	void SetShotHoldState(bool isShotHoldState) {
+		isShotHoldState_ = isShotHoldState;
+		if (isShotHoldState) {
+			// 掴み直した時に状態を初期化する
+			isHoldBursting_ = false;
+			holdBurstElapsed_ = 0.0f;
+			holdBurstShotTimer_ = 0.0f;
+		}
+	}
+
+	// 状態のSetter
 	void SetState(State state) { state_ = state; }
 
 	// ShotTimerのリセット
@@ -61,6 +71,7 @@ public:
 	// 撃たれた瞬間を返すGetter
 	bool GetIsShot() const { return isShotThisFrame_; }
 
+	// 発射タイマーの進行度Getter
 	float GetShotProgress() const {
 		float interval = GetShotInterval();
 		if (interval > 0.0f) {
@@ -142,4 +153,9 @@ private:
 
 	// 敵の挙動ポインタ
 	IEnemyBehavior* behavior_ = nullptr;
+
+	// 掴まり中の連射用
+	bool isHoldBursting_ = false;     // 連射中か
+	float holdBurstElapsed_ = 0.0f;   // 連射開始からの経過時間
+	float holdBurstShotTimer_ = 0.0f; // 次の1発までのタイマー
 };

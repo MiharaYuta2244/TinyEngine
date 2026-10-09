@@ -11,4 +11,6 @@ public:
 	Vector4 GetColor() const override { return {0, 1, 0, 1}; }
 	float GetShotInterval() const override { return 0.4f; }
 	void Shot(const ShotContext& c) override;
+	float GetHoldBurstDuration() const override { return 1.5f; }
+	float GetHoldBurstInterval() const override { return 0.4f; }
 };

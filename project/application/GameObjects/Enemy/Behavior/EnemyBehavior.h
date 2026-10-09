@@ -46,4 +46,10 @@ public:
 	// 死亡時
 	virtual void OnDeath(EngineContext* ctx, const Vector3& pos, std::list<std::unique_ptr<TinyEngine::Particle>>& deathEffect) {}
 	virtual float GetDeathBlastRadius() const { return 0.0f; } 
+
+	// 掴まれた時の連射時間
+	virtual float GetHoldBurstDuration() const { return 0.0f; }
+
+	// 掴まれた時の連射間隔
+	virtual float GetHoldBurstInterval() const { return 0.1f; }
 };

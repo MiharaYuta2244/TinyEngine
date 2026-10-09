@@ -234,22 +234,50 @@ void EnemyAI::UpdateHold(float deltaTime, Player* player, EnemyBulletManager* en
 	if (!isShotHoldState_ || hasShotInHold_)
 		return;
 
-	// プレイヤーが向いている方向に一度だけ射撃を行う
+	// プレイヤーが向いている方向
 	Vector3 playerDirection = {player->GetDirection().x, 0.0f, player->GetDirection().y};
-	shotTimer_ += deltaTime;
 
-	// 弾の発射処理 通常の発射より早く撃つ
-	if (shotTimer_ >= shotIntervalHold_ * shotTimerMultiPlier_) {
-		// 射撃
+	const float burstDuration = behavior_->GetHoldBurstDuration();
+
+	// 連射しないタイプは単発
+	if (burstDuration <= 0.0f) {
+		shotTimer_ += deltaTime;
+		if (shotTimer_ >= shotIntervalHold_ * shotTimerMultiPlier_) {
+			Shot(playerDirection, enemyBulletManager, enemyBombManager);
+			audioManager_->PlaySE("Shot", 0.3f);
+			isShotHoldState_ = false;
+			hasShotInHold_ = true;
+		}
+		return;
+	}
+
+	// 連射開始前の溜め
+	if (!isHoldBursting_) {
+		shotTimer_ += deltaTime;
+		if (shotTimer_ < shotIntervalHold_ * shotTimerMultiPlier_) {
+			return;
+		}
+		// 溜め完了。最初の1発はすぐ撃つ
+		isHoldBursting_ = true;
+		holdBurstElapsed_ = 0.0f;
+		holdBurstShotTimer_ = behavior_->GetHoldBurstInterval();
+	}
+
+	// 連射中
+	const float interval = behavior_->GetHoldBurstInterval();
+	holdBurstElapsed_ += deltaTime;
+	holdBurstShotTimer_ += deltaTime;
+
+	if (holdBurstShotTimer_ >= interval) {
+		holdBurstShotTimer_ -= interval;
 		Shot(playerDirection, enemyBulletManager, enemyBombManager);
+		audioManager_->PlaySE("Shot", 0.2f);
+	}
 
-		// SE再生
-		audioManager_->PlaySE("Shot", 0.3f);
-
-		// 拘束時の発射フラグを下す
+	// 連射時間が終わったら完了
+	if (holdBurstElapsed_ >= burstDuration) {
+		isHoldBursting_ = false;
 		isShotHoldState_ = false;
-
-		// 射撃済みフラグを立てる
 		hasShotInHold_ = true;
 	}
 }

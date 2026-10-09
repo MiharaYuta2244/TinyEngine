@@ -44,7 +44,7 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 	audioManager_->Initialize();
 	audioManager_->LoadWave("Heal", "resources/sounds/se/Heal.mp3");
 
-	// 投げ軌道プレビュー用ドットをあらかじめ生成しておく（最初は画面外に隠す）
+	// 投げ軌道プレビュー用ドットをあらかじめ生成しておく
 	for (auto& decal : throwPreviewDecals_) {
 		decal = bloodDecalManager_->AddDecal("white.png", {0.0f, -1000.0f, 0.0f}, {std::numbers::pi_v<float> / 2.0f, 0, 0}, {0.15f, 0.15f, 1.0f}, {1.0f, 0.85f, 0.2f, 0.0f});
 	}
