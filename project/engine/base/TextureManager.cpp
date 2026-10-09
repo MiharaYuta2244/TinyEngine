@@ -28,8 +28,8 @@ void TextureManager::Initialize(DirectXCommon* directXCommon, SrvManager* srvMan
 void TextureManager::LoadTexture(const std::string& filePath) {
 	std::string fullPath;
 
-	// すでに "resources/models/" が含まれているかチェック
-	if (filePath.find("resources/models/") == std::string::npos) {
+	// すでにresources/が含まれているかチェック
+	if (filePath.find("resources/") == std::string::npos) {
 		fullPath = "resources/textures/" + filePath;
 	} else {
 		fullPath = filePath;
@@ -112,23 +112,22 @@ void TextureManager::AllTextureLoad() {
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(const std::string& filePath) {
-	// 範囲外指定違反チェック
-	assert(textureDatas_[filePath].srvIndex < textureDatas_.size() + 1);
-
-	// テクスチャデータの参照を取得
-	TextureData& textureData = textureDatas_[filePath];
-	return textureData.srvHandleGPU;
+	auto it = textureDatas_.find(ResolveKey(filePath));
+	assert(it != textureDatas_.end() && "Texture not loaded");
+	return it->second.srvHandleGPU;
 }
 
 const DirectX::TexMetadata& TextureManager::GetMetaData(const std::string& filePath) {
-	// 範囲外指定違反チェック
-	assert(textureDatas_[filePath].srvIndex < textureDatas_.size() + 1);
-
-	TextureData& textureData = textureDatas_[filePath];
-	return textureData.metaData;
+	auto it = textureDatas_.find(ResolveKey(filePath));
+	assert(it != textureDatas_.end() && "Texture not loaded");
+	return it->second.metaData;
 }
 
-uint32_t TextureManager::GetSrvIndex(const std::string& filePath) { return textureDatas_[filePath].srvIndex; }
+uint32_t TextureManager::GetSrvIndex(const std::string& filePath) { 
+	auto it = textureDatas_.find(ResolveKey(filePath));
+	assert(it != textureDatas_.end() && "Texture not loaded");
+	return it->second.srvIndex;
+}
 
 ComPtr<ID3D12Resource> TextureManager::CreateTextureResource(const DirectX::TexMetadata& metadata) {
 	// metadataを基にResourceの設定
@@ -209,4 +208,16 @@ void TextureManager::RegisterTextureFromMemory(const std::string& key, const uin
 
 	ComPtr<ID3D12Resource> intermediate = UploadTextureData(textureData.resource, scratch, directXCommon_->GetDevice(), directXCommon_->GetCommandList());
 	directXCommon_->ExecuteCommandListAndWait();
+}
+
+std::string TextureManager::ResolveKey(const std::string& filePath) const {
+	// すでにメモリ登録キー、またはフルパスで登録済みならそのまま使う
+	if (textureDatas_.contains(filePath)) {
+		return filePath;
+	}
+	// ファイル名のみ指定された場合はresources/textures/を補う
+	if (filePath.find("resources/") == std::string::npos) {
+		return "resources/textures/" + filePath;
+	}
+	return filePath;
 }

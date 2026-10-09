@@ -188,7 +188,6 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="application\GameObjects\Enemy\Weapon\EnemyBulletManager.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\EnemyManager.cpp" />
     <ClCompile Include="application\GameObjects\ResultUI\Button\IButton.cpp" />
-    <ClCompile Include="application\Scene\EasingEditorScene.cpp" />
     <ClCompile Include="engine\base\CopyImage.cpp" />
     <ClCompile Include="engine\base\utility\easing\EasingEditor.cpp" />
     <ClCompile Include="engine\utility\DirectXUtils.cpp" />
@@ -418,7 +417,6 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="application\GameObjects\Enemy\EnemyManager.h" />
     <ClInclude Include="application\GameObjects\Player\IHPGauge.h" />
     <ClInclude Include="application\GameObjects\ResultUI\Button\IButton.h" />
-    <ClInclude Include="application\Scene\EasingEditorScene.h" />
     <ClInclude Include="engine\base\CopyImage.h" />
     <ClInclude Include="engine\base\ParticleMaterial.h" />
     <ClInclude Include="engine\base\PostEffectPass.h" />

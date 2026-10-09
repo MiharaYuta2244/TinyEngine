@@ -273,9 +273,6 @@
     <ClCompile Include="engine\base\utility\easing\EasingEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="application\Scene\EasingEditorScene.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="engine\tool\json\JsonManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -812,9 +809,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="engine\base\utility\easing\EasingEditor.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="application\Scene\EasingEditorScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="engine\tool\json\JsonManager.h">

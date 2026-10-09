@@ -1,5 +1,4 @@
 #include "Game.h"
-#include "Scene/EasingEditorScene.h"
 #include "Scene/GamePlayScene.h"
 #include "Scene/TitleScene.h"
 #include "Scene/PauseScene.h"
@@ -29,7 +28,6 @@ void Game::Initialize() {
 	sceneManager_->AddScene("Pause", std::make_unique<PauseScene>());
 	sceneManager_->AddScene("Result", std::make_unique<ResultScene>());
 	sceneManager_->AddScene("StageSelect", std::make_unique<StageSelectScene>());
-	sceneManager_->AddScene("EasingEditorScene", std::make_unique<EasingEditorScene>());
 	sceneManager_->AddScene("Test", std::make_unique<TestScene>());
 
 	// 最初のシーンを初期化

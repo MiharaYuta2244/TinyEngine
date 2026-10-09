@@ -34,6 +34,9 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() const { return descriptorHeap_; }
 	uint32_t GetIndexFromHandle(D3D12_CPU_DESCRIPTOR_HANDLE handle) const;
 
+	// リセット関数
+	void Reset();
+
 private:
 	DirectXCommon* dxCommon_ = nullptr;
 

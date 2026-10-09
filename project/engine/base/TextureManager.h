@@ -37,6 +37,7 @@ public:
 	// SRVインデックスの取得
 	uint32_t GetSrvIndex(const std::string& filePath);
 
+	// SrvManagerのGetter
 	SrvManager* GetSrvManager() { return srvManager_; }
 
 public:
@@ -48,6 +49,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> UploadTextureData(
 	    Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages, Microsoft::WRL::ComPtr<ID3D12Device> device,
 	    Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> commandList);
+
+	// キー正規化
+	std::string ResolveKey(const std::string& filePath) const;
 
 private:
 	// テクスチャデータ
