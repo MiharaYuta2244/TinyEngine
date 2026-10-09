@@ -288,10 +288,7 @@ void SceneEditor::UpdatePicking(const SceneContext& ctx) {
 void SceneEditor::DebugInput(
     const SceneContext& ctx, Player* player, EnemyManager* enemyManager, CameraDeathZoomController* cameraZoomController, bool& isDebugCameraActive, Vector3& currentCameraPivot) {
 #if _DEBUG || NDEBUG
-	if (ctx.keyboard->KeyTriggered(DIK_F1)) {
-		ctx.sceneManager->ChangeScene("EasingEditorScene");
-	}
-
+	// ステージ編集モード切り替え
 	if (ctx.keyboard->KeyTriggered(DIK_F2)) {
 		isDebugCameraActive = !isDebugCameraActive;
 
@@ -305,16 +302,14 @@ void SceneEditor::DebugInput(
 		}
 	}
 
+	// 敵の動きをON
 	if (ctx.keyboard->KeyTriggered(DIK_F3)) {
 		enemyManager->SetMove();
 	}
 
+	// 敵の動きをOFF
 	if (ctx.keyboard->KeyTriggered(DIK_F4)) {
 		enemyManager->SetStop();
-	}
-
-	if (ctx.keyboard->KeyTriggered(DIK_SPACE) && cameraZoomController->GetIsActive()) {
-		cameraZoomController->Skip();
 	}
 #endif
 }

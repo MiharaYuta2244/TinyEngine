@@ -337,6 +337,11 @@ void GamePlayScene::Update() {
 		ctx_.currentCamera->Update(*ctx_.keyboard, *ctx_.gamePad);
 	}
 
+	// カメラのズーム演出をスキップ
+	if (ctx_.keyboard->KeyTriggered(DIK_SPACE) && cameraZoomController_->GetIsActive()) {
+		cameraZoomController_->Skip();
+	}
+
 	// フラッシュエフェクト更新
 	flashEffect_->Update(deltaTime);
 
