@@ -34,9 +34,3 @@ void HealArea::Draw() {
 	// 描画
 	render_->Draw();
 }
-
-void HealArea::SetEnableOutline(bool isEnable) {
-	if (render_) {
-		render_->SetEnableOutline(isEnable);
-	}
-}

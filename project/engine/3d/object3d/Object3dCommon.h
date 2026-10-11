@@ -63,9 +63,9 @@ public:
 	// getter
 	DirectXCommon* GetDxCommon() const { return dxCommon_; }
 	Camera* GetDefaultCamera() { return defaultCamera_; }
-	DirectionalLight& GetDirectionalLight() { return globalDirectionalLight_; }
-	PointLight& GetPointLight() { return globalPointLight_; }
-	SpotLight& GetSpotLight() { return globalSpotLight_; }
+	const DirectionalLight& GetDirectionalLight() { return globalDirectionalLight_; }
+	const PointLight& GetPointLight() { return globalPointLight_; }
+	const SpotLight& GetSpotLight() { return globalSpotLight_; }
 	ID3D12PipelineState* GetOutlinePipelineState() { return outlinePipelineState_.Get(); }
 	ID3D12RootSignature* GetSkinningRootSignature() const { return skinningRootSignature_.Get(); }
 	ID3D12PipelineState* GetSkinningGraphicsPipelineState() const { return skinningGraphicsPipelineState_.Get(); }

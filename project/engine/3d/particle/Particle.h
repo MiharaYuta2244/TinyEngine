@@ -101,9 +101,9 @@ public:
 	void UpdateTranslate(const Vector3& newPos);
 
 	// getter
-	Vector4& GetColor() { return material_.color; }
-	Matrix4x4& GetWorldMatrix() { return worldMatrix_; }
-	ParticleMaterial& GetMaterial() { return material_; }
+	const Vector4& GetColor() { return material_.color; }
+	const Matrix4x4& GetWorldMatrix() { return worldMatrix_; }
+	const ParticleMaterial& GetMaterial() { return material_; }
 	bool IsFinished() const { return isFinished_; }
 
 private:

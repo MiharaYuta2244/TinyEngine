@@ -52,9 +52,3 @@ void Glass::AddGlassesDecal(Vector3 scale) {
 		glassesDecalManager_->AddDecal("Shard.png", pos, {rotate.x, rotate.y, rotate.z}, scale, ColorPalette::White());
 	}
 }
-
-void Glass::SetEnableOutline(bool isEnable) {
-	if (render_) {
-		render_->SetEnableOutline(isEnable);
-	}
-}

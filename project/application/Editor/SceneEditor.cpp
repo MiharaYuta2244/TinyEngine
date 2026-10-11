@@ -28,15 +28,6 @@ void SceneEditor::Update(
 		selectedGameObject_ = objects_.front();
 	}
 
-	// 選択中のオブジェクトにアウトラインを適用
-	for (IGameObject* obj : objects_) {
-		if (obj == selectedGameObject_) {
-			obj->SetEnableOutline(true);
-		} else {
-			obj->SetEnableOutline(false);
-		}
-	}
-
 	HandleUndoRedoInput(ctx);
 	UpdatePicking(ctx);
 	UpdateImGui(ctx, player, cameraPosY);
@@ -101,15 +92,29 @@ void SceneEditor::UpdateImGui(const SceneContext& ctx, Player* player, float& ca
 	// デバッグ用パラメータリスト
 	// =====================================
 	ImGui::Begin("Debug List");
+
 	if (ImGui::Button("Kill Player")) {
 		player->Damage(player->GetMaxHP());
 	}
 
-	ImGui::Text("FPS %f", ctx.timeManager->GetFPS());
-	ImGui::Text("DeltaTime %f", ctx.timeManager->GetDeltaTime());
-	ImGui::DragFloat3("Direction", &ctx.engineContext->object3dCommon->GetDirectionalLight().direction.x, 0.01f);
-	ImGui::ColorEdit4("Color", &ctx.engineContext->object3dCommon->GetDirectionalLight().color.x);
-	ImGui::DragFloat("Intensity", &ctx.engineContext->object3dCommon->GetDirectionalLight().intensity, 0.01f);
+	ImGui::Text("FPS %.1f", ctx.timeManager->GetFPS());
+	ImGui::Text("DeltaTime %.4f", ctx.timeManager->GetDeltaTime());
+
+	// DirectionalLight編集用
+	const DirectionalLight& light = ctx.engineContext->object3dCommon->GetDirectionalLight();
+	DirectionalLight editable = light; // 編集用コピー
+
+	bool changed = false;
+
+	changed |= ImGui::DragFloat3("Direction", &editable.direction.x, 0.01f);
+	changed |= ImGui::ColorEdit4("Color", &editable.color.x);
+	changed |= ImGui::DragFloat("Intensity", &editable.intensity, 0.01f);
+
+	// 値が変わったら反映
+	if (changed) {
+		ctx.engineContext->object3dCommon->SetDirectionalLightParam(editable);
+	}
+
 	ImGui::End();
 
 	// =====================================

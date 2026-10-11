@@ -29,9 +29,6 @@ public:
 	// ガラスの破片を生成
 	void AddGlassesDecal(Vector3 scale);
 
-	// アウトライン有効フラグSetter
-	void SetEnableOutline(bool isEnable) override;
-
 private:
 	// 当たり判定の更新
 	void UpdateCollision();

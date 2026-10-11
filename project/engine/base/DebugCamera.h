@@ -28,12 +28,12 @@ public:
 	void StartSeesawShake(float duration, float angleDegree, float frequency = 2.0f, const Vector3& axisWeight = {0.0f, 0.0f, 1.0f}, EaseType easeType = EaseType::EASEOUTQUAD);
 
 	// Getter
-	Matrix4x4& GetWorldMatrix() { return worldMatrix_; }
-	Matrix4x4 GetViewMatrix() { return viewMatrix_; }
-	Matrix4x4& GetProjection() { return projectionMatrix_; }
-	Matrix4x4& GetViewProjectionMatrix() { return viewProjectionMatrix_; }
-	Vector3& GetTranslation() { return transform_.translate; }
-	Vector3& GetRotate() { return transform_.rotate; }
+	const Matrix4x4& GetWorldMatrix() { return worldMatrix_; }
+	const Matrix4x4 GetViewMatrix() { return viewMatrix_; }
+	const Matrix4x4& GetProjection() { return projectionMatrix_; }
+	const Matrix4x4& GetViewProjectionMatrix() { return viewProjectionMatrix_; }
+	const Vector3& GetTranslation() { return transform_.translate; }
+	const Vector3& GetRotate() { return transform_.rotate; }
 	const Vector3& GetEuler() const { return euler_; }
 	bool GetIsShake() const { return isShake_; }
 	Vector3& GetPivot() { return pivot_; }

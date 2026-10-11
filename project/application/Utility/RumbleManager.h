@@ -34,9 +34,9 @@ public:
 	void DrawImGui();
 
 	// 各種パラメータの取得・設定
-	RumbleParam& GetPlayerDamageParam() { return playerDamageParam_; }
-	RumbleParam& GetEnemyDeathParam() { return enemyDeathParam_; }
-	RumbleParam& GetGlassBreakParam() { return glassBreakParam_; }
+	const RumbleParam& GetPlayerDamageParam() { return playerDamageParam_; }
+	const RumbleParam& GetEnemyDeathParam() { return enemyDeathParam_; }
+	const RumbleParam& GetGlassBreakParam() { return glassBreakParam_; }
 
 private:
 	GamePad* pad_ = nullptr;

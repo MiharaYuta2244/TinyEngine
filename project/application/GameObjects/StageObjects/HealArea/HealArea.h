@@ -24,9 +24,6 @@ public:
 	// アクティブフラグGetter
 	bool GetIsActive() const { return isActive_; }
 
-	// アウトライン有効フラグSetter
-	void SetEnableOutline(bool isEnable) override;
-
 private:
 	std::unique_ptr<ObjectRender> render_ = nullptr;
 	AABB collision_{};

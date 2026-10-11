@@ -4,7 +4,7 @@
 /// <summary>
 /// 選択しているボタンのタイプ
 /// </summary>
-struct ButtonStyle{
+struct ButtonStyle {
 	Vector4 color;
 	Vector2 size;
 };
@@ -14,6 +14,9 @@ struct ButtonStyle{
 /// </summary>
 class IButton {
 public:
+	// 仮想デストラクタ
+	virtual ~IButton() {};
+
 	// 初期化
 	void Initialize(EngineContext* ctx);
 

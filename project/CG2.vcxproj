@@ -415,7 +415,6 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="application\GameObjects\Enemy\Weapon\EnemyBullet.h" />
     <ClInclude Include="application\GameObjects\Enemy\Weapon\EnemyBulletManager.h" />
     <ClInclude Include="application\GameObjects\Enemy\EnemyManager.h" />
-    <ClInclude Include="application\GameObjects\Player\IHPGauge.h" />
     <ClInclude Include="application\GameObjects\ResultUI\Button\IButton.h" />
     <ClInclude Include="engine\base\CopyImage.h" />
     <ClInclude Include="engine\base\ParticleMaterial.h" />

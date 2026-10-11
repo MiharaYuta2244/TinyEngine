@@ -80,13 +80,13 @@ public:
 	void SetEnableOutline(bool isEnable) { enableOutline_ = isEnable; }
 
 	// getter
-	Vector3& GetScale() { return transform_.scale; }
-	Vector3& GetRotate() { return transform_.rotate; }
-	Vector3& GetTranslate() { return transform_.translate; }
-	Vector4& GetColor() { return material_.color; }
-	Transform& GetTransform() { return transform_; }
-	Matrix4x4& GetWorldMatrix() { return worldMatrix_; }
-	Material& GetMaterial() { return material_; }
+	const Vector3& GetScale() { return transform_.scale; }
+	const Vector3& GetRotate() { return transform_.rotate; }
+	const Vector3& GetTranslate() { return transform_.translate; }
+	const Vector4& GetColor() { return material_.color; }
+	const Transform& GetTransform() { return transform_; }
+	const Matrix4x4& GetWorldMatrix() { return worldMatrix_; }
+	const Material& GetMaterial() { return material_; }
 	uint32_t GetID() const { return id_; }
 	const std::string& GetName() const { return name_; }
 	const std::string& GetFilepath() const { return currentFilepath_; }

@@ -122,8 +122,10 @@ void EnemyManager::DrawImGui() {
 		if (ImGui::CollapsingHeader(header.c_str(), ImGuiTreeNodeFlags_DefaultOpen)) {
 
 			// --- Position ---
-			Vector3& pos = enemy->GetPos();
-			ImGui::DragFloat3("Position", &pos.x, 0.1f);
+			Vector3 pos = enemy->GetPos();
+			if(ImGui::DragFloat3("Position", &pos.x, 0.1f)){
+				enemy->SetPos(pos);
+			}
 
 			// --- Rotation ---
 			Vector3 rot = enemy->GetRotate();

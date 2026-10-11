@@ -48,13 +48,13 @@ public:
 	AABB GetBodyCol() const { return bodyCol_; }
 
 	// 敵の座標Getter
-	Vector3& GetPos() { return transform_.translate; }
+	const Vector3& GetPos() { return transform_.translate; }
 
 	// 敵の座標Setter
 	void SetPos(Vector3 pos) { transform_.translate = pos; }
 
 	// 敵の回転Getter
-	Vector3& GetRotate() { return transform_.rotate; }
+	const Vector3& GetRotate() { return transform_.rotate; }
 
 	// 敵の回転Setter
 	void SetRotate(Vector3 rot) { transform_.rotate = rot; }

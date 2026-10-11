@@ -43,18 +43,18 @@ public:
 	void CreateTransformationData();
 
 	// getter
-	Vector2& GetPosition() { return position_; }
-	float& GetRotation() { return rotation_; }
-	Vector4& GetColor() { return materialData_->color; }
-	Vector2& GetSize() { return size_; }
+	const Vector2& GetPosition() { return position_; }
+	const float& GetRotation() { return rotation_; }
+	const Vector4& GetColor() { return materialData_->color; }
+	const Vector2& GetSize() { return size_; }
 	D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() { return vertexBufferView_; }
 	const Microsoft::WRL::ComPtr<ID3D12Resource>& GetTransformMatrixResource() { return transformMatrixResource_; }
-	Vector2& GetAnchorPoint() { return anchorPoint_; }
-	bool& GetIsFlipX() { return isFlipX_; }
-	bool& GetIsFlipY() { return isFlipY_; }
-	Vector2& GetTextureLeftTop() { return textureLeftTop_; }
-	Vector2& GetTextureSize() { return textureSize_; }
-	float& GetZDepth() { return zDepth_; }
+	const Vector2& GetAnchorPoint() { return anchorPoint_; }
+	const bool& GetIsFlipX() { return isFlipX_; }
+	const bool& GetIsFlipY() { return isFlipY_; }
+	const Vector2& GetTextureLeftTop() { return textureLeftTop_; }
+	const Vector2& GetTextureSize() { return textureSize_; }
+	const float& GetZDepth() { return zDepth_; }
 
 	// setter
 	void SetPosition(const Vector2& position) { position_ = position; }

@@ -42,9 +42,6 @@ public:
 	// ギズモ用
 	std::string GetName() const override { return "Soup(" + std::to_string(id_) + ")"; }
 
-	// アウトライン有効フラグSetter
-	void SetEnableOutline(bool isEnable) override;
-
 	// プレイヤーに掴まれた時の処理
 	void Grab();
 

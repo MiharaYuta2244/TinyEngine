@@ -71,12 +71,6 @@ bool Soap::IsDangerous() const {
 	return isThrown_ && speedSq >= kDangerousSpeedSq_;
 }
 
-void Soap::SetEnableOutline(bool isEnable) {
-	if (render_) {
-		render_->SetEnableOutline(isEnable);
-	}
-}
-
 void Soap::UpdateMove(float deltaTime) {
 	prevPos_ = transform_.translate;
 

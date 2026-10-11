@@ -24,9 +24,6 @@ public:
 
 	// ギズモ用
 	std::string GetName() const override { return "Wall(" + std::to_string(id_) + ")"; }
-	
-	// アウトライン有効フラグSetter
-	void SetEnableOutline(bool isEnable) override;
 
 private:
 	AABB collision_{}; // 当たり判定
