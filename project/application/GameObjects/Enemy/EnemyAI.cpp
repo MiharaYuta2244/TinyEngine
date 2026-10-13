@@ -1,8 +1,8 @@
 #include "EnemyAI.h"
 #include "AStarPathfinder.h"
+#include "GameObjects/Player/Player.h"
 #include "Gameobjects/Enemy/Weapon/EnemyBombManager.h"
 #include "Gameobjects/Enemy/Weapon/EnemyBulletManager.h"
-#include "GameObjects/Player/Player.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
 #include "Random.h"
@@ -170,7 +170,7 @@ void EnemyAI::UpdateVigilance(
 		shotTimer_ += deltaTime;
 
 		// 弾の発射処理
-		if (shotTimer_ >= shotIntervalNormal_) {
+		if (shotTimer_ >= GetShotInterval()) {
 			// 射撃
 			Shot(toTarget, enemyBulletManager, enemyBombManager);
 
@@ -181,6 +181,9 @@ void EnemyAI::UpdateVigilance(
 	} else {
 		// shotTimerをリセット
 		shotTimer_ = 0.0f;
+
+		// 1発目に戻す
+		isFirstShot_ = true;
 
 		// 見失った場合、タイマーを減らす
 		lostSightTimer_ -= deltaTime;
@@ -392,6 +395,7 @@ bool EnemyAI::IsSegmentIntersectAABB(const Vector3& start, const Vector3& end, c
 
 void EnemyAI::Shot(Vector3 toTarget, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager) {
 	isShotThisFrame_ = true;
+	isFirstShot_ = false; // 以降は通常の連射間隔
 	shotDirection_ = MathUtility::Normalize(toTarget);
 	shotTimer_ = 0.0f;
 	behavior_->Shot({ctx_, transform_->translate, toTarget, lastKnownPlayerPos_, bulletMargin_, enemyBulletManager, enemyBombManager});

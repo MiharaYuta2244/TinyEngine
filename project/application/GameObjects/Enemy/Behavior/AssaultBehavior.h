@@ -10,6 +10,7 @@ public:
 	int GetMaxHP() const override { return 1; }
 	Vector4 GetColor() const override { return {0, 1, 0, 1}; }
 	float GetShotInterval() const override { return 0.4f; }
+	float GetFirstShotInterval() const override { return 1.5f; } // 1発目は通常の敵と同じ
 	void Shot(const ShotContext& c) override;
 	float GetHoldBurstDuration() const override { return 1.5f; }
 	float GetHoldBurstInterval() const override { return 0.4f; }

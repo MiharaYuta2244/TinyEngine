@@ -59,14 +59,34 @@ public:
 	}
 
 	// 状態のSetter
-	void SetState(State state) { state_ = state; }
+	void SetState(State state) {
+		// 状態が変わったら1発目扱いに戻す
+		if (state_ != state) {
+			isFirstShot_ = true;
+		}
+
+		state_ = state;
+	}
 
 	// ShotTimerのリセット
-	void ResetShotTimer() { shotTimer_ = 0.0f; }
+	void ResetShotTimer() {
+		shotTimer_ = 0.0f;
+		isFirstShot_ = true;
+	}
 
 	// 弾が撃たれた瞬間を知らせるGetter
 	float GetShotTimer() const { return shotTimer_; }
-	float GetShotInterval() const { return state_ == State::Hold ? shotIntervalHold_ : shotIntervalNormal_; }
+
+	// 弾のインターバルGetter
+	float GetShotInterval() const {
+		// ホールド時
+		if (state_ == State::Hold) {
+			return shotIntervalHold_;
+		}
+
+		// 1発目かそうでないかで返す値を変える
+		return isFirstShot_ ? shotIntervalFirst_ : shotIntervalNormal_;
+	}
 
 	// 撃たれた瞬間を返すGetter
 	bool GetIsShot() const { return isShotThisFrame_; }
@@ -84,6 +104,7 @@ public:
 	void SetBehavior(IEnemyBehavior* behavior) {
 		behavior_ = behavior;
 		shotIntervalNormal_ = behavior_->GetShotInterval();
+		shotIntervalFirst_ = behavior_->GetFirstShotInterval();
 	}
 
 private:
@@ -132,6 +153,8 @@ private:
 	bool hasShotInHold_ = false; // 拘束時に1度でも射撃したかどうかのフラグ
 	Vector3 shotDirection_ = {0.0f, 0.0f, 1.0f};
 	float shotTimerMultiPlier_ = 0.5f; // 拘束時の発射速度を早めるための変数
+	float shotIntervalFirst_ = 1.5f;   // 1発目の射撃間隔
+	bool isFirstShot_ = true;          // 警戒開始後まだ撃っていないか
 
 	// 経路探索用
 	std::vector<Vector3> currentPath_; // A*で計算した経路

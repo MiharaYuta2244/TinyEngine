@@ -559,6 +559,7 @@ void CollisionManager::CheckCollisions(
 			// 勢いよく直接ぶつかった場合は即ダウン
 			if (soap->IsDangerous() && Collision::Intersect(enemy->GetBodyCol(), soap->GetCollision())) {
 				enemy->StartDown();
+				soap->Stop();
 				continue;
 			}
 

@@ -79,7 +79,7 @@ void Stage::Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalM
 	if (stagePath == "Stage1/") {
 		goal_->SetPos({548.0f, 0.0f, -17.0f});
 	} else if (stagePath == "Stage2/") {
-		goal_->SetPos({556.0f, 0.0f, 0.0f});
+		goal_->SetPos({560.0f, 0.0f, 0.0f});
 	} else if (stagePath == "Stage3/") {
 		goal_->SetPos({601.0f, 0.0f, 0.0f});
 	}

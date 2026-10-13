@@ -31,7 +31,7 @@ void PauseScene::Initialize(const SceneContext& ctx) {
 }
 
 void PauseScene::Update() {
-	if (ctx_.keyboard->KeyTriggered(DIK_TAB) || ctx_.gamePad->GetState().buttonsPressed.start) {
+	if (ctx_.keyboard->KeyTriggered(DIK_TAB) || ctx_.gamePad->GetState().buttonsPressed.start || ctx_.gamePad->GetState().buttonsPressed.b) {
 		RequestScenePop();
 	}
 

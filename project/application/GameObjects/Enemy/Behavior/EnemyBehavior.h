@@ -40,6 +40,9 @@ public:
 	// 弾の発射インターバルGetter
 	virtual float GetShotInterval() const { return 1.5f; }
 
+	// 警戒開始後、1発目だけに使う発射インターバル
+	virtual float GetFirstShotInterval() const { return GetShotInterval(); }
+
 	// 弾の発射処理
 	virtual void Shot(const ShotContext& c) = 0;
 
