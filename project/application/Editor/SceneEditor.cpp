@@ -223,6 +223,11 @@ void SceneEditor::UpdateImGui(const SceneContext& ctx, Player* player, float& ca
 	if (ImGui::IsItemDeactivatedAfterEdit())
 		PushCommand(std::make_unique<TransformCommand>(selectedGameObject_, dragBeginSnapshot_, CaptureTransform(selTransform)));
 
+	// 固有データ編集用UI
+	if (selectedGameObject_) {
+		selectedGameObject_->DrawExtraImGui();
+	}
+
 	ImGui::End();
 #endif // USE_IMGUI
 }

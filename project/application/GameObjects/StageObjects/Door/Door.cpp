@@ -77,6 +77,11 @@ void Door::Update(float deltaTime, Vector3 playerPos) {
 	// 当たり判定の更新
 	UpdateCollision();
 
+	// 色の反映
+	for (auto& render : renders_) {
+		render->SetColor(color_);
+	}
+
 	// 描画用インスタンス更新
 	renders_[0]->Update(transform_);
 	renders_[1]->Update(transformSecond_);
@@ -155,4 +160,18 @@ void Door::UpdateCollision() {
 	collision_.max.x = std::max(door1.max.x, door2.max.x);
 	collision_.max.y = std::max(door1.max.y, door2.max.y);
 	collision_.max.z = std::max(door1.max.z, door2.max.z);
+}
+
+void Door::DrawExtraImGui() {
+#ifdef USE_IMGUI
+	ImGui::ColorEdit4("Color", &color_.x);
+#endif
+}
+
+void Door::ToExtraJson(Json& j) const { j["color"] = color_; }
+
+void Door::FromExtraJson(const Json& j) {
+	if (j.contains("color")) {
+		color_ = j.at("color").get<Vector4>();
+	}
 }

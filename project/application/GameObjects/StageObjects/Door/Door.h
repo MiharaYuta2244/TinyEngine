@@ -29,6 +29,11 @@ public:
 	// 開閉状態のGetter
 	bool GetIsOpen() const { return isOpen_; }
 
+	// 固有パラメータ(色)
+	void DrawExtraImGui() override;
+	void ToExtraJson(Json& j) const override;
+	void FromExtraJson(const Json& j) override;
+
 private:
 	// ドアのtransformを求める
 	void CulcTransform();

@@ -54,6 +54,9 @@ public:
 				ImGui::DragFloat3("Rotate", &t.rotate.x, 0.01f);
 				ImGui::DragFloat3("Scale", &t.scale.x, 0.1f);
 
+				// 固有パラメータ
+				obj->DrawExtraImGui();
+
 				if (ImGui::Button("Delete")) {
 					it = objects_.erase(it);
 					ImGui::PopID();
@@ -107,22 +110,32 @@ private:
 	// 読み込み処理
 	void LoadFromJson(const std::string& filepath) {
 		objects_.clear();
-		std::vector<Transform> transformList;
-		if (!JsonManager::Load(filepath, transformList)) {
+		std::vector<Json> entries;
+
+		// 読み込み失敗すれば早期リターン
+		if (!JsonManager::Load(filepath, entries)) {
 			return;
 		}
-		for (const auto& t : transformList) {
-			objects_.push_back(CreateObject(t));
+
+		// 生成
+		for (const auto& j : entries) {
+			auto obj = CreateObject(j.get<Transform>());
+			obj->FromExtraJson(j);
+			objects_.push_back(std::move(obj));
 		}
 	}
 
 	// 保存処理
 	void SaveToJson(const std::string& filepath) {
-		std::vector<Transform> transformList;
+		std::vector<Json> entries;
 		for (auto& obj : objects_) {
-			transformList.push_back(obj->GetTransform());
+			Json j = obj->GetTransform();
+			obj->ToExtraJson(j); // 固有データ
+			entries.push_back(std::move(j));
 		}
-		JsonManager::Save(filepath, transformList);
+
+		// 保存
+		JsonManager::Save(filepath, entries);
 	}
 
 private:

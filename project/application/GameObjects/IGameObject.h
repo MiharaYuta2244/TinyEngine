@@ -1,6 +1,6 @@
 #pragma once
-#include "Transform.h"
 #include "AABB.h"
+#include "Transform.h"
 
 /// <summary>
 /// ゲームオブジェクトの基底クラス
@@ -16,6 +16,9 @@ public:
 
 	// ギズモ用の当たり判定
 	virtual AABB GetAABBForGizmo() const { return aabbForGizmo_; }
+
+	// 固有パラメータのImGui編集UI
+	virtual void DrawExtraImGui() {}
 
 protected:
 	// ギズモ用の当たり判定の更新
