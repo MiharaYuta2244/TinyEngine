@@ -292,6 +292,13 @@ void GamePlayScene::Update() {
 	// シーンエディターの更新
 	sceneEditor_->Update(ctx_, editObjects, player_.get(), enemyManager_.get(), cameraZoomController_.get(), cameraPosY_, isDebugCameraActive_, ctx_.currentCamera->GetPivot());
 
+	// ドラッグ＆ドロップで要求されたオブジェクトを生成
+	if (auto request = sceneEditor_->PollSpawnRequest()) {
+		if (IGameObject* spawned = SpawnObject(*request)) {
+			sceneEditor_->SelectObject(spawned);
+		}
+	}
+
 	// パーティクルの更新
 	for (auto& particle : enemyDeathEffect_) {
 		particle->Update();
@@ -503,3 +510,23 @@ void GamePlayScene::GenerateGlassBreakEffect(const Vector3& pos, const Vector3& 
 }
 
 void GamePlayScene::GenerateSoapBreakEffect(const Vector3& pos) { EffectGenerator::CreateSoapBreakEffect(ctx_.engineContext, {pos.x, pos.y + 0.5f, pos.z}, soapBreakEffect_); }
+
+IGameObject* GamePlayScene::SpawnObject(const SpawnRequest& request) {
+	switch (request.type) {
+	case SpawnType::Wall:
+		return stage_->GetWallManager()->AddObject(request.position);
+	case SpawnType::Door:
+		return stage_->GetDoorManager()->AddObject(request.position);
+	case SpawnType::Glass:
+		return stage_->GetGlassManager()->AddObject(request.position);
+	case SpawnType::Cage:
+		return stage_->GetCageManager()->AddObject(request.position);
+	case SpawnType::HealArea:
+		return stage_->GetHealAreaManager()->AddObject(request.position);
+	case SpawnType::Soap:
+		return stage_->GetSoapManager()->AddObject(request.position);
+	case SpawnType::Enemy:
+		return enemyManager_->AddEnemy(request.position);
+	}
+	return nullptr;
+}

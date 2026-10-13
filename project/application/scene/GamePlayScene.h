@@ -59,6 +59,9 @@ private:
 	// 石鹸の箱破壊時のエフェクトの生成
 	void GenerateSoapBreakEffect(const Vector3& pos);
 
+	// エディターからの生成リクエストを処理
+	IGameObject* SpawnObject(const SpawnRequest& request);
+
 private:
 	// プレイヤー
 	std::unique_ptr<Player> player_;

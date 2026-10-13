@@ -160,17 +160,6 @@ void EnemyManager::DrawImGui() {
 
 	ImGui::Separator();
 
-	// 敵の追加ボタン
-	if (ImGui::Button("Add Enemy")) {
-		auto newEnemy = std::make_unique<Enemy>();
-		newEnemy->Initialize(ctx_, {0.0f, 0.0f, 0.0f}, EnemyType::Normal, bloodDecalManager_, audioManager_.get());
-		newEnemy->SetPos({0.0f, 0.0f, 0.0f});
-		newEnemy->SetRotate({0.0f, 0.0f, 0.0f});
-		newEnemy->SetIsMove(false);
-		newEnemy->SetFootprintManager(footprintManager_.get());
-		enemies_.push_back(std::move(newEnemy));
-	}
-
 	// JSON保存ボタン
 	if (ImGui::Button("Save JSON")) {
 		SaveToJson(jsonPath_);
@@ -230,4 +219,15 @@ void EnemyManager::AllDead() {
 	for (auto& enemy : enemies_) {
 		enemy->Dead();
 	}
+}
+
+Enemy* EnemyManager::AddEnemy(const Vector3& pos, EnemyType type) {
+	auto enemy = std::make_unique<Enemy>();
+	enemy->Initialize(ctx_, pos, type, bloodDecalManager_, audioManager_.get());
+	enemy->SetPos(pos);
+	enemy->SetRotate({0.0f, 0.0f, 0.0f});
+	enemy->SetIsMove(false);
+	enemy->SetFootprintManager(footprintManager_.get());
+	enemies_.push_back(std::move(enemy));
+	return enemies_.back().get();
 }

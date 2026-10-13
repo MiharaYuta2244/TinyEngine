@@ -55,6 +55,9 @@ public:
 	// 敵を全員殺す
 	void AllDead();
 
+	// 敵の追加
+	Enemy* AddEnemy(const Vector3& pos, EnemyType type = EnemyType::Normal);
+
 private:
 	void LoadFromJson(const std::string& filepath);
 	void SaveToJson(const std::string& filepath);

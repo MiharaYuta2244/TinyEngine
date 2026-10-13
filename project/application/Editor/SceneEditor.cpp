@@ -28,9 +28,20 @@ void SceneEditor::Update(
 		selectedGameObject_ = objects_.front();
 	}
 
+	// Undo/Redo
 	HandleUndoRedoInput(ctx);
+
+	// マウスの座標変換
 	UpdatePicking(ctx);
+
+	// ImGuiの更新
 	UpdateImGui(ctx, player, cameraPosY);
+
+	// 生成するオブジェクトの一覧
+	UpdateSpawnPalette();
+
+	// オブジェクトのドロップ処理
+	UpdateSpawnDropTarget(ctx);
 }
 
 void SceneEditor::UpdateImGui(const SceneContext& ctx, Player* player, float& cameraPosY) {
@@ -384,4 +395,133 @@ void SceneEditor::HandleUndoRedoInput(const SceneContext& ctx) {
 	if (ctx.keyboard->KeyTriggered(DIK_Y)) {
 		Redo();
 	}
+}
+
+void SceneEditor::UpdateSpawnPalette() {
+#ifdef USE_IMGUI
+	struct Item {
+		SpawnType type;
+		const char* label;
+	};
+
+	static const Item kItems[] = {
+	    {SpawnType::Wall,     "Wall"    },
+        {SpawnType::Door,     "Door"    },
+        {SpawnType::Glass,    "Glass"   },
+        {SpawnType::Cage,     "Cage"    },
+	    {SpawnType::HealArea, "HealArea"},
+        {SpawnType::Soap,     "Soap"    },
+        {SpawnType::Enemy,    "Enemy"   },
+	};
+
+	ImGui::Begin("Spawn Palette");
+	ImGui::TextUnformatted("Drag & Drop onto the Game view");
+	ImGui::DragFloat("Spawn Y", &spawnY_, 0.1f);
+	ImGui::Separator();
+
+	for (const auto& item : kItems) {
+		ImGui::Button(item.label, ImVec2(120.0f, 0.0f));
+
+		// このボタンをドラッグ元にする
+		if (ImGui::BeginDragDropSource()) {
+			int typeValue = static_cast<int>(item.type);
+			ImGui::SetDragDropPayload("SPAWN_OBJECT", &typeValue, sizeof(int));
+			ImGui::Text("+ %s", item.label);
+			ImGui::EndDragDropSource();
+		}
+	}
+	ImGui::End();
+#endif
+}
+
+void SceneEditor::UpdateSpawnDropTarget(const SceneContext& ctx) {
+#ifdef USE_IMGUI
+	// 生成用のドラッグ中以外は何もしない
+	const ImGuiPayload* dragging = ImGui::GetDragDropPayload();
+	if (!dragging || !dragging->IsDataType("SPAWN_OBJECT")) {
+		return;
+	}
+
+	if (!ImGui::Begin("Game")) {
+		ImGui::End();
+		return;
+	}
+
+	ImVec2 windowPos = ImGui::GetWindowPos();
+	ImVec2 contentMin = ImGui::GetWindowContentRegionMin();
+	ImVec2 contentMax = ImGui::GetWindowContentRegionMax();
+	ImVec2 viewPos = ImVec2(windowPos.x + contentMin.x, windowPos.y + contentMin.y);
+	ImVec2 viewSize = ImVec2(contentMax.x - contentMin.x, contentMax.y - contentMin.y);
+
+	if (viewSize.x > 0.0f && viewSize.y > 0.0f) {
+		// 描画領域と同じ大きさの透明ボタンをドロップ先にする
+		ImVec2 contentMin = ImGui::GetWindowContentRegionMin();
+		ImVec2 contentMax = ImGui::GetWindowContentRegionMax();
+		ImVec2 viewSize = ImVec2(contentMax.x - contentMin.x, contentMax.y - contentMin.y);
+		ImGui::SetCursorPos(contentMin); // ローカル座標で移動
+		ImGui::InvisibleButton("##SpawnDropArea", viewSize);
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("SPAWN_OBJECT", ImGuiDragDropFlags_AcceptBeforeDelivery)) {
+				Vector3 pos{};
+				if (ScreenToGroundPoint(ctx, viewPos, viewSize, spawnY_, pos)) {
+					// 既存のスナップ設定をそのまま使う
+					if (useSnap_) {
+						pos.x = std::round(pos.x / snapValue_[0]) * snapValue_[0];
+						pos.z = std::round(pos.z / snapValue_[2]) * snapValue_[2];
+					}
+
+					if (payload->IsPreview()) {
+						ImGui::SetTooltip("(%.1f, %.1f, %.1f)", pos.x, pos.y, pos.z);
+					}
+
+					if (payload->IsDelivery()) {
+						SpawnRequest request;
+						request.type = static_cast<SpawnType>(*static_cast<const int*>(payload->Data));
+						request.position = pos;
+						pendingSpawn_ = request;
+					}
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+	}
+	ImGui::End();
+#endif
+}
+
+bool SceneEditor::ScreenToGroundPoint(const SceneContext& ctx, const ImVec2& viewPos, const ImVec2& viewSize, float planeY, Vector3& outPos) const {
+#ifdef USE_IMGUI
+	ImVec2 mousePos = ImGui::GetMousePos();
+
+	// デバイス座標系に正規化
+	float nx = (2.0f * (mousePos.x - viewPos.x)) / viewSize.x - 1.0f;
+	float ny = 1.0f - (2.0f * (mousePos.y - viewPos.y)) / viewSize.y;
+
+	Matrix4x4 viewMat = ctx.currentCamera->GetViewMatrix();
+	Matrix4x4 projMat = ctx.currentCamera->GetProjection();
+	Matrix4x4 vpInv = MathUtility::Inverse(MathUtility::Multiply(viewMat, projMat));
+
+	Vector3 a = {nx, ny, 0.0f};
+	Vector3 b = {nx, ny, 1.0f};
+	Vector3 nearPoint = MathUtility::Transform(a, vpInv);
+	Vector3 farPoint = MathUtility::Transform(b, vpInv);
+	Vector3 dir = MathUtility::Normalize(farPoint - nearPoint);
+
+	// 水平に近いレイは平面と交差しない
+	if (std::abs(dir.y) < 0.0001f) {
+		return false;
+	}
+
+	float t = (planeY - nearPoint.y) / dir.y;
+	if (t < 0.0f) {
+		return false;
+	}
+
+	outPos = nearPoint + dir * t;
+	outPos.y = planeY;
+	return true;
+#else
+	return false;
+#endif
 }

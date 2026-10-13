@@ -76,6 +76,14 @@ public:
 	// オブジェクトの追加
 	void AddObject() { objects_.push_back(CreateObject(defaultTransform_)); }
 
+	// オブジェクトの追加
+	T* AddObject(const Vector3& position) {
+		Transform t = defaultTransform_;
+		t.translate = position;
+		objects_.push_back(CreateObject(t));
+		return objects_.back().get();
+	}
+
 	// オブジェクト削除
 	void RemoveObject(T* target) {
 		for (auto it = objects_.begin(); it != objects_.end(); ++it) {

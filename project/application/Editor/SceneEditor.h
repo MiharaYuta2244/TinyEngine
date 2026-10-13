@@ -6,7 +6,9 @@
 #include "GameObjects/Player/Player.h"
 #include "ImGuizmo.h"
 #include "SceneContext.h"
+#include "SpawnRequest.h"
 #include <deque>
+#include <optional>
 #include <vector>
 
 /// <summary>
@@ -23,6 +25,16 @@ public:
 
 	// デバッグフラグのSetter
 	void SetIsDebug(bool isDebug) { isDebug_ = isDebug; }
+
+	// ドロップで発生した生成リクエストを取り出す
+	std::optional<SpawnRequest> PollSpawnRequest() {
+		auto request = pendingSpawn_;
+		pendingSpawn_.reset();
+		return request;
+	}
+
+	// 生成直後のオブジェクトを選択状態にする
+	void SelectObject(IGameObject* obj) { selectedGameObject_ = obj; }
 
 private:
 	// ImGuiの統合更新
@@ -48,6 +60,15 @@ private:
 
 	// Ctrl+Z / Ctrl+Yの入力を処理する
 	void HandleUndoRedoInput(const SceneContext& ctx);
+
+	// 生成パレット
+	void UpdateSpawnPalette();
+
+	// Gameビュー上のドロップ先
+	void UpdateSpawnDropTarget(const SceneContext& ctx);
+
+	// マウス位置から、planeYの平面との交点を求める
+	bool ScreenToGroundPoint(const SceneContext& ctx, const ImVec2& viewPos, const ImVec2& viewSize, float planeY, Vector3& outPos) const;
 
 private:
 	// オブジェクトのリスト
@@ -78,4 +99,7 @@ private:
 
 	// デバッグフラグ
 	bool isDebug_ = false;
+
+	std::optional<SpawnRequest> pendingSpawn_;
+	float spawnY_ = 0.0f; // 生成時に固定するY座標
 };
