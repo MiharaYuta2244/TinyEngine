@@ -178,7 +178,7 @@ private:
 
 	// チャージパーティクル
 	std::unique_ptr<TinyEngine::Particle> chargeParticle_;
-	std::unique_ptr<TinyEngine::Particle> chargeCylinderParticle_;
+	std::unique_ptr<TinyEngine::Particle> chargeCylinderEffect_;
 
 	// 移動フラグ
 	bool isMove_ = true;

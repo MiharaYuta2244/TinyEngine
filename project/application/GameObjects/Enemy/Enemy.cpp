@@ -205,16 +205,16 @@ void Enemy::Update(
 	// チャージパーティクルの生成
 	if (!chargeParticle_ && ai_->GetShotTimer() >= 0.01f) {
 		chargeParticle_ = std::make_unique<Particle>();
-		chargeParticle_->Initialize(ctx_, transform_.translate, "AttractEffect.png", std::make_unique<ChargeModule>(), nullptr, ParticleMeshType::Square);
+		chargeParticle_->Initialize(ctx_, transform_.translate, "SolarGlow.png", std::make_unique<ChargeModule>(), nullptr, ParticleMeshType::Square);
 		chargeParticle_->SetEmitMode(true, 0.1f);
 		chargeParticle_->SetEmitterParam(3, 0.05f);
 
 		// シリンダーパーティクルの生成&初期化
-		if (!chargeCylinderParticle_) {
-			chargeCylinderParticle_ = std::make_unique<Particle>();
-			chargeCylinderParticle_->Initialize(ctx_, transform_.translate, "gradationLine.png", std::make_unique<ChargeCylinderModule>(ai_.get(), &transform_), nullptr, ParticleMeshType::Cylinder);
-			chargeCylinderParticle_->SetEmitMode(false, 0.0f);
-			chargeCylinderParticle_->SetEmitterParam(1, 9999.0f);
+		if (!chargeCylinderEffect_) {
+			chargeCylinderEffect_ = std::make_unique<Particle>();
+			chargeCylinderEffect_->Initialize(ctx_, transform_.translate, "gradationLine.png", std::make_unique<ChargeCylinderModule>(ai_.get(), &transform_), nullptr, ParticleMeshType::Cylinder);
+			chargeCylinderEffect_->SetEmitMode(false, 0.0f);
+			chargeCylinderEffect_->SetEmitterParam(1, 9999.0f);
 		}
 	}
 
@@ -224,8 +224,8 @@ void Enemy::Update(
 		chargeParticle_->Update();
 	}
 
-	if (chargeCylinderParticle_ && (ai_->GetState() == EnemyAI::State::Vigilance || ai_->GetState() == EnemyAI::State::Hold)) {
-		chargeCylinderParticle_->Update();
+	if (chargeCylinderEffect_ && (ai_->GetState() == EnemyAI::State::Vigilance || ai_->GetState() == EnemyAI::State::Hold)) {
+		chargeCylinderEffect_->Update();
 	}
 
 	// チャージパーティクルの削除
@@ -233,9 +233,9 @@ void Enemy::Update(
 		chargeParticle_.reset();
 		chargeParticle_ = nullptr;
 
-		if (chargeCylinderParticle_) {
-			chargeCylinderParticle_.reset();
-			chargeCylinderParticle_ = nullptr;
+		if (chargeCylinderEffect_) {
+			chargeCylinderEffect_.reset();
+			chargeCylinderEffect_ = nullptr;
 		}
 	}
 
@@ -288,8 +288,8 @@ void Enemy::Draw() {
 		}
 
 		// シリンダーチャージパーティクル描画
-		if (!isDown_ && isMove_ && (ai_->GetState() == EnemyAI::State::Vigilance || ai_->GetState() == EnemyAI::State::Hold) && chargeCylinderParticle_) {
-			chargeCylinderParticle_->Draw();
+		if (!isDown_ && isMove_ && (ai_->GetState() == EnemyAI::State::Vigilance || ai_->GetState() == EnemyAI::State::Hold) && chargeCylinderEffect_) {
+			chargeCylinderEffect_->Draw();
 		}
 	}
 }
@@ -419,7 +419,7 @@ void Enemy::StartDown(float duration) {
 	// チャージエフェクトや「!」マークを消去
 	exclamationMark_.reset();
 	chargeParticle_.reset();
-	chargeCylinderParticle_.reset();
+	chargeCylinderEffect_.reset();
 
 	// 吹き飛び中などの速度も止めておく
 	velocity_ = {0.0f, 0.0f, 0.0f};

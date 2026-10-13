@@ -58,7 +58,4 @@ void ChargeModule::Update(ParticleState& particle, float deltaTime, EngineContex
 		particle.color.y = baseColor_.y + (peakColor_.y - baseColor_.y) * colorT;
 		particle.color.z = baseColor_.z + (peakColor_.z - baseColor_.z) * colorT;
 	}
-
-	// 寿命の終わりにかけてフェードさせる
-	particle.color.w = std::clamp(1.0f - t * 0.3f, 0.0f, 1.0f);
 }
