@@ -32,6 +32,12 @@ public:
 		Vector4 color;
 		Matrix4x4 worldMatrix;
 		std::string texturePath;
+
+		// 寿命管理
+		float lifeTime = 0.0f;  // 完全に表示される時間
+		float fadeTime = 1.0f;  // 薄くなって消えるまでの時間
+		float elapsed = 0.0f;   // 経過時間
+		float baseAlpha = 1.0f; // 生成時のアルファ値
 	};
 
 	~DecalManager();
@@ -44,7 +50,7 @@ public:
 	/// <summary>
 	/// 更新処理
 	/// </summary>
-	void Update();
+	void Update(float deltaTime);
 
 	/// <summary>
 	/// 描画処理
@@ -54,7 +60,9 @@ public:
 	/// <summary>
 	/// デカールをステージ上に追加する
 	/// </summary>
-	DecalData* AddDecal(const std::string& texturePath, const Vector3& position, const Vector3& rotation, const Vector3& scale = {1.0f, 1.0f, 1.0f}, const Vector4& color = {1.0f, 1.0f, 1.0f, 1.0f});
+	DecalData* AddDecal(
+	    const std::string& texturePath, const Vector3& position, const Vector3& rotation, const Vector3& scale = {1.0f, 1.0f, 1.0f}, const Vector4& color = {1.0f, 1.0f, 1.0f, 1.0f},
+	    float lifeTime = 0.0f, float fadeTime = 1.0f);
 
 	// Setter
 	void SetCamera(Camera* camera) { camera_ = camera; }

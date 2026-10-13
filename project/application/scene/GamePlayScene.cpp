@@ -138,7 +138,7 @@ void GamePlayScene::Update() {
 		player_->PostUpdate();
 		enemyManager_->PostUpdate();
 		decalManager_->SetCamera(ctx_.currentCamera);
-		decalManager_->Update();
+		decalManager_->Update(deltaTime);
 		postEffectController_->Update(deltaTime, player_->GetCurrentHP(), player_->IsDead());
 
 		// 演出用レターボックス更新
@@ -358,7 +358,7 @@ void GamePlayScene::Update() {
 
 	// 血痕管理インスタンス更新
 	decalManager_->SetCamera(ctx_.currentCamera);
-	decalManager_->Update();
+	decalManager_->Update(deltaTime);
 
 #ifdef USE_IMGUI
 	ImGui::Begin("Camera");
@@ -400,9 +400,6 @@ void GamePlayScene::Draw() {
 		particle->Draw();
 	}
 
-	// 血痕描画
-	decalManager_->Draw();
-
 	// フラッシュエフェクト描画
 	flashEffect_->Draw();
 
@@ -418,6 +415,9 @@ void GamePlayScene::Draw() {
 
 	// ガラスの描画
 	stage_->DrawTransparent();
+
+	// 血痕描画
+	decalManager_->Draw();
 }
 
 void GamePlayScene::Finalize() {

@@ -40,7 +40,8 @@ void DecalManager::Initialize(EngineContext* ctx) {
 	*materialData_ = material_;
 }
 
-DecalManager::DecalData* DecalManager::AddDecal(const std::string& texturePath, const Vector3& position, const Vector3& rotation, const Vector3& scale, const Vector4& color) {
+DecalManager::DecalData*
+    DecalManager::AddDecal(const std::string& texturePath, const Vector3& position, const Vector3& rotation, const Vector3& scale, const Vector4& color, float lifeTime, float fadeTime) {
 	std::string fullPath = "resources/textures/" + texturePath;
 	ctx_->textureManager->LoadTexture(texturePath);
 
@@ -73,6 +74,10 @@ DecalManager::DecalData* DecalManager::AddDecal(const std::string& texturePath, 
 	newData.transform = {scale, rotation, position};
 	newData.color = color;
 	newData.worldMatrix = MathUtility::MakeAffineMatrix(scale, rotation, position);
+	newData.lifeTime = lifeTime;
+	newData.fadeTime = fadeTime;
+	newData.baseAlpha = color.w;
+	newData.elapsed = 0.0f;
 
 	auto& group = decalGroups_[fullPath];
 	DecalData* createdDecal = nullptr;
@@ -91,7 +96,7 @@ DecalManager::DecalData* DecalManager::AddDecal(const std::string& texturePath, 
 	return createdDecal;
 }
 
-void DecalManager::Update() {
+void DecalManager::Update(float deltaTime) {
 	if (camera_ == nullptr)
 		return;
 
@@ -104,12 +109,25 @@ void DecalManager::Update() {
 		uint32_t numInstance = static_cast<uint32_t>(group->decalList.size());
 
 		for (uint32_t i = 0; i < numInstance; ++i) {
-			// transformの変更を反映するためワールド行列を再計算
-			group->decalList[i].worldMatrix = MathUtility::MakeAffineMatrix(group->decalList[i].transform.scale, group->decalList[i].transform.rotate, group->decalList[i].transform.translate);
+			DecalData& decal = group->decalList[i];
 
-			group->instancingData[i].World = group->decalList[i].worldMatrix;
-			group->instancingData[i].WVP = MathUtility::Multiply(group->decalList[i].worldMatrix, viewProjMatrix);
-			group->instancingData[i].color = group->decalList[i].color;
+			// 寿命が設定されているデカールだけフェード処理
+			if (decal.lifeTime > 0.0f) {
+				decal.elapsed += deltaTime;
+
+				if (decal.elapsed >= decal.lifeTime + decal.fadeTime) {
+					decal.color.w = 0.0f; // 完全に消えた
+				} else if (decal.elapsed > decal.lifeTime) {
+					float t = (decal.elapsed - decal.lifeTime) / decal.fadeTime;
+					decal.color.w = decal.baseAlpha * (1.0f - t);
+				}
+			}
+
+			decal.worldMatrix = MathUtility::MakeAffineMatrix(decal.transform.scale, decal.transform.rotate, decal.transform.translate);
+
+			group->instancingData[i].World = decal.worldMatrix;
+			group->instancingData[i].WVP = MathUtility::Multiply(decal.worldMatrix, viewProjMatrix);
+			group->instancingData[i].color = decal.color;
 		}
 	}
 }
