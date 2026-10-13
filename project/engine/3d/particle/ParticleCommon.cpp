@@ -14,6 +14,14 @@ void ParticleCommon::DrawSettingCommon() {
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
+void ParticleCommon::DrawSettingCommonDecal() {
+	// RootSignatureを設定
+	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature_.Get());
+	dxCommon_->GetCommandList()->SetPipelineState(decalPipelineState_.Get()); // PSOを設定(アルファブレンド)
+	// 形状を設定
+	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
 void ParticleCommon::Initialize(DirectXCommon* dxCommon) {
 	dxCommon_ = dxCommon;
 
@@ -115,6 +123,17 @@ void ParticleCommon::CreateGraphicsPipeline() {
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;
 
+	// デカール用(アルファブレンド)のBlendState設定
+	D3D12_BLEND_DESC decalBlendDesc{};
+	decalBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
+	decalBlendDesc.RenderTarget[0].BlendEnable = TRUE;
+	decalBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	decalBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+	decalBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	decalBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
+	decalBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
+	decalBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+
 	// RasterizerStateの設定
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 	// 裏面(時計回り)を表示しない
@@ -145,20 +164,29 @@ void ParticleCommon::CreateGraphicsPipeline() {
 	graphicsPipelineStateDesc.PS = {pixelShaderBlob->GetBufferPointer(), pixelShaderBlob->GetBufferSize()};   // PixelShader
 	graphicsPipelineStateDesc.BlendState = blendDesc;                                                         // BlendState
 	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;                                               // RasterizerState
+
 	// 書き込むRTVの情報
 	graphicsPipelineStateDesc.NumRenderTargets = 1;
 	graphicsPipelineStateDesc.RTVFormats[0] = dxCommon_->GetRtvFormat();
+
 	// 利用するトポロジ(形状)のタイプ。三角形
 	graphicsPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
 	// どのように画面に色を打ち込むのかの設定(気にしなくていい)
 	graphicsPipelineStateDesc.SampleDesc.Count = 1;
-	/*graphicsPipelineStateDesc.SampleDesc.Quality = 0;*/
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
+
 	// DepthStencilの設定
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
 	// 実際に生成
 	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState_));
+	assert(SUCCEEDED(hr));
+
+	// デカール用のPSO生成
+	graphicsPipelineStateDesc.BlendState = decalBlendDesc;
+	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&decalPipelineState_));
 	assert(SUCCEEDED(hr));
 }
 

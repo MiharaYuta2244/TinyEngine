@@ -136,8 +136,8 @@ void DecalManager::Draw() {
 	if (decalGroups_.empty())
 		return;
 
-	// ParticleCommon等のパイプライン設定を流用
-	ctx_->particleCommon->DrawSettingCommon();
+	// デカールのパイプライン設定を適用
+	ctx_->particleCommon->DrawSettingCommonDecal();
 
 	auto commandList = ctx_->particleCommon->GetDxCommon()->GetCommandList();
 

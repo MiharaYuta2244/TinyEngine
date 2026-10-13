@@ -13,6 +13,11 @@ public:
 	void DrawSettingCommon();
 
 	/// <summary>
+	/// デカール用共通描画設定
+	/// </summary>
+	void DrawSettingCommonDecal();
+
+	/// <summary>
 	/// 初期化関数
 	/// </summary>
 	/// <param name="dxCommon">DirectX共通クラスのポインタ</param>
@@ -47,6 +52,7 @@ private:
 	// Root Signature / Pipeline
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState_;
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> decalPipelineState_;
 
 	// Shader Compiler
 	Microsoft::WRL::ComPtr<IDxcUtils> dxcUtils_;

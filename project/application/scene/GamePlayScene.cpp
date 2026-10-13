@@ -400,6 +400,9 @@ void GamePlayScene::Draw() {
 		particle->Draw();
 	}
 
+	// 血痕描画
+	decalManager_->Draw();
+
 	// フラッシュエフェクト描画
 	flashEffect_->Draw();
 
@@ -415,9 +418,6 @@ void GamePlayScene::Draw() {
 
 	// ガラスの描画
 	stage_->DrawTransparent();
-
-	// 血痕描画
-	decalManager_->Draw();
 }
 
 void GamePlayScene::Finalize() {
