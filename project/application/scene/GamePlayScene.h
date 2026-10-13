@@ -6,16 +6,16 @@
 #include "Collision/CollisionManager.h"
 #include "DecalManager.h"
 #include "Editor/SceneEditor.h"
+#include "Font.h"
 #include "GameObjects/ControlUI/ControlUI.h"
 #include "GameObjects/Effect/FlashEffect.h"
 #include "GameObjects/Effect/LetterBox.h"
-#include "Gameobjects/Enemy/Weapon/EnemyBombManager.h"
-#include "Gameobjects/Enemy/Weapon/EnemyBulletManager.h"
 #include "GameObjects/Enemy/EnemyManager.h"
 #include "GameObjects/Player/Player.h"
 #include "GameObjects/StageObjects/Stage.h"
+#include "Gameobjects/Enemy/Weapon/EnemyBombManager.h"
+#include "Gameobjects/Enemy/Weapon/EnemyBulletManager.h"
 #include "Particle.h"
-#include "Font.h"
 #include "TextSprite.h"
 #include <memory>
 
@@ -143,7 +143,8 @@ private:
 	Vector3 introGoalPivot_{};
 
 	// 移動にかける時間
-	float introMoveDuration_ = 3.0f;
+	float introMoveDuration_ = 3.0f;     // 行き
+	float introMoveBackDuration_ = 2.0f; // 帰り
 
 	// ゴール地点での待機時間
 	float introHoldDuration_ = 1.0f;

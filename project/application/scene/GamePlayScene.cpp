@@ -470,7 +470,7 @@ void GamePlayScene::UpdateCameraIntro(float deltaTime) {
 		// ゴール地点で少し待機
 		introHoldTimer_.Update(deltaTime);
 		if (introHoldTimer_.IsEnd()) {
-			introPivotAnim_.anim.Start(introGoalPivot_, introStartPivot_, introMoveDuration_, EaseType::EASEINOUTSINE);
+			introPivotAnim_.anim.Start(introGoalPivot_, introStartPivot_, introMoveBackDuration_, EaseType::EASEINOUTCUBIC);
 			introPhase_ = CameraAnimState::ToStart;
 		}
 		break;
