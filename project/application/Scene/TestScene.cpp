@@ -19,8 +19,6 @@ void TestScene::Update() {
 	gpuParticle_->DispatchUpdate();
 }
 
-void TestScene::Draw() {
-	gpuParticle_->Draw();
-}
+void TestScene::Draw() { gpuParticle_->Draw(); }
 
 void TestScene::Finalize() {}

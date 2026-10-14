@@ -1,0 +1,272 @@
+{
+    "emitters": [
+        {
+            "blend": "Additive",
+            "burst": true,
+            "count": 1,
+            "duration": 0.10000000149011612,
+            "extent": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "frequency": 0.10000000149011612,
+            "loop": false,
+            "mesh": "Ring",
+            "moduleType": "HitFlash",
+            "name": "Flash",
+            "offset": {
+                "x": 0.0,
+                "y": 0.5,
+                "z": 0.0
+            },
+            "params": {
+                "colorEase": 30,
+                "colorEnd": {
+                    "w": 0.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "colorStartA": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "colorStartB": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "damping": 1.0,
+                "direction": {
+                    "x": 0.0,
+                    "y": 1.0,
+                    "z": 0.0
+                },
+                "endScale": 0.0,
+                "gravity": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "initialRotateDeg": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "life": {
+                    "max": 0.6000000238418579,
+                    "min": 0.30000001192092896
+                },
+                "shape": "Cone",
+                "sizeAxis": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "sizeEase": 30,
+                "speed": {
+                    "max": 3.0,
+                    "min": 1.0
+                },
+                "spinDeg": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "spreadAngle": 180.0,
+                "startSize": {
+                    "max": 0.4000000059604645,
+                    "min": 0.20000000298023224
+                },
+                "useSpawnDirection": false,
+                "yVelocity": {
+                    "max": 0.0,
+                    "min": 0.0
+                }
+            },
+            "texture": "AttractEffect.png"
+        },
+        {
+            "blend": "Additive",
+            "burst": true,
+            "count": 50,
+            "duration": 0.10000000149011612,
+            "extent": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "frequency": 0.10000000149011612,
+            "loop": false,
+            "mesh": "Square",
+            "moduleType": "HitSpark",
+            "name": "Sparks",
+            "offset": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "params": {
+                "colorEase": 30,
+                "colorEnd": {
+                    "w": 0.0,
+                    "x": 1.0,
+                    "y": 0.6000000238418579,
+                    "z": 0.10000000149011612
+                },
+                "colorStartA": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 0.4000000059604645,
+                    "z": 0.10000000149011612
+                },
+                "colorStartB": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 0.800000011920929,
+                    "z": 0.10000000149011612
+                },
+                "damping": 0.8799999952316284,
+                "direction": {
+                    "x": 0.0,
+                    "y": 1.0,
+                    "z": 0.0
+                },
+                "endScale": 0.0,
+                "gravity": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "initialRotateDeg": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "life": {
+                    "max": 0.5,
+                    "min": 0.25
+                },
+                "shape": "Cone",
+                "sizeAxis": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "sizeEase": 30,
+                "speed": {
+                    "max": 14.0,
+                    "min": 6.0
+                },
+                "spinDeg": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "spreadAngle": 180.0,
+                "startSize": {
+                    "max": 1.0,
+                    "min": 1.0
+                },
+                "useSpawnDirection": false,
+                "yVelocity": {
+                    "max": 0.0,
+                    "min": 0.0
+                }
+            },
+            "texture": "white.png"
+        },
+        {
+            "blend": "Additive",
+            "burst": true,
+            "count": 1,
+            "duration": 0.10000000149011612,
+            "extent": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "frequency": 0.10000000149011612,
+            "loop": false,
+            "mesh": "Cylinder",
+            "moduleType": "HitRing",
+            "name": "Ring",
+            "offset": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "params": {
+                "colorEase": 30,
+                "colorEnd": {
+                    "w": 0.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "colorStartA": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "colorStartB": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "damping": 1.0,
+                "direction": {
+                    "x": 0.0,
+                    "y": 1.0,
+                    "z": 0.0
+                },
+                "endScale": 0.0,
+                "gravity": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "initialRotateDeg": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "life": {
+                    "max": 0.6000000238418579,
+                    "min": 0.30000001192092896
+                },
+                "shape": "Cone",
+                "sizeAxis": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "sizeEase": 30,
+                "speed": {
+                    "max": 3.0,
+                    "min": 1.0
+                },
+                "spinDeg": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "spreadAngle": 180.0,
+                "startSize": {
+                    "max": 0.4000000059604645,
+                    "min": 0.20000000298023224
+                },
+                "useSpawnDirection": false,
+                "yVelocity": {
+                    "max": 0.0,
+                    "min": 0.0
+                }
+            },
+            "texture": "gradationLine.png"
+        }
+    ],
+    "name": "Hit"
+}

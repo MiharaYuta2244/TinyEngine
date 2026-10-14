@@ -22,6 +22,20 @@ void ImGuiManager::Initialize(HWND hwnd, ComPtr<ID3D12Device> device, ComPtr<ID3
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
+	// 日本語フォント
+	const char* fontPath = "resources/fonts/NotoSansJP-VariableFont_wght.ttf";
+	const float fontSize = 18.0f;
+
+	ImFont* font = io.Fonts->AddFontFromFileTTF(fontPath, fontSize, nullptr, io.Fonts->GetGlyphRangesJapanese());
+
+	if (!font) {
+		// 同梱フォントが無ければWindows標準のメイリオにフォールバック
+		font = io.Fonts->AddFontFromFileTTF("C:/Windows/Fonts/meiryo.ttc", fontSize, nullptr, io.Fonts->GetGlyphRangesJapanese());
+	}
+	if (font) {
+		io.FontDefault = font;
+	}
+
 	ImGui::StyleColorsDark();
 	ImGui_ImplWin32_Init(hwnd);
 

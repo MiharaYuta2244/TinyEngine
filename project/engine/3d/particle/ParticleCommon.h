@@ -1,6 +1,7 @@
 #pragma once
 #include "DebugCamera.h"
 #include "DirectXCommon.h"
+#include "ParticleTypes.h"
 
 /// <summary>
 /// パーティクルの共通クラス
@@ -10,12 +11,7 @@ public:
 	/// <summary>
 	/// 共通描画設定
 	/// </summary>
-	void DrawSettingCommon();
-
-	/// <summary>
-	/// デカール用共通描画設定
-	/// </summary>
-	void DrawSettingCommonDecal();
+	void DrawSettingCommon(TinyEngine::ParticleBlendMode mode = TinyEngine::ParticleBlendMode::Additive);
 
 	/// <summary>
 	/// 初期化関数

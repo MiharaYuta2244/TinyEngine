@@ -1,16 +1,21 @@
 #include "Game.h"
+#include "EffectLibrary.h"
+#include "Scene/EffectEditorScene.h"
 #include "Scene/GamePlayScene.h"
-#include "Scene/TitleScene.h"
 #include "Scene/PauseScene.h"
 #include "Scene/ResultScene.h"
-#include "Scene/TestScene.h"
 #include "Scene/StageSelectScene.h"
+#include "Scene/TestScene.h"
+#include "Scene/TitleScene.h"
 
 using namespace TinyEngine;
 
 void Game::Initialize() {
 	// 基底クラスの初期化処理
 	Framework::Initialize();
+
+	// 起動時時に全エフェクトを読み込み
+	EffectLibrary::Get().LoadAll();
 
 	// フェードマネージャーの生成&初期化
 	fadeManager_ = std::make_unique<FadeManager>();
@@ -29,6 +34,7 @@ void Game::Initialize() {
 	sceneManager_->AddScene("Result", std::make_unique<ResultScene>());
 	sceneManager_->AddScene("StageSelect", std::make_unique<StageSelectScene>());
 	sceneManager_->AddScene("Test", std::make_unique<TestScene>());
+	sceneManager_->AddScene("EffectEditor", std::make_unique<EffectEditorScene>());
 
 	// 最初のシーンを初期化
 	sceneManager_->ChangeScene("Title");

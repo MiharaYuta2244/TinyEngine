@@ -1,24 +1,14 @@
-#include "DirectXCommon.h"
 #include "ParticleCommon.h"
-#include "StringUtility.h"
+#include "DirectXCommon.h"
 #include "DirectXUtils.h"
-#include <format>
 
 using namespace Microsoft::WRL;
+using namespace TinyEngine;
 
-void ParticleCommon::DrawSettingCommon() {
-	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
+void ParticleCommon::DrawSettingCommon(ParticleBlendMode mode) {
+	auto* pso = (mode == TinyEngine::ParticleBlendMode::Alpha) ? decalPipelineState_.Get() : graphicsPipelineState_.Get();
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature_.Get());
-	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState_.Get()); // PSOを設定
-	// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
-	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-}
-
-void ParticleCommon::DrawSettingCommonDecal() {
-	// RootSignatureを設定
-	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature_.Get());
-	dxCommon_->GetCommandList()->SetPipelineState(decalPipelineState_.Get()); // PSOを設定(アルファブレンド)
-	// 形状を設定
+	dxCommon_->GetCommandList()->SetPipelineState(pso);
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
@@ -42,12 +32,12 @@ void ParticleCommon::CreateRootSignature() {
 
 	// RootParameter作成。複数設定できるので配列。
 	D3D12_ROOT_PARAMETER rootParameters[3] = {};
-	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;                   // CBVを使う
-	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;                // PixelShaderで使う
-	rootParameters[0].Descriptor.ShaderRegister = 0;                                   // レジスタ番号0とバインド
+	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;    // CBVを使う
+	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL; // PixelShaderで使う
+	rootParameters[0].Descriptor.ShaderRegister = 0;                    // レジスタ番号0とバインド
 
 	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;      // DescriptorTableを使う
-	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;                // VertexShaderで使う
+	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;               // VertexShaderで使う
 	rootParameters[1].DescriptorTable.pDescriptorRanges = descriptorRange;             // Tableの中身の配列を指定
 	rootParameters[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange); // Tableで利用する数
 
@@ -55,7 +45,7 @@ void ParticleCommon::CreateRootSignature() {
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;                // PixelShaderで使う
 	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;             // Tableの中身の配列を指定
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange); // Tableで利用する数
-	
+
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;   // バイリニアフィルタ
 	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP; // 0~1の範囲をリピート

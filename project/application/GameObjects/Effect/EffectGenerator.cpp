@@ -1,5 +1,6 @@
 #include "EffectGenerator.h"
 #include "ParticleModuleHeader.h"
+#include "EffectLibrary.h"
 
 using namespace TinyEngine;
 

@@ -6,7 +6,7 @@
 #include "ParticleForGPU.h"
 #include "ParticleMaterial.h"
 #include "ParticleModule.h"
-#include "ParticleState.h"
+#include "ParticleTypes.h"
 #include "TimeManager.h"
 #include "Transform.h"
 #include "VertexData.h"
@@ -18,12 +18,6 @@
 #include <wrl.h>
 
 namespace TinyEngine {
-enum class ParticleMeshType {
-	Square,   // 従来の矩形
-	Ring,     // リング
-	Cylinder, // シリンダー
-};
-
 /// <summary>
 /// パーティクルクラス
 /// </summary>
@@ -83,6 +77,8 @@ public:
 		emitter_.frequency = frequency;
 		emitter_.frequencyTime = frequency;
 	}
+	void SetBlendMode(ParticleBlendMode mode) { blendMode_ = mode; }
+	void SetBurst(bool isBurst) { isBurst_ = isBurst; }
 
 	// モジュールごとのエミッタを登録する
 	void SetEmitterForModule(const std::string& moduleName, const Emitter& emitter);
@@ -171,7 +167,7 @@ private:
 	Matrix4x4 worldMatrix_;
 
 	// 描画する数
-	static const uint32_t kNumMaxInstance = 100;
+	static const uint32_t kNumMaxInstance = 1024;
 	uint32_t numInstance_ = 0;
 
 	// 3Dオブジェクト自体とカメラの座標変換行列の元となるTransform
@@ -232,5 +228,12 @@ private:
 
 	// 追従フラグ
 	bool isFollowTarget_ = false;
+
+	// ブレンドモード
+	ParticleBlendMode blendMode_ = ParticleBlendMode::Additive;
+
+	// 1回だけcount個を発生させる為のフラグ
+	bool isBurst_ = false;
+	bool burstDone_ = false;
 };
 } // namespace TinyEngine

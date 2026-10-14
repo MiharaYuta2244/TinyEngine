@@ -137,7 +137,7 @@ void DecalManager::Draw() {
 		return;
 
 	// デカールのパイプライン設定を適用
-	ctx_->particleCommon->DrawSettingCommonDecal();
+	ctx_->particleCommon->DrawSettingCommon(TinyEngine::ParticleBlendMode::Alpha);
 
 	auto commandList = ctx_->particleCommon->GetDxCommon()->GetCommandList();
 

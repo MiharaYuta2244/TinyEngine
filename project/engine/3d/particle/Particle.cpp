@@ -13,16 +13,14 @@ using namespace Microsoft::WRL;
 using namespace DirectX;
 using namespace TinyEngine;
 
-Particle::~Particle(){
+Particle::~Particle() {
 	if (ctx_ && ctx_->srvManager) {
 		Logger::Log("Particle Destroyed. SRV Index: " + std::to_string(srvIndex_), LogLevel::Info);
 		ctx_->srvManager->Free(srvIndex_);
 	}
 }
 
-void Particle::Initialize(
-    EngineContext* ctx, Vector3 emitterPos, const std::string& texturePath, std::unique_ptr<ParticleModule> module, const Emitter* customEmitter,
-    ParticleMeshType meshType) {
+void Particle::Initialize(EngineContext* ctx, Vector3 emitterPos, const std::string& texturePath, std::unique_ptr<ParticleModule> module, const Emitter* customEmitter, ParticleMeshType meshType) {
 	ctx_ = ctx;
 
 	// モジュールのセット
@@ -102,7 +100,14 @@ void Particle::Update() {
 
 	// 新たなパーティクルを発生させる状態かどうか
 	bool isActive = true;
-	if (!isLoop_ && duration_ > 0.0f && elapsedTime_ >= duration_) {
+	if (isBurst_) {
+		// 最初のフレームに1回だけ発生させ、以降は新規発生しない
+		if (!burstDone_) {
+			particles_.splice(particles_.end(), Emit(emitter_, emitter_.transform.translate));
+			burstDone_ = true;
+		}
+		isActive = false;
+	} else if (!isLoop_ && duration_ > 0.0f && elapsedTime_ >= duration_) {
 		isActive = false; // 指定した稼働時間を超えたら新規発生をストップ
 	}
 
@@ -141,10 +146,12 @@ void Particle::Draw() {
 		return;
 	}
 
+#if defined(NDEBUG) || defined(_DEBUG)
 	Logger::Log("Particle Draw Command Added. SRV Index: " + std::to_string(srvIndex_), LogLevel::Debug);
+#endif
 
 	// 3Dオブジェクト描画準備。3Dオブジェクトの描画に共通のグラフィックスコマンドを積む
-	ctx_->particleCommon->DrawSettingCommon();
+	ctx_->particleCommon->DrawSettingCommon(blendMode_);
 
 	auto commandList = ctx_->particleCommon->GetDxCommon()->GetCommandList();
 
@@ -204,7 +211,7 @@ ModelData Particle::CreatePrimitive(const std::string& texturePath) {
 	return modelData;
 }
 
-ModelData TinyEngine::Particle::CreateRingPrimitive(const std::string& texturePath, float innerRadius, float outerRadius, uint32_t segments) { 
+ModelData TinyEngine::Particle::CreateRingPrimitive(const std::string& texturePath, float innerRadius, float outerRadius, uint32_t segments) {
 	ModelData modelData;
 	modelData.materials.resize(1);
 
@@ -467,7 +474,7 @@ void Particle::CreateInstancingSRV(UINT srvIndex) {
 }
 
 void Particle::InitializeAccelerationField() {
-	accelerationField_.acceleration = {15.0f, 0.0f, 0.0f};
+	accelerationField_.acceleration = {0.0f, 0.0f, 0.0f};
 	accelerationField_.area.min = {-1.0f, -1.0f, -1.0f};
 	accelerationField_.area.max = {1.0f, 1.0f, 1.0f};
 }
@@ -512,7 +519,7 @@ void Particle::WriteParticleToGPU(const ParticleState& p, uint32_t index) {
 	instancingData_[index].color.w = alpha;
 }
 
-void Particle::UpdateTranslate(const Vector3& newPos){
+void Particle::UpdateTranslate(const Vector3& newPos) {
 	if (isFollowTarget_) {
 		// 前回のエミッタ座標と新しい座標の差分を計算
 		Vector3 delta;

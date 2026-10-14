@@ -55,17 +55,18 @@ public:
 	static float EaseInBounce(float t);
 	static float EaseInOutBounce(float t);
 
-	static inline float ApplyEasing(EaseType type, float t) {
-		return EaseTable[static_cast<int>(type)](t);
-	}
+	// Linear
+	static float Linear(float t);
+
+	static inline float ApplyEasing(EaseType type, float t) { return EaseTable[static_cast<int>(type)](t); }
 
 private:
 	// イージングテーブル
 	static constexpr EaseFunc EaseTable[] = {
-	    &Easing::EaseInSine,    &Easing::EaseOutSine,    &Easing::EaseInOutSine,    &Easing::EaseInQuad,    &Easing::EaseOutQuad,  &Easing::EaseInOutQuad,
-	    &Easing::EaseInCubic,   &Easing::EaseOutCubic,   &Easing::EaseInOutCubic,   &Easing::EaseInQuart,   &Easing::EaseOutQuart, &Easing::EaseInOutQuart,
-	    &Easing::EaseInQuint,   &Easing::EaseOutQuint,   &Easing::EaseInOutQuint,   &Easing::EaseInExpo,    &Easing::EaseOutExpo,  &Easing::EaseInOutExpo,
-	    &Easing::EaseInCirc,    &Easing::EaseOutCirc,    &Easing::EaseInOutCirc,    &Easing::EaseInBack,    &Easing::EaseOutBack,  &Easing::EaseInOutBack,
-	    &Easing::EaseInElastic, &Easing::EaseOutElastic, &Easing::EaseInOutElastic, &Easing::EaseOutBounce, &Easing::EaseInBounce, &Easing::EaseInOutBounce,
+	    &Easing::EaseInSine,     &Easing::EaseOutSine,     &Easing::EaseInOutSine, &Easing::EaseInQuad,    &Easing::EaseOutQuad,    &Easing::EaseInOutQuad,    &Easing::EaseInCubic,
+	    &Easing::EaseOutCubic,   &Easing::EaseInOutCubic,  &Easing::EaseInQuart,   &Easing::EaseOutQuart,  &Easing::EaseInOutQuart, &Easing::EaseInQuint,      &Easing::EaseOutQuint,
+	    &Easing::EaseInOutQuint, &Easing::EaseInExpo,      &Easing::EaseOutExpo,   &Easing::EaseInOutExpo, &Easing::EaseInCirc,     &Easing::EaseOutCirc,      &Easing::EaseInOutCirc,
+	    &Easing::EaseInBack,     &Easing::EaseOutBack,     &Easing::EaseInOutBack, &Easing::EaseInElastic, &Easing::EaseOutElastic, &Easing::EaseInOutElastic, &Easing::EaseOutBounce,
+	    &Easing::EaseInBounce,   &Easing::EaseInOutBounce, &Easing::Linear,
 	};
 };

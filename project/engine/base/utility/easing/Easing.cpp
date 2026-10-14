@@ -100,3 +100,6 @@ float Easing::EaseOutBounce(float t) {
 float Easing::EaseInBounce(float t) { return 1.0f - EaseOutBounce(1.0f - t); }
 
 float Easing::EaseInOutBounce(float t) { return t < 0.5f ? (1.0f - EaseOutBounce(1.0f - 2.0f * t)) / 2.0f : (1.0f + EaseOutBounce(2.0f * t - 1.0f)) / 2.0f; }
+
+// --- Linear ---
+float Easing::Linear(float t) { return t; }

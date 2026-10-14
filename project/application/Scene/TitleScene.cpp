@@ -94,6 +94,13 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 void TitleScene::Update() {
 	float deltaTime = ctx_.timeManager->GetDeltaTime();
 
+#if defined(NDEBUG) || defined(_DEBUG)
+	// エフェクトエディタシーンへの遷移
+	if (ctx_.keyboard->KeyTriggered(DIK_F5)) {
+		RequestSceneChange("EffectEditor");
+	}
+#endif
+
 	// 音声更新
 	audioManager_->Update();
 
@@ -250,6 +257,4 @@ void TitleScene::Draw() {
 	}
 }
 
-void TitleScene::Finalize() {
-	audioManager_->StopBGM();
-}
+void TitleScene::Finalize() { audioManager_->StopBGM(); }
