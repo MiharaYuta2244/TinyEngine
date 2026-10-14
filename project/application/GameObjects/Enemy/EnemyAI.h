@@ -77,11 +77,14 @@ public:
 	// 弾が撃たれた瞬間を知らせるGetter
 	float GetShotTimer() const { return shotTimer_; }
 
+	// ホールド時のチャージ時間
+	float GetHoldChargeTime() const { return shotIntervalHold_ * shotTimerMultiPlier_; }
+
 	// 弾のインターバルGetter
 	float GetShotInterval() const {
 		// ホールド時
 		if (state_ == State::Hold) {
-			return shotIntervalHold_;
+			return GetHoldChargeTime();
 		}
 
 		// 1発目かそうでないかで返す値を変える

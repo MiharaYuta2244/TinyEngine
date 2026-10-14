@@ -213,6 +213,9 @@ private:
 	// 前フレームのLTボタンの入力値
 	float preLt_ = 0.0f;
 
+	// 前フレームのRTボタンの入力値
+	float preRt_ = 0.0f;
+
 	// ポイントライト調整用パラメータ
 	float pointLightHeightOffset_ = 2.0f;                // プレイヤー中心からの高さ
 	Vector4 pointLightColor_ = {1.0f, 1.0f, 1.0f, 1.0f}; // ライトの色
@@ -238,4 +241,7 @@ private:
 
 	// 振動マネージャー
 	std::unique_ptr<RumbleManager> rumbleManager_;
+
+	// 攻撃インターバル
+	GameTimer attckTimer_;
 };

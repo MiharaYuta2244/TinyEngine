@@ -378,6 +378,9 @@ void GamePlayScene::Draw() {
 	// 敵の描画処理
 	enemyManager_->Draw();
 
+	// 血痕描画
+	decalManager_->Draw();
+
 	// 敵の弾の描画処理
 	enemyBulletManager_->Draw();
 
@@ -399,9 +402,6 @@ void GamePlayScene::Draw() {
 	for (auto& particle : soapBreakEffect_) {
 		particle->Draw();
 	}
-
-	// 血痕描画
-	decalManager_->Draw();
 
 	// フラッシュエフェクト描画
 	flashEffect_->Draw();

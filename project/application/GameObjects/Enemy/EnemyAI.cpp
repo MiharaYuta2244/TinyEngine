@@ -245,7 +245,7 @@ void EnemyAI::UpdateHold(float deltaTime, Player* player, EnemyBulletManager* en
 	// 連射しないタイプは単発
 	if (burstDuration <= 0.0f) {
 		shotTimer_ += deltaTime;
-		if (shotTimer_ >= shotIntervalHold_ * shotTimerMultiPlier_) {
+		if (shotTimer_ >= GetHoldChargeTime()) {
 			Shot(playerDirection, enemyBulletManager, enemyBombManager);
 			audioManager_->PlaySE("Shot", 0.3f);
 			isShotHoldState_ = false;
@@ -257,7 +257,7 @@ void EnemyAI::UpdateHold(float deltaTime, Player* player, EnemyBulletManager* en
 	// 連射開始前の溜め
 	if (!isHoldBursting_) {
 		shotTimer_ += deltaTime;
-		if (shotTimer_ < shotIntervalHold_ * shotTimerMultiPlier_) {
+		if (shotTimer_ < GetHoldChargeTime()) {
 			return;
 		}
 		// 溜め完了。最初の1発はすぐ撃つ

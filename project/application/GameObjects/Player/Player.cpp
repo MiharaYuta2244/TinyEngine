@@ -304,7 +304,7 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		const auto& padState = gamePad->GetState();
 
 		// Lトリガーで掴み
-		if (padState.axes.lt > 0.3f) {
+		if (padState.axes.lt > 0.3f && !isGrab_) {
 			isGrab_ = true;
 			// 前フレームの入力が閾値以下だった場合のみ押した瞬間とみなす
 			if (preLt_ <= 0.3f) {
@@ -318,15 +318,17 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		}
 
 		// Rトリガーで突き飛ばし
-		if (padState.axes.rt > 0.3f) {
+		if (padState.axes.rt > 0.3f && preRt_ <= 0.3f) {
 			isAttackTriggered_ = true;
 		}
 
-		// 現在のLTの値を保存
+		// 現在のLT/RTの値を保存
 		preLt_ = padState.axes.lt;
+		preRt_ = padState.axes.rt;
 	} else {
 		// パッドが繋がっていない場合はリセット
 		preLt_ = 0.0f;
+		preRt_ = 0.0f;
 	}
 
 	// 石鹸の掴み・投げ処理
