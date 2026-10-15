@@ -83,7 +83,7 @@ private:
 	float stopThreshold_ = 0.3f;            // これ以下で停止扱い
 
 	Vector3 halfSize_ = {0.5f, 0.3f, 0.5f};       // 本体当たり判定の半径
-	Vector3 bubbleHalfSize_ = {2.0f, 2.0f, 0.5f}; // 泡の当たり判定の半径
+	Vector3 bubbleHalfSize_ = {4.0f, 4.0f, 0.5f}; // 泡の当たり判定の半径
 
 	bool isThrown_ = false;       // 投げられて飛んでいる最中か
 	bool isBubbleActive_ = false; // 泡が発生しているか
@@ -103,7 +103,7 @@ private:
 	bool isBroken_ = false;
 
 	// 投げるスピード
-	float throwSpeed_ = 30.0f;
+	float throwSpeed_ = 40.0f;
 
 	// 破壊された瞬間のフラグ
 	bool justBroken_ = false;

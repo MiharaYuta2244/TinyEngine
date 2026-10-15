@@ -320,6 +320,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="application\GameObjects\Enemy\Behavior\NormalBehavior.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\Behavior\ShotgunBehavior.cpp" />
     <ClCompile Include="engine\3d\particle\modules\WoodShardModule.cpp" />
+    <ClCompile Include="application\GameObjects\Item\Molotov.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -581,6 +582,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="application\GameObjects\Effect\FootprintManager.h" />
     <ClInclude Include="engine\3d\particle\modules\WoodShardModule.h" />
     <ClInclude Include="engine\3d\particle\modules\GenericModule.h" />
+    <ClInclude Include="application\GameObjects\Item\Molotov.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

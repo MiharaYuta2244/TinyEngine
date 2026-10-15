@@ -202,41 +202,35 @@ void Enemy::Update(
 	}
 	std::erase_if(muzzleParticles_, [](const std::unique_ptr<Particle>& p) { return p->IsFinished(); });
 
-	// チャージパーティクルの生成
-	if (!chargeParticle_ && ai_->GetShotTimer() >= 0.01f) {
+	// チャージエフェクトはAIの「チャージ中」判定に完全に同期させる
+	const bool isCharging = ai_->IsCharging();
+
+	// 生成
+	if (isCharging && !chargeParticle_) {
 		chargeParticle_ = std::make_unique<Particle>();
 		chargeParticle_->Initialize(ctx_, transform_.translate, "SolarGlow.png", std::make_unique<ChargeModule>(), nullptr, ParticleMeshType::Square);
 		chargeParticle_->SetEmitMode(true, 0.1f);
 		chargeParticle_->SetEmitterParam(3, 0.05f);
 
-		// シリンダーパーティクルの生成&初期化
-		if (!chargeCylinderEffect_) {
-			chargeCylinderEffect_ = std::make_unique<Particle>();
-			chargeCylinderEffect_->Initialize(ctx_, transform_.translate, "gradationLine.png", std::make_unique<ChargeCylinderModule>(ai_.get(), &transform_), nullptr, ParticleMeshType::Cylinder);
-			chargeCylinderEffect_->SetEmitMode(false, 0.0f);
-			chargeCylinderEffect_->SetEmitterParam(1, 9999.0f);
-		}
+		chargeCylinderEffect_ = std::make_unique<Particle>();
+		chargeCylinderEffect_->Initialize(ctx_, transform_.translate, "gradationLine.png", std::make_unique<ChargeCylinderModule>(ai_.get(), &transform_), nullptr, ParticleMeshType::Cylinder);
+		chargeCylinderEffect_->SetEmitMode(false, 0.0f);
+		chargeCylinderEffect_->SetEmitterParam(1, 9999.0f);
 	}
 
-	// チャージパーティクルの更新
+	// 削除
+	if (!isCharging && chargeParticle_) {
+		chargeParticle_.reset();
+		chargeCylinderEffect_.reset();
+	}
+
+	// 更新
 	if (chargeParticle_) {
 		chargeParticle_->SetTranslate(transform_.translate);
 		chargeParticle_->Update();
 	}
-
-	if (chargeCylinderEffect_ && (ai_->GetState() == EnemyAI::State::Vigilance || ai_->GetState() == EnemyAI::State::Hold)) {
+	if (chargeCylinderEffect_) {
 		chargeCylinderEffect_->Update();
-	}
-
-	// チャージパーティクルの削除
-	if (chargeParticle_ && (ai_->GetIsShot() || ai_->GetState() == EnemyAI::State::Normal)) {
-		chargeParticle_.reset();
-		chargeParticle_ = nullptr;
-
-		if (chargeCylinderEffect_) {
-			chargeCylinderEffect_.reset();
-			chargeCylinderEffect_ = nullptr;
-		}
 	}
 
 	// ギズモ用当たり判定更新
@@ -288,7 +282,7 @@ void Enemy::Draw() {
 		}
 
 		// シリンダーチャージパーティクル描画
-		if (!isDown_ && isMove_ && (ai_->GetState() == EnemyAI::State::Vigilance || ai_->GetState() == EnemyAI::State::Hold) && chargeCylinderEffect_) {
+		if (!isDown_ && isMove_ && chargeCylinderEffect_) {
 			chargeCylinderEffect_->Draw();
 		}
 	}

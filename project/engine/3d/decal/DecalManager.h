@@ -62,7 +62,7 @@ public:
 	/// </summary>
 	DecalData* AddDecal(
 	    const std::string& texturePath, const Vector3& position, const Vector3& rotation, const Vector3& scale = {1.0f, 1.0f, 1.0f}, const Vector4& color = {1.0f, 1.0f, 1.0f, 1.0f},
-	    float lifeTime = 0.0f, float fadeTime = 1.0f);
+	    float lifeTime = 0.0f, float fadeTime = 1.0f, int drawOrder = 0);
 
 	// Setter
 	void SetCamera(Camera* camera) { camera_ = camera; }
@@ -93,6 +93,7 @@ private:
 
 	// テクスチャごとの管理グループ
 	struct DecalGroup {
+		int drawOrder = 0; // 描画優先度（小さいほど奥に描画）
 		std::vector<DecalData> decalList;
 		uint32_t decalIndex = 0;
 

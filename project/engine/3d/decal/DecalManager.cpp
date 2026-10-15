@@ -40,8 +40,8 @@ void DecalManager::Initialize(EngineContext* ctx) {
 	*materialData_ = material_;
 }
 
-DecalManager::DecalData*
-    DecalManager::AddDecal(const std::string& texturePath, const Vector3& position, const Vector3& rotation, const Vector3& scale, const Vector4& color, float lifeTime, float fadeTime) {
+DecalManager::DecalData* DecalManager::AddDecal(
+    const std::string& texturePath, const Vector3& position, const Vector3& rotation, const Vector3& scale, const Vector4& color, float lifeTime, float fadeTime, int drawOrder) {
 	std::string fullPath = "resources/textures/" + texturePath;
 	ctx_->textureManager->LoadTexture(texturePath);
 
@@ -65,6 +65,7 @@ DecalManager::DecalData*
 
 		group->instancingSrvHandleCPU = ctx_->srvManager->GetCPUDescriptorHandle(group->srvIndex);
 		group->instancingSrvHandleGPU = ctx_->srvManager->GetGPUDescriptorHandle(group->srvIndex);
+		group->drawOrder = drawOrder;
 		ctx_->particleCommon->GetDxCommon()->GetDevice()->CreateShaderResourceView(group->instancingResource.Get(), &srvDesc, group->instancingSrvHandleCPU);
 
 		decalGroups_[fullPath] = std::move(group);
@@ -147,19 +148,28 @@ void DecalManager::Draw() {
 	// VertexBufferViewを設定
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView_);
 
+	// 描画順のソート
+	std::vector<std::pair<const std::string*, DecalGroup*>> sorted;
+	sorted.reserve(decalGroups_.size());
 	for (auto& pair : decalGroups_) {
-		const std::string& texturePath = pair.first;
-		auto& group = pair.second;
-		uint32_t numInstance = static_cast<uint32_t>(group->decalList.size());
+		sorted.emplace_back(&pair.first, pair.second.get());
+	}
+	std::sort(sorted.begin(), sorted.end(), [](const auto& a, const auto& b) {
+		if (a.second->drawOrder != b.second->drawOrder)
+			return a.second->drawOrder < b.second->drawOrder;
+		return *a.first < *b.first;
+	});
 
-		if (numInstance <= 0)
+	for (auto& [path, group] : sorted) {
+		uint32_t numInstance = static_cast<uint32_t>(group->decalList.size());
+		if (numInstance == 0)
 			continue;
 
 		// StructuredBufferの場所を設定
 		commandList->SetGraphicsRootDescriptorTable(1, group->instancingSrvHandleGPU);
 
 		// ピクセルシェーダー用テクスチャの設定
-		commandList->SetGraphicsRootDescriptorTable(2, ctx_->textureManager->GetSrvHandleGPU(texturePath));
+		commandList->SetGraphicsRootDescriptorTable(2, ctx_->textureManager->GetSrvHandleGPU(*path));
 
 		// 描画
 		commandList->DrawInstanced(UINT(modelData_.vertices.size()), numInstance, 0, 0);

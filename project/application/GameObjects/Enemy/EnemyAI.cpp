@@ -149,6 +149,7 @@ void EnemyAI::UpdateVigilance(
 
 	// 現在プレイヤーが見えているかチェック
 	bool canSeePlayer = CheckPlayerInVision(player, wallManager, doorManager, glassManager);
+	canSeePlayer_ = canSeePlayer;
 
 	if (canSeePlayer) {
 		// 見えている場合、タイマーをリセットし、最後の位置を更新
@@ -399,4 +400,18 @@ void EnemyAI::Shot(Vector3 toTarget, EnemyBulletManager* enemyBulletManager, Ene
 	shotDirection_ = MathUtility::Normalize(toTarget);
 	shotTimer_ = 0.0f;
 	behavior_->Shot({ctx_, transform_->translate, toTarget, lastKnownPlayerPos_, bulletMargin_, enemyBulletManager, enemyBombManager});
+}
+
+bool EnemyAI::IsCharging() const {
+	if (shotTimer_ < 0.01f) {
+		return false;
+	}
+	switch (state_) {
+	case State::Vigilance:
+		return canSeePlayer_; // 見失っている間はチャージしない
+	case State::Hold:
+		return isShotHoldState_ && !hasShotInHold_ && !isHoldBursting_; // 発射済み・連射中は除外
+	default:
+		return false;
+	}
 }

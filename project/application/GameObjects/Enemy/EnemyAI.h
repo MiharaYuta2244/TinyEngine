@@ -110,6 +110,9 @@ public:
 		shotIntervalFirst_ = behavior_->GetFirstShotInterval();
 	}
 
+	// チャージ中かどうか
+	bool IsCharging() const;
+
 private:
 	// プレーヤー方向に回転する
 	void LookatPlayer(float deltaTime, Vector3 playerPos, Vector3 enemyPos, float turnSpeed = 6.0f);
@@ -158,6 +161,7 @@ private:
 	float shotTimerMultiPlier_ = 0.5f; // 拘束時の発射速度を早めるための変数
 	float shotIntervalFirst_ = 1.5f;   // 1発目の射撃間隔
 	bool isFirstShot_ = true;          // 警戒開始後まだ撃っていないか
+	bool canSeePlayer_ = false;        // 直近のフレームでプレイヤーが見えていたか
 
 	// 経路探索用
 	std::vector<Vector3> currentPath_; // A*で計算した経路
