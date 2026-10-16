@@ -44,6 +44,9 @@ void Game::Update() {
 	// 基底クラスの更新処理
 	Framework::Update();
 
+	// ポストエフェクトのON/OFFを全シーン共通で反映
+	ApplyPostEffectSettings();
+
 	// シーン切り替えの要求があればフェードアウト開始
 	if (sceneManager_->GetRequestedSceneName() != "" && sceneManager_->GetRequestedTransition() == SceneTransition::Change) {
 		fadeManager_->FadeOutTo(sceneManager_->GetRequestedSceneName());
@@ -90,4 +93,20 @@ void Game::Finalize() {
 
 	// 基底クラスの終了処理
 	Framework::Finalize();
+}
+
+void Game::ApplyPostEffectSettings() {
+	const PostEffectSettings& s = sceneManager_->GetCommonData()->postEffectSettings;
+	PostEffectPipeline* pipeline = GetEngineContext().postEffectPipeline;
+
+	pipeline->SetEffectEnabled(PostEffectType::Vignette, s.vignetteEnabled);
+	pipeline->SetEffectEnabled(PostEffectType::RadialBlur, s.radialBlurEnabled);
+	pipeline->SetEffectEnabled(PostEffectType::Glitch, s.glitchEnabled);
+	pipeline->SetEffectEnabled(PostEffectType::Scanline, s.scanlineEnabled);
+	pipeline->SetEffectEnabled(PostEffectType::BarrelDistortion, s.barrelDistortionEnabled);
+	pipeline->SetEffectEnabled(PostEffectType::Smoothing, s.blurEnabled);
+	pipeline->SetEffectEnabled(PostEffectType::Gaussian, s.blurEnabled);
+	pipeline->SetEffectEnabled(PostEffectType::DeathEffect, s.deathEffectEnabled);
+	pipeline->SetEffectEnabled(PostEffectType::DepthOutline, s.outlineEnabled);
+	pipeline->SetEffectEnabled(PostEffectType::LuminanceOutline, s.outlineEnabled);
 }

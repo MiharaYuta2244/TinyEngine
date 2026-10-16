@@ -6,6 +6,9 @@ void PostEffectPipeline::Inititlize(DirectXCommon* dxCommon, SrvManager* srvMana
 	dxCommon_ = dxCommon;
 	srvManager_ = srvManager;
 	textureManager_ = textureManager;
+
+	fallbackCopy_ = std::make_unique<TinyEngine::CopyImage>();
+	fallbackCopy_->Initialize(dxCommon_, PostEffectType::FullScreen, textureManager_);
 }
 
 void PostEffectPipeline::SetEffects(const std::vector<PostEffectType>& types) {
@@ -32,18 +35,11 @@ void PostEffectPipeline::Excute(DirectXCommon* dxCommon, SrvManager* srvManager,
 	uint32_t currentColorSrv = inputColorSrv;
 	uint32_t currentDepthSrv = inputDepthSrv;
 
-	for (size_t i = 0; i < passes_.size(); ++i) {
-		auto& pass = passes_[i];
-		bool isLast = (i == passes_.size() - 1);
-
-		if (!isLast) {
-			// 中間バッファへ書き込み開始
-			pass.renderTexture->BeginRender(dxCommon_);
-		} else if (outputTarget) {
-			// Gameパネル用オフスクリーンへ出力
+	// 最終出力先の開始/終了
+	auto beginFinal = [&]() {
+		if (outputTarget) {
 			outputTarget->BeginRender(dxCommon_);
 		} else {
-			// 従来通りバックバッファへ直接出力
 			auto cmd = dxCommon_->GetCommandList();
 			D3D12_CPU_DESCRIPTOR_HANDLE backBufferRTV = dxCommon_->GetCurrentBackBufferRTV();
 			cmd->OMSetRenderTargets(1, &backBufferRTV, false, nullptr);
@@ -53,6 +49,40 @@ void PostEffectPipeline::Excute(DirectXCommon* dxCommon, SrvManager* srvManager,
 			cmd->RSSetViewports(1, &vp);
 			cmd->RSSetScissorRects(1, &sc);
 		}
+	};
+
+	auto endFinal = [&]() {
+		if (outputTarget) {
+			outputTarget->EndRender(dxCommon_);
+		}
+	};
+
+	// 有効なパスだけを集める
+	std::vector<PostEffectPass*> active;
+	for (auto& pass : passes_) {
+		if (IsEffectEnabled(pass.type)) {
+			active.push_back(&pass);
+		}
+	}
+
+	// 全部OFFならそのままコピー
+	if (active.empty()) {
+		beginFinal();
+		fallbackCopy_->Draw(dxCommon_, srvManager_, currentColorSrv, currentDepthSrv);
+		endFinal();
+		return;
+	}
+
+	for (size_t i = 0; i < active.size(); ++i) {
+		PostEffectPass& pass = *active[i];
+		bool isLast = (i == active.size() - 1);
+
+		if (!isLast) {
+			assert(pass.renderTexture);
+			pass.renderTexture->BeginRender(dxCommon_);
+		} else {
+			beginFinal();
+		}
 
 		pass.copyImage->Draw(dxCommon_, srvManager_, currentColorSrv, currentDepthSrv);
 
@@ -60,9 +90,8 @@ void PostEffectPipeline::Excute(DirectXCommon* dxCommon, SrvManager* srvManager,
 			pass.renderTexture->EndRender(dxCommon_);
 			currentColorSrv = pass.renderTexture->GetSRVIndexColor();
 			currentDepthSrv = pass.renderTexture->GetSRVIndexDepth();
-		} else if (outputTarget) {
-			// SRVとして参照できる状態に戻す
-			outputTarget->EndRender(dxCommon_);
+		} else {
+			endFinal();
 		}
 	}
 }
@@ -74,4 +103,12 @@ TinyEngine::CopyImage* PostEffectPipeline::GetPass(PostEffectType type) {
 		}
 	}
 	return nullptr;
+}
+
+void PostEffectPipeline::SetEffectEnabled(PostEffectType type, bool enabled) {
+	if (enabled) {
+		disabledTypes_.erase(type);
+	} else {
+		disabledTypes_.insert(type);
+	}
 }

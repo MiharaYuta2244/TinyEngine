@@ -31,6 +31,12 @@ const float kPi = std::numbers::pi_v<float>;
 void StageSelectScene::Initialize(const SceneContext& ctx) {
 	ctx_ = ctx;
 	commonData_ = ctx_.sceneManager->GetCommonData();
+
+	// 前回作成したデカールへのポインタを破棄
+	ringDots_.clear();
+	connectionDots_.clear();
+	markers_ = {};
+
 	selected_ = std::clamp(commonData_->currentStageNo - 1, 0, kStageCount - 1);
 	isDecided_ = false;
 	stickInUse_ = false;
@@ -220,6 +226,11 @@ void StageSelectScene::Draw() {
 }
 
 void StageSelectScene::Finalize() {
+	// デカールへのポインタ破棄
+	ringDots_.clear();
+	connectionDots_.clear();
+	markers_ = {};
+
 	// デフォルトカメラを共通のカメラに戻す
 	ctx_.engineContext->object3dCommon->SetDefaultCamera(ctx_.currentCamera);
 }

@@ -108,7 +108,7 @@ void GamePlayPostEffectController::UpdateGlitch(float deltaTime) {
 		}
 	}
 
-	bool shouldGlitch = commonData_->postEffectSettings.glitchEnabled && glitchTimer_ > 0.0f;
+	bool shouldGlitch = glitchTimer_ > 0.0f;
 	float intensity = shouldGlitch ? 1.0f : 0.0f;
 	auto* glitch = ctx_->engineContext->postEffectPipeline->GetPass(PostEffectType::Glitch);
 	if (glitch) {

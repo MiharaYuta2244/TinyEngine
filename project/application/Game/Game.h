@@ -15,6 +15,10 @@ public:
 	void Finalize() override;
 
 private:
+	// ポストエフェクトの設定を毎フレーム反映
+	void ApplyPostEffectSettings();
+
+private:
 	// シーンマネージャー
 	std::unique_ptr<SceneManager> sceneManager_;
 

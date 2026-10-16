@@ -27,12 +27,17 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 	// オプションメニューの生成
 	optionMenu_ = std::make_unique<MenuList>();
 	optionMenu_->Initialize(ctx.engineContext);
-	optionMenu_->SetStartPos(titleLogoPos_ + Vector2{400.0f, 200.0f});
+	optionMenu_->SetStartPos(titleLogoPos_ + Vector2{400.0f, 130.0f});
+	optionMenu_->SetOffsetY(65.0f);
 
 	auto& pfx = commonData_->postEffectSettings;
 	optionMenu_->AddToggleItem("Vignette", "Vignette.png", &pfx.vignetteEnabled);
 	optionMenu_->AddToggleItem("RadialBlur", "RadialBlur.png", &pfx.radialBlurEnabled);
 	optionMenu_->AddToggleItem("Glitch", "Glitch.png", &pfx.glitchEnabled);
+	optionMenu_->AddToggleItem("Scanline", "Glitch.png", &pfx.scanlineEnabled);
+	optionMenu_->AddToggleItem("Fisheye", "Glitch.png", &pfx.barrelDistortionEnabled);
+	optionMenu_->AddToggleItem("Blur", "Glitch.png", &pfx.blurEnabled);
+	optionMenu_->AddToggleItem("DeathEffect", "Glitch.png", &pfx.deathEffectEnabled);
 	optionMenu_->AddItem("Back", "Back.png", [this]() {
 		menuState_ = TitleMenuState::Main;
 		menu_->ResetState();
