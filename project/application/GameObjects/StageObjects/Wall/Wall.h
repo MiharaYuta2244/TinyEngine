@@ -27,7 +27,7 @@ public:
 
 private:
 	AABB collision_{}; // 当たり判定
-	Vector4 color_ = {0.1f, 0.1f, 0.18f, 1.0f};
+	Vector4 color_ = {0.1f, 0.1f, 0.2f, 1.0f};
 	float time_ = 0.0f;
 
 	// オブジェクト数カウント用

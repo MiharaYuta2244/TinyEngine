@@ -22,11 +22,10 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	player_ = std::make_unique<Player>();
 
 	// ライトの設定
-	DirectionalLight dirLight;
-	dirLight.color = {1, 1, 1, 1};
-	dirLight.intensity = 3.0f;
-	dirLight.direction = {0.5f, 0.5f, -0.5f};
-	ctx.engineContext->object3dCommon->SetDirectionalLightParam(dirLight);
+	dirLight_.color = {1, 1, 1, 1};
+	dirLight_.intensity = 3.0f;
+	dirLight_.direction = {0.5f, 0.5f, -0.5f};
+	ctx.engineContext->object3dCommon->SetDirectionalLightParam(dirLight_);
 
 	// カメラの生成&初期化
 	mainCamera_ = std::make_unique<Camera>();

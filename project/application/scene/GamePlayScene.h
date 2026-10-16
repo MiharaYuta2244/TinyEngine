@@ -163,4 +163,7 @@ private:
 
 	// 石鹸の箱破壊時のエフェクト
 	std::list<std::unique_ptr<TinyEngine::Particle>> soapBreakEffect_;
+
+	// ライト
+	DirectionalLight dirLight_;
 };
