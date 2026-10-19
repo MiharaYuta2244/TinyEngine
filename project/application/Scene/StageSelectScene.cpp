@@ -17,8 +17,9 @@ const Vector2 kScreenshotPos = {60.0f, 50.0f};
 const Vector2 kScreenshotSize = {420.0f, 236.0f};
 const float kFramePadding = 8.0f;
 
-const Vector4 kMarkerClearedColor = {1.0f, 0.85f, 0.2f, 1.0f};
-const Vector4 kMarkerNotClearedColor = {0.4f, 0.4f, 0.45f, 1.0f};
+const Vector4 kMarkerClearedColor = {1.0f, 0.85f, 0.2f, 1.0f};    // クリアの色
+const Vector4 kMarkerNotClearedColor = {0.4f, 0.4f, 0.45f, 1.0f}; // 未クリアの色
+const Vector4 kMarkerLockedColor = {0.15f, 0.15f, 0.18f, 1.0f};   // 未開放の色
 
 const float kDotSpacing = 1.5f;                                // 点線の間隔
 const float kConnectionDotHeight = 0.10f;                      // 点線の高さ
@@ -131,6 +132,7 @@ void StageSelectScene::Initialize(const SceneContext& ctx) {
 	audioManager_->Initialize();
 	audioManager_->LoadWave("Select", "resources/sounds/se/Select.mp3");
 	audioManager_->LoadWave("Decide", "resources/sounds/se/Decide.mp3");
+	audioManager_->LoadWave("Error", "resources/sounds/se/Error.mp3");
 
 	// ポストエフェクトの設定
 	ctx_.engineContext->postEffectPipeline->SetEffects({
@@ -148,6 +150,16 @@ void StageSelectScene::Initialize(const SceneContext& ctx) {
 
 void StageSelectScene::Update() {
 	float deltaTime = ctx_.timeManager->GetDeltaTime();
+
+#if defined(NDEBUG) || defined(_DEBUG)
+	// F6で全ステージ開放のON/OFF
+	if (ctx_.keyboard->KeyTriggered(DIK_F6)) {
+		commonData_->unlockAllStages = !commonData_->unlockAllStages;
+	}
+#endif
+
+	// マーカーの色を毎フレーム反映
+	ApplyMarkerColors();
 
 	// オーディオマネージャーの更新
 	audioManager_->Update();
@@ -278,6 +290,12 @@ void StageSelectScene::HandleInput() {
 	}
 
 	if (decide) {
+		// 未開放ステージには入れない
+		if (!commonData_->IsStageUnlocked(selected_ + 1)) {
+			audioManager_->PlaySE("Error", 0.5f);
+			return;
+		}
+
 		commonData_->currentStageNo = selected_ + 1;
 		commonData_->currentStageKey = "Stage" + std::to_string(selected_ + 1);
 		RequestSceneChange(commonData_->currentStageKey);
@@ -333,8 +351,12 @@ void StageSelectScene::UpdateModels(float deltaTime) {
 		t.rotate = {0.0f, modelTime_ * rotateSpeed_ + static_cast<float>(i) * 0.8f, 0.0f};
 		t.translate = GetArcPos(GetStageAngle(i), arcRadius_, modelHeight_ + bob);
 
-		// 選択外は少し暗くする
+		// 選択外は少し暗くする、未開放はさらに暗くする
 		float c = (i == selected_) ? 1.0f : 0.45f;
+		if (!commonData_->IsStageUnlocked(i + 1)) {
+			c *= 0.35f;
+		}
+
 		models_[i]->SetColor({c, c, c, 1.0f});
 		models_[i]->Update(t);
 	}
@@ -351,21 +373,29 @@ void StageSelectScene::UpdateRing(float deltaTime) {
 }
 
 void StageSelectScene::UpdateInfo(float deltaTime) {
-	// スクショ
+	const bool unlocked = commonData_->IsStageUnlocked(selected_ + 1);
+
+	// スクショ（未開放は暗く）
 	screenshotAlphaAnim_.Update(deltaTime, screenshotAlpha_);
-	screenshots_[selected_]->SetColor({1.0f, 1.0f, 1.0f, screenshotAlpha_});
+	float shade = unlocked ? 1.0f : 0.25f;
+	screenshots_[selected_]->SetColor({shade, shade, shade, screenshotAlpha_});
 	screenshots_[selected_]->Update();
 
 	// 最速タイム・最大撃破数
-	const StageRecord& rec = commonData_->stageRecords[selected_];
-	if (rec.cleared) {
-		int minutes = std::min(static_cast<int>(rec.bestTime) / 60, 99);
-		int seconds = static_cast<int>(rec.bestTime) % 60;
-		clearTimeText_->SetText(std::format(L"Clear Time  {:02}:{:02}", minutes, seconds));
-		killCountText_->SetText(std::format(L"Kill Count  {}", rec.maxKillCount));
+	if (!unlocked) {
+		clearTimeText_->SetText(L"LOCKED");
+		killCountText_->SetText(std::format(L"Clear Stage {} to unlock", selected_));
 	} else {
-		clearTimeText_->SetText(L"Clear Time  --:--");
-		killCountText_->SetText(L"Kill Count  --");
+		const StageRecord& rec = commonData_->stageRecords[selected_];
+		if (rec.cleared) {
+			int minutes = std::min(static_cast<int>(rec.bestTime) / 60, 99);
+			int seconds = static_cast<int>(rec.bestTime) % 60;
+			clearTimeText_->SetText(std::format(L"Clear Time  {:02}:{:02}", minutes, seconds));
+			killCountText_->SetText(std::format(L"Kill Count  {}", rec.maxKillCount));
+		} else {
+			clearTimeText_->SetText(L"Clear Time  --:--");
+			killCountText_->SetText(L"Kill Count  --");
+		}
 	}
 
 	clearTimeText_->Update();
@@ -374,7 +404,13 @@ void StageSelectScene::UpdateInfo(float deltaTime) {
 
 void StageSelectScene::ApplyMarkerColors() {
 	for (int i = 0; i < kStageCount; ++i) {
-		markers_[i]->color = commonData_->stageRecords[i].cleared ? kMarkerClearedColor : kMarkerNotClearedColor;
+		if (!commonData_->IsStageUnlocked(i + 1)) {
+			markers_[i]->color = kMarkerLockedColor; // 未開放
+		} else if (commonData_->stageRecords[i].cleared) {
+			markers_[i]->color = kMarkerClearedColor; // クリア
+		} else {
+			markers_[i]->color = kMarkerNotClearedColor; // 未クリア
+		}
 	}
 }
 
