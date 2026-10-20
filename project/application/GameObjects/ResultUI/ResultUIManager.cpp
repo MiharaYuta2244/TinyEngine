@@ -19,6 +19,10 @@ void ResultUIManager::Initialize(EngineContext* ctx, CommonData* commonData) {
 	toTitleButton_ = std::make_unique<ToTitleButton>();
 	toTitleButton_->Initialize(ctx);
 
+	// 次のステージへボタン生成&初期化
+	nextStageButton_ = std::make_unique<NextStageButton>();
+	nextStageButton_->Initialize(ctx);
+
 	// キル数の受け渡し
 	scoreText_->SetParam(commonData->killCount);
 
@@ -129,6 +133,7 @@ void ResultUIManager::RegisterButtons() {
 	// すべてのボタンをリストに登録
 	buttons_.push_back(retryButton_.get());
 	buttons_.push_back(toTitleButton_.get());
+	buttons_.push_back(nextStageButton_.get());
 }
 
 void ResultUIManager::OnDecide() { buttons_[selectedIndex_]->Execute(); }

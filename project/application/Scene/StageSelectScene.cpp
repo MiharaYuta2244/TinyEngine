@@ -114,7 +114,8 @@ void StageSelectScene::Initialize(const SceneContext& ctx) {
 
 	// フォントの生成&初期化
 	font_ = std::make_unique<Font>();
-	font_->Initialize(ctx_.engineContext, L"Dela Gothic One", 48);
+	std::wstring chars = Font::MakeJapaneseCharSet() + L"数中解放";
+	font_->Initialize(ctx_.engineContext, L"Dela Gothic One", 48, chars);
 
 	const float textY = kScreenshotPos.y + kScreenshotSize.y + 40.0f;
 	clearTimeText_ = std::make_unique<TextSprite>();
@@ -401,18 +402,18 @@ void StageSelectScene::UpdateInfo(float deltaTime) {
 
 	// 最速タイム・最大撃破数
 	if (!unlocked) {
-		clearTimeText_->SetText(L"LOCKED");
-		killCountText_->SetText(std::format(L"Clear Stage {} to unlock", selected_));
+		clearTimeText_->SetText(L"ロック中");
+		killCountText_->SetText(L"ステージクリアで解放");
 	} else {
 		const StageRecord& rec = commonData_->stageRecords[selected_];
 		if (rec.cleared) {
 			int minutes = std::min(static_cast<int>(rec.bestTime) / 60, 99);
 			int seconds = static_cast<int>(rec.bestTime) % 60;
-			clearTimeText_->SetText(std::format(L"Clear Time  {:02}:{:02}", minutes, seconds));
-			killCountText_->SetText(std::format(L"Kill Count  {}", rec.maxKillCount));
+			clearTimeText_->SetText(std::format(L"クリアタイム  {:02}:{:02}", minutes, seconds));
+			killCountText_->SetText(std::format(L"キル数  {}", rec.maxKillCount));
 		} else {
-			clearTimeText_->SetText(L"Clear Time  --:--");
-			killCountText_->SetText(L"Kill Count  --");
+			clearTimeText_->SetText(L"クリアタイム  --:--");
+			killCountText_->SetText(L"キル数  --");
 		}
 	}
 

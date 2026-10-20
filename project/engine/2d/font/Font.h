@@ -17,8 +17,11 @@ public:
 	// TTFファイルをプライベート登録する
 	static bool LoadFontFile(const std::wstring& ttfPath);
 
+	// 日本語表示に必要な文字セットを作る(ASCII + 記号 + ひらがな + カタカナ + 全角英数)
+	static std::wstring MakeJapaneseCharSet(bool jisLevel1Kanji = false);
+
 private:
-	void BuildAtlas(const std::wstring& fontFamily, int pixelHeight, const std::wstring& charSet);
+	void BuildAtlas(const std::wstring& fontFamily, int pixelHeight, const std::wstring& charsIn);
 
 private:
 	EngineContext* ctx_ = nullptr;

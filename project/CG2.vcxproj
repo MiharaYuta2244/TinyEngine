@@ -322,6 +322,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="engine\3d\particle\modules\WoodShardModule.cpp" />
     <ClCompile Include="application\GameObjects\Item\Molotov.cpp" />
     <ClCompile Include="application\GameObjects\StageMiniature\StageMiniature.cpp" />
+    <ClCompile Include="application\GameObjects\ResultUI\Button\NextStageButton.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -585,6 +586,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="engine\3d\particle\modules\GenericModule.h" />
     <ClInclude Include="application\GameObjects\Item\Molotov.h" />
     <ClInclude Include="application\GameObjects\StageMiniature\StageMiniature.h" />
+    <ClInclude Include="application\GameObjects\ResultUI\Button\NextStageButton.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

@@ -2,6 +2,7 @@
 #include "AudioManager.h"
 #include "Button/RetryButton.h"
 #include "Button/ToTitleButton.h"
+#include "Button/NextStageButton.h"
 #include "GameObjects/CommonData.h"
 #include "Text/ResultParamText.h"
 
@@ -28,6 +29,9 @@ public:
 	// タイトルへ戻るボタンのGetter
 	ToTitleButton* GetToTitleButton() const { return toTitleButton_.get(); }
 
+	// 次のステージへボタンのGetter
+	NextStageButton* GetNextStageButton() const { return nextStageButton_.get(); }
+
 private:
 	// 決定ボタンを押したときの処理
 	void OnDecide();
@@ -44,6 +48,9 @@ private:
 
 	// タイトルへ戻るボタン
 	std::unique_ptr<ToTitleButton> toTitleButton_;
+
+	// 次のステージへボタン
+	std::unique_ptr<NextStageButton> nextStageButton_;
 
 	// ボタンの選択状況
 	bool isSelect_ = false;

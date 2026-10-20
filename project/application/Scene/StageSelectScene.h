@@ -1,13 +1,14 @@
 #pragma once
+#include "AnimationBundle.h"
 #include "AudioManager.h"
 #include "BaseScene.h"
 #include "DecalManager.h"
 #include "EasingAnimation.h"
 #include "Font.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
+#include "GameObjects/StageMiniature/StageMiniature.h"
 #include "Sprite.h"
 #include "TextSprite.h"
-#include "GameObjects/StageMiniature/StageMiniature.h"
 
 /// <summary>
 /// ステージセレクトシーン
@@ -72,7 +73,7 @@ private:
 	float cameraMoveDuration_ = 0.8f;        // カメラの移動にかかる時間
 
 	// 弧・カメラのパラメータ
-	float arcStepRad_ = 0.55f;    // ステージ間の角度
+	float arcStepRad_ = 0.55f;     // ステージ間の角度
 	float arcRadius_ = 28.0f;      // 弧の半径
 	float cameraDistance_ = 16.0f; // ステージからカメラまでの距離
 	float cameraHeight_ = 7.0f;
@@ -118,4 +119,8 @@ private:
 	// ステージを俯瞰から見たミニチュア
 	std::array<std::unique_ptr<StageMiniature>, kStageCount> miniatures_;
 	float miniScale_ = 0.012f;
+
+	// ステージ選択時のアニメーション
+	AnimationBundle<float> miniatureHeightAnim_;  // ミニチュアの高さ
+	AnimationBundle<float> miniatureRotateYAnim_; // ミニチュアのY軸回転
 };

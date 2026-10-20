@@ -99,8 +99,6 @@ void StageMiniature::Initialize(EngineContext* ctx, const std::string& stagePath
 	load("Cages.json", kCageHalfH, false, cages);
 	load("Glasses.json", kGlassHalfH, false, glasses);
 
-	constexpr float kMaxDistFromMedian = 600.0f; // ステージ長に合わせて調整
-
 	std::vector<float> xs, zs;
 	for (auto* list : {&walls, &doors, &cages, &glasses}) {
 		for (const Box& b : *list) {
