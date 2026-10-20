@@ -7,6 +7,7 @@
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "Sprite.h"
 #include "TextSprite.h"
+#include "GameObjects/StageMiniature/StageMiniature.h"
 
 /// <summary>
 /// ステージセレクトシーン
@@ -113,4 +114,8 @@ private:
 	ScanlineParam scanlineParam_;                 // 走査線
 	BarrelDistortionParam barrelDistortionParam_; // 歪み
 	GlitchParam glitchParam_;                     // グリッチ
+
+	// ステージを俯瞰から見たミニチュア
+	std::array<std::unique_ptr<StageMiniature>, kStageCount> miniatures_;
+	float miniScale_ = 0.012f;
 };

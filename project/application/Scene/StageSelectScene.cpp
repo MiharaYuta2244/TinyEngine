@@ -62,16 +62,16 @@ void StageSelectScene::Initialize(const SceneContext& ctx) {
 	pointLight.intensity = 0.0f;
 	ctx_.engineContext->object3dCommon->SetPointLightParam(pointLight);
 
-	// ステージモデルの生成&初期化
-	for (int i = 0; i < kStageCount; ++i) {
-		models_[i] = std::make_unique<ObjectRender>();
-		models_[i]->Initialize(ctx_.engineContext, kStageModels[i]);
-	}
-
 	// デカールの生成&初期化
 	decalManager_ = std::make_unique<DecalManager>();
 	decalManager_->Initialize(ctx_.engineContext);
 	decalManager_->SetCamera(camera_.get());
+
+	// ステージモデルの生成&初期化
+	for (int i = 0; i < kStageCount; ++i) {
+		miniatures_[i] = std::make_unique<StageMiniature>();
+		miniatures_[i]->Initialize(ctx_.engineContext, "Stage" + std::to_string(i + 1) + "/");
+	}
 
 	const Vector3 flat = {kPi / 2.0f, 0.0f, 0.0f}; // 地面に水平
 
@@ -222,9 +222,17 @@ void StageSelectScene::Draw() {
 	// 背景
 	background_->Draw();
 
-	// ステージモデル
-	for (auto& model : models_) {
-		model->Draw();
+	// ミニチュア描画
+	for (auto& miniature : miniatures_) {
+		miniature->Draw();
+	}
+
+	// デカール描画
+	decalManager_->Draw();
+
+	// 透明のミニチュア描画
+	for (auto& miniature : miniatures_) {
+		miniature->DrawTransparent(); // ガラス
 	}
 
 	// マーカー・点線・選択リング
@@ -242,6 +250,11 @@ void StageSelectScene::Finalize() {
 	ringDots_.clear();
 	connectionDots_.clear();
 	markers_ = {};
+
+	// ミニチュア解放
+	for (auto& miniature : miniatures_) {
+		miniature.reset();
+	}
 
 	// デフォルトカメラを共通のカメラに戻す
 	ctx_.engineContext->object3dCommon->SetDefaultCamera(ctx_.currentCamera);
@@ -357,8 +370,13 @@ void StageSelectScene::UpdateModels(float deltaTime) {
 			c *= 0.35f;
 		}
 
-		models_[i]->SetColor({c, c, c, 1.0f});
-		models_[i]->Update(t);
+		// ミニチュアの更新
+		for (int i = 0; i < kStageCount; ++i) {
+			float bob = std::sin(modelTime_ * bobSpeed_ + static_cast<float>(i) * 1.3f) * bobAmplitude_;
+			float yaw = modelTime_ * rotateSpeed_ + static_cast<float>(i) * 0.8f;
+			float c = (i == selected_) ? 1.0f : 0.45f;
+			miniatures_[i]->Update(GetArcPos(GetStageAngle(i), arcRadius_, modelHeight_ + bob), yaw, miniScale_, c);
+		}
 	}
 }
 

@@ -25,12 +25,30 @@ struct CommonData {
 	// ステージごとの記録
 	std::array<StageRecord, kStageCount> stageRecords;
 
+	// 全ステージを開放する（デバッグ用）
+	bool unlockAllStages = false;
+
+	// ステージが遊べる状態かどうか
+	bool IsStageUnlocked(int stageNo) const {
+		if (stageNo < 1 || stageNo > kStageCount) {
+			return false;
+		}
+
+		if (unlockAllStages || stageNo == 1) {
+			return true;
+		}
+
+		// 1つ前のステージをクリア済みなら開放
+		return stageRecords[stageNo - 2].cleared;
+	}
+
 	// クリア時に記録を更新する
 	void ReportClear(int stageNo, float time, int kills) {
 		int i = stageNo - 1;
 		if (i < 0 || i >= kStageCount) {
 			return;
 		}
+
 		StageRecord& r = stageRecords[i];
 		r.bestTime = r.cleared ? std::min(r.bestTime, time) : time;
 		r.maxKillCount = std::max(r.maxKillCount, kills);
