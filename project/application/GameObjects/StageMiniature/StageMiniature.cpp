@@ -99,15 +99,34 @@ void StageMiniature::Initialize(EngineContext* ctx, const std::string& stagePath
 	load("Cages.json", kCageHalfH, false, cages);
 	load("Glasses.json", kGlassHalfH, false, glasses);
 
+	constexpr float kMaxDistFromMedian = 600.0f; // ステージ長に合わせて調整
+
+	std::vector<float> xs, zs;
+	for (auto* list : {&walls, &doors, &cages, &glasses}) {
+		for (const Box& b : *list) {
+			xs.push_back(b.pos.x);
+			zs.push_back(b.pos.z);
+		}
+	}
+
+	if (xs.empty()) {
+		return;
+	}
+
 	// 全体のバウンディングからXZ中心を求める
 	float minX = 1e9f, maxX = -1e9f, minZ = 1e9f, maxZ = -1e9f;
 	for (auto* list : {&walls, &doors, &cages, &glasses}) {
 		for (const Box& b : *list) {
-			float e = std::max(b.half.x, b.half.z);
-			minX = std::min(minX, b.pos.x - e);
-			maxX = std::max(maxX, b.pos.x + e);
-			minZ = std::min(minZ, b.pos.z - e);
-			maxZ = std::max(maxZ, b.pos.z + e);
+			// Y回転を考慮した、ワールド軸に沿った半幅を求める
+			const float c = std::abs(std::cos(b.yaw));
+			const float s = std::abs(std::sin(b.yaw));
+			const float ex = b.half.x * c + b.half.z * s;
+			const float ez = b.half.x * s + b.half.z * c;
+
+			minX = std::min(minX, b.pos.x - ex);
+			maxX = std::max(maxX, b.pos.x + ex);
+			minZ = std::min(minZ, b.pos.z - ez);
+			maxZ = std::max(maxZ, b.pos.z + ez);
 		}
 	}
 
