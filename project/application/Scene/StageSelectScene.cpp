@@ -142,11 +142,20 @@ void StageSelectScene::Initialize(const SceneContext& ctx) {
 	    PostEffectType::Glitch,
 	});
 
+	// ポストエフェクトパラメータ初期化
 	barrelDistortionParam_.strength = 0.05f;
 	glitchParam_.intensity = 0.1f;
 	scanlineParam_.scanlineCount = 150.0f;
 	scanlineParam_.intensity = 0.7f;
 	scanlineParam_.speed = 5.0f;
+
+	// 決定時アニメーションパラメータ初期化
+	isDecideAnimating_ = false;
+	decideSpin_ = 0.0f;
+	decideJump_ = 0.0f;
+	decideSpinAnim_.Reset();
+	decideJumpUpAnim_.Reset();
+	decideJumpDownAnim_.Reset();
 }
 
 void StageSelectScene::Update() {
@@ -310,10 +319,8 @@ void StageSelectScene::HandleInput() {
 			return;
 		}
 
-		commonData_->currentStageNo = selected_ + 1;
-		commonData_->currentStageKey = "Stage" + std::to_string(selected_ + 1);
-		RequestSceneChange(commonData_->currentStageKey);
 		audioManager_->PlaySE("Decide", 0.5f);
+		StartDecideAnimation();
 		isDecided_ = true;
 	} else if (back) {
 		RequestSceneChange("Title");
@@ -356,28 +363,24 @@ void StageSelectScene::UpdateCamera(float deltaTime) {
 
 void StageSelectScene::UpdateModels(float deltaTime) {
 	modelTime_ += deltaTime;
+	UpdateDecideAnimation(deltaTime);
 
 	for (int i = 0; i < kStageCount; ++i) {
 		float bob = std::sin(modelTime_ * bobSpeed_ + static_cast<float>(i) * 1.3f) * bobAmplitude_;
+		float yaw = modelTime_ * rotateSpeed_ + static_cast<float>(i) * 0.8f;
+		Vector3 pos = GetArcPos(GetStageAngle(i), arcRadius_, modelHeight_ + bob);
 
-		Transform t;
-		t.scale = {modelScale_, modelScale_, modelScale_};
-		t.rotate = {0.0f, modelTime_ * rotateSpeed_ + static_cast<float>(i) * 0.8f, 0.0f};
-		t.translate = GetArcPos(GetStageAngle(i), arcRadius_, modelHeight_ + bob);
+		// 決定演出は選択中のミニチュアだけに加算
+		if (i == selected_) {
+			yaw += decideSpin_;
+			pos.y += decideJump_;
+		}
 
-		// 選択外は少し暗くする、未開放はさらに暗くする
+		// 未選択のミニチュアは暗くする
 		float c = (i == selected_) ? 1.0f : 0.45f;
-		if (!commonData_->IsStageUnlocked(i + 1)) {
-			c *= 0.35f;
-		}
 
-		// ミニチュアの更新
-		for (int i = 0; i < kStageCount; ++i) {
-			float bob = std::sin(modelTime_ * bobSpeed_ + static_cast<float>(i) * 1.3f) * bobAmplitude_;
-			float yaw = modelTime_ * rotateSpeed_ + static_cast<float>(i) * 0.8f;
-			float c = (i == selected_) ? 1.0f : 0.45f;
-			miniatures_[i]->Update(GetArcPos(GetStageAngle(i), arcRadius_, modelHeight_ + bob), yaw, miniScale_, c);
-		}
+		// ミニチュア更新
+		miniatures_[i]->Update(pos, yaw, miniScale_, c);
 	}
 }
 
@@ -472,5 +475,36 @@ void StageSelectScene::CreateConnectionLine() {
 			// 点線デカールを追加
 			connectionDots_.push_back(decalManager_->AddDecal(kDotTexture, pos, flatRotate, kConnectionDotScale, kConnectionDotColor));
 		}
+	}
+}
+
+void StageSelectScene::StartDecideAnimation() {
+	decideSpinAnim_.Start(0.0f, 2.0f * kPi, decideSpinDuration_, EaseType::EASEINOUTCUBIC);
+	decideJumpUpAnim_.Start(0.0f, decideJumpHeight_, decideJumpUpDuration_, EaseType::EASEOUTQUAD);
+	isDecideAnimating_ = true;
+}
+
+void StageSelectScene::UpdateDecideAnimation(float deltaTime) {
+	// 回転
+	decideSpinAnim_.Update(deltaTime, decideSpin_);
+
+	// ジャンプ上昇
+	bool wasUp = decideJumpUpAnim_.GetIsActive();
+	decideJumpUpAnim_.Update(deltaTime, decideJump_);
+
+	// 落下開始
+	if (wasUp && !decideJumpUpAnim_.GetIsActive()) {
+		decideJumpDownAnim_.Start(decideJumpHeight_, 0.0f, decideJumpDownDuration_, EaseType::EASEINQUAD);
+	}
+
+	// 落下更新
+	decideJumpDownAnim_.Update(deltaTime, decideJump_);
+
+	// アニメーションがすべて終わったらシーン遷移
+	if (isDecideAnimating_ && !decideSpinAnim_.GetIsActive() && !decideJumpUpAnim_.GetIsActive() && !decideJumpDownAnim_.GetIsActive()) {
+		isDecideAnimating_ = false;
+		commonData_->currentStageNo = selected_ + 1;
+		commonData_->currentStageKey = "Stage" + std::to_string(selected_ + 1);
+		RequestSceneChange(commonData_->currentStageKey);
 	}
 }

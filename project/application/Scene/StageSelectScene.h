@@ -58,6 +58,12 @@ private:
 	// 弧上の座標
 	Vector3 GetArcPos(float angle, float radius, float y) const;
 
+	// 決定演出の開始
+	void StartDecideAnimation();
+
+	// 決定演出の更新
+	void UpdateDecideAnimation(float deltaTime);
+
 private:
 	// ステージ数
 	static constexpr int kStageCount = CommonData::kStageCount;
@@ -123,4 +129,16 @@ private:
 	// ステージ選択時のアニメーション
 	AnimationBundle<float> miniatureHeightAnim_;  // ミニチュアの高さ
 	AnimationBundle<float> miniatureRotateYAnim_; // ミニチュアのY軸回転
+
+	// 決定時のミニチュア演出
+	EasingAnimation<float> decideSpinAnim_;     // 回転
+	EasingAnimation<float> decideJumpUpAnim_;   // ジャンプ上昇
+	EasingAnimation<float> decideJumpDownAnim_; // ジャンプ落下
+	float decideSpin_ = 0.0f;                   // 現在の追加回転量
+	float decideJump_ = 0.0f;                   // 現在の追加高さ
+	float decideSpinDuration_ = 0.5f;           // 回転時間
+	float decideJumpHeight_ = 2.0f;             // ジャンプの高さ
+	float decideJumpUpDuration_ = 0.22f;        // 上昇時間
+	float decideJumpDownDuration_ = 0.28f;      // 落下時間
+	bool isDecideAnimating_ = false;            // 決定演出の再生中フラグ
 };
