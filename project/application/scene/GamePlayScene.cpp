@@ -122,6 +122,9 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	// ステージ開始演出用レターボックスの生成&初期化
 	introLetterBox_ = std::make_unique<LetterBox>();
 	introLetterBox_->Initialize(ctx_.engineContext);
+
+	// デバッグカメラ有効フラグを初期化
+	isDebugCameraActive_ = false;
 }
 
 void GamePlayScene::Update() {
@@ -145,8 +148,10 @@ void GamePlayScene::Update() {
 
 		// カメラ演出をスキップ
 		if (ctx_.keyboard->KeyDown(DIK_SPACE) || ctx_.gamePad->GetState().buttons.a) {
+			introPhase_ = CameraAnimState::End;
 			isIntroPlaying_ = false;
 			introLetterBox_->Hide(); // スキップ時も退場させる
+			InitializeGameSceneCamera();
 		}
 
 		return;

@@ -31,7 +31,7 @@ void ResultScene::Initialize(const SceneContext& ctx) {
 	// シーンで使うエフェクトの宣言
 	ctx_.engineContext->postEffectPipeline->SetEffects({
 	    PostEffectType::Scanline,         // 走査線
-	    PostEffectType::BarrelDistortion, // 魚眼
+	    PostEffectType::BarrelDistortion, // 歪み
 	    PostEffectType::Glitch,           // グリッチ
 	});
 

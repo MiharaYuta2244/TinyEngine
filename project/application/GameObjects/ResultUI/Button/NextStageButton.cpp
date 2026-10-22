@@ -5,18 +5,10 @@ void NextStageButton::Initialize(EngineContext* ctx) {
 
 	// 個別のスプライト設定
 	sprite_->Initialize(ctx, "NextStage.png");
-	sprite_->SetPosition({250.0f, 500.0f});
+	sprite_->SetPosition({750.0f, 550.0f});
 }
 
-void NextStageButton::Update(bool isSelect) {
-	/*ImGui::Begin("NextStage");
-	Vector2 pos = sprite_->GetPosition();
-	ImGui::DragFloat2("Pos", &pos.x, 1.0f);
-	sprite_->SetPosition(pos);
-	ImGui::End();*/
-
-	IButton::Update(isSelect);
-}
+void NextStageButton::Update(bool isSelect) { IButton::Update(isSelect); }
 
 void NextStageButton::Draw() { IButton::Draw(); }
 

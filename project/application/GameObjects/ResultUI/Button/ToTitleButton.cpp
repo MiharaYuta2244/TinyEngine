@@ -5,7 +5,7 @@ void ToTitleButton::Initialize(EngineContext* ctx) {
 
 	// 個別のスプライト設定
 	sprite_->Initialize(ctx, "Title.png");
-	sprite_->SetPosition({850.0f, 500.0f});
+	sprite_->SetPosition({450.0f, 550.0f});
 }
 
 void ToTitleButton::Update(bool isSelect) { IButton::Update(isSelect); }

@@ -16,7 +16,7 @@ void IButton::Update(bool isSelect) {
 	const ButtonStyle& style = isSelect_ ? GetSelectedStyle() : GetNormalStyle();
 	sprite_->SetColor(style.color);
 	sprite_->SetSize(style.size);
-
+	
 	// 更新
 	sprite_->Update();
 }

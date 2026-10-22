@@ -26,7 +26,7 @@ private:
 
 	// ポストエフェクトパラメータ
 	ScanlineParam scanlineParam_;                 // 走査線
-	BarrelDistortionParam barrelDistortionParam_; // 魚眼
+	BarrelDistortionParam barrelDistortionParam_; // 歪み
 	GlitchParam glitchParam_;                     // グリッチ
 
 	// オーディオマネージャーインスタンス
