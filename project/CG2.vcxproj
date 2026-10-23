@@ -161,6 +161,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="engine\Animation\AnimationLibrary.cpp" />
     <ClCompile Include="application\Editor\EditorCommand.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\AStarPathfinder.cpp" />
     <ClCompile Include="application\GameObjects\IGameObject.cpp" />
@@ -180,6 +181,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="application\Scene\EffectEditorScene.cpp" />
     <ClCompile Include="application\GameObjects\ResultUI\Button\Button.cpp" />
     <ClCompile Include="application\GameObjects\ResultUI\Button\ButtonGroup.cpp" />
+    <ClCompile Include="application\GameObjects\Enemy\EnemyAnimator.cpp" />
     <ClCompile Include="engine\3d\particle\EffectLibrary.cpp" />
     <ClCompile Include="engine\3d\particle\EffectBuilder.cpp" />
     <ClCompile Include="engine\3d\decal\DecalManager.cpp" />
@@ -388,10 +390,12 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="engine\Animation\AnimationLibrary.h" />
     <ClInclude Include="application\Editor\EditorCommand.h" />
     <ClInclude Include="application\Editor\SpawnRequest.h" />
     <ClInclude Include="application\GameObjects\Enemy\AStarPathfinder.h" />
     <ClInclude Include="application\GameObjects\Enemy\Behavior\EnemyBehavior.h" />
+    <ClInclude Include="application\GameObjects\Enemy\EnemyState.h" />
     <ClInclude Include="application\GameObjects\Enemy\EnemyType.h" />
     <ClInclude Include="application\GameObjects\CommonData.h" />
     <ClInclude Include="application\GameObjects\IGameObject.h" />
@@ -411,6 +415,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="application\Scene\EffectEditorScene.h" />
     <ClInclude Include="application\GameObjects\ResultUI\Button\Button.h" />
     <ClInclude Include="application\GameObjects\ResultUI\Button\ButtonGroup.h" />
+    <ClInclude Include="application\GameObjects\Enemy\EnemyAnimator.h" />
     <ClInclude Include="engine\3d\particle\EffectLibrary.h" />
     <ClInclude Include="engine\3d\particle\EffectBuilder.h" />
     <ClInclude Include="engine\2d\font\GlyphInfo.h" />

@@ -4,14 +4,15 @@
 #include "Behavior/EnemyBehavior.h"
 #include "DecalManager.h"
 #include "EnemyAI.h"
+#include "EnemyAnimator.h"
 #include "EnemyType.h"
 #include "ExclamationMark.h"
+#include "GameObjects/Effect/FootprintManager.h"
 #include "GameObjects/IGameObject.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "GameTimer.h"
 #include "Particle.h"
 #include "VisionCone.h"
-#include "GameObjects/Effect/FootprintManager.h"
 
 class EnemyBulletManager;
 class Player;
@@ -227,4 +228,7 @@ private:
 	float strideAccum_ = 0.0f;   // 前回の足跡からの移動距離
 	float strideLength_ = 1.2f;  // 足跡を置く間隔
 	bool isNextFootLeft_ = true; // 次に踏む足
+
+	// アニメーター
+	EnemyAnimator animator_;
 };

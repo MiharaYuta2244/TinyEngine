@@ -49,7 +49,7 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 		decal = bloodDecalManager_->AddDecal("white.png", {0.0f, -1000.0f, 0.0f}, {std::numbers::pi_v<float> / 2.0f, 0, 0}, {0.15f, 0.15f, 1.0f}, {1.0f, 0.85f, 0.2f, 0.0f}, 0, 0, 100);
 	}
 
-	// 振動マネージャーの生成と初期化
+	// 振動マネージャーの生成
 	rumbleManager_ = std::make_unique<RumbleManager>();
 }
 
@@ -548,9 +548,6 @@ void Player::Draw() {
 }
 
 bool Player::IsDead() const {
-	// ゲーム開始から死亡までの時間をログに出力
-	Logger::Log("", LogLevel::Info);
-
 	return hp_->IsDead();
 }
 

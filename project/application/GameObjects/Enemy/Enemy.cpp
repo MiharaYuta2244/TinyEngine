@@ -28,9 +28,9 @@ void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalMan
 	render_->SetEnvScale(envScale_);
 	render_->SetColor(color_);
 	render_->SetIsSkinning(true);
-	KeyframeAnimation keyframeAnimation;
-	Animation idleAnimation = keyframeAnimation.LoadAnimationFile("HumanIdle.gltf");
-	render_->GetObject3d()->PlayAnimation(idleAnimation);
+
+	// アニメーターの初期化
+	animator_.Initialize(render_->GetObject3d());
 
 	renderGun_ = std::make_unique<ObjectRender>();
 	renderGun_->Initialize(ctx, "Cube.obj");
@@ -104,32 +104,9 @@ void Enemy::Update(
 	ai_->Update(deltaTime, player, enemyBulletManager, wallManager, doorManager, glassManager, enemyBombManager);
 
 	// アニメーション遷移処理
-	std::string targetModel = "HumanIdle.gltf"; // 待機
-
-	if (ai_->GetState() == EnemyAI::State::Hold) {
-		// 拘束時
-		targetModel = "HumanIdle.gltf";
-	} else if (ai_->GetState() == EnemyAI::State::Vigilance) {
-		// 警戒時
-		targetModel = "HumanVigilanceWalk.gltf";
-	} else {
-		// 通常時
-		float dx = transform_.translate.x - prevPos.x;
-		float dz = transform_.translate.z - prevPos.z;
-		if ((dx * dx + dz * dz) > 0.0001f) {
-			targetModel = "HumanNormalWalk.gltf"; // 歩き
-		} else {
-			targetModel = "HumanIdle.gltf"; // 待機
-		}
-	}
-
-	// 現在のモデルと違う場合のみ、モデルを切り替えてアニメーション再生
-	if (render_->GetFilepath() != targetModel) {
-		render_->SetModel(targetModel);
-		KeyframeAnimation keyframeAnim;
-		Animation anim = keyframeAnim.LoadAnimationFile(targetModel);
-		render_->GetObject3d()->PlayAnimation(anim);
-	}
+	const float dx = transform_.translate.x - prevPos.x;
+	const float dz = transform_.translate.z - prevPos.z;
+	animator_.Update(ai_->GetState(), (dx * dx + dz * dz) > 0.0001f);
 
 	if (ai_->IsShotThisFrame()) {
 		GenerateMuzzleFlash(ai_->GetShotDirection());

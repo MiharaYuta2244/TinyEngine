@@ -20,7 +20,7 @@ void PlayerHealth::Update(float deltaTime) {
 	}
 
 	// プレイヤーのHPが0なら一度だけログ出力
-	if (preHP_ <= 0.0f && hp_ <= 0.0f) {
+	if (preHP_ >= 0.0f && hp_ <= 0.0f) {
 		Logger::Log("Player is Dead", LogLevel::Info);
 	}
 

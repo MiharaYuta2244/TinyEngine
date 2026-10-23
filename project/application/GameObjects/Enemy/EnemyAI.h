@@ -2,6 +2,7 @@
 #include "AABB.h"
 #include "AudioManager.h"
 #include "Behavior/EnemyBehavior.h"
+#include "EnemyState.h"
 #include "GameObjects/GameObjectManager.h"
 #include "GameObjects/StageObjects/Door/Door.h"
 #include "GameObjects/StageObjects/Glass/Glass.h"
@@ -27,12 +28,8 @@ struct Visionparam {
 /// </summary>
 class EnemyAI {
 public:
-	enum class State {
-		Normal,    // 徘徊、通常状態
-		Vigilance, // 警戒、プレイヤー追跡状態
-		Hold,      // プレイヤーに拘束されている状態
-		Down,      // ひるみ状態
-	};
+	// 敵の状態
+	using State = EnemyState;
 
 	// 初期化
 	void Initialize(Transform* transform, EngineContext* ctx, IEnemyBehavior* behavior, TinyEngine::AudioManager* audioManager);
