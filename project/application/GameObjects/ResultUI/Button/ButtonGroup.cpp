@@ -1,4 +1,3 @@
-// ButtonGroup.cpp
 #include "ButtonGroup.h"
 #include <algorithm>
 #include <cmath>
