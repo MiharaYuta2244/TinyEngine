@@ -470,7 +470,7 @@ void EffectEditorScene::DrawPreviewControls() {
 	ImGui::Separator();
 	ImGui::TextUnformatted("Ctrl+S: 保存 / 右ドラッグ: 回転 / ホイール: 前後");
 	if (ImGui::Button("Back to Title")) {
-		RequestSceneChange("Title");
+		ctx_.sceneTransition->ChangeScene("Title");
 	}
 	ImGui::End();
 }

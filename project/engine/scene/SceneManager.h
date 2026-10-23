@@ -1,12 +1,18 @@
 #pragma once
 #include "BaseScene.h"
 #include "GameObjects/CommonData.h"
+#include "Fade/SceneTransition.h"
 #include <memory>
 #include <unordered_map>
 #include <vector>
 
 // 遷移の種類
-enum class SceneTransition { None, Change, Push, Pop };
+enum class TransitionType {
+	None,
+	Change,
+	Push,
+	Pop,
+};
 
 /// <summary>
 /// シーンマネージャークラス
@@ -17,7 +23,7 @@ public:
 	~SceneManager() = default;
 
 	// シーン初期化（共通リソースを渡す）
-	void Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, TimeManager* timeManager, FadeManager* fadeManager);
+	void Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, TimeManager* timeManager, FadeManager* fadeManager, SceneTransition* sceneTransition);
 
 	// シーン追加
 	void AddScene(const std::string& sceneName, std::unique_ptr<BaseScene> scene);
@@ -30,23 +36,8 @@ public:
 	// 現在のシーンを取得
 	BaseScene* GetCurrentScene() const;
 
-	// 要求されているシーン名を取得
-	std::string GetRequestedSceneName() const { return requestedSceneName_; }
-
-	// 要求されているシーン名を設定
-	void SetRequestedSceneName(const std::string& sceneName) { requestedSceneName_ = sceneName; }
-
-	// 要求されている遷移の種類を取得
-	SceneTransition GetRequestedTransition() const { return requestedTransition_; }
-
 	// 共通データへのポインタを取得
 	CommonData* GetCommonData() const { return commonData_.get(); }
-
-	// 要求されている遷移の種類をクリア
-	void ClearRequest() {
-		requestedSceneName_ = "";
-		requestedTransition_ = SceneTransition::None;
-	}
 
 	// シーン更新
 	void Update();
@@ -57,16 +48,21 @@ public:
 	// 終了処理
 	void Finalize();
 
+	// 未登録のシーンを弾く
+	bool HasScene(const std::string& name) const { return scenes_.contains(name); }
+
+	// シーン切り替え中かどうか
+	bool HasPendingTransition() const { return requestedTransition_ != TransitionType::None; }
+
 private:
 	// シーンマップ
 	std::unordered_map<std::string, std::unique_ptr<BaseScene>> scenes_;
 
 	std::vector<BaseScene*> sceneStack_;
-	std::string requestedSceneName_;
 	std::string nextSceneName_;
 
 	// 切り替えフラグ
-	SceneTransition requestedTransition_ = SceneTransition::None;
+	TransitionType requestedTransition_ = TransitionType::None;
 
 	// 共通リソースへのポインタ
 	EngineContext* engineContext_ = nullptr;
@@ -78,4 +74,7 @@ private:
 
 	// シーン間で共有するデータ
 	std::unique_ptr<CommonData> commonData_;
+
+	// シーン切り替えポインタ
+	SceneTransition* sceneTransition_ = nullptr;
 };

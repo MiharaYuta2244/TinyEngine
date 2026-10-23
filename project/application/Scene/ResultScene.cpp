@@ -17,9 +17,9 @@ void ResultScene::Initialize(const SceneContext& ctx) {
 	uiManager_->Initialize(ctx.engineContext, commonData_);
 
 	// コールバック登録
-	uiManager_->GetRetryButton()->SetCallback([this]() { RequestSceneChange(commonData_->currentStageKey); });
-	uiManager_->GetToTitleButton()->SetCallback([this]() { RequestSceneChange("Title"); });
-	uiManager_->GetNextStageButton()->SetCallback([this]() { RequestSceneChange("Stage" + std::to_string(commonData_->currentStageNo + 1)); });
+	uiManager_->GetRetryButton()->SetCallback([this]() { ctx_.sceneTransition->ChangeScene(commonData_->currentStageKey); });
+	uiManager_->GetToTitleButton()->SetCallback([this]() { ctx_.sceneTransition->ChangeScene("Title"); });
+	uiManager_->GetNextStageButton()->SetCallback([this]() { ctx_.sceneTransition->ChangeScene("Stage" + std::to_string(commonData_->currentStageNo + 1)); });
 
 	// 生成したボタンをリストに登録する
 	uiManager_->RegisterButtons();

@@ -1,4 +1,5 @@
 #include "PauseScene.h"
+#include "Fade/SceneTransition.h"
 
 using namespace TinyEngine;
 
@@ -10,8 +11,8 @@ void PauseScene::Initialize(const SceneContext& ctx) {
 	menuList_->Initialize(ctx.engineContext);
 
 	// メニュー項目の追加
-	menuList_->AddItem("Resume", "Resume.png", [this]() { RequestScenePop(); });
-	menuList_->AddItem("Title", "Title.png", [this]() { RequestSceneChange("Title"); });
+	menuList_->AddItem("Resume", "Resume.png", [this]() { ctx_.sceneTransition->PopScene(); });
+	menuList_->AddItem("Title", "Title.png", [this]() { ctx_.sceneTransition->ChangeScene("Title"); });
 
 	// 背景スプライト生成&初期化
 	bgSprite_ = std::make_unique<Sprite>();
@@ -32,7 +33,7 @@ void PauseScene::Initialize(const SceneContext& ctx) {
 
 void PauseScene::Update() {
 	if (ctx_.keyboard->KeyTriggered(DIK_TAB) || ctx_.gamePad->GetState().buttonsPressed.start || ctx_.gamePad->GetState().buttonsPressed.b) {
-		RequestScenePop();
+		ctx_.sceneTransition->PopScene();
 	}
 
 	// 背景更新
@@ -43,28 +44,6 @@ void PauseScene::Update() {
 
 	// ポーズテキストの更新
 	textSprite_->Update();
-
-#ifdef USE_IMGUI
-	ImGui::Begin("Pause Menu");
-
-	// 音量調整
-	static float volume = 1.0f;
-	if (ImGui::SliderFloat("Volume", &volume, 0.0f, 1.0f)) {
-		// サウンドマネージャー等に音量をセットする
-	}
-
-	// ゲームに戻る
-	if (ImGui::Button("Resume")) {
-		RequestScenePop();
-	}
-
-	// タイトルに戻る
-	if (ImGui::Button("Back to Title")) {
-		RequestSceneChange("Title");
-	}
-
-	ImGui::End();
-#endif
 }
 
 void PauseScene::Draw() {

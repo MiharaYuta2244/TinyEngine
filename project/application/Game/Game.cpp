@@ -23,7 +23,9 @@ void Game::Initialize() {
 
 	// シーンマネージャーの生成&初期化
 	sceneManager_ = std::make_unique<SceneManager>();
-	sceneManager_->Initialize(&GetEngineContext(), GetKeyboard(), GetGamePad(), GetDebugCamera(), GetTimeManager(), fadeManager_.get());
+	sceneTransition_ = std::make_unique<SceneTransition>();
+	sceneManager_->Initialize(&GetEngineContext(), GetKeyboard(), GetGamePad(), GetDebugCamera(), GetTimeManager(), fadeManager_.get(), sceneTransition_.get());
+	sceneTransition_->Initialize(sceneManager_.get(), fadeManager_.get());
 
 	// シーン追加
 	sceneManager_->AddScene("Title", std::make_unique<TitleScene>());
@@ -36,8 +38,8 @@ void Game::Initialize() {
 	sceneManager_->AddScene("Test", std::make_unique<TestScene>());
 	sceneManager_->AddScene("EffectEditor", std::make_unique<EffectEditorScene>());
 
-	// 最初のシーンを初期化
-	sceneManager_->ChangeScene("Title");
+	// 最初のシーンを指定
+	sceneTransition_->ChangeSceneImmediate("Title");
 }
 
 void Game::Update() {
@@ -47,21 +49,8 @@ void Game::Update() {
 	// ポストエフェクトのON/OFFを全シーン共通で反映
 	ApplyPostEffectSettings();
 
-	// シーン切り替えの要求があればフェードアウト開始
-	if (sceneManager_->GetRequestedSceneName() != "" && sceneManager_->GetRequestedTransition() == SceneTransition::Change) {
-		fadeManager_->FadeOutTo(sceneManager_->GetRequestedSceneName());
-		sceneManager_->ClearRequest();
-	}
-
-	// フェードの更新処理
-	float dt = GetTimeManager()->GetDeltaTime();
-	fadeManager_->Update(dt);
-
-	// 画面が完全に暗くなったらシーンを切り替える
-	if (fadeManager_->IsWaitingForSceneShange()) {
-		sceneManager_->ChangeScene(fadeManager_->GetRequestedSceneName());
-		fadeManager_->NotifySceneChanged();
-	}
+	// フェード進行とシーン切り替え
+	sceneTransition_->Update(GetTimeManager()->GetDeltaTime());
 
 	// シーンマネージャー更新
 	sceneManager_->Update();

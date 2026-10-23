@@ -323,7 +323,7 @@ void StageSelectScene::HandleInput() {
 		StartDecideAnimation();
 		isDecided_ = true;
 	} else if (back) {
-		RequestSceneChange("Title");
+		ctx_.sceneTransition->ChangeScene("Title");
 		isDecided_ = true;
 	}
 }
@@ -505,6 +505,6 @@ void StageSelectScene::UpdateDecideAnimation(float deltaTime) {
 		isDecideAnimating_ = false;
 		commonData_->currentStageNo = selected_ + 1;
 		commonData_->currentStageKey = "Stage" + std::to_string(selected_ + 1);
-		RequestSceneChange(commonData_->currentStageKey);
+		ctx_.sceneTransition->ChangeScene(commonData_->currentStageKey);
 	}
 }

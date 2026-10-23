@@ -195,7 +195,6 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="engine\base\utility\easing\EasingEditor.cpp" />
     <ClCompile Include="engine\utility\DirectXUtils.cpp" />
     <ClCompile Include="engine\Collision\Collision.cpp" />
-    <ClCompile Include="engine\scene\BaseScene.cpp" />
     <ClCompile Include="engine\scene\SceneManager.cpp" />
     <ClCompile Include="engine\base\utility\easing\Easing.cpp" />
     <ClCompile Include="engine\3d\particle\modules\DustModule.cpp" />
@@ -323,6 +322,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="application\GameObjects\Item\Molotov.cpp" />
     <ClCompile Include="application\GameObjects\StageMiniature\StageMiniature.cpp" />
     <ClCompile Include="application\GameObjects\ResultUI\Button\NextStageButton.cpp" />
+    <ClCompile Include="application\Fade\SceneTransition.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -587,6 +587,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="application\GameObjects\Item\Molotov.h" />
     <ClInclude Include="application\GameObjects\StageMiniature\StageMiniature.h" />
     <ClInclude Include="application\GameObjects\ResultUI\Button\NextStageButton.h" />
+    <ClInclude Include="application\Fade\SceneTransition.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

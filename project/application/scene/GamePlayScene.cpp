@@ -159,7 +159,7 @@ void GamePlayScene::Update() {
 
 	// ポーズ画面
 	if (ctx_.keyboard->KeyTriggered(DIK_TAB) || ctx_.gamePad->GetState().buttonsPressed.start) {
-		RequestScenePush("Pause");
+		ctx_.sceneTransition->PushScene("Pause");
 		return;
 	}
 
@@ -222,7 +222,7 @@ void GamePlayScene::Update() {
 	// レターボックスの演出が終わったらシーン遷移
 	if (!letterBox_->GetIsActive() && !postEffectController_->GetIsDeathAnimPlaying()) {
 		if (!isTransitionRequested_) {
-			RequestSceneChange("Result");
+			ctx_.sceneTransition->ChangeScene("Result");
 			isTransitionRequested_ = true;
 		}
 
@@ -246,7 +246,7 @@ void GamePlayScene::Update() {
 		ctx_.currentCamera->SetEuler(cameraZoomController_->GetRotation());
 
 		if (!isTransitionRequested_ && cameraZoomController_->GetIsFinished()) {
-			RequestSceneChange("Result");
+			ctx_.sceneTransition->ChangeScene("Result");
 			isTransitionRequested_ = true;
 
 			// クリアしたかどうかを記録

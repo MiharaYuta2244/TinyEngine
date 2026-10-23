@@ -2,6 +2,7 @@
 #include "Framework.h"
 #include "SceneManager.h"
 #include "Fade/FadeManager.h"
+#include "Fade/SceneTransition.h"
 #include <memory>
 
 class Game : public Framework {
@@ -24,4 +25,7 @@ private:
 
 	// フェードマネージャー
 	std::unique_ptr<FadeManager> fadeManager_;
+
+	// シーン切り替えインスタンス
+	std::unique_ptr<SceneTransition> sceneTransition_;
 };

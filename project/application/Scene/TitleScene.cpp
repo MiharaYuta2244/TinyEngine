@@ -14,7 +14,7 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 	// メニューの生成&初期化
 	menu_ = std::make_unique<MenuList>();
 	menu_->Initialize(ctx.engineContext);
-	menu_->AddItem("Play", "Title_Play.png", [this]() { RequestSceneChange("StageSelect"); });
+	menu_->AddItem("Play", "Title_Play.png", [this]() { ctx_.sceneTransition->ChangeScene("StageSelect"); });
 	menu_->AddItem("Option", "Title_Option.png", [this]() {
 		menuState_ = TitleMenuState::Option;
 		optionMenu_->ResetState();
@@ -102,7 +102,7 @@ void TitleScene::Update() {
 #if defined(NDEBUG) || defined(_DEBUG)
 	// エフェクトエディタシーンへの遷移
 	if (ctx_.keyboard->KeyTriggered(DIK_F5)) {
-		RequestSceneChange("EffectEditor");
+		ctx_.sceneTransition->ChangeScene("EffectEditor");
 	}
 #endif
 

@@ -21,10 +21,6 @@ public:
 	// シーン終了処理
 	virtual void Finalize() = 0;
 
-	virtual void RequestSceneChange(const std::string& sceneName);
-	virtual void RequestScenePush(const std::string& sceneName);
-	virtual void RequestScenePop();
-
 protected:
 	SceneContext ctx_;
 	CommonData* commonData_;

@@ -1,12 +1,13 @@
 #include "SceneManager.h"
 
-void SceneManager::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, TimeManager* timeManager, FadeManager* fadeManager) {
+void SceneManager::Initialize(EngineContext* ctx, DirectInput* keyboard, GamePad* gamePad, Camera* debugCamera, TimeManager* timeManager, FadeManager* fadeManager, SceneTransition* sceneTransition) {
 	engineContext_ = ctx;
 	keyboard_ = keyboard;
 	gamePad_ = gamePad;
 	debugCamera_ = debugCamera;
 	timeManager_ = timeManager;
 	fadeManager_ = fadeManager;
+	sceneTransition_ = sceneTransition;
 	commonData_ = std::make_unique<CommonData>();
 }
 
@@ -15,31 +16,34 @@ void SceneManager::AddScene(const std::string& sceneName, std::unique_ptr<BaseSc
 }
 
 void SceneManager::ChangeScene(const std::string& sceneName) {
-	if (scenes_.find(sceneName) == scenes_.end() || requestedTransition_ != SceneTransition::None)
+	if (scenes_.find(sceneName) == scenes_.end() || requestedTransition_ != TransitionType::None)
 		return;
+
 	nextSceneName_ = sceneName;
-	requestedTransition_ = SceneTransition::Change;
+	requestedTransition_ = TransitionType::Change;
 }
 
 void SceneManager::PushScene(const std::string& sceneName) {
-	if (scenes_.find(sceneName) == scenes_.end() || requestedTransition_ != SceneTransition::None)
+	if (scenes_.find(sceneName) == scenes_.end() || requestedTransition_ != TransitionType::None)
 		return;
+
 	nextSceneName_ = sceneName;
-	requestedTransition_ = SceneTransition::Push;
+	requestedTransition_ = TransitionType::Push;
 }
 
 void SceneManager::PopScene() {
-	if (sceneStack_.size() <= 1 || requestedTransition_ != SceneTransition::None)
+	if (sceneStack_.size() <= 1 || requestedTransition_ != TransitionType::None)
 		return;
-	requestedTransition_ = SceneTransition::Pop;
+
+	requestedTransition_ = TransitionType::Pop;
 }
 
 BaseScene* SceneManager::GetCurrentScene() const { return sceneStack_.empty() ? nullptr : sceneStack_.back(); }
 
 void SceneManager::Update() {
 	// シーン遷移処理
-	if (requestedTransition_ != SceneTransition::None) {
-		if (requestedTransition_ == SceneTransition::Change) {
+	if (requestedTransition_ != TransitionType::None) {
+		if (requestedTransition_ == TransitionType::Change) {
 			// 全てのシーンを終了してクリア
 			for (auto it = sceneStack_.rbegin(); it != sceneStack_.rend(); ++it) {
 				(*it)->Finalize();
@@ -48,7 +52,7 @@ void SceneManager::Update() {
 
 			// 新しいシーンを追加
 			BaseScene* next = scenes_[nextSceneName_].get();
-			SceneContext ctx = {engineContext_, keyboard_, gamePad_, debugCamera_, timeManager_, this, fadeManager_};
+			SceneContext ctx = {engineContext_, keyboard_, gamePad_, debugCamera_, timeManager_, this, fadeManager_, sceneTransition_};
 			next->Initialize(ctx);
 			sceneStack_.push_back(next);
 
@@ -57,19 +61,19 @@ void SceneManager::Update() {
 				timeManager_->ResetDeltaTime();
 			}
 
-		} else if (requestedTransition_ == SceneTransition::Push) {
+		} else if (requestedTransition_ == TransitionType::Push) {
 			// 現在のシーンは終了せずに、新しいシーンを上に重ねる
 			BaseScene* next = scenes_[nextSceneName_].get();
-			SceneContext ctx = {engineContext_, keyboard_, gamePad_, debugCamera_, timeManager_, this, fadeManager_};
+			SceneContext ctx = {engineContext_, keyboard_, gamePad_, debugCamera_, timeManager_, this, fadeManager_, sceneTransition_};
 			next->Initialize(ctx);
 			sceneStack_.push_back(next);
 
-		} else if (requestedTransition_ == SceneTransition::Pop) {
+		} else if (requestedTransition_ == TransitionType::Pop) {
 			// 一番上のシーンだけ終了して取り除く
 			sceneStack_.back()->Finalize();
 			sceneStack_.pop_back();
 		}
-		requestedTransition_ = SceneTransition::None;
+		requestedTransition_ = TransitionType::None;
 	}
 
 	// 現在アクティブのシーンだけ更新する

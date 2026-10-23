@@ -7,6 +7,7 @@
 #include "Fade/FadeManager.h"
 
 class SceneManager;
+class SceneTransition;
 
 struct SceneContext {
 	EngineContext* engineContext = nullptr;
@@ -16,4 +17,5 @@ struct SceneContext {
 	TimeManager* timeManager = nullptr;
 	SceneManager* sceneManager = nullptr;
 	FadeManager* fadeManager = nullptr;
+	SceneTransition* sceneTransition = nullptr;
 };
