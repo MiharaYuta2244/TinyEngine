@@ -291,22 +291,10 @@
     <ClCompile Include="application\Scene\ResultScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="application\GameObjects\ResultUI\ResultUIManager.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="application\GameObjects\ResultUI\Text\ResultParamText.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="application\GameObjects\ResultUI\Animation\SpriteScaleWipeAnimator.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="application\GameObjects\ResultUI\Button\RetryButton.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="application\GameObjects\ResultUI\Button\ToTitleButton.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="application\GameObjects\ResultUI\Button\IButton.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="engine\3d\skybox\SkyboxCommon.cpp">
@@ -501,10 +489,13 @@
     <ClCompile Include="application\GameObjects\StageMiniature\StageMiniature.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="application\GameObjects\ResultUI\Button\NextStageButton.cpp">
+    <ClCompile Include="application\Fade\SceneTransition.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="application\Fade\SceneTransition.cpp">
+    <ClCompile Include="application\GameObjects\ResultUI\Button\Button.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="application\GameObjects\ResultUI\Button\ButtonGroup.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
@@ -850,22 +841,10 @@
     <ClInclude Include="application\Scene\ResultScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="application\GameObjects\ResultUI\ResultUIManager.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="application\GameObjects\ResultUI\Text\ResultParamText.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="application\GameObjects\ResultUI\Animation\SpriteScaleWipeAnimator.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="application\GameObjects\ResultUI\Button\RetryButton.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="application\GameObjects\ResultUI\Button\ToTitleButton.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="application\GameObjects\ResultUI\Button\IButton.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="engine\3d\skybox\SkyboxCommon.h">
@@ -1120,10 +1099,13 @@
     <ClInclude Include="application\GameObjects\StageMiniature\StageMiniature.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="application\GameObjects\ResultUI\Button\NextStageButton.h">
+    <ClInclude Include="application\Fade\SceneTransition.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="application\Fade\SceneTransition.h">
+    <ClInclude Include="application\GameObjects\ResultUI\Button\Button.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="application\GameObjects\ResultUI\Button\ButtonGroup.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

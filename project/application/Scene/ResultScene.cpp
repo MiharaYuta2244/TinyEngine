@@ -12,18 +12,6 @@ void ResultScene::Initialize(const SceneContext& ctx) {
 		commonData_->ReportClear(commonData_->currentStageNo, commonData_->clearTime, commonData_->killCount);
 	}
 
-	// UI管理クラス生成&初期化
-	uiManager_ = std::make_unique<ResultUIManager>();
-	uiManager_->Initialize(ctx.engineContext, commonData_);
-
-	// コールバック登録
-	uiManager_->GetRetryButton()->SetCallback([this]() { ctx_.sceneTransition->ChangeScene(commonData_->currentStageKey); });
-	uiManager_->GetToTitleButton()->SetCallback([this]() { ctx_.sceneTransition->ChangeScene("Title"); });
-	uiManager_->GetNextStageButton()->SetCallback([this]() { ctx_.sceneTransition->ChangeScene("Stage" + std::to_string(commonData_->currentStageNo + 1)); });
-
-	// 生成したボタンをリストに登録する
-	uiManager_->RegisterButtons();
-
 	// メインカメラ
 	mainCamera_ = std::make_unique<Camera>();
 	mainCamera_->Initialize();
@@ -45,22 +33,33 @@ void ResultScene::Initialize(const SceneContext& ctx) {
 	audioManager_ = std::make_unique<AudioManager>();
 	audioManager_->Initialize();
 	audioManager_->LoadWave("ResultBGM", "resources/sounds/bgm/ResultScene.mp3");
+	audioManager_->LoadWave("Select", "resources/sounds/se/Select.mp3");
+	audioManager_->LoadWave("Decide", "resources/sounds/se/Decide.mp3");
 	audioManager_->PlayBGM("ResultBGM");
 
-	// リザルトテキスト生成&初期化
-	resultText_ = std::make_unique<Sprite>();
+	// フォントの生成&初期化
+	font_ = std::make_unique<Font>();
+	font_->Initialize(ctx.engineContext, L"Dela Gothic One", 48, L"体リトライタイトルへ戻る次のステージ");
+	titleFont_ = std::make_unique<Font>();
+	titleFont_->Initialize(ctx.engineContext, L"Dela Gothic One", 96);
 
-	if (commonData_->isClear) {
-		resultText_->Initialize(ctx.engineContext, "Clear.png");
-		resultText_->SetPosition({515, 100});
-	} else {
-		resultText_->Initialize(ctx.engineContext, "GameOver.png");
-		resultText_->SetPosition({390, 100});
-	}
+	// リザルトテキスト生成&初期化
+	resultText_ = std::make_unique<TextSprite>();
+	resultText_->Initialize(ctx.engineContext, titleFont_.get(), commonData_->isClear ? L"CLEAR" : L"GAME OVER");
+	resultText_->SetAnchorPoint({0.5f, 0.0f});
+	resultText_->SetPosition({640.0f, 80.0f});
+	resultText_->SetColor({1.0f, 0.7f, 0.1f, 1.0f});
 
 	// スコア表示インスタンス生成&初期化
 	scoreDisplay_ = std::make_unique<ResultScoreDisplay>();
 	scoreDisplay_->Initialize(ctx.engineContext, commonData_->isClear, commonData_->clearTime, commonData_->killCount);
+
+	// ボタングループの生成&初期化
+	buttons_ = std::make_unique<ButtonGroup>();
+	buttons_->Initialize(ButtonGroup::Layout::Horizontal, audioManager_.get());
+	buttons_->Add(ctx.engineContext, font_.get(), L"リトライ", {3240.0f, 580.0f}, [this]() { ctx_.sceneTransition->ChangeScene(commonData_->currentStageKey); });
+	buttons_->Add(ctx.engineContext, font_.get(), L"タイトル", {625.0f, 580.0f}, [this]() { ctx_.sceneTransition->ChangeScene("Title"); });
+	buttons_->Add(ctx.engineContext, font_.get(), L"次のステージ", {1030.0f, 580.0f}, [this]() { ctx_.sceneTransition->ChangeScene("Stage" + std::to_string(commonData_->currentStageNo + 1)); });
 }
 
 void ResultScene::Update() {
@@ -72,9 +71,6 @@ void ResultScene::Update() {
 	// 歪みのパラメータにDeltaTime加算
 	glitchParam_.time += deltaTime;
 	scanlineParam_.time += deltaTime;
-
-	// UI管理クラス更新
-	uiManager_->Update(deltaTime, ctx_.keyboard, ctx_.gamePad);
 
 	auto* scanline = ctx_.engineContext->postEffectPipeline->GetPass(PostEffectType::Scanline);
 	if (scanline) {
@@ -98,6 +94,16 @@ void ResultScene::Update() {
 
 	// スコア表示更新
 	scoreDisplay_->Update(deltaTime);
+
+#ifdef USE_IMGUI
+	// ボタングループのImGui描画
+	ImGui::Begin("Button Editor");
+	buttons_->DrawImGui();
+	ImGui::End();
+#endif
+
+	// ボタングループの更新
+	buttons_->Update(ctx_.keyboard, ctx_.gamePad);
 }
 
 void ResultScene::Draw() {
@@ -107,8 +113,8 @@ void ResultScene::Draw() {
 	// スコア表示描画
 	scoreDisplay_->Draw();
 
-	// UI管理クラス描画
-	uiManager_->Draw();
+	// ボタングループの描画
+	buttons_->Draw();
 }
 
 void ResultScene::Finalize() { audioManager_->StopBGM(); }
