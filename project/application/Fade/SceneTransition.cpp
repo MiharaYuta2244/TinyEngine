@@ -30,6 +30,15 @@ void SceneTransition::ChangeScene(const std::string& sceneName) {
 	fadeManager_->FadeOutTo(sceneName);
 }
 
+void SceneTransition::ChangeScene(const std::string& sceneName, FadeStyle style) {
+	if (state_ == State::FadingOut) {
+		return;
+	}
+
+	fadeManager_->SetStyle(style);
+	ChangeScene(sceneName);
+}
+
 void SceneTransition::ChangeSceneImmediate(const std::string& sceneName) { sceneManager_->ChangeScene(sceneName); }
 
 void SceneTransition::PushScene(const std::string& sceneName) {

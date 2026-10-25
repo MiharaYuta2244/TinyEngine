@@ -57,9 +57,11 @@ void ResultScene::Initialize(const SceneContext& ctx) {
 	// ボタングループの生成&初期化
 	buttons_ = std::make_unique<ButtonGroup>();
 	buttons_->Initialize(ButtonGroup::Layout::Horizontal, audioManager_.get());
-	buttons_->Add(ctx.engineContext, font_.get(), L"リトライ", {240.0f, 580.0f}, [this]() { ctx_.sceneTransition->ChangeScene(commonData_->currentStageKey); });
-	buttons_->Add(ctx.engineContext, font_.get(), L"タイトル", {625.0f, 580.0f}, [this]() { ctx_.sceneTransition->ChangeScene("Title"); });
-	buttons_->Add(ctx.engineContext, font_.get(), L"次のステージ", {1030.0f, 580.0f}, [this]() { ctx_.sceneTransition->ChangeScene("Stage" + std::to_string(commonData_->currentStageNo + 1)); });
+	buttons_->Add(ctx.engineContext, font_.get(), L"リトライ", {240.0f, 580.0f}, [this]() { ctx_.sceneTransition->ChangeScene(commonData_->currentStageKey, FadeStyle::Logo); });
+	buttons_->Add(ctx.engineContext, font_.get(), L"タイトル", {625.0f, 580.0f}, [this]() { ctx_.sceneTransition->ChangeScene("Title", FadeStyle::Logo); });
+	buttons_->Add(ctx.engineContext, font_.get(), L"次のステージ", {1030.0f, 580.0f}, [this]() {
+		ctx_.sceneTransition->ChangeScene("Stage" + std::to_string(commonData_->currentStageNo + 1), FadeStyle::Logo);
+	});
 }
 
 void ResultScene::Update() {

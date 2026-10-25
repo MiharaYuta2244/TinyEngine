@@ -222,7 +222,7 @@ void GamePlayScene::Update() {
 	// レターボックスの演出が終わったらシーン遷移
 	if (!letterBox_->GetIsActive() && !postEffectController_->GetIsDeathAnimPlaying()) {
 		if (!isTransitionRequested_) {
-			ctx_.sceneTransition->ChangeScene("Result");
+			ctx_.sceneTransition->ChangeScene("Result", FadeStyle::Logo);
 			isTransitionRequested_ = true;
 		}
 
@@ -246,7 +246,7 @@ void GamePlayScene::Update() {
 		ctx_.currentCamera->SetEuler(cameraZoomController_->GetRotation());
 
 		if (!isTransitionRequested_ && cameraZoomController_->GetIsFinished()) {
-			ctx_.sceneTransition->ChangeScene("Result");
+			ctx_.sceneTransition->ChangeScene("Result", FadeStyle::Logo);
 			isTransitionRequested_ = true;
 
 			// クリアしたかどうかを記録

@@ -20,6 +20,7 @@ void Game::Initialize() {
 	// フェードマネージャーの生成&初期化
 	fadeManager_ = std::make_unique<FadeManager>();
 	fadeManager_->Initialize(&GetEngineContext());
+	fadeManager_->SetStyle(FadeStyle::Logo);
 
 	// シーンマネージャーの生成&初期化
 	sceneManager_ = std::make_unique<SceneManager>();

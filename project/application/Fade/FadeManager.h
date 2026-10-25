@@ -1,6 +1,7 @@
 #pragma once
 #include "ColorPalette.h"
 #include "EngineContext.h"
+#include "FadeStyle.h"
 #include "IFadeState.h"
 #include "Sprite.h"
 #include <array>
@@ -76,7 +77,23 @@ public:
 	float GetFadeTimer() const { return fadeTimer_; }
 	void SetFadeTimer(float timer) { fadeTimer_ = timer; }
 	void AddFadeTimer(float deltaTime) { fadeTimer_ += deltaTime; }
-	float GetFadeDuration() const { return fadeDuration_; }
+
+	// 演出スタイルのSetter
+	void SetStyle(FadeStyle style) { style_ = style; }
+
+	// 演出スタイルのGetter
+	FadeStyle GetStyle() const { return style_; }
+
+	// フェード時間Getter
+	float GetFadeDuration() const { return style_ == FadeStyle::Logo ? logoFadeDuration_ : fadeDuration_; }
+
+private:
+	// ロゴ演出
+	void InitializeLogoStyle(EngineContext* ctx);
+	void UpdateLogoOut(float t); // 暗転からロゴ表示
+	void UpdateLogoIn(float r);  // ロゴ消去からシーン表示
+	void ApplyLogoCrop(float visibleLeft, float alpha);
+	void DrawLogoStyle();
 
 private:
 	// スプライトの数
@@ -91,9 +108,9 @@ private:
 	// 各レイヤーのRGBAカラー初期値
 	std::array<Vector4, kLayerCount> layerColors_ = {
 	    {
-         ColorPalette::NeonPurple(),   // 奥
-	        ColorPalette::NeonBlue(), // 中
-	        ColorPalette::Black()       // 手前
+         ColorPalette::NeonPurple(), // 奥
+	        ColorPalette::NeonBlue(),   // 中
+	        ColorPalette::Black(),      // 手前
 	    }
     };
 
@@ -108,4 +125,15 @@ private:
 
 	std::string requestedSceneName_;       // フェードアウト開始時に切り替えるシーン名
 	bool isWaitingForSceneChange_ = false; // シーン切り替え待ちフラグ
+
+	FadeStyle style_ = FadeStyle::Stripe;
+	float logoFadeDuration_ = 1.0f; // 行き・帰りそれぞれの長さ
+
+	std::unique_ptr<TinyEngine::Sprite> coverL_, coverR_; // 画面を覆うグレーのパネル
+	std::unique_ptr<TinyEngine::Sprite> line_;            // 白い横ライン
+	std::unique_ptr<TinyEngine::Sprite> bar_;             // 傾いた白い縦バー
+	std::unique_ptr<TinyEngine::Sprite> logo_;            // ロゴ
+	Vector2 logoTexSize_{};
+	float logoScale_ = 1.0f;
+	bool logoActive_ = false, logoShown_ = false, lineShown_ = false, barShown_ = false;
 };

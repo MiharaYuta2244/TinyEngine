@@ -1,4 +1,5 @@
 #pragma once
+#include "FadeStyle.h"
 #include <string>
 
 class SceneManager;
@@ -17,6 +18,7 @@ public:
 
 	// シーン切り替え処理
 	void ChangeScene(const std::string& sceneName);
+	void ChangeScene(const std::string& sceneName, FadeStyle style);
 
 	// フェードなしで即座に切り替え
 	void ChangeSceneImmediate(const std::string& sceneName);

@@ -6,6 +6,23 @@
 
 using namespace TinyEngine;
 
+namespace {
+constexpr float kW = 1280.0f, kH = 720.0f;
+const Vector4 kCoverColor = {0.16f, 0.16f, 0.16f, 1.0f}; // 暗転の背景色
+constexpr float kLineHeight = 120.0f;                     // 横ラインの太さ
+constexpr float kBarWidth = 120.0f;                       // 縦バーの太さ
+constexpr float kBarHeight = 1000.0f;
+constexpr float kBarAngle = 0.17f; // 縦バーの傾き
+constexpr const char* kLogoTexture = "Title_Logo.png";
+
+float Phase(float t, float s, float e) { return std::clamp((t - s) / (e - s), 0.0f, 1.0f); }
+float EaseOut(float t) { return Easing::ApplyEasing(EaseType::EASEOUTCUBIC, t); }
+void SetRect(TinyEngine::Sprite* s, float x, float y, float w, float h) {
+	s->SetPosition({x, y});
+	s->SetSize({w, h});
+}
+} // namespace
+
 void FadeManager::Initialize(EngineContext* ctx) {
 	for (int i = 0; i < kStripeCount; ++i) {
 		// 各帯のベースとなる遅延時間を記録
@@ -25,6 +42,7 @@ void FadeManager::Initialize(EngineContext* ctx) {
 	}
 
 	ChangeState(std::make_unique<FadeStateNone>());
+	InitializeLogoStyle(ctx);
 }
 
 void FadeManager::Update(float deltaTime) {
@@ -34,6 +52,11 @@ void FadeManager::Update(float deltaTime) {
 }
 
 void FadeManager::Draw() {
+	if (style_ == FadeStyle::Logo) {
+		DrawLogoStyle();
+		return;
+	}
+
 	for (int i = 0; i < kStripeCount; ++i) {
 		for (int j = 0; j < kLayerCount; ++j) {
 			if (fadeSprites_[i][j]) {
@@ -61,7 +84,9 @@ void FadeManager::ChangeState(std::unique_ptr<IFadeState> newState) {
 	if (currentState_) {
 		currentState_->Exit(this);
 	}
+
 	currentState_ = std::move(newState);
+
 	if (currentState_) {
 		currentState_->Enter(this);
 	}
@@ -69,6 +94,17 @@ void FadeManager::ChangeState(std::unique_ptr<IFadeState> newState) {
 
 void FadeManager::SetFadeAlpha(float progress) {
 	bool isFadeOut = !requestedSceneName_.empty() || isWaitingForSceneChange_;
+
+	if (style_ == FadeStyle::Logo) {
+		if (isFadeOut) {
+			UpdateLogoOut(progress);
+		} else {
+			UpdateLogoIn(1.0f - progress);
+		}
+
+		return;
+	}
+
 	float layerDelayGap = 0.1f; // レイヤー間の遅延差
 
 	// アニメーション全体がduration内に収まるように最大遅延を計算
@@ -139,4 +175,108 @@ void FadeManager::SetLayerColors(const Vector4& color0, const Vector4& color1, c
 	SetLayerColor(0, color0);
 	SetLayerColor(1, color1);
 	SetLayerColor(2, color2);
+}
+
+void FadeManager::InitializeLogoStyle(EngineContext* ctx) {
+	auto makeRect = [&](std::unique_ptr<Sprite>& s, const Vector4& color, const Vector2& anchor) {
+		s = std::make_unique<Sprite>();
+		s->Initialize(ctx, "white.png");
+		s->SetAnchorPoint(anchor);
+		s->SetColor(color);
+		s->SetSize({0.0f, 0.0f});
+	};
+
+	makeRect(coverL_, kCoverColor, {0.0f, 0.0f});
+	makeRect(coverR_, kCoverColor, {0.0f, 0.0f});
+	makeRect(line_, {1, 1, 1, 1}, {0.0f, 0.0f});
+	makeRect(bar_, {1, 1, 1, 1}, {0.5f, 0.5f});
+	bar_->SetRotation(kBarAngle);
+
+	logo_ = std::make_unique<Sprite>();
+	logo_->Initialize(ctx, kLogoTexture);
+	logo_->SetAnchorPoint({0.0f, 0.0f});
+	logoTexSize_ = logo_->GetSize(); // Initialize直後はテクスチャサイズ
+}
+
+void FadeManager::UpdateLogoOut(float t) {
+	logoActive_ = true;
+
+	// 左右からグレーのパネルが閉じる
+	float half = kW * 0.5f * EaseOut(Phase(t, 0.0f, 0.2f));
+	SetRect(coverL_.get(), 0.0f, 0.0f, half, kH);
+	SetRect(coverR_.get(), kW - half, 0.0f, half, kH);
+
+	// 白い横ラインが左→右へ伸び、後半で右端へ縮む
+	float lineLeft = kW * EaseOut(Phase(t, 0.5f, 0.7f));
+	float lineRight = kW * EaseOut(Phase(t, 0.2f, 0.45f));
+	float lineW = std::max(lineRight - lineLeft, 0.0f);
+	SetRect(line_.get(), lineLeft, kH * 0.5f - kLineHeight * 0.5f, lineW, kLineHeight);
+	lineShown_ = lineW > 0.5f;
+
+	// 傾いた縦バーが右→左へ走り、通過した位置から右側のロゴが見えていく
+	float sweep = Phase(t, 0.45f, 0.85f);
+	float barX = (kW + 150.0f) + (-150.0f - (kW + 150.0f)) * EaseOut(sweep);
+	bar_->SetPosition({barX, kH * 0.5f});
+	bar_->SetSize({kBarWidth, kBarHeight});
+	barShown_ = sweep > 0.0f && sweep < 1.0f;
+	ApplyLogoCrop(barX, 1.0f);
+}
+
+void FadeManager::UpdateLogoIn(float r) {
+	logoActive_ = r < 1.0f;
+	lineShown_ = false;
+	barShown_ = false;
+
+	ApplyLogoCrop(-kW, 1.0f - Phase(r, 0.3f, 0.6f));
+
+	float left = kW * EaseOut(Phase(r, 0.45f, 1.0f));
+	SetRect(coverL_.get(), 0.0f, 0.0f, 0.0f, kH);
+	SetRect(coverR_.get(), left, 0.0f, kW - left, kH);
+}
+
+void FadeManager::ApplyLogoCrop(float visibleLeft, float alpha) {
+	const float dispW = logoTexSize_.x * logoScale_;
+	const float dispH = logoTexSize_.y * logoScale_;
+	const float left = (kW - dispW) * 0.5f;
+	const float top = (kH - dispH) * 0.5f;
+	const float right = left + dispW;
+
+	float vl = std::clamp(visibleLeft, left, right);
+	float vw = right - vl;
+	logoShown_ = vw > 0.5f && alpha > 0.0f;
+	if (!logoShown_) {
+		return;
+	}
+
+	logo_->SetPosition({vl, top});
+	logo_->SetSize({vw, dispH});
+	logo_->SetTextureLeftTop({(vl - left) / logoScale_, 0.0f});
+	logo_->SetTextureSize({vw / logoScale_, logoTexSize_.y});
+	logo_->SetColor({1.0f, 1.0f, 1.0f, alpha});
+}
+
+void FadeManager::DrawLogoStyle() {
+	if (!logoActive_) {
+		return;
+	}
+
+	coverL_->Update();
+	coverL_->Draw();
+	coverR_->Update();
+	coverR_->Draw();
+
+	if (logoShown_) {
+		logo_->Update();
+		logo_->Draw();
+	}
+
+	if (lineShown_) {
+		line_->Update();
+		line_->Draw();
+	}
+
+	if (barShown_) {
+		bar_->Update();
+		bar_->Draw();
+	}
 }
