@@ -13,6 +13,7 @@
 #include "GameTimer.h"
 #include "Particle.h"
 #include "VisionCone.h"
+#include "PiyoEffect.h"
 
 class EnemyBulletManager;
 class Player;
@@ -231,4 +232,7 @@ private:
 
 	// アニメーター
 	EnemyAnimator animator_;
+
+	// ダウン中のピヨピヨ演出
+	std::unique_ptr<PiyoEffect> piyoEffect_;
 };

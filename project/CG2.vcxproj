@@ -321,6 +321,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="application\GameObjects\Item\Molotov.cpp" />
     <ClCompile Include="application\GameObjects\StageMiniature\StageMiniature.cpp" />
     <ClCompile Include="application\Fade\SceneTransition.cpp" />
+    <ClCompile Include="application\GameObjects\Enemy\PiyoEffect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -586,6 +587,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="application\GameObjects\Item\Molotov.h" />
     <ClInclude Include="application\GameObjects\StageMiniature\StageMiniature.h" />
     <ClInclude Include="application\Fade\SceneTransition.h" />
+    <ClInclude Include="application\GameObjects\Enemy\PiyoEffect.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

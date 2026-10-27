@@ -74,8 +74,16 @@ void Enemy::Update(
 
 	if (isDown_) {
 		downTimer_.Update(deltaTime);
+
+		// ピヨピヨの更新
+		if (piyoEffect_) {
+			piyoEffect_->Update(deltaTime, transform_.translate);
+		}
+
 		if (downTimer_.IsEnd()) {
 			isDown_ = false;
+			piyoEffect_.reset(); // 復帰したら削除
+
 			// 復帰時に掴まれている場合はHold状態を壊さない
 			if (ai_->GetState() == EnemyAI::State::Down) {
 				ai_->SetState(EnemyAI::State::Normal);
@@ -248,6 +256,11 @@ void Enemy::Draw() {
 			exclamationMark_->Draw();
 		}
 
+		// ピヨピヨの描画
+		if (isDown_ && piyoEffect_) {
+			piyoEffect_->Draw();
+		}
+
 		// マズルフラッシュパーティクルの描画
 		for (auto& particle : muzzleParticles_) {
 			particle->Draw();
@@ -394,6 +407,10 @@ void Enemy::StartDown(float duration) {
 
 	// 吹き飛び中などの速度も止めておく
 	velocity_ = {0.0f, 0.0f, 0.0f};
+
+	// ピヨピヨ演出の開始
+	piyoEffect_ = std::make_unique<PiyoEffect>();
+	piyoEffect_->Initialize(ctx_);
 }
 
 void Enemy::PlayDeathEffect(std::list<std::unique_ptr<Particle>>& container) { behavior_->OnDeath(ctx_, transform_.translate, container); }
