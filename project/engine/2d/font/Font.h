@@ -7,8 +7,12 @@
 namespace TinyEngine {
 class Font {
 public:
+	// 初期化関数
 	void Initialize(EngineContext* ctx, const std::wstring& fontFamily, int pixelHeight, const std::wstring& charSet = L"");
-	~Font();
+	~Font() = default;
+
+	// フォントファイルの登録解除
+	static void UnloadFontFiles();
 
 	const GlyphInfo* GetGlyph(wchar_t c) const;
 	float GetLineHeight() const { return lineHeight_; }

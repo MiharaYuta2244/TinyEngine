@@ -230,6 +230,9 @@ void Framework::Finalize() {
 
 	Logger::Finalize();
 
+	// フォントの登録解除
+	TinyEngine::Font::UnloadFontFiles();
+
 	CloseHandle(dxCommon_->GetFenceEvent());
 
 	CoUninitialize();

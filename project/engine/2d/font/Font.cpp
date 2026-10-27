@@ -3,12 +3,6 @@
 
 using namespace TinyEngine;
 
-Font::~Font() {
-	for (auto& path : loadedFontPaths_) {
-		RemoveFontResourceExW(path.c_str(), FR_PRIVATE | FR_NOT_ENUM, nullptr);
-	}
-}
-
 void Font::Initialize(EngineContext* ctx, const std::wstring& fontFamily, int pixelHeight, const std::wstring& charSet) {
 	ctx_ = ctx;
 	std::wstring chars = charSet;
@@ -162,4 +156,12 @@ std::wstring Font::MakeJapaneseCharSet(bool jisLevel1Kanji) {
 		}
 	}
 	return s;
+}
+
+void Font::UnloadFontFiles() {
+	for (auto& path : loadedFontPaths_) {
+		RemoveFontResourceExW(path.c_str(), FR_PRIVATE | FR_NOT_ENUM, nullptr);
+	}
+
+	loadedFontPaths_.clear();
 }

@@ -192,10 +192,11 @@ void FadeManager::InitializeLogoStyle(EngineContext* ctx) {
 	makeRect(bar_, {1, 1, 1, 1}, {0.5f, 0.5f});
 	bar_->SetRotation(kBarAngle);
 
+	// シーン遷移時のロゴ生成&初期化
 	logo_ = std::make_unique<Sprite>();
 	logo_->Initialize(ctx, kLogoTexture);
 	logo_->SetAnchorPoint({0.0f, 0.0f});
-	logoTexSize_ = logo_->GetSize(); // Initialize直後はテクスチャサイズ
+	logoTexSize_ = logo_->GetSize();
 }
 
 void FadeManager::UpdateLogoOut(float t) {

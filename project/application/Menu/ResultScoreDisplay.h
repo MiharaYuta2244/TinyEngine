@@ -1,12 +1,12 @@
 #pragma once
 #include "EngineContext.h"
+#include "Font.h"
 #include "GameObjects/ResultUI/Animation/SpriteScaleWipeAnimator.h"
 #include "GameTimer.h"
 #include "Sprite.h"
-#include <array>
+#include "TextSprite.h"
 #include <memory>
 #include <string>
-#include <vector>
 
 /// <summary>
 /// リザルトシーンでのスコア表示クラス
@@ -28,21 +28,21 @@ private:
 	std::unique_ptr<TinyEngine::Sprite> CreateSymbolSprite(EngineContext* ctx, const std::string& textureName, const Vector2& pos);
 
 private:
-	// 数字のテクスチャ名
-	std::array<std::string, 10> digitTextureNames_ = {"0.png", "1.png", "2.png", "3.png", "4.png", "5.png", "6.png", "7.png", "8.png", "9.png"};
+	// フォント
+	std::unique_ptr<TinyEngine::Font> font_;
 
-	// クリアタイム表示用
-	std::vector<std::unique_ptr<TinyEngine::Sprite>> timeSprites_;
-	std::unique_ptr<TinyEngine::Sprite> colonSprite_;
+	// 表示テキスト
+	std::unique_ptr<TinyEngine::TextSprite> timeText_;      // クリアタイマー
+	std::unique_ptr<TinyEngine::TextSprite> killCountText_; // キル数
 
-	// キル数表示用
-	std::vector<std::unique_ptr<TinyEngine::Sprite>> killCountSprites_;
-	std::unique_ptr<TinyEngine::Sprite> unitSprite_; // 「体」
+	// フォント設定
+	const std::wstring kFontFamily = L"Dela Gothic One";
+	const int kFontPixelHeight = 80;
+	const std::wstring kCharSet = L"0123456789:-体";
 
-	// 表示位置の基準点
+	// 表示位置(テキストの左上基準)
 	const Vector2 kTimeBasePos = {490.0f, 300.0f};
-	const Vector2 kKillCountBasePos = {530.0f, 400.0f};
-	const float kDigitSpacing = 60.0f; // 数字間のスペース
+	const Vector2 kKillCountBasePos = {490.0f, 400.0f};
 
 	// ワイプアニメーション用
 	std::unique_ptr<SpriteScaleWipeAnimator> timerWipe_;

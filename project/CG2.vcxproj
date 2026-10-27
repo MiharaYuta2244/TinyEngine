@@ -296,7 +296,6 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="application\Menu\MenuList.cpp" />
     <ClCompile Include="application\Scene\PauseScene.cpp" />
     <ClCompile Include="application\Scene\ResultScene.cpp" />
-    <ClCompile Include="application\GameObjects\ResultUI\Text\ResultParamText.cpp" />
     <ClCompile Include="application\GameObjects\ResultUI\Animation\SpriteScaleWipeAnimator.cpp" />
     <ClCompile Include="engine\3d\skybox\SkyboxCommon.cpp" />
     <ClCompile Include="engine\3d\skybox\Skybox.cpp" />
@@ -545,7 +544,6 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="application\GameObjects\StageObjects\Ground\Ground.h" />
     <ClInclude Include="application\Scene\PauseScene.h" />
     <ClInclude Include="application\Scene\ResultScene.h" />
-    <ClInclude Include="application\GameObjects\ResultUI\Text\ResultParamText.h" />
     <ClInclude Include="application\GameObjects\ResultUI\Animation\SpriteScaleWipeAnimator.h" />
     <ClInclude Include="engine\3d\skybox\SkyboxCommon.h" />
     <ClInclude Include="engine\3d\skybox\Skybox.h" />

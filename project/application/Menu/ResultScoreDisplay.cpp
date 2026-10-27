@@ -1,71 +1,49 @@
 #include "ResultScoreDisplay.h"
+#include <algorithm>
 #include <iomanip>
 #include <sstream>
 
 using namespace TinyEngine;
 
 void ResultScoreDisplay::Initialize(EngineContext* ctx, bool isClear, float clearTime, int killCount) {
-
-	// クリアタイム表示の初期化
-	timeSprites_.clear();
-
 	// ワイプアニメ開始タイマー
 	wipeAnimStartTimer_.Initialize(1.0f);
 
+	// フォント生成
+	font_ = std::make_unique<Font>();
+	font_->Initialize(ctx, kFontFamily, kFontPixelHeight, kCharSet);
+
+	// 表示文字列の作成
+	std::wstring timeStr;
+	std::wstring killStr;
+
 	if (isClear) {
-		// クリア時は時間を分:秒に変換して表示
-		int minutes = static_cast<int>(clearTime) / 60;
+		int minutes = std::min(static_cast<int>(clearTime) / 60, 99); // 分は99まで
 		int seconds = static_cast<int>(clearTime) % 60;
 
-		// 分が99を超えないように制限
-		minutes = std::min(minutes, 99);
+		std::wostringstream ts;
+		ts << std::setfill(L'0') << std::setw(2) << minutes << L':' << std::setw(2) << seconds;
+		timeStr = ts.str();
 
-		// MM:SSの形式を作成
-		int m10 = minutes / 10;
-		int m1 = minutes % 10;
-		int s10 = seconds / 10;
-		int s1 = seconds % 10;
-
-		timeSprites_.push_back(CreateDigitSprite(ctx, digitTextureNames_[m10], kTimeBasePos));
-		timeSprites_.push_back(CreateDigitSprite(ctx, digitTextureNames_[m1], {kTimeBasePos.x + kDigitSpacing, kTimeBasePos.y}));
-
-		colonSprite_ = CreateSymbolSprite(ctx, "colon.png", {kTimeBasePos.x + kDigitSpacing * 2, kTimeBasePos.y});
-
-		timeSprites_.push_back(CreateDigitSprite(ctx, digitTextureNames_[s10], {kTimeBasePos.x + kDigitSpacing * 3, kTimeBasePos.y}));
-		timeSprites_.push_back(CreateDigitSprite(ctx, digitTextureNames_[s1], {kTimeBasePos.x + kDigitSpacing * 4, kTimeBasePos.y}));
+		int clamped = std::min(std::max(killCount, 0), 999); // 3桁上限
+		std::wostringstream ks;
+		ks << std::setfill(L'0') << std::setw(3) << clamped << L"体";
+		killStr = ks.str();
 	} else {
-		// ゲームオーバー時は "--:--" を表示
-		timeSprites_.push_back(CreateSymbolSprite(ctx, "hyphen.png", kTimeBasePos));
-		timeSprites_.push_back(CreateSymbolSprite(ctx, "hyphen.png", {kTimeBasePos.x + kDigitSpacing, kTimeBasePos.y}));
-
-		colonSprite_ = CreateSymbolSprite(ctx, "colon.png", {kTimeBasePos.x + kDigitSpacing * 2, kTimeBasePos.y});
-
-		timeSprites_.push_back(CreateSymbolSprite(ctx, "hyphen.png", {kTimeBasePos.x + kDigitSpacing * 3, kTimeBasePos.y}));
-		timeSprites_.push_back(CreateSymbolSprite(ctx, "hyphen.png", {kTimeBasePos.x + kDigitSpacing * 4, kTimeBasePos.y}));
+		// ゲームオーバー時
+		timeStr = L"--:--";
+		killStr = L"-体";
 	}
 
-	// キル数表示の初期化
-	killCountSprites_.clear();
+	// タイム表示
+	timeText_ = std::make_unique<TextSprite>();
+	timeText_->Initialize(ctx, font_.get(), timeStr);
+	timeText_->SetPosition(kTimeBasePos);
 
-	if (isClear) {
-		// 3桁上限に制限
-		int clampedKillCount = std::min(std::max(killCount, 0), 999);
-
-		int k100 = clampedKillCount / 100;
-		int k10 = (clampedKillCount / 10) % 10;
-		int k1 = clampedKillCount % 10;
-
-		killCountSprites_.push_back(CreateDigitSprite(ctx, digitTextureNames_[k100], kKillCountBasePos));
-		killCountSprites_.push_back(CreateDigitSprite(ctx, digitTextureNames_[k10], {kKillCountBasePos.x + kDigitSpacing, kKillCountBasePos.y}));
-		killCountSprites_.push_back(CreateDigitSprite(ctx, digitTextureNames_[k1], {kKillCountBasePos.x + kDigitSpacing * 2, kKillCountBasePos.y}));
-
-		unitSprite_ = CreateSymbolSprite(ctx, "tai.png", {kKillCountBasePos.x + kDigitSpacing * 3, kKillCountBasePos.y});
-
-	} else {
-		// ゲームオーバー時は "-体" を表示
-		killCountSprites_.push_back(CreateSymbolSprite(ctx, "hyphen.png", {kKillCountBasePos.x + kDigitSpacing, kKillCountBasePos.y}));
-		unitSprite_ = CreateSymbolSprite(ctx, "tai.png", {kKillCountBasePos.x + kDigitSpacing * 2, kKillCountBasePos.y});
-	}
+	// キル数表示
+	killCountText_ = std::make_unique<TextSprite>();
+	killCountText_->Initialize(ctx, font_.get(), killStr);
+	killCountText_->SetPosition(kKillCountBasePos);
 
 	// ワイプアニメーションの初期化
 	Vector2 wipeSize = {350.0f, 100.0f};
@@ -81,14 +59,12 @@ void ResultScoreDisplay::Initialize(EngineContext* ctx, bool isClear, float clea
 }
 
 void ResultScoreDisplay::Update(float deltaTime) {
-	// ワイプアニメ開始タイマー更新
+	// ワイプ関連
 	wipeAnimStartTimer_.Update(deltaTime);
 
-	// ワイプの更新
 	if (wipeAnimStartTimer_.IsEnd()) {
 		timerWipe_->Update(deltaTime);
 
-		// キル数ワイプを少し遅れて開始させる
 		if (!isKillCountWipeStarted_) {
 			killCountWipeDelay_ -= deltaTime;
 			if (killCountWipeDelay_ <= 0.0f) {
@@ -100,58 +76,21 @@ void ResultScoreDisplay::Update(float deltaTime) {
 		}
 	}
 
-	// スプライトの更新
-	for (auto& sprite : timeSprites_) {
-		sprite->Update();
-	}
-	if (colonSprite_)
-		colonSprite_->Update();
-
-	for (auto& sprite : killCountSprites_) {
-		sprite->Update();
-	}
-	if (unitSprite_)
-		unitSprite_->Update();
+	// テキストの更新
+	timeText_->Update();
+	killCountText_->Update();
 }
 
 void ResultScoreDisplay::Draw() {
-	// クリアタイマー描画
+	// クリアタイム描画
 	if (timerWipe_->GetBeforeAnimationFinished()) {
-		for (auto& sprite : timeSprites_) {
-			sprite->Draw();
-		}
-		if (colonSprite_) {
-			colonSprite_->Draw();
-		}
+		timeText_->Draw();
 	}
-
-	// タイマー用ワイプ描画
 	timerWipe_->Draw();
 
 	// キル数描画
 	if (killCountWipe_->GetBeforeAnimationFinished()) {
-		for (auto& sprite : killCountSprites_) {
-			sprite->Draw();
-		}
-		if (unitSprite_) {
-			unitSprite_->Draw();
-		}
+		killCountText_->Draw();
 	}
-
-	// スコア用ワイプ描画
 	killCountWipe_->Draw();
-}
-
-std::unique_ptr<Sprite> ResultScoreDisplay::CreateDigitSprite(EngineContext* ctx, const std::string& textureName, const Vector2& pos) {
-	auto sprite = std::make_unique<Sprite>();
-	sprite->Initialize(ctx, textureName);
-	sprite->SetPosition(pos);
-	return sprite;
-}
-
-std::unique_ptr<Sprite> ResultScoreDisplay::CreateSymbolSprite(EngineContext* ctx, const std::string& textureName, const Vector2& pos) {
-	auto sprite = std::make_unique<Sprite>();
-	sprite->Initialize(ctx, textureName);
-	sprite->SetPosition(pos);
-	return sprite;
 }

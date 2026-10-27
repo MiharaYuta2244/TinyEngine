@@ -11,12 +11,16 @@
 /// </summary>
 class ResultScene : public BaseScene {
 public:
+	// 初期化関数
 	void Initialize(const SceneContext& ctx) override;
 
+	// 更新関数
 	void Update() override;
 
+	// 描画関数
 	void Draw() override;
 
+	// 終了時処理
 	void Finalize() override;
 
 private:
