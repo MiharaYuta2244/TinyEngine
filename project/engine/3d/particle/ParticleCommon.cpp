@@ -122,7 +122,7 @@ void ParticleCommon::CreateGraphicsPipeline() {
 	decalBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
 	decalBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
 	decalBlendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
-	decalBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
+	decalBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ONE;
 
 	// RasterizerStateの設定
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
