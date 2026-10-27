@@ -25,5 +25,5 @@ private:
 	float angularSpeed_ = 6.0f; // 回転速度
 	float radius_ = 1.0f;       // 回る半径
 	float height_ = 2.0f;       // 頭上の高さ
-	float starSize_ = 0.4f;     // 星のサイズ
+	float starSize_ = 0.2f;     // 星のサイズ
 };

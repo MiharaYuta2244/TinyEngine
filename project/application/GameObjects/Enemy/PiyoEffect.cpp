@@ -5,11 +5,11 @@
 void PiyoEffect::Initialize(EngineContext* ctx) {
 	for (auto& render : renders_) {
 		render = std::make_unique<ObjectRender>();
-		render->Initialize(ctx, "plane.obj");
+		render->Initialize(ctx, "Star.obj");
 		render->SetTexture("white.png");
 		render->SetEnableLighting(false);
 		render->SetColor({1.0f, 0.9f, 0.2f, 1.0f});
-		render->SetScale({32.0f, 1.0f, 32.0f});
+		render->SetScale({1.0f, 1.0f, 1.0f});
 	}
 }
 
@@ -22,8 +22,8 @@ void PiyoEffect::Update(float deltaTime, const Vector3& enemyPos) {
 		float a = angle_ + step * i;
 
 		Transform t;
-		t.scale = {starSize_, starSize_, 1.0f};
-		t.rotate = {-std::numbers::pi_v<float> / 2.0f, 0.0f, 0.0f}; // Groundと同じく上向き
+		t.scale = {starSize_, 1.0f, starSize_};
+		t.rotate = {0.0f, 0.0f, 0.0f};
 		t.translate = {enemyPos.x + std::cos(a) * radius_, enemyPos.y + height_, enemyPos.z + std::sin(a) * radius_};
 		renders_[i]->Update(t);
 	}
