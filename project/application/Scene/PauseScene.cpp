@@ -11,8 +11,8 @@ void PauseScene::Initialize(const SceneContext& ctx) {
 	menuList_->Initialize(ctx.engineContext);
 
 	// メニュー項目の追加
-	menuList_->AddItem("Resume", "Resume.png", [this]() { ctx_.sceneTransition->PopScene(); });
-	menuList_->AddItem("Title", "Title.png", [this]() { ctx_.sceneTransition->ChangeScene("Title", FadeStyle::Logo); });
+	menuList_->AddItem(L"Resume", [this]() { ctx_.sceneTransition->PopScene(); });
+	menuList_->AddItem(L"Title", [this]() { ctx_.sceneTransition->ChangeScene("Title", FadeStyle::Logo); });
 
 	// 背景スプライト生成&初期化
 	bgSprite_ = std::make_unique<Sprite>();

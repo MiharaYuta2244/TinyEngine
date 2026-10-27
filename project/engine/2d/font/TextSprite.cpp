@@ -70,12 +70,15 @@ void TextSprite::Update() {
 		return;
 	}
 
-	// アンカーポイント分のオフセット
-	Vector2 offset = {-textSize_.x * anchorPoint_.x, -textSize_.y * anchorPoint_.y};
+	// アンカー位置
+	Vector2 pivot = {textSize_.x * anchorPoint_.x, textSize_.y * anchorPoint_.y};
 
+	// 座標変換
+	Matrix4x4 pivotMatrix = MathUtility::MakeTranslateMatrix({-pivot.x, -pivot.y, 0.0f});
 	Matrix4x4 scaleMatrix = MathUtility::MakeScaleMatrix({scale_, scale_, 1.0f});
-	Matrix4x4 translateMatrix = MathUtility::MakeTranslateMatrix({position_.x + offset.x * scale_, position_.y + offset.y * scale_, 0.0f});
-	Matrix4x4 worldMatrix = MathUtility::Multiply(scaleMatrix, translateMatrix);
+	Matrix4x4 rotateMatrix = MathUtility::MakeRollRotateMatrix(rotation_);
+	Matrix4x4 translateMatrix = MathUtility::MakeTranslateMatrix({position_.x, position_.y, 0.0f});
+	Matrix4x4 worldMatrix = MathUtility::Multiply(MathUtility::Multiply(MathUtility::Multiply(pivotMatrix, scaleMatrix), rotateMatrix), translateMatrix);
 
 	// スプライトと同様に正射影で画面座標系に変換する
 	Matrix4x4 viewMatrix = MathUtility::MakeIdentity4x4();

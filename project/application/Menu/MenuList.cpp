@@ -3,8 +3,12 @@
 
 using namespace TinyEngine;
 
-void MenuList::Initialize(EngineContext* ctx) {
+void MenuList::Initialize(EngineContext* ctx, const std::wstring& fontFamily, int fontPixelHeight, bool useKanji) {
 	ctx_ = ctx;
+
+	// フォント生成
+	font_ = std::make_unique<TinyEngine::Font>();
+	font_->Initialize(ctx_, fontFamily, fontPixelHeight, TinyEngine::Font::MakeJapaneseCharSet(useKanji));
 
 	// 決定ボタン入力時のエフェクト
 	decideEffect_ = std::make_unique<DecideEffect>();
@@ -24,29 +28,29 @@ void MenuList::Initialize(EngineContext* ctx) {
 	selectorBg_->SetAnchorPoint({0.5f, 0.0f});
 }
 
-void MenuList::AddItem(const std::string& label, const std::string& texturePath, std::function<void()> onSelect) {
+void MenuList::AddItem(const std::wstring& label, std::function<void()> onSelect) {
 	MenuItem item;
 	item.label = label;
 	item.onSelect = onSelect;
-	item.sprite = std::make_unique<Sprite>();
-	item.sprite->Initialize(ctx_, texturePath);
-	item.originalSize = item.sprite->GetSize();
-	item.sprite->SetAnchorPoint({0.5f, 0.5f});
+	item.text = std::make_unique<TinyEngine::TextSprite>();
+	item.text->Initialize(ctx_, font_.get(), label);
+	item.text->SetAnchorPoint({0.5f, 0.5f});
+	item.text->SetScale(textScale_);
 	items_.push_back(std::move(item));
 }
 
-void MenuList::AddToggleItem(const std::string& label, const std::string& texturePath, bool* target) {
+void MenuList::AddToggleItem(const std::wstring& label, bool* target) {
 	MenuItem item;
 	item.label = label;
 	item.toggleValue = target;
 	item.onSelect = [target]() { *target = !(*target); };
 
-	item.sprite = std::make_unique<Sprite>();
-	item.sprite->Initialize(ctx_, texturePath);
-	item.originalSize = item.sprite->GetSize();
-	item.sprite->SetAnchorPoint({0.5f, 0.5f});
+	item.text = std::make_unique<TinyEngine::TextSprite>();
+	item.text->Initialize(ctx_, font_.get(), label);
+	item.text->SetAnchorPoint({0.5f, 0.5f});
+	item.text->SetScale(textScale_);
 
-	item.checkIcon = std::make_unique<Sprite>();
+	item.checkIcon = std::make_unique<TinyEngine::Sprite>();
 	item.checkIcon->Initialize(ctx_, "Check.png");
 
 	items_.push_back(std::move(item));
@@ -160,17 +164,13 @@ void MenuList::Draw() {
 
 	for (int i = 0; i < items_.size(); i++) {
 		auto& item = items_[i];
-		auto& sprite = item.sprite;
+		auto& text = item.text;
 
-		// 選択中は色を変える
-		if (i == currentIndex_) {
-			sprite->SetColor(selectColor_);
-		} else {
-			sprite->SetColor(normalColor_);
-		}
+		text->SetColor(i == currentIndex_ ? selectColor_ : normalColor_);
 
-		// 左上基準の座標にサイズの半分を足す
-		sprite->SetPosition({startPos_.x + item.originalSize.x * 0.5f, startPos_.y + offsetY_ * i + item.originalSize.y * 0.5f});
+		// 左上基準の座標にテキストサイズの半分を足す
+		Vector2 size = text->GetTextSize();
+		text->SetPosition({startPos_.x + size.x * textScale_ * 0.5f, startPos_.y + offsetY_ * i + size.y * textScale_ * 0.5f});
 
 		// 揺れ
 		float angle = 0.0f;
@@ -178,10 +178,10 @@ void MenuList::Draw() {
 			float t = item.wiggleTimer / wiggleDuration_;
 			angle = wiggleAngle_ * std::sin(t * wiggleCycles_ * 2.0f * std::numbers::pi_v<float>) * (1.0f - t);
 		}
-		sprite->SetRotation(angle);
 
-		sprite->Update();
-		sprite->Draw();
+		text->SetRotation(angle);
+		text->Update();
+		text->Draw();
 
 		// トグル項目ならON/OFF状態のアイコンも描画
 		if (item.toggleValue && item.checkIcon) {

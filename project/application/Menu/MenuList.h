@@ -3,15 +3,15 @@
 #include "AudioManager.h"
 #include "DirectInput.h"
 #include "GameObjects/Effect/DecideEffect.h"
+#include "TextSprite.h"
 #include <Sprite.h>
 #include <functional>
 #include <string>
 
 struct MenuItem {
-	std::string label;
+	std::wstring label;
 	std::function<void()> onSelect;
-	std::unique_ptr<TinyEngine::Sprite> sprite;
-	Vector2 originalSize;
+	std::unique_ptr<TinyEngine::TextSprite> text;
 	bool* toggleValue = nullptr;
 	std::unique_ptr<TinyEngine::Sprite> checkIcon;
 	float wiggleTimer = 999.0f;
@@ -23,13 +23,13 @@ struct MenuItem {
 class MenuList {
 public:
 	// 初期化
-	void Initialize(EngineContext* ctx);
+	void Initialize(EngineContext* ctx, const std::wstring& fontFamily = L"Dela Gothic One", int fontPixelHeight = 48, bool useKanji = false);
 
 	// メニューの追加
-	void AddItem(const std::string& label, const std::string& texturePath, std::function<void()> onSelect);
+	void AddItem(const std::wstring& label, std::function<void()> onSelect);
 
 	// ON/OFFを切り替えるトグル項目
-	void AddToggleItem(const std::string& label, const std::string& texturePath, bool* target);
+	void AddToggleItem(const std::wstring& label, bool* target);
 
 	// 更新処理
 	void Update(DirectInput* input, GamePad* gamePad, float deltaTime);
@@ -48,6 +48,9 @@ public:
 
 private:
 	EngineContext* ctx_ = nullptr;
+
+	// フォント
+	std::unique_ptr<TinyEngine::Font> font_;
 
 	// メニューのリスト
 	std::vector<MenuItem> items_;
@@ -90,4 +93,7 @@ private:
 	float wiggleDuration_ = 0.3f; // 揺れる時間
 	float wiggleAngle_ = 0.25f;   // 最大角度
 	float wiggleCycles_ = 2.0f;   // 往復回数
+
+	// 文字サイズ調整用
+	float textScale_ = 1.0f;
 };

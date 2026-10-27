@@ -14,12 +14,12 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 	// メニューの生成&初期化
 	menu_ = std::make_unique<MenuList>();
 	menu_->Initialize(ctx.engineContext);
-	menu_->AddItem("Play", "Title_Play.png", [this]() { ctx_.sceneTransition->ChangeScene("StageSelect", FadeStyle::Logo); });
-	menu_->AddItem("Option", "Title_Option.png", [this]() {
+	menu_->AddItem(L"Play", [this]() { ctx_.sceneTransition->ChangeScene("StageSelect", FadeStyle::Logo); });
+	menu_->AddItem(L"Option", [this]() {
 		menuState_ = TitleMenuState::Option;
 		optionMenu_->ResetState();
 	});
-	menu_->AddItem("Quit", "Title_Quit.png", [this]() {
+	menu_->AddItem(L"Quit", [this]() {
 		finishTimer_ = std::make_unique<GameTimer>();
 		finishTimer_->Initialize(0.5f);
 	});
@@ -31,14 +31,14 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 	optionMenu_->SetOffsetY(65.0f);
 
 	auto& pfx = commonData_->postEffectSettings;
-	optionMenu_->AddToggleItem("Vignette", "Vignette.png", &pfx.vignetteEnabled);
-	optionMenu_->AddToggleItem("RadialBlur", "RadialBlur.png", &pfx.radialBlurEnabled);
-	optionMenu_->AddToggleItem("Glitch", "Glitch.png", &pfx.glitchEnabled);
-	optionMenu_->AddToggleItem("Scanline", "Glitch.png", &pfx.scanlineEnabled);
-	optionMenu_->AddToggleItem("Fisheye", "Glitch.png", &pfx.barrelDistortionEnabled);
-	optionMenu_->AddToggleItem("Blur", "Glitch.png", &pfx.blurEnabled);
-	optionMenu_->AddToggleItem("DeathEffect", "Glitch.png", &pfx.deathEffectEnabled);
-	optionMenu_->AddItem("Back", "Back.png", [this]() {
+	optionMenu_->AddToggleItem(L"Vignette", &pfx.vignetteEnabled);
+	optionMenu_->AddToggleItem(L"RadialBlur", &pfx.radialBlurEnabled);
+	optionMenu_->AddToggleItem(L"Glitch", &pfx.glitchEnabled);
+	optionMenu_->AddToggleItem(L"Scanline", &pfx.scanlineEnabled);
+	optionMenu_->AddToggleItem(L"Fisheye", &pfx.barrelDistortionEnabled);
+	optionMenu_->AddToggleItem(L"Blur", &pfx.blurEnabled);
+	optionMenu_->AddToggleItem(L"DeathEffect", &pfx.deathEffectEnabled);
+	optionMenu_->AddItem(L"Back", [this]() {
 		menuState_ = TitleMenuState::Main;
 		menu_->ResetState();
 	});

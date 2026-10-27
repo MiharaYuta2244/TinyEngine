@@ -2,11 +2,19 @@
 #include "EngineContext.h"
 #include "Font.h"
 
+/// <summary>
+/// テキスト描画クラス
+/// </summary>
 namespace TinyEngine {
 class TextSprite {
 public:
+	// 初期化関数
 	void Initialize(EngineContext* ctx, Font* font, const std::wstring& text);
+
+	// 更新関数
 	void Update();
+
+	// 描画関数
 	void Draw();
 
 	void SetText(const std::wstring& text);
@@ -16,6 +24,7 @@ public:
 	void SetAnchorPoint(const Vector2& anchor) { anchorPoint_ = anchor; }
 	Vector2 GetTextSize() const { return textSize_; }
 	Vector2& GetPos() { return position_; }
+	void SetRotation(float rotation) { rotation_ = rotation; }
 
 private:
 	struct VertexData {
@@ -44,5 +53,8 @@ private:
 	uint32_t* indexData_ = nullptr;
 	Vector4* materialData_ = nullptr;
 	Matrix4x4* transformData_ = nullptr;
+
+	// 回転（アニメーション用）
+	float rotation_ = 0.0f;
 };
 } // namespace TinyEngine
