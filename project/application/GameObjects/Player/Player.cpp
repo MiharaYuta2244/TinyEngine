@@ -5,6 +5,7 @@
 #include "GameObjects/Enemy/EnemyManager.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
+#include "GameObjects/PlayTestConfig.h"
 
 using namespace TinyEngine;
 
@@ -660,22 +661,30 @@ void Player::AddBloodDecal(Vector3 scale) {
 void Player::Bleeding(float deltaTime) {
 	if (hp_->GetCurrentHP() <= 2 && isMoving_) {
 		if (bleedingTimer_.IsEnd()) {
-			// スケールの最大値と最小値
-			Vector3 bloodScaleMin = {0.5f, 0.5f, 0.5f};
-			Vector3 bloodScaleMax = {1.0f, 1.0f, 1.0f};
+			Vector3 scale;
+			float interval;
 
-			// 生成間隔の最大値と最小値
-			float intervalMin = 0.2f;
-			float intervalmax = 0.5f;
+			if (PlaytestConfig::obscureMode) {
+				// HPに依存しない固定値
+				scale = {0.75f, 0.75f, 0.75f};
+				interval = 0.35f;
+			} else {
+				// スケールの最大値と最小値
+				Vector3 bloodScaleMin = {0.5f, 0.5f, 0.5f};
+				Vector3 bloodScaleMax = {1.0f, 1.0f, 1.0f};
+				
+				// 生成間隔の最大値と最小値
+				float intervalMin = 0.2f;
+				float intervalmax = 0.5f;
 
-			float hp = hp_->GetCurrentHP();
-			float t = hp / 2.0f;
+				float t = hp_->GetCurrentHP() / 2.0f;
+				
+				// スケールの確定
+				Vector3 scale = bloodScaleMax - (bloodScaleMax - bloodScaleMin) * t;
 
-			// スケールの確定
-			Vector3 scale = bloodScaleMax - (bloodScaleMax - bloodScaleMin) * t;
-
-			// 生成間隔の確定
-			float interval = intervalMin + (intervalmax - intervalMin) * t;
+				// 生成間隔の確定
+				float interval = intervalMin + (intervalmax - intervalMin) * t;
+			}
 
 			// 血痕の生成
 			AddBloodDecal(scale);

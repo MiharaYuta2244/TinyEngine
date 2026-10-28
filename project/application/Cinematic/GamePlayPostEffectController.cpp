@@ -1,5 +1,6 @@
 #include "GamePlayPostEffectController.h"
 #include "SceneManager.h"
+#include "GameObjects/PlayTestConfig.h"
 
 using namespace TinyEngine;
 
@@ -31,6 +32,8 @@ void GamePlayPostEffectController::Initialize(const SceneContext& ctx) {
 }
 
 void GamePlayPostEffectController::Update(float deltaTime, float playerHP, bool isPlayerDead) {
+	const bool obscure = PlaytestConfig::obscureMode;
+
 	// グリッチノイズの更新
 	UpdateGlitch(deltaTime);
 
@@ -62,19 +65,20 @@ void GamePlayPostEffectController::Update(float deltaTime, float playerHP, bool 
 			vignette->SetVignetteColor({1.0f, 0.0f, 0.0f, 0.0f});
 		}
 		if (radialBlur) {
+			const bool lowHp = !obscure && playerHP <= 1.0f;
 			RadialBlurParam param;
-			param.blurWidth = playerHP <= 1.0f ? 0.01f : 0.0f;
-			param.numSamples = playerHP <= 1.0f ? 5.0f : 1.0f;
+			param.blurWidth = lowHp ? 0.01f : 0.0f;
+			param.numSamples = lowHp ? 5.0f : 1.0f;
 			radialBlur->SetRadialBlurParam(param);
 		}
 		if (smoothing) {
 			SmoothingParam param;
-			param.radius = (damageBlurTimer_ > 0.0f) ? 2 : 0;
+			param.radius = (!obscure && damageBlurTimer_ > 0.0f) ? 2 : 0;
 			smoothing->SetSmoothingParam(param);
 		}
 		if (gaussian) {
 			GaussianParam param;
-			param.radius = (damageBlurTimer_ > 0.0f) ? 2 : 0;
+			param.radius = (!obscure && damageBlurTimer_ > 0.0f) ? 2 : 0;
 			gaussian->SetGaussianParam(param);
 		}
 		if (deathEffect) {
@@ -108,9 +112,10 @@ void GamePlayPostEffectController::UpdateGlitch(float deltaTime) {
 		}
 	}
 
-	bool shouldGlitch = glitchTimer_ > 0.0f;
+	bool shouldGlitch = !PlaytestConfig::obscureMode && glitchTimer_ > 0.0f;
 	float intensity = shouldGlitch ? 1.0f : 0.0f;
 	auto* glitch = ctx_->engineContext->postEffectPipeline->GetPass(PostEffectType::Glitch);
+
 	if (glitch) {
 		glitch->SetGlitchTime(elapsedTime_);
 		glitch->SetGlitchIntensity(intensity);

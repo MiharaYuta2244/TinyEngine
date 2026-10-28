@@ -5,6 +5,7 @@
 #include "GameObjects/Player/Player.h"
 #include "Gameobjects/Enemy/Behavior/EnemyBehaviorFactory.h"
 #include "Gameobjects/Enemy/Weapon/EnemyBulletManager.h"
+#include "GameObjects/PlayTestConfig.h"
 
 using namespace TinyEngine;
 
@@ -126,16 +127,19 @@ void Enemy::Update(
 		GenerateExMark();
 	}
 
+	const bool obscure = PlaytestConfig::obscureMode;
+	visionCone_->SetIgnoreObstacles(obscure);
+
 	// AIの状態を取得して色を変える
 	if (ai_->GetState() == EnemyAI::State::Vigilance) {
 		// 警戒状態なら赤色
 		visionCone_->SetColor({1.0f, 0.0f, 0.0f, 0.3f});
 		// 射撃ゲージの進行度を渡す
-		visionCone_->SetChargeProgress(ai_->GetShotProgress());
+		visionCone_->SetChargeProgress(obscure ? 0.0f : ai_->GetShotProgress());
 	} else if (ai_->GetState() == EnemyAI::State::Hold) {
 		// 拘束状態も射撃するのでプログレスを渡す
 		visionCone_->SetColor({1.0f, 0.5f, 0.0f, 0.3f});
-		visionCone_->SetChargeProgress(ai_->GetShotProgress());
+		visionCone_->SetChargeProgress(obscure ? 0.0f : ai_->GetShotProgress());
 	} else {
 		// 通常状態なら緑色
 		visionCone_->SetColor({0.0f, 1.0f, 0.0f, 0.3f});

@@ -391,6 +391,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\Fade\FadeStyle.h" />
+    <ClInclude Include="application\GameObjects\PlayTestConfig.h" />
     <ClInclude Include="engine\Animation\AnimationLibrary.h" />
     <ClInclude Include="application\Editor\EditorCommand.h" />
     <ClInclude Include="application\Editor\SpawnRequest.h" />

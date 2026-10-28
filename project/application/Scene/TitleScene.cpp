@@ -1,5 +1,6 @@
 #include "TitleScene.h"
 #include "SceneManager.h"
+#include "GameObjects/PlaytestConfig.h"
 
 using namespace TinyEngine;
 
@@ -19,6 +20,7 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 		menuState_ = TitleMenuState::Option;
 		optionMenu_->ResetState();
 	});
+	menu_->AddToggleItem(L"Obscure", &PlaytestConfig::obscureMode);
 	menu_->AddItem(L"Quit", [this]() {
 		finishTimer_ = std::make_unique<GameTimer>();
 		finishTimer_->Initialize(0.5f);

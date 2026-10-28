@@ -52,6 +52,7 @@ public:
 	void SetColor(const Vector4& color) { material_.color = color; }
 	void SetTransform(const Transform& transform) { transform_ = transform; }
 	void SetChargeProgress(float progress) { material_.chargeProgress = progress; }
+	void SetIgnoreObstacles(bool ignore) { ignoreObstacles_ = ignore; }
 
 	// Getter
 	Transform& GetTransform() { return transform_; }
@@ -100,6 +101,9 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource_;
 	CameraForGPU* cameraData_ = nullptr;
+
+	// 交差判定フラグ
+	bool ignoreObstacles_ = false;
 };
 
 } // namespace TinyEngine

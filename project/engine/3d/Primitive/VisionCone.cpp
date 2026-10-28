@@ -161,36 +161,38 @@ void VisionCone::Update(const std::list<std::unique_ptr<Wall>>& walls, const std
 
 		float closestT = 1.0f;
 
-		// 全ての壁に対して交差判定を行う
-		for (const auto& wall : walls) {
-			float t = 0.0f;
-			if (Collision::Intersect(ray, wall->GetCollision(), t)) {
-				// 最も手前にある壁の衝突地点を記録
-				if (t < closestT) {
-					closestT = t;
-				}
-			}
-		}
-
-		// 全てのドアに対して交差判定を行う
-		for (const auto& door : doors) {
-			if (!door->GetIsOpen()) {
+		if (!ignoreObstacles_) {
+			// 全ての壁に対して交差判定を行う
+			for (const auto& wall : walls) {
 				float t = 0.0f;
-				if (Collision::Intersect(ray, door->GetCollision(), t)) {
+				if (Collision::Intersect(ray, wall->GetCollision(), t)) {
+					// 最も手前にある壁の衝突地点を記録
 					if (t < closestT) {
 						closestT = t;
 					}
 				}
 			}
-		}
 
-		// 全てのガラスに対して交差判定を行う
-		for (const auto& glass : glasses) {
-			float t = 0.0f;
-			if (Collision::Intersect(ray, glass->GetCollision(), t)) {
-				// 最も手前にある壁の衝突地点を記録
-				if (t < closestT) {
-					closestT = t;
+			// 全てのドアに対して交差判定を行う
+			for (const auto& door : doors) {
+				if (!door->GetIsOpen()) {
+					float t = 0.0f;
+					if (Collision::Intersect(ray, door->GetCollision(), t)) {
+						if (t < closestT) {
+							closestT = t;
+						}
+					}
+				}
+			}
+
+			// 全てのガラスに対して交差判定を行う
+			for (const auto& glass : glasses) {
+				float t = 0.0f;
+				if (Collision::Intersect(ray, glass->GetCollision(), t)) {
+					// 最も手前にある壁の衝突地点を記録
+					if (t < closestT) {
+						closestT = t;
+					}
 				}
 			}
 		}
