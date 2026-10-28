@@ -23,6 +23,7 @@ void EnemyManager::Initialize(EngineContext* ctx, DecalManager* bloodDecalManage
 	audioManager_->LoadWave("Cymbal", "resources/sounds/se/Cymbal.mp3");
 	audioManager_->LoadWave("Snare", "resources/sounds/se/Snare.mp3");
 	audioManager_->LoadWave("Shot", "resources/sounds/se/Shot.mp3");
+	audioManager_->LoadWave("Piyo", "resources/sounds/se/PiyoPiyo.mp3");
 
 	// JSON読み込み
 	jsonPath_ = stagePath + "Enemies.json";

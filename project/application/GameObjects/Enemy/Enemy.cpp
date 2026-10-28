@@ -32,6 +32,7 @@ void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalMan
 	// アニメーターの初期化
 	animator_.Initialize(render_->GetObject3d());
 
+	// 銃モデルの生成&初期化
 	renderGun_ = std::make_unique<ObjectRender>();
 	renderGun_->Initialize(ctx, "Cube.obj");
 	renderGun_->SetTransform(transform_);

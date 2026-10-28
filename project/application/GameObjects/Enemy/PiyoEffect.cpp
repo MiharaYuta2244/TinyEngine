@@ -3,6 +3,7 @@
 #include <numbers>
 
 void PiyoEffect::Initialize(EngineContext* ctx) {
+	// ピヨピヨモデル生成&初期化
 	for (auto& render : renders_) {
 		render = std::make_unique<ObjectRender>();
 		render->Initialize(ctx, "Star.obj");
