@@ -680,10 +680,10 @@ void Player::Bleeding(float deltaTime) {
 				float t = hp_->GetCurrentHP() / 2.0f;
 				
 				// スケールの確定
-				Vector3 scale = bloodScaleMax - (bloodScaleMax - bloodScaleMin) * t;
+				scale = bloodScaleMax - (bloodScaleMax - bloodScaleMin) * t;
 
 				// 生成間隔の確定
-				float interval = intervalMin + (intervalmax - intervalMin) * t;
+				interval = intervalMin + (intervalmax - intervalMin) * t;
 			}
 
 			// 血痕の生成
