@@ -3,9 +3,9 @@
 #include "GameObjects/Effect/EffectGenerator.h"
 #include "GameObjects/Enemy/Enemy.h"
 #include "GameObjects/Enemy/EnemyManager.h"
+#include "GameObjects/PlayTestConfig.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
-#include "GameObjects/PlayTestConfig.h"
 
 using namespace TinyEngine;
 
@@ -548,9 +548,7 @@ void Player::Draw() {
 	render_->Draw();
 }
 
-bool Player::IsDead() const {
-	return hp_->IsDead();
-}
+bool Player::IsDead() const { return hp_->IsDead(); }
 
 void Player::Damage(float value) {
 	if (hp_->GetIsInvincible())
@@ -661,8 +659,8 @@ void Player::AddBloodDecal(Vector3 scale) {
 void Player::Bleeding(float deltaTime) {
 	if (hp_->GetCurrentHP() <= 2 && isMoving_) {
 		if (bleedingTimer_.IsEnd()) {
-			Vector3 scale;
-			float interval;
+			Vector3 scale = {0.0f, 0.0f, 0.0f};
+			float interval = 0.0f;
 
 			if (PlaytestConfig::obscureMode) {
 				// HPに依存しない固定値
@@ -672,13 +670,13 @@ void Player::Bleeding(float deltaTime) {
 				// スケールの最大値と最小値
 				Vector3 bloodScaleMin = {0.5f, 0.5f, 0.5f};
 				Vector3 bloodScaleMax = {1.0f, 1.0f, 1.0f};
-				
+
 				// 生成間隔の最大値と最小値
 				float intervalMin = 0.2f;
 				float intervalmax = 0.5f;
 
 				float t = hp_->GetCurrentHP() / 2.0f;
-				
+
 				// スケールの確定
 				scale = bloodScaleMax - (bloodScaleMax - bloodScaleMin) * t;
 

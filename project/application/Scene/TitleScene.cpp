@@ -25,6 +25,7 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 		finishTimer_ = std::make_unique<GameTimer>();
 		finishTimer_->Initialize(0.5f);
 	});
+	menu_->SetStartPos({520.0f, 350.0f});
 
 	// オプションメニューの生成
 	optionMenu_ = std::make_unique<MenuList>();
