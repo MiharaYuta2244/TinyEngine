@@ -1,6 +1,6 @@
 #include "TitleScene.h"
-#include "SceneManager.h"
 #include "GameObjects/PlaytestConfig.h"
+#include "SceneManager.h"
 
 using namespace TinyEngine;
 
@@ -20,7 +20,6 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 		menuState_ = TitleMenuState::Option;
 		optionMenu_->ResetState();
 	});
-	menu_->AddToggleItem(L"Obscure", &PlaytestConfig::obscureMode);
 	menu_->AddItem(L"Quit", [this]() {
 		finishTimer_ = std::make_unique<GameTimer>();
 		finishTimer_->Initialize(0.5f);
@@ -30,8 +29,9 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 	// オプションメニューの生成
 	optionMenu_ = std::make_unique<MenuList>();
 	optionMenu_->Initialize(ctx.engineContext);
-	optionMenu_->SetStartPos(titleLogoPos_ + Vector2{400.0f, 130.0f});
+	optionMenu_->SetStartPos(titleLogoPos_ + Vector2{400.0f, 150.0f});
 	optionMenu_->SetOffsetY(65.0f);
+	optionMenu_->SetVisibleCount(6); // 6項目まで表示
 
 	auto& pfx = commonData_->postEffectSettings;
 	optionMenu_->AddToggleItem(L"Vignette", &pfx.vignetteEnabled);

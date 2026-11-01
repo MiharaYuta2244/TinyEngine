@@ -46,6 +46,25 @@ public:
 	// 決定ロック状態をリセットする
 	void ResetState() { isDecided_ = false; }
 
+	// 同時に表示する項目数(0ならスクロールなし・全表示)
+	void SetVisibleCount(int count) { maxVisibleCount_ = count; }
+
+private:
+	// スクロール更新
+	void UpdateScroll(float deltaTime);
+
+	// スクロールバーの更新
+	void UpdateScrollBar();
+
+	// スクロールバーを表示するか
+	bool HasScrollBar() const { return maxVisibleCount_ > 0 && static_cast<int>(items_.size()) > maxVisibleCount_; }
+
+	// 項目iのY座標(スクロール反映済み)
+	float GetRowY(int index) const { return startPos_.y + offsetY_ * (static_cast<float>(index) - scrollOffset_); }
+
+	// 項目iが表示範囲内か
+	bool IsRowVisible(int index) const;
+
 private:
 	EngineContext* ctx_ = nullptr;
 
@@ -96,4 +115,19 @@ private:
 
 	// 文字サイズ調整用
 	float textScale_ = 1.0f;
+
+	// スクロール関連
+	int maxVisibleCount_ = 0;   // 最大表示数
+	int scrollTop_ = 0;         // 先頭に表示する項目(目標値)
+	float scrollOffset_ = 0.0f; // 現在のスクロール量(項目単位・補間後)
+	float scrollSpeed_ = 24.0f; // スクロール追従速度
+
+	// スクロールバー
+	std::unique_ptr<TinyEngine::Sprite> scrollTrack_;      // 背景
+	std::unique_ptr<TinyEngine::Sprite> scrollThumb_;      // つまみ
+	float scrollBarOffsetX_ = 520.0f;                      // startPos_.xからの横オフセット
+	float scrollBarWidth_ = 8.0f;                          // 幅
+	float scrollBarMinThumbHeight_ = 24.0f;                // つまみの最小の長さ
+	Vector4 scrollTrackColor_ = {1.0f, 1.0f, 1.0f, 0.15f}; // 背景色
+	Vector4 scrollThumbColor_ = {1.0f, 0.7f, 0.1f, 1.0f};  // つまみの色
 };

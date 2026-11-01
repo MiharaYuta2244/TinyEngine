@@ -26,6 +26,17 @@ void MenuList::Initialize(EngineContext* ctx, const std::wstring& fontFamily, in
 	selectorBg_->SetColor({1.0f, 1.0f, 1.0f, 0.2f});
 	selectorBg_->SetSize(selectorBgSize_);
 	selectorBg_->SetAnchorPoint({0.5f, 0.0f});
+
+	// スクロールバーの生成&初期化
+	scrollTrack_ = std::make_unique<Sprite>();
+	scrollTrack_->Initialize(ctx_, "white.png");
+	scrollTrack_->SetColor(scrollTrackColor_);
+	scrollTrack_->SetAnchorPoint({0.0f, 0.0f});
+
+	scrollThumb_ = std::make_unique<Sprite>();
+	scrollThumb_->Initialize(ctx_, "white.png");
+	scrollThumb_->SetColor(scrollThumbColor_);
+	scrollThumb_->SetAnchorPoint({0.0f, 0.0f});
 }
 
 void MenuList::AddItem(const std::wstring& label, std::function<void()> onSelect) {
@@ -140,16 +151,19 @@ void MenuList::Update(DirectInput* input, GamePad* gamePad, float deltaTime) {
 		}
 	}
 
+	// スクロール更新
+	UpdateScroll(deltaTime);
+	UpdateScrollBar();
+
 	// 背景スプライトの座標を選択中アイテムに合わせる
-	selectorBg_->SetPosition({startPos_.x, startPos_.y + offsetY_ * currentIndex_});
+	selectorBg_->SetPosition({startPos_.x, GetRowY(currentIndex_)});
 	selectorBg_->Update();
 
 	// 決定ボタン入力時エフェクト更新
 	decideEffect_->Update(deltaTime);
 
 	// 選択中メニューの座標をエフェクトに適用
-	Vector2 effectPos = {startPos_.x, startPos_.y + offsetY_ * currentIndex_};
-	decideEffect_->SetPos(effectPos);
+	decideEffect_->SetPos({startPos_.x, GetRowY(currentIndex_)});
 
 	// 音声更新
 	audioManager_->Update();
@@ -163,6 +177,11 @@ void MenuList::Draw() {
 	decideEffect_->Draw();
 
 	for (int i = 0; i < items_.size(); i++) {
+		// 表示範囲外は描画しない
+		if (!IsRowVisible(i)) {
+			continue;
+		}
+
 		auto& item = items_[i];
 		auto& text = item.text;
 
@@ -170,7 +189,7 @@ void MenuList::Draw() {
 
 		// 左上基準の座標にテキストサイズの半分を足す
 		Vector2 size = text->GetTextSize();
-		text->SetPosition({startPos_.x + size.x * textScale_ * 0.5f, startPos_.y + offsetY_ * i + size.y * textScale_ * 0.5f});
+		text->SetPosition({startPos_.x + size.x * textScale_ * 0.5f, GetRowY(i) + size.y * textScale_ * 0.5f});
 
 		// 揺れ
 		float angle = 0.0f;
@@ -187,9 +206,79 @@ void MenuList::Draw() {
 		if (item.toggleValue && item.checkIcon) {
 			bool isOn = *item.toggleValue;
 			item.checkIcon->SetColor(isOn ? Vector4{0.3f, 1.0f, 0.3f, 1.0f} : Vector4{0.4f, 0.4f, 0.4f, 0.5f});
-			item.checkIcon->SetPosition({startPos_.x + checkIconOffsetX_, startPos_.y + offsetY_ * i});
+			item.checkIcon->SetPosition({startPos_.x + checkIconOffsetX_, GetRowY(i)});
 			item.checkIcon->Update();
 			item.checkIcon->Draw();
 		}
 	}
+
+	// スクロールバー
+	if (HasScrollBar()) {
+		scrollTrack_->Draw();
+		scrollThumb_->Draw();
+	}
+}
+
+bool MenuList::IsRowVisible(int index) const {
+	if (maxVisibleCount_ <= 0) {
+		return true;
+	}
+
+	const float row = static_cast<float>(index) - scrollOffset_;
+	const float eps = 0.01f;
+
+	return row >= -eps && row <= static_cast<float>(maxVisibleCount_ - 1) + eps;
+}
+
+void MenuList::UpdateScroll(float deltaTime) {
+	if (maxVisibleCount_ <= 0) {
+		scrollOffset_ = 0.0f;
+		return;
+	}
+
+	const int count = static_cast<int>(items_.size());
+	const int maxTop = std::max(0, count - maxVisibleCount_);
+
+	// 選択項目が範囲内に収まるように先頭を動かす
+	if (currentIndex_ < scrollTop_) {
+		scrollTop_ = currentIndex_;
+	} else if (currentIndex_ >= scrollTop_ + maxVisibleCount_) {
+		scrollTop_ = currentIndex_ - maxVisibleCount_ + 1;
+	}
+
+	scrollTop_ = std::clamp(scrollTop_, 0, maxTop);
+
+	// 追従
+	const float t = std::min(1.0f, scrollSpeed_ * deltaTime);
+	scrollOffset_ += (static_cast<float>(scrollTop_) - scrollOffset_) * t;
+}
+
+void MenuList::UpdateScrollBar() {
+	if (!HasScrollBar()) {
+		return;
+	}
+
+	const int count = static_cast<int>(items_.size());
+	const int maxTop = count - maxVisibleCount_;
+
+	// トラックは表示範囲いっぱいの高さ
+	const float trackX = startPos_.x + scrollBarOffsetX_;
+	const float trackY = startPos_.y;
+	const float trackH = offsetY_ * static_cast<float>(maxVisibleCount_) - 10.0f;
+
+	// つまみの長さは表示数/全項目数の割合
+	const float ratio = static_cast<float>(maxVisibleCount_) / static_cast<float>(count);
+	const float thumbH = std::max(trackH * ratio, scrollBarMinThumbHeight_);
+
+	// つまみの位置は補間後のスクロール量に連動
+	const float progress = std::clamp(scrollOffset_ / static_cast<float>(maxTop), 0.0f, 1.0f);
+	const float thumbY = trackY + (trackH - thumbH) * progress;
+
+	scrollTrack_->SetPosition({trackX, trackY});
+	scrollTrack_->SetSize({scrollBarWidth_, trackH});
+	scrollTrack_->Update();
+
+	scrollThumb_->SetPosition({trackX, thumbY});
+	scrollThumb_->SetSize({scrollBarWidth_, thumbH});
+	scrollThumb_->Update();
 }
