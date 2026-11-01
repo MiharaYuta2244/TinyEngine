@@ -1,6 +1,6 @@
 #include "GamePlayPostEffectController.h"
-#include "SceneManager.h"
 #include "GameObjects/PlayTestConfig.h"
+#include "SceneManager.h"
 
 using namespace TinyEngine;
 
@@ -10,12 +10,14 @@ void GamePlayPostEffectController::Initialize(const SceneContext& ctx) {
 
 	// シーンで使うエフェクトの宣言
 	ctx_->engineContext->postEffectPipeline->SetEffects({
-	    PostEffectType::Vignette,    // ビネット
-	    PostEffectType::Glitch,      // グリッチ
-	    PostEffectType::DeathEffect, // 死亡時エフェクト
-	    PostEffectType::Smoothing,   // スムージング
-	    PostEffectType::Gaussian,    // ガウシアン
-	    PostEffectType::RadialBlur,  // ラディアルブラー
+	    PostEffectType::Vignette,         // ビネット
+	    PostEffectType::Glitch,           // グリッチ
+	    PostEffectType::DeathEffect,      // 死亡時エフェクト
+	    PostEffectType::Smoothing,        // スムージング
+	    PostEffectType::Gaussian,         // ガウシアン
+	    PostEffectType::RadialBlur,       // ラディアルブラー
+	    PostEffectType::Scanline,         // 走査線
+	    PostEffectType::BarrelDistortion, // 歪み
 	});
 
 	// ビネットの初期設定
@@ -29,6 +31,11 @@ void GamePlayPostEffectController::Initialize(const SceneContext& ctx) {
 	damageBlurTimer_ = 0.0f;
 	isDeathAnimStarted_ = false;
 	isAnimPlaying_ = false;
+	barrelDistortionParam_.strength = 0.05f;
+	scanlineParam_.scanlineCount = 150.0f;
+	scanlineParam_.intensity = 0.7f;
+	scanlineParam_.speed = 5.0f;
+	scanlineParam_.time = 0.0f;
 }
 
 void GamePlayPostEffectController::Update(float deltaTime, float playerHP, bool isPlayerDead) {
@@ -36,6 +43,17 @@ void GamePlayPostEffectController::Update(float deltaTime, float playerHP, bool 
 
 	// グリッチノイズの更新
 	UpdateGlitch(deltaTime);
+
+	// 走査の更新
+	scanlineParam_.time += deltaTime;
+	if (auto* scanline = ctx_->engineContext->postEffectPipeline->GetPass(PostEffectType::Scanline)) {
+		scanline->SetScanlineParam(scanlineParam_);
+	}
+
+	// 歪みの更新
+	if (auto* barrel = ctx_->engineContext->postEffectPipeline->GetPass(PostEffectType::BarrelDistortion)) {
+		barrel->SetFisheyeParam(barrelDistortionParam_);
+	}
 
 	// ダメージブラータイマーの減算
 	if (damageBlurTimer_ > 0.0f) {

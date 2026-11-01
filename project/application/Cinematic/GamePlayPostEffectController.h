@@ -1,6 +1,7 @@
 #pragma once
 #include "AnimationBundle.h"
 #include "Matrix4x4.h"
+#include "PostEffectTypes.h"
 
 // シーンコンテキスト等の前方宣言
 struct SceneContext;
@@ -47,4 +48,7 @@ private:
 	AnimationBundle<float> numSamplesAnim_;
 	bool isDeathAnimStarted_ = false;
 	bool isAnimPlaying_ = false;
+
+	ScanlineParam scanlineParam_;                 // 走査線
+	BarrelDistortionParam barrelDistortionParam_; // 歪み
 };
