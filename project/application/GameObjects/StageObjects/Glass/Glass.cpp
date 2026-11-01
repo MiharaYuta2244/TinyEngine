@@ -13,6 +13,7 @@ void Glass::Initialize(EngineContext* ctx, const Transform& transform, TinyEngin
 	render_ = std::make_unique<ObjectRender>();
 	render_->Initialize(ctx, "Cube.obj");
 	render_->SetColor({1.0f, 1.0f, 1.0f, 0.2f});
+	render_->SetEnableLighting(false);
 
 	glassesDecalManager_ = decalManager;
 }

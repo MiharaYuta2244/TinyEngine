@@ -4,13 +4,13 @@
 #include "DecalManager.h"
 #include "DirectInput.h"
 #include "GameObjects/IGameObject.h"
+#include "GameObjects/Item/Soap.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "GameTimer.h"
 #include "OBB.h"
 #include "Particle.h"
 #include "PlayerHealth.h"
 #include "PlayerMove.h"
-#include "GameObjects/Item/Soap.h"
 #include "Utility/RumbleManager.h"
 
 class EnemyManager;
@@ -215,7 +215,7 @@ private:
 	// ポイントライト調整用パラメータ
 	float pointLightHeightOffset_ = 2.0f;                // プレイヤー中心からの高さ
 	Vector4 pointLightColor_ = {1.0f, 1.0f, 1.0f, 1.0f}; // ライトの色
-	float pointLightIntensity_ = 1.0f;                   // 輝度
+	float pointLightIntensity_ = 0.0f;                   // 輝度
 	float pointLightRadius_ = 7.0f;                      // 影響半径
 	float pointLightDecay_ = 0.7f;                       // 減衰率
 
