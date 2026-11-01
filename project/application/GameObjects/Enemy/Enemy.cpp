@@ -413,6 +413,11 @@ void Enemy::StartDown(float duration) {
 	// 吹き飛び中などの速度も止めておく
 	velocity_ = {0.0f, 0.0f, 0.0f};
 
+	// ダウン開始時にピヨピヨSEを再生
+	if (audioManager_) {
+		audioManager_->PlaySE("Piyo", 0.3f);
+	}
+
 	// ピヨピヨ演出の開始
 	piyoEffect_ = std::make_unique<PiyoEffect>();
 	piyoEffect_->Initialize(ctx_);
