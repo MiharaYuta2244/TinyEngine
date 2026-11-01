@@ -34,9 +34,6 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 	hp_ = std::make_unique<PlayerHealth>();
 	hp_->Initialize(maxHP_);
 
-	// パーティクル生成タイマー初期化
-	particleGenerateTimer_.Initialize(0.2f);
-
 	// 血痕の管理インスタンスポインタ
 	bloodDecalManager_ = bloodDecalManager;
 
@@ -468,31 +465,6 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		move_->ResetVelocity();
 	}
 
-	// パーティクルの生成タイマー更新
-	if (isMoving_) {
-		particleGenerateTimer_.Update(deltaTime);
-	}
-
-	// パーティクルの生成
-	if (particleGenerateTimer_.IsEnd() && !hp_->IsDead()) {
-		auto particle = std::make_unique<Particle>();
-		particle->Initialize(ctx_, render_->GetBonePos(L"ボーン.022"), "Dust.png", std::make_unique<DustStepModule>(), nullptr, TinyEngine::ParticleMeshType::Square);
-		particle->SetEmitMode(false, 0.1f);
-		particle->SetEmitterParam(1, 0.3f);
-		dustParticle_.push_back(std::move(particle));
-
-		// タイマーの再設定
-		particleGenerateTimer_.Initialize(0.2f);
-	}
-
-	// パーティクルの更新
-	for (auto& particle : dustParticle_) {
-		particle->Update();
-	}
-
-	// パーティクル削除処理
-	std::erase_if(dustParticle_, [this](const std::unique_ptr<TinyEngine::Particle>& p) { return p->IsFinished(); });
-
 	// ヒットエフェクトの更新
 	for (auto& particle : hitEffects_) {
 		particle->Update();
@@ -529,11 +501,6 @@ void Player::PostUpdate() {
 }
 
 void Player::Draw() {
-	// パーティクルの描画
-	for (auto& particle : dustParticle_) {
-		particle->Draw();
-	}
-
 	// ヒットエフェクトパーティクルの描画
 	for (auto& particle : hitEffects_) {
 		particle->Draw();
@@ -653,7 +620,7 @@ void Player::AddBloodDecal(Vector3 scale) {
 	finalPos.x = basePos.x;
 	finalPos.y = 0.1f;
 	finalPos.z = basePos.z;
-	bloodDecalManager_->AddDecal("Blood.png", finalPos, {std::numbers::pi_v<float> / 2.0f, 0, 0}, scale, ColorPalette::NeonRed(), 4.0f, 2.0f);
+	bloodDecalManager_->AddDecal("Blood.png", finalPos, {std::numbers::pi_v<float> / 2.0f, 0, 0}, scale, ColorPalette::Orange(), 4.0f, 2.0f);
 }
 
 void Player::Bleeding(float deltaTime) {
@@ -759,7 +726,7 @@ void Player::UpdateThrowPreview(float deltaTime) {
 	if (isSoapTarget) {
 		pos = heldSoap_->GetPos();
 		power = soapThrowPower_;
-		friction = 1.0f; // Soapクラスの摩擦係数（friction_）
+		friction = 1.0f; // Soapクラスの摩擦係数
 	} else if (isEnemyTarget) {
 		pos = heldEnemy_->GetPos();
 		power = heldEnemy_->GetKnockBackPower();

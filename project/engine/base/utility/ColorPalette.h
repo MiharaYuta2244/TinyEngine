@@ -14,6 +14,14 @@ public:
 	static constexpr Vector4 Yellow() { return {1, 1, 0, 1}; }
 	static constexpr Vector4 Cyan() { return {0, 1, 1, 1}; }
 	static constexpr Vector4 Magenta() { return {1, 0, 1, 1}; }
+	static constexpr Vector4 Orange() { return {1.0f, 0.1568f, 0.0f, 1}; }
+	static constexpr Vector4 Purple() { return {0.5f, 0.0f, 1.0f, 1}; }
+	static constexpr Vector4 Pink() { return {1.0f, 0.4f, 0.7f, 1}; }
+	static constexpr Vector4 Brown() { return {0.6f, 0.3f, 0.1f, 1}; }
+	static constexpr Vector4 Lime() { return {0.7f, 1.0f, 0.0f, 1}; }
+	static constexpr Vector4 Navy() { return {0.0f, 0.1f, 0.4f, 1}; }
+	static constexpr Vector4 SkyBlue() { return {0.4f, 0.8f, 1.0f, 1}; }
+	static constexpr Vector4 Violet() { return {0.6f, 0.3f, 1.0f, 1}; }
 
 	// -----------------------------
 	// グレー系

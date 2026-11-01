@@ -213,7 +213,7 @@ void AudioManager::PlaySE(const std::string& tag, float volume) {
 	buf.AudioBytes = static_cast<UINT32>(data.buffer.size());
 	buf.Flags = XAUDIO2_END_OF_STREAM;
 
-	// ★SEはループしない (LoopCount = 0)
+	// SEはループしない (LoopCount = 0)
 	buf.LoopCount = 0;
 
 	// 再生
