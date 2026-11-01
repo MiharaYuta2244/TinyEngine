@@ -35,6 +35,7 @@ void ResultScene::Initialize(const SceneContext& ctx) {
 	audioManager_->LoadWave("ResultBGM", "resources/sounds/bgm/ResultScene.mp3");
 	audioManager_->LoadWave("Select", "resources/sounds/se/Select.mp3");
 	audioManager_->LoadWave("Decide", "resources/sounds/se/Decide.mp3");
+	audioManager_->LoadWave("Error", "resources/sounds/se/Error.mp3");
 	audioManager_->PlayBGM("ResultBGM");
 
 	// フォントの生成&初期化
@@ -62,6 +63,10 @@ void ResultScene::Initialize(const SceneContext& ctx) {
 	buttons_->Add(ctx.engineContext, font_.get(), L"次のステージ", {1030.0f, 580.0f}, [this]() {
 		ctx_.sceneTransition->ChangeScene("Stage" + std::to_string(commonData_->currentStageNo + 1), FadeStyle::Logo);
 	});
+
+	// 「次のステージ」ボタンはステージをクリアしたときのみ押せるようにする
+	const bool canGoNext = commonData_->isClear && commonData_->currentStageNo < CommonData::kStageCount;
+	buttons_->SetEnabled(2, canGoNext);
 }
 
 void ResultScene::Update() {

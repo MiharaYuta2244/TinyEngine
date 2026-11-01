@@ -27,6 +27,9 @@ public:
 	// ImGui描画
 	void DrawImGui();
 
+	// ボタンを押せるかどうかの切り替え
+	void SetEnabled(int index, bool enabled);
+
 private:
 	// 今フレームの選択移動量
 	int PollMove(DirectInput* input, GamePad* gamePad);

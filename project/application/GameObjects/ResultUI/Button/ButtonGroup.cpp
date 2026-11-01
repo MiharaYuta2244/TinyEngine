@@ -26,18 +26,39 @@ void ButtonGroup::Update(DirectInput* input, GamePad* gamePad) {
 		const int count = static_cast<int>(buttons_.size());
 
 		if (int move = PollMove(input, gamePad); move != 0) {
-			selectedIndex_ = (selectedIndex_ + move + count) % count;
-			if (audio_) {
-				audio_->PlaySE("Select", 0.5f);
+			// 無効なボタンを飛ばして次の有効なボタンへ
+			int next = selectedIndex_;
+			for (int i = 0; i < count; ++i) {
+				next = (next + move + count) % count;
+
+				if (buttons_[next].IsEnabled()) {
+					break;
+				}
+			}
+
+			if (next != selectedIndex_) {
+				selectedIndex_ = next;
+
+				if (audio_) {
+					audio_->PlaySE("Select", 0.5f);
+				}
 			}
 		}
 
 		if (PollDecide(input, gamePad)) {
-			isDecided_ = true;
-			if (audio_) {
-				audio_->PlaySE("Decide", 0.5f);
+			if (!buttons_[selectedIndex_].IsEnabled()) {
+				if (audio_) {
+					audio_->PlaySE("Error", 0.5f);
+				}
+			} else {
+				isDecided_ = true;
+
+				if (audio_) {
+					audio_->PlaySE("Decide", 0.5f);
+				}
+
+				buttons_[selectedIndex_].Execute();
 			}
-			buttons_[selectedIndex_].Execute();
 		}
 	}
 
@@ -62,6 +83,14 @@ void ButtonGroup::DrawImGui() {
 		ImGui::TreePop();
 	}
 #endif
+}
+
+void ButtonGroup::SetEnabled(int index, bool enabled) {
+	if (index < 0 || index >= static_cast<int>(buttons_.size())) {
+		return;
+	}
+
+	buttons_[index].SetEnabled(enabled);
 }
 
 int ButtonGroup::PollMove(DirectInput* input, GamePad* gamePad) {

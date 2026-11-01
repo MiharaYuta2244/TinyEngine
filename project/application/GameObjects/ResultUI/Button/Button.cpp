@@ -3,6 +3,7 @@
 namespace {
 const Vector4 kNormalColor = {1.0f, 1.0f, 1.0f, 1.0f};
 const Vector4 kSelectedColor = {1.0f, 1.0f, 0.0f, 1.0f};
+const Vector4 kDisabledColor = {0.4f, 0.4f, 0.4f, 0.6f};
 constexpr float kNormalScale = 1.0f;
 constexpr float kSelectedScale = 1.2f;
 } // namespace
@@ -18,8 +19,15 @@ void Button::Initialize(EngineContext* ctx, TinyEngine::Font* font, const std::w
 }
 
 void Button::Update(bool isSelected) {
-	text_->SetColor(isSelected ? kSelectedColor : kNormalColor);
-	text_->SetScale(isSelected ? kSelectedScale : kNormalScale);
+	if (!isEnabled_) {
+		text_->SetColor(kDisabledColor);
+		text_->SetScale(kNormalScale);
+	} else {
+		text_->SetColor(isSelected ? kSelectedColor : kNormalColor);
+		text_->SetScale(isSelected ? kSelectedScale : kNormalScale);
+	}
+
+	// テキスト更新
 	text_->Update();
 }
 

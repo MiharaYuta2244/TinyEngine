@@ -33,9 +33,15 @@ public:
 	// 座標のGetter
 	const Vector2& GetPosition() const { return position_; }
 
+	// 押せるかどうかのフラグSetter
+	void SetEnabled(bool enabled) { isEnabled_ = enabled; }
+
+	// 押せるかどうかのフラグGetter
+	bool IsEnabled() const { return isEnabled_; }
+
 	// コールバック関数呼び出し処理
 	void Execute() const {
-		if (onDecide_) {
+		if (isEnabled_ && onDecide_) {
 			onDecide_();
 		}
 	}
@@ -49,4 +55,7 @@ private:
 
 	// 座標
 	Vector2 position_ = {0.0f, 0.0f};
+
+	// 押せるかどうか
+	bool isEnabled_ = true;
 };
