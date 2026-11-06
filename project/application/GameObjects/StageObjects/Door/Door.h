@@ -36,7 +36,7 @@ public:
 
 private:
 	// ドアのtransformを求める
-	void CulcTransform();
+	void CalcTransform();
 
 	// 当たり判定の更新
 	void UpdateCollision();

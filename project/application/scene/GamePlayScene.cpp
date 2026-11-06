@@ -267,6 +267,7 @@ void GamePlayScene::Update() {
 	// プレイヤーのImGui
 	player_->DrawImGui();
 
+#if defined(NDEBUG) || defined(_DEBUG)
 	// 毎フレームオブジェクトリストを生成してシーンエディターに渡す
 	std::vector<IGameObject*> editObjects;
 	editObjects.push_back(player_.get());
@@ -302,6 +303,7 @@ void GamePlayScene::Update() {
 			sceneEditor_->SelectObject(spawned);
 		}
 	}
+#endif
 
 	// パーティクルの更新
 	for (auto& particle : enemyDeathEffect_) {
@@ -335,9 +337,9 @@ void GamePlayScene::Update() {
 	}
 
 	// プレイヤーが敵を掴んだらシェイク
-	if (player_->GetIsGrabTriggerd()) {
+	if (player_->GetIsGrabTriggered()) {
 		ctx_.currentCamera->StartShake(0.2f, 0.2f);
-		player_->SetIsGrabTriggerd(false);
+		player_->SetIsGrabTriggered(false);
 	}
 
 	// カメラのシェイク更新

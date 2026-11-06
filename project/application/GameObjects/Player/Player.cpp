@@ -48,7 +48,7 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 	}
 
 	// 振動マネージャーの生成
-	rumbleManager_ = std::make_unique<RumbleManager>();
+	rumbleManager_ = std::make_unique<GameRumbleController>();
 }
 
 void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps) {

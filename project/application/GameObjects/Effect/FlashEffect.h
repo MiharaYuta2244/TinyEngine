@@ -30,6 +30,6 @@ private:
 	// アクティブかどうか
 	bool isActive_ = false;
 
-	// 演出が終了下かどうか
+	// 演出が終了したかどうか
 	bool isFinished_ = false;
 };

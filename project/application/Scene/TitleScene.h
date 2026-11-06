@@ -46,7 +46,7 @@ private:
 	// ゲーム終了までのタイマー
 	std::unique_ptr<GameTimer> finishTimer_;
 
-	// ゲーム機同時の黒背景
+	// ゲーム起動時の黒背景
 	std::unique_ptr<TinyEngine::Sprite> blackBg_;
 
 	// コントローラー画像
@@ -60,5 +60,5 @@ private:
 	const float fadeOutDuration_ = 2.0f;  // フェードアウトにかける時間
 
 	// 一度表示したら以降はタイトル画面で表示しない為のフラグ
-	static inline bool isReccomended_ = true;
+	static inline bool isRecommended_ = true;
 };

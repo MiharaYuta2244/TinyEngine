@@ -40,7 +40,7 @@ public:
 	void SetPos(Vector3 pos) { transform_.translate = pos; }
 
 	// ギズモ用
-	std::string GetName() const override { return "Soup(" + std::to_string(id_) + ")"; }
+	std::string GetName() const override { return "Soap(" + std::to_string(id_) + ")"; }
 
 	// プレイヤーに掴まれた時の処理
 	void Grab();

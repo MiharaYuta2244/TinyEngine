@@ -69,7 +69,7 @@ public:
 	void SetLayerColors(const Vector4& color0, const Vector4& color1, const Vector4& color2);
 
 	// Getter Setter
-	bool IsWaitingForSceneShange() const { return isWaitingForSceneChange_; }
+	bool IsWaitingForSceneChange() const { return isWaitingForSceneChange_; }
 	void SetWaitingForSceneChange(bool waiting) { isWaitingForSceneChange_ = waiting; }
 
 	const std::string& GetRequestedSceneName() const { return requestedSceneName_; }

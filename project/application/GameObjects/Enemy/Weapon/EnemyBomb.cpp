@@ -37,13 +37,13 @@ void EnemyBomb::Update(float deltaTime) {
 	// 爆破タイマーが終了したら爆破処理へ
 	if (bombTimer_.IsEnd()) {
 		// 当たり判定を更新
-		UpdateBombCollsion();
+		UpdateBombCollision();
 
 		// 爆発エフェクトの生成
 		GenerateBombEffect();
 	} else {
 		// 当たり判定の更新
-		UpdateCollsion();
+		UpdateCollision();
 	}
 
 	// 爆発エフェクトの更新
@@ -80,14 +80,14 @@ void EnemyBomb::Draw() {
 	}
 }
 
-void EnemyBomb::UpdateCollsion() {
+void EnemyBomb::UpdateCollision() {
 	Vector3 pos = transform_.translate;
 	Vector3 scale = transform_.scale;
 	collision_.min = {pos.x - (scale.x / 2.0f), pos.y - (scale.y / 2.0f), pos.z - (scale.z / 2.0f)};
 	collision_.max = {pos.x + (scale.x / 2.0f), pos.y + (scale.y / 2.0f), pos.z + (scale.z / 2.0f)};
 }
 
-void EnemyBomb::UpdateBombCollsion() {
+void EnemyBomb::UpdateBombCollision() {
 	Vector3 pos = transform_.translate;
 	bombCollision_.min = {pos.x - (bombScale_.x / 2.0f), pos.y - (bombScale_.y / 2.0f), pos.z - (bombScale_.z / 2.0f)};
 	bombCollision_.max = {pos.x + (bombScale_.x / 2.0f), pos.y + (bombScale_.y / 2.0f), pos.z + (bombScale_.z / 2.0f)};

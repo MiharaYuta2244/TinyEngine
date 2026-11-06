@@ -118,7 +118,7 @@ void TitleScene::Update() {
 	bool skippedThisFrame = false;
 
 	// 初回のみフェード処理およびスキップ入力チェックを行う
-	if (isReccomended_) {
+	if (isRecommended_) {
 		isFading = (fadeTimer_ < totalFadeTime);
 
 		if (isFading) {
@@ -140,12 +140,12 @@ void TitleScene::Update() {
 			if (ctx_.keyboard->KeyTriggered(DIK_SPACE) || ctx_.gamePad->GetState().buttons.a) {
 				fadeTimer_ = totalFadeTime;
 				isFading = false;
-				isReccomended_ = false;  // 次回以降表示しないようにフラグを倒す
+				isRecommended_ = false;  // 次回以降表示しないようにフラグを倒す
 				skippedThisFrame = true; // このフレームでスキップされたことを記録
 			}
 		} else {
 			// フェード時間が終了したら表示完了とみなす
-			isReccomended_ = false;
+			isRecommended_ = false;
 		}
 	}
 
@@ -253,7 +253,7 @@ void TitleScene::Draw() {
 	// タイトルロゴ描画
 	titleLogo_->Draw();
 
-	if (isReccomended_) {
+	if (isRecommended_) {
 		// 黒背景描画
 		blackBg_->Draw();
 

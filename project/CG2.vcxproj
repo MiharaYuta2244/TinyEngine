@@ -103,7 +103,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NOMINMAX;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NOMINMAX;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
@@ -314,7 +314,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="application\Scene\StageSelectScene.cpp" />
     <ClCompile Include="engine\2d\font\TextSprite.cpp" />
     <ClCompile Include="application\GameObjects\Item\Soap.cpp" />
-    <ClCompile Include="application\Utility\RumbleManager.cpp" />
+    <ClCompile Include="application\Utility\GameRumbleController.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\Behavior\NormalBehavior.cpp" />
     <ClCompile Include="application\GameObjects\Enemy\Behavior\ShotgunBehavior.cpp" />
     <ClCompile Include="engine\3d\particle\modules\WoodShardModule.cpp" />
@@ -579,7 +579,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="engine\2d\font\TextSprite.h" />
     <ClInclude Include="application\GameObjects\Item\Soap.h" />
     <ClInclude Include="engine\3d\particle\modules\GlassShardModule.h" />
-    <ClInclude Include="application\Utility\RumbleManager.h" />
+    <ClInclude Include="application\Utility\GameRumbleController.h" />
     <ClInclude Include="application\GameObjects\Enemy\Behavior\NormalBehavior.h" />
     <ClInclude Include="application\GameObjects\Enemy\Behavior\ShotgunBehavior.h" />
     <ClInclude Include="application\GameObjects\Effect\FootprintManager.h" />

@@ -17,7 +17,7 @@ void Door::Initialize(EngineContext* ctx, const Transform& transform) {
 		renders_[i]->SetEnableLighting(false);
 	}
 
-	CulcTransform();
+	CalcTransform();
 }
 
 void Door::Update(float deltaTime, Vector3 playerPos) {
@@ -47,7 +47,7 @@ void Door::Update(float deltaTime, Vector3 playerPos) {
 	transformSecond_.translate.z += moveDir.z * previousOpenOffset_;
 
 	// 基準となる初期位置を計算
-	CulcTransform();
+	CalcTransform();
 
 	// 開閉状態が切り替わった瞬間を検知して、アニメーションをセットする
 	if (isOpen_ != wasOpen_) {
@@ -96,7 +96,7 @@ void Door::Draw() {
 	}
 }
 
-void Door::CulcTransform() {
+void Door::CalcTransform() {
 	transformSecond_ = transform_;
 
 	// 2枚目のドアの配置オフセットをY軸で回転させる

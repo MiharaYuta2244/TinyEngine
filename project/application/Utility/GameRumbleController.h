@@ -10,7 +10,7 @@
 /// <summary>
 /// コントローラーの振動を一括管理するクラス
 /// </summary>
-class RumbleManager {
+class GameRumbleController {
 public:
 	struct RumbleParam {
 		float left = 0.0f;     // 強振動 (左モーター)

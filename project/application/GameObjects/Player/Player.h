@@ -11,7 +11,7 @@
 #include "Particle.h"
 #include "PlayerHealth.h"
 #include "PlayerMove.h"
-#include "Utility/RumbleManager.h"
+#include "Utility/GameRumbleController.h"
 
 class EnemyManager;
 class Enemy;
@@ -98,14 +98,14 @@ public:
 	bool GetIsAttack() const { return isAttackTriggered_; }
 
 	// プレイヤーが敵を掴んだかどうか
-	bool GetIsGrabTriggerd() const { return isGrabTriggered_; }
-	void SetIsGrabTriggerd(bool isGrabTriggered) { isGrabTriggered_ = isGrabTriggered; }
+	bool GetIsGrabTriggered() const { return isGrabTriggered_; }
+	void SetIsGrabTriggered(bool isGrabTriggered) { isGrabTriggered_ = isGrabTriggered; }
 
 	// ImGui描画
 	void DrawImGui();
 
 	// 振動マネージャーGetter
-	RumbleManager* GetRumbleManager() { return rumbleManager_.get(); }
+	GameRumbleController* GetRumbleManager() { return rumbleManager_.get(); }
 
 private:
 	// 当たり判定の更新処理
@@ -236,8 +236,8 @@ private:
 	float soapThrowPower_ = 15.0f; // 石鹸を投げる初速
 
 	// 振動マネージャー
-	std::unique_ptr<RumbleManager> rumbleManager_;
+	std::unique_ptr<GameRumbleController> rumbleManager_;
 
 	// 攻撃インターバル
-	GameTimer attckTimer_;
+	GameTimer attackTimer_;
 };

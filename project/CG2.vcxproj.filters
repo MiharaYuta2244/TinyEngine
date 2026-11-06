@@ -441,7 +441,7 @@
     <ClCompile Include="engine\3d\particle\modules\GlassShardModule.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="application\Utility\RumbleManager.cpp">
+    <ClCompile Include="application\Utility\GameRumbleController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="application\GameObjects\Enemy\Behavior\EnemyBehaviorBase.cpp">
@@ -1039,7 +1039,7 @@
     <ClInclude Include="engine\3d\particle\modules\GlassShardModule.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="application\Utility\RumbleManager.h">
+    <ClInclude Include="application\Utility\GameRumbleController.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="application\GameObjects\Enemy\Behavior\EnemyBehavior.h">

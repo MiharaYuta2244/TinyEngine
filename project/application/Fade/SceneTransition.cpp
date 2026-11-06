@@ -13,7 +13,7 @@ void SceneTransition::Update(float deltaTime) {
 	fadeManager_->Update(deltaTime);
 
 	// 画面が完全に暗くなったらシーンを切り替える
-	if (state_ == State::FadingOut && fadeManager_->IsWaitingForSceneShange()) {
+	if (state_ == State::FadingOut && fadeManager_->IsWaitingForSceneChange()) {
 		sceneManager_->ChangeScene(fadeManager_->GetRequestedSceneName());
 		fadeManager_->NotifySceneChanged(); // フェードイン開始
 		state_ = State::Idle;

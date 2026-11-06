@@ -37,8 +37,8 @@ public:
 
 private:
 	// 当たり判定の更新
-	void UpdateCollsion();
-	void UpdateBombCollsion();
+	void UpdateCollision();
+	void UpdateBombCollision();
 
 	// エフェクトの生成
 	void GenerateBombEffect();
