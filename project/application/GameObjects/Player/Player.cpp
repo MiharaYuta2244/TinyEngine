@@ -443,7 +443,6 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 
 		// 投げる対象がいればノックバック処理を実行
 		if (throwTarget != nullptr) {
-			// enableAttack_ = false;
 			throwTarget->SetEnableAI(true);
 			throwTarget->StartKnockBack({lastMoveDirection_.x, 0.0f, lastMoveDirection_.y});
 			throwTarget->SetAIState(EnemyAI::State::Normal);
