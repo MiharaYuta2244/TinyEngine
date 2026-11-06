@@ -98,13 +98,14 @@ void Enemy::Update(
 		return;
 	}
 
+	// タイマーの更新(無敵・点滅)
+	UpdateTimers(deltaTime);
+
+	// エフェクトの更新
+	UpdateEffects(deltaTime);
+
 	if (!isMove_) {
 		return;
-	}
-
-	// 無敵タイマー更新
-	if (invincibleTimer_ > 0.0f) {
-		invincibleTimer_ -= deltaTime;
 	}
 
 	// AI更新前の座標を記録
@@ -170,58 +171,6 @@ void Enemy::Update(
 
 	// 当たり判定更新　衝突判定用
 	UpdateCollision();
-
-	// 点滅用タイマーを回す
-	if (damageBlinkTimer_ > 0.0f) {
-		damageBlinkTimer_ -= deltaTime;
-
-		// 0.05秒ごとにON/OFF切り替え
-		const float blinkInterval = 0.05f;
-		if (fmod(damageBlinkTimer_, blinkInterval * 2) < blinkInterval) {
-			isBlinkVisible_ = false;
-		} else {
-			isBlinkVisible_ = true;
-		}
-	} else {
-		isBlinkVisible_ = true;
-	}
-
-	// マズルフラッシュパーティクルの更新と自動削除
-	for (auto& particle : muzzleParticles_) {
-		particle->Update();
-	}
-	std::erase_if(muzzleParticles_, [](const std::unique_ptr<Particle>& p) { return p->IsFinished(); });
-
-	// チャージエフェクトはAIの「チャージ中」判定に完全に同期させる
-	const bool isCharging = ai_->IsCharging();
-
-	// 生成
-	if (isCharging && !chargeParticle_) {
-		chargeParticle_ = std::make_unique<Particle>();
-		chargeParticle_->Initialize(ctx_, transform_.translate, "SolarGlow.png", std::make_unique<ChargeModule>(), nullptr, ParticleMeshType::Square);
-		chargeParticle_->SetEmitMode(true, 0.1f);
-		chargeParticle_->SetEmitterParam(3, 0.05f);
-
-		chargeCylinderEffect_ = std::make_unique<Particle>();
-		chargeCylinderEffect_->Initialize(ctx_, transform_.translate, "gradationLine.png", std::make_unique<ChargeCylinderModule>(ai_.get(), &transform_), nullptr, ParticleMeshType::Cylinder);
-		chargeCylinderEffect_->SetEmitMode(false, 0.0f);
-		chargeCylinderEffect_->SetEmitterParam(1, 9999.0f);
-	}
-
-	// 削除
-	if (!isCharging && chargeParticle_) {
-		chargeParticle_.reset();
-		chargeCylinderEffect_.reset();
-	}
-
-	// 更新
-	if (chargeParticle_) {
-		chargeParticle_->SetTranslate(transform_.translate);
-		chargeParticle_->Update();
-	}
-	if (chargeCylinderEffect_) {
-		chargeCylinderEffect_->Update();
-	}
 
 	// ギズモ用当たり判定更新
 	UpdateAABBForGizmo();
@@ -464,4 +413,65 @@ void Enemy::UpdateFootprint() {
 
 	footprintManager_->Add(footPos, transform_.rotate.y, isNextFootLeft_);
 	isNextFootLeft_ = !isNextFootLeft_;
+}
+
+void Enemy::UpdateTimers(float deltaTime){
+	// 無敵タイマー更新
+	if (invincibleTimer_ > 0.0f) {
+		invincibleTimer_ -= deltaTime;
+	}
+
+	// 点滅タイマー更新
+	if (damageBlinkTimer_ > 0.0f) {
+		damageBlinkTimer_ -= deltaTime;
+
+		constexpr float blinkInterval = 0.05f;
+
+		if (fmod(damageBlinkTimer_, blinkInterval * 2) < blinkInterval) {
+			isBlinkVisible_ = false;
+		} else {
+			isBlinkVisible_ = true;
+		}
+	} else {
+		isBlinkVisible_ = true;
+	}
+}
+
+void Enemy::UpdateEffects(float deltaTime){
+	// マズルフラッシュパーティクルの更新と自動削除
+	for (auto& particle : muzzleParticles_) {
+		particle->Update();
+	}
+	std::erase_if(muzzleParticles_, [](const std::unique_ptr<Particle>& p) { return p->IsFinished(); });
+
+	// チャージエフェクトはAIの「チャージ中」判定に完全に同期させる
+	const bool isCharging = ai_->IsCharging();
+
+	// 生成
+	if (isCharging && !chargeParticle_) {
+		chargeParticle_ = std::make_unique<Particle>();
+		chargeParticle_->Initialize(ctx_, transform_.translate, "SolarGlow.png", std::make_unique<ChargeModule>(), nullptr, ParticleMeshType::Square);
+		chargeParticle_->SetEmitMode(true, 0.1f);
+		chargeParticle_->SetEmitterParam(3, 0.05f);
+
+		chargeCylinderEffect_ = std::make_unique<Particle>();
+		chargeCylinderEffect_->Initialize(ctx_, transform_.translate, "gradationLine.png", std::make_unique<ChargeCylinderModule>(ai_.get(), &transform_), nullptr, ParticleMeshType::Cylinder);
+		chargeCylinderEffect_->SetEmitMode(false, 0.0f);
+		chargeCylinderEffect_->SetEmitterParam(1, 9999.0f);
+	}
+
+	// 削除
+	if (!isCharging && chargeParticle_) {
+		chargeParticle_.reset();
+		chargeCylinderEffect_.reset();
+	}
+
+	// 更新
+	if (chargeParticle_) {
+		chargeParticle_->SetTranslate(transform_.translate);
+		chargeParticle_->Update();
+	}
+	if (chargeCylinderEffect_) {
+		chargeCylinderEffect_->Update();
+	}
 }

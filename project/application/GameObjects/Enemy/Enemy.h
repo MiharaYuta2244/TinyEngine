@@ -147,6 +147,12 @@ private:
 	// 足跡の生成処理
 	void UpdateFootprint();
 
+	// タイマーの更新
+	void UpdateTimers(float deltaTime);
+
+	// エフェクトの更新
+	void UpdateEffects(float deltaTime);
+
 private:
 	AABB bodyCol_{}; // 本体のAABB
 	bool enableMove_ = true;
