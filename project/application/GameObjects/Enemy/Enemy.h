@@ -153,6 +153,15 @@ private:
 	// エフェクトの更新
 	void UpdateEffects(float deltaTime);
 
+	// 状態に応じた視界の更新処理
+	void UpdateVisionCone(WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager);
+
+	// ノックバックの更新
+	void UpdateKnockback(float deltaTime);
+	
+	// アニメーションの更新処理
+	void UpdateAnimation(Vector3 prevPos);
+
 private:
 	AABB bodyCol_{}; // 本体のAABB
 	bool enableMove_ = true;

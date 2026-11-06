@@ -2,10 +2,10 @@
 #include "ChargeModule.h"
 #include "ColorPalette.h"
 #include "GameObjects/Effect/EffectGenerator.h"
+#include "GameObjects/PlayTestConfig.h"
 #include "GameObjects/Player/Player.h"
 #include "Gameobjects/Enemy/Behavior/EnemyBehaviorFactory.h"
 #include "Gameobjects/Enemy/Weapon/EnemyBulletManager.h"
-#include "GameObjects/PlayTestConfig.h"
 
 using namespace TinyEngine;
 
@@ -58,22 +58,10 @@ void Enemy::Update(
 	if (isDead_)
 		return;
 
-	// 速度による移動と減衰
-	if (velocity_.x != 0.0f || velocity_.z != 0.0f) {
-		// 速度による座標の更新
-		transform_.translate.x += velocity_.x * deltaTime;
-		transform_.translate.z += velocity_.z * deltaTime;
+	// ノックバックの更新処理
+	UpdateKnockback(deltaTime);
 
-		// 摩擦処理
-		velocity_.x = MathUtility::Lerp(velocity_.x, 0.0f, knockBackFriction_ * deltaTime);
-		velocity_.z = MathUtility::Lerp(velocity_.z, 0.0f, knockBackFriction_ * deltaTime);
-
-		// 速度が十分に小さくなったら完全に停止させる
-		if (std::abs(velocity_.x) < 0.1f && std::abs(velocity_.z) < 0.1f) {
-			velocity_ = {0.0f, 0.0f, 0.0f};
-		}
-	}
-
+	// ダウン時(ピヨピヨ状態)の処理
 	if (isDown_) {
 		downTimer_.Update(deltaTime);
 
@@ -104,6 +92,7 @@ void Enemy::Update(
 	// エフェクトの更新
 	UpdateEffects(deltaTime);
 
+	// 停止状態の時は早期リターン
 	if (!isMove_) {
 		return;
 	}
@@ -114,11 +103,10 @@ void Enemy::Update(
 	// AIインスタンス更新
 	ai_->Update(deltaTime, player, enemyBulletManager, wallManager, doorManager, glassManager, enemyBombManager);
 
-	// アニメーション遷移処理
-	const float dx = transform_.translate.x - prevPos.x;
-	const float dz = transform_.translate.z - prevPos.z;
-	animator_.Update(ai_->GetState(), (dx * dx + dz * dz) > 0.0001f);
+	// アニメーション更新処理
+	UpdateAnimation(prevPos);
 
+	// マズルフラッシュの生成
 	if (ai_->IsShotThisFrame()) {
 		GenerateMuzzleFlash(ai_->GetShotDirection());
 	}
@@ -128,25 +116,8 @@ void Enemy::Update(
 		GenerateExMark();
 	}
 
-	const bool obscure = PlaytestConfig::obscureMode;
-	visionCone_->SetIgnoreObstacles(obscure);
-
-	// AIの状態を取得して色を変える
-	if (ai_->GetState() == EnemyAI::State::Vigilance) {
-		// 警戒状態なら赤色
-		visionCone_->SetColor({1.0f, 0.0f, 0.0f, 0.3f});
-		// 射撃ゲージの進行度を渡す
-		visionCone_->SetChargeProgress(obscure ? 0.0f : ai_->GetShotProgress());
-	} else if (ai_->GetState() == EnemyAI::State::Hold) {
-		// 拘束状態も射撃するのでプログレスを渡す
-		visionCone_->SetColor({1.0f, 0.5f, 0.0f, 0.3f});
-		visionCone_->SetChargeProgress(obscure ? 0.0f : ai_->GetShotProgress());
-	} else {
-		// 通常状態なら緑色
-		visionCone_->SetColor({0.0f, 1.0f, 0.0f, 0.3f});
-		// プログレスはリセット
-		visionCone_->SetChargeProgress(0.0f);
-	}
+	// 状態に応じた視界の更新処理
+	UpdateVisionCone(wallManager, doorManager, glassManager);
 
 	// 「!」マークのアニメーションが終了していれば「!」マークインスタンスを削除
 	if (exclamationMark_) {
@@ -160,11 +131,6 @@ void Enemy::Update(
 	if (exclamationMark_) {
 		exclamationMark_->Update(deltaTime, transform_.translate);
 	}
-
-	// 視界
-	visionCone_->SetTranslate(transform_.translate);
-	visionCone_->SetRotate(transform_.rotate);
-	visionCone_->Update(wallManager->GetObjects(), doorManager->GetObjects(), glassManager->GetObjects());
 
 	// 敵AIの状態を記録
 	lastState = ai_->GetState();
@@ -415,7 +381,7 @@ void Enemy::UpdateFootprint() {
 	isNextFootLeft_ = !isNextFootLeft_;
 }
 
-void Enemy::UpdateTimers(float deltaTime){
+void Enemy::UpdateTimers(float deltaTime) {
 	// 無敵タイマー更新
 	if (invincibleTimer_ > 0.0f) {
 		invincibleTimer_ -= deltaTime;
@@ -437,7 +403,7 @@ void Enemy::UpdateTimers(float deltaTime){
 	}
 }
 
-void Enemy::UpdateEffects(float deltaTime){
+void Enemy::UpdateEffects(float deltaTime) {
 	// マズルフラッシュパーティクルの更新と自動削除
 	for (auto& particle : muzzleParticles_) {
 		particle->Update();
@@ -474,4 +440,55 @@ void Enemy::UpdateEffects(float deltaTime){
 	if (chargeCylinderEffect_) {
 		chargeCylinderEffect_->Update();
 	}
+}
+
+void Enemy::UpdateVisionCone(WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager) {
+	const bool obscure = PlaytestConfig::obscureMode;
+	visionCone_->SetIgnoreObstacles(obscure);
+
+	// AIの状態を取得して色を変える
+	if (ai_->GetState() == EnemyAI::State::Vigilance) {
+		// 警戒状態なら赤色
+		visionCone_->SetColor({1.0f, 0.0f, 0.0f, 0.3f});
+		// 射撃ゲージの進行度を渡す
+		visionCone_->SetChargeProgress(obscure ? 0.0f : ai_->GetShotProgress());
+	} else if (ai_->GetState() == EnemyAI::State::Hold) {
+		// 拘束状態も射撃するのでプログレスを渡す
+		visionCone_->SetColor({1.0f, 0.5f, 0.0f, 0.3f});
+		visionCone_->SetChargeProgress(obscure ? 0.0f : ai_->GetShotProgress());
+	} else {
+		// 通常状態なら緑色
+		visionCone_->SetColor({0.0f, 1.0f, 0.0f, 0.3f});
+		// プログレスはリセット
+		visionCone_->SetChargeProgress(0.0f);
+	}
+
+	// 視界
+	visionCone_->SetTranslate(transform_.translate);
+	visionCone_->SetRotate(transform_.rotate);
+	visionCone_->Update(wallManager->GetObjects(), doorManager->GetObjects(), glassManager->GetObjects());
+}
+
+void Enemy::UpdateKnockback(float deltaTime) {
+	// 速度による移動と減衰
+	if (velocity_.x != 0.0f || velocity_.z != 0.0f) {
+		// 速度による座標の更新
+		transform_.translate.x += velocity_.x * deltaTime;
+		transform_.translate.z += velocity_.z * deltaTime;
+
+		// 摩擦処理
+		velocity_.x = MathUtility::Lerp(velocity_.x, 0.0f, knockBackFriction_ * deltaTime);
+		velocity_.z = MathUtility::Lerp(velocity_.z, 0.0f, knockBackFriction_ * deltaTime);
+
+		// 速度が十分に小さくなったら完全に停止させる
+		if (std::abs(velocity_.x) < 0.1f && std::abs(velocity_.z) < 0.1f) {
+			velocity_ = {0.0f, 0.0f, 0.0f};
+		}
+	}
+}
+
+void Enemy::UpdateAnimation(Vector3 prevPos) {
+	const float dx = transform_.translate.x - prevPos.x;
+	const float dz = transform_.translate.z - prevPos.z;
+	animator_.Update(ai_->GetState(), (dx * dx + dz * dz) > 0.0001f); // 移動時のみ更新
 }
