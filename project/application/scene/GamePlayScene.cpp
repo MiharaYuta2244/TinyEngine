@@ -67,6 +67,10 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	letterBox_ = std::make_unique<LetterBox>();
 	letterBox_->Initialize(ctx_.engineContext);
 
+	// テキストカットイン演出の生成&初期化
+	clearCutIn_ = std::make_unique<StageClearCutIn>();
+	clearCutIn_->Initialize(ctx_.engineContext, stageNo_);
+
 	// ステージ管理インスタンスの生成&初期化
 	stage_ = std::make_unique<Stage>();
 	stage_->Initialize(ctx, decalManager_.get(), stagePath_);
@@ -219,8 +223,13 @@ void GamePlayScene::Update() {
 		postEffectController_->StartDeathAnimation();
 	}
 
-	// レターボックスの演出が終わったらシーン遷移
-	if (!letterBox_->GetIsActive() && !postEffectController_->GetIsDeathAnimPlaying()) {
+	// レターボックスが出切ったらテキストカットイン開始
+	if (letterBox_->GetIsTriggered() && !letterBox_->GetIsActive()) {
+		clearCutIn_->Trigger();
+	}
+
+	// カットインが終わったらシーン遷移
+	if (clearCutIn_->IsFinished() && !postEffectController_->GetIsDeathAnimPlaying()) {
 		if (!isTransitionRequested_) {
 			ctx_.sceneTransition->ChangeScene("Result", FadeStyle::Logo);
 			isTransitionRequested_ = true;
@@ -303,6 +312,13 @@ void GamePlayScene::Update() {
 			sceneEditor_->SelectObject(spawned);
 		}
 	}
+
+	// デバッグ用ステージクリア
+	if (sceneEditor_->PollStageClearRequest()) {
+		if (!player_->IsDead()) {
+			stage_->GetGoal()->SetIsGoal(true);
+		}
+	}
 #endif
 
 	// パーティクルの更新
@@ -362,6 +378,9 @@ void GamePlayScene::Update() {
 	letterBox_->Update(deltaTime);
 	introLetterBox_->Update(deltaTime);
 
+	// カットイン演出更新
+	clearCutIn_->Update(deltaTime);
+
 	// 血痕管理インスタンス更新
 	decalManager_->SetCamera(ctx_.currentCamera);
 	decalManager_->Update(deltaTime);
@@ -415,6 +434,9 @@ void GamePlayScene::Draw() {
 	// レターボックス描画
 	letterBox_->Draw();
 	introLetterBox_->Draw();
+
+	// カットイン演出描画
+	clearCutIn_->Draw();
 
 	// 半透明オブジェクトの描画準備
 	ctx_.engineContext->object3dCommon->DrawSettingTransparent(ctx_.engineContext->textureManager);

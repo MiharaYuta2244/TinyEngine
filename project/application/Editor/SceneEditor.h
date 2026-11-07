@@ -36,6 +36,13 @@ public:
 	// 生成直後のオブジェクトを選択状態にする
 	void SelectObject(IGameObject* obj) { selectedGameObject_ = obj; }
 
+	// ステージクリア要求を取り出す
+	bool PollStageClearRequest() {
+		bool requested = pendingStageClear_;
+		pendingStageClear_ = false;
+		return requested;
+	}
+
 private:
 	// ImGuiの統合更新
 	void UpdateImGui(const SceneContext& ctx, Player* player, float& cameraPosY);
@@ -102,4 +109,7 @@ private:
 
 	std::optional<SpawnRequest> pendingSpawn_;
 	float spawnY_ = 0.0f; // 生成時に固定するY座標
+
+	// デバッグ用ステージクリア要求
+	bool pendingStageClear_ = false;
 };

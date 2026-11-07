@@ -108,6 +108,12 @@ void SceneEditor::UpdateImGui(const SceneContext& ctx, Player* player, float& ca
 		player->Damage(player->GetMaxHP());
 	}
 
+	ImGui::SameLine();
+
+	if (ImGui::Button("Stage Clear")) {
+		pendingStageClear_ = true;
+	}
+
 	ImGui::Text("FPS %.1f", ctx.timeManager->GetFPS());
 	ImGui::Text("DeltaTime %.4f", ctx.timeManager->GetDeltaTime());
 
@@ -199,36 +205,38 @@ void SceneEditor::UpdateImGui(const SceneContext& ctx, Player* player, float& ca
 	}
 
 	// 選択中オブジェクトのSRT
-	ImGui::Begin("Selected GameObject");
-	Transform& selTransform = selectedGameObject_->GetTransform();
-
-	if (ImGui::DragFloat3("Scale", &selTransform.scale.x, 0.01f)) {
-	}
-	if (ImGui::IsItemActivated())
-		dragBeginSnapshot_ = CaptureTransform(selTransform);
-	if (ImGui::IsItemDeactivatedAfterEdit())
-		PushCommand(std::make_unique<TransformCommand>(selectedGameObject_, dragBeginSnapshot_, CaptureTransform(selTransform)));
-
-	if (ImGui::DragFloat3("Rotate", &selTransform.rotate.x, 0.01f)) {
-	}
-	if (ImGui::IsItemActivated())
-		dragBeginSnapshot_ = CaptureTransform(selTransform);
-	if (ImGui::IsItemDeactivatedAfterEdit())
-		PushCommand(std::make_unique<TransformCommand>(selectedGameObject_, dragBeginSnapshot_, CaptureTransform(selTransform)));
-
-	if (ImGui::DragFloat3("Translate", &selTransform.translate.x, 0.01f)) {
-	}
-	if (ImGui::IsItemActivated())
-		dragBeginSnapshot_ = CaptureTransform(selTransform);
-	if (ImGui::IsItemDeactivatedAfterEdit())
-		PushCommand(std::make_unique<TransformCommand>(selectedGameObject_, dragBeginSnapshot_, CaptureTransform(selTransform)));
-
-	// 固有データ編集用UI
 	if (selectedGameObject_) {
-		selectedGameObject_->DrawExtraImGui();
-	}
+		ImGui::Begin("Selected GameObject");
+		Transform& selTransform = selectedGameObject_->GetTransform();
 
-	ImGui::End();
+		if (ImGui::DragFloat3("Scale", &selTransform.scale.x, 0.01f)) {
+		}
+		if (ImGui::IsItemActivated())
+			dragBeginSnapshot_ = CaptureTransform(selTransform);
+		if (ImGui::IsItemDeactivatedAfterEdit())
+			PushCommand(std::make_unique<TransformCommand>(selectedGameObject_, dragBeginSnapshot_, CaptureTransform(selTransform)));
+
+		if (ImGui::DragFloat3("Rotate", &selTransform.rotate.x, 0.01f)) {
+		}
+		if (ImGui::IsItemActivated())
+			dragBeginSnapshot_ = CaptureTransform(selTransform);
+		if (ImGui::IsItemDeactivatedAfterEdit())
+			PushCommand(std::make_unique<TransformCommand>(selectedGameObject_, dragBeginSnapshot_, CaptureTransform(selTransform)));
+
+		if (ImGui::DragFloat3("Translate", &selTransform.translate.x, 0.01f)) {
+		}
+		if (ImGui::IsItemActivated())
+			dragBeginSnapshot_ = CaptureTransform(selTransform);
+		if (ImGui::IsItemDeactivatedAfterEdit())
+			PushCommand(std::make_unique<TransformCommand>(selectedGameObject_, dragBeginSnapshot_, CaptureTransform(selTransform)));
+
+		// 固有データ編集用UI
+		if (selectedGameObject_) {
+			selectedGameObject_->DrawExtraImGui();
+		}
+
+		ImGui::End();
+	}
 #endif // USE_IMGUI
 }
 

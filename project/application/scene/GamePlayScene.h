@@ -17,6 +17,7 @@
 #include "Gameobjects/Enemy/Weapon/EnemyBulletManager.h"
 #include "Particle.h"
 #include "TextSprite.h"
+#include "GameObjects/Effect/StageClearCutIn.h"
 #include <memory>
 
 // ゲーム開始時カメラ演出用
@@ -83,6 +84,9 @@ private:
 
 	// レターボックス
 	std::unique_ptr<LetterBox> letterBox_;
+
+	// ステージクリア時のカットイン
+	std::unique_ptr<StageClearCutIn> clearCutIn_;
 
 	// 血痕管理インスタンス
 	std::unique_ptr<TinyEngine::DecalManager> decalManager_;
