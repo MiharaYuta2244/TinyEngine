@@ -38,6 +38,4 @@ private:
 	bool isGoal_ = false; // ゴールフラグ
 
 	std::vector<std::unique_ptr<TinyEngine::Particle>> particle_; // パーティクル
-	GameTimer particleGenerateTimer_;                             // パーティクル生成用のタイマー
-	TinyEngine::Particle::Emitter emitter_;                       // エミッター
 };

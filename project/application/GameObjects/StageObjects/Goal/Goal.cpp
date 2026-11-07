@@ -1,21 +1,23 @@
 #include "Goal.h"
+#include "EffectLibrary.h"
 
 using namespace TinyEngine;
 
 void Goal::Initialize(EngineContext* ctx) {
 	ctx_ = ctx;
 
-	transform_.scale = {0.01f, 1.0f, 3.5f};
+	transform_.scale = {1.0f, 1.0f, 5.0f};
 	transform_.rotate = {0.0f, 0.0f, 0.0f};
 	transform_.translate = {542.0f, 0.0f, -17.0f};
 
-	// パーティクル生成用のタイマー初期化
-	particleGenerateTimer_.Initialize(0.2f);
+	// エフェクトの生成
+	particle_.clear();
+	EffectLibrary::Get().Spawn(ctx_, "GoalLine", transform_.translate, particle_);
 
-	// エミッターの初期化
-	emitter_.count = 1;
-	emitter_.frequency = 2.0f;
-	emitter_.frequencyTime = 0.0f;
+	// SetPosやImGuiで座標が動いても、発生済みの粒ごと追従させる
+	for (auto& particle : particle_) {
+		particle->SetFollowTarget(true);
+	}
 }
 
 void Goal::Update(float deltaTime) {
@@ -30,28 +32,11 @@ void Goal::Update(float deltaTime) {
 	col_.max = {pos.x + halfScale.x, pos.y + halfScale.y, pos.z + halfScale.z};
 	col_.min = {pos.x - halfScale.x, pos.y - halfScale.y, pos.z - halfScale.z};
 
-	// パーティクル生成用のタイマー更新
-	particleGenerateTimer_.Update(deltaTime);
-
-	// パーティクルの生成
-	if (particleGenerateTimer_.IsEnd()) {
-		auto particle = std::make_unique<Particle>();
-		particle->Initialize(ctx_, transform_.translate, "Cross.png", std::make_unique<DustModule>(), &emitter_, TinyEngine::ParticleMeshType::Square);
-		particle->SetEmitMode(false, 0.1f);
-		particle->SetEmitterParam(20, 0.05f);
-		particle_.push_back(std::move(particle));
-
-		// タイマーの再設定
-		particleGenerateTimer_.Initialize(0.2f);
-	}
-
 	// パーティクルの更新
 	for (auto& particle : particle_) {
+		particle->UpdateTranslate(transform_.translate);
 		particle->Update();
 	}
-
-	// パーティクル削除処理
-	std::erase_if(particle_, [this](const std::unique_ptr<TinyEngine::Particle>& p) { return p->IsFinished(); });
 
 	// ギズモ用当たり判定更新
 	UpdateAABBForGizmo();

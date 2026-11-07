@@ -1,0 +1,272 @@
+{
+    "emitters": [
+        {
+            "blend": "Additive",
+            "burst": false,
+            "count": 1,
+            "duration": 0.10000000149011612,
+            "extent": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "frequency": 0.44999998807907104,
+            "loop": true,
+            "mesh": "Ring",
+            "moduleType": "Generic",
+            "name": "Glow",
+            "offset": {
+                "x": 0.0,
+                "y": 0.05000000074505806,
+                "z": 0.0
+            },
+            "params": {
+                "colorEase": 8,
+                "colorEnd": {
+                    "w": 0.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "colorStartA": {
+                    "w": 0.44999998807907104,
+                    "x": 1.0,
+                    "y": 0.699999988079071,
+                    "z": 0.15000000596046448
+                },
+                "colorStartB": {
+                    "w": 0.44999998807907104,
+                    "x": 1.0,
+                    "y": 0.699999988079071,
+                    "z": 0.15000000596046448
+                },
+                "damping": 1.0,
+                "direction": {
+                    "x": 0.0,
+                    "y": 1.0,
+                    "z": 0.0
+                },
+                "endScale": 2.319999933242798,
+                "gravity": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "initialRotateDeg": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "life": {
+                    "max": 1.399999976158142,
+                    "min": 1.399999976158142
+                },
+                "shape": "Cone",
+                "sizeAxis": {
+                    "x": 3.0,
+                    "y": 4.0,
+                    "z": 1.0
+                },
+                "sizeEase": 28,
+                "speed": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "spinDeg": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "spreadAngle": 180.0,
+                "startSize": {
+                    "max": 1.0,
+                    "min": 1.0
+                },
+                "useSpawnDirection": false,
+                "yVelocity": {
+                    "max": 0.0,
+                    "min": 0.0
+                }
+            },
+            "texture": "AttractEffect.png"
+        },
+        {
+            "blend": "Additive",
+            "burst": false,
+            "count": 1,
+            "duration": 0.10000000149011612,
+            "extent": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "frequency": 0.6000000238418579,
+            "loop": true,
+            "mesh": "Square",
+            "moduleType": "Generic",
+            "name": "Pulse",
+            "offset": {
+                "x": 0.0,
+                "y": 0.05999999865889549,
+                "z": 0.0
+            },
+            "params": {
+                "colorEase": 30,
+                "colorEnd": {
+                    "w": 0.0,
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "colorStartA": {
+                    "w": 0.6000000238418579,
+                    "x": 1.0,
+                    "y": 0.800000011920929,
+                    "z": 0.3019607961177826
+                },
+                "colorStartB": {
+                    "w": 0.6000000238418579,
+                    "x": 1.0,
+                    "y": 0.800000011920929,
+                    "z": 0.3019607961177826
+                },
+                "damping": 1.0,
+                "direction": {
+                    "x": 0.0,
+                    "y": 1.0,
+                    "z": 0.0
+                },
+                "endScale": 1.899999976158142,
+                "gravity": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "initialRotateDeg": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "life": {
+                    "max": 1.399999976158142,
+                    "min": 1.399999976158142
+                },
+                "shape": "Cone",
+                "sizeAxis": {
+                    "x": 2.0,
+                    "y": 4.0,
+                    "z": 1.0
+                },
+                "sizeEase": 28,
+                "speed": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "spinDeg": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "spreadAngle": 180.0,
+                "startSize": {
+                    "max": 1.0,
+                    "min": 1.0
+                },
+                "useSpawnDirection": false,
+                "yVelocity": {
+                    "max": 0.0,
+                    "min": 0.0
+                }
+            },
+            "texture": "AttractEffect.png"
+        },
+        {
+            "blend": "Additive",
+            "burst": false,
+            "count": 2,
+            "duration": 0.10000000149011612,
+            "extent": {
+                "x": 0.30000001192092896,
+                "y": 0.0,
+                "z": 1.75
+            },
+            "frequency": 0.07999999821186066,
+            "loop": true,
+            "mesh": "Square",
+            "moduleType": "Generic",
+            "name": "Sparkle",
+            "offset": {
+                "x": 0.0,
+                "y": 0.30000001192092896,
+                "z": 0.0
+            },
+            "params": {
+                "colorEase": 3,
+                "colorEnd": {
+                    "w": 0.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "colorStartA": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 0.800000011920929,
+                    "z": 0.30000001192092896
+                },
+                "colorStartB": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 0.8999999761581421
+                },
+                "damping": 0.949999988079071,
+                "direction": {
+                    "x": 0.0,
+                    "y": 1.0,
+                    "z": 0.0
+                },
+                "endScale": 0.20000000298023224,
+                "gravity": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "initialRotateDeg": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "life": {
+                    "max": 1.600000023841858,
+                    "min": 0.8999999761581421
+                },
+                "shape": "CircleXZ",
+                "sizeAxis": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "sizeEase": 3,
+                "speed": {
+                    "max": 1.5,
+                    "min": 0.30000001192092896
+                },
+                "spinDeg": {
+                    "max": 180.0,
+                    "min": -180.0
+                },
+                "spreadAngle": 180.0,
+                "startSize": {
+                    "max": 0.5,
+                    "min": 0.25
+                },
+                "useSpawnDirection": false,
+                "yVelocity": {
+                    "max": 3.0,
+                    "min": 1.5
+                }
+            },
+            "texture": "Cross.png"
+        }
+    ],
+    "name": "GoalLine"
+}
