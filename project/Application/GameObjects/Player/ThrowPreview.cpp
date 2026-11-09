@@ -77,7 +77,7 @@ void ThrowPreview::Update(float deltaTime, const Vector3& startPos, const Vector
 	}
 }
 
-std::vector<Vector3> ThrowPreview::SimulateTrajectory(Vector3 pos, Vector2 velocity, float friction) const {
+std::vector<Vector3> ThrowPreview::SimulateTrajectory(Vector3 pos, Vector2 velocity, float friction) {
 	std::vector<Vector3> points;
 	points.reserve(kMaxSimSteps);
 

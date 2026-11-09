@@ -16,7 +16,7 @@ public:
 
 private:
 	// 軌道をシミュレーションして通過点を返す
-	std::vector<Vector3> SimulateTrajectory(Vector3 pos, Vector2 velocity, float friction) const;
+	static std::vector<Vector3> SimulateTrajectory(Vector3 pos, Vector2 velocity, float friction);
 
 	// 通過点の累積距離を計算し、総距離を返す
 	static float BuildAccumulatedDistances(const std::vector<Vector3>& points, std::vector<float>& outDistances);

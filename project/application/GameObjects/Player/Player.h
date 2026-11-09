@@ -10,6 +10,7 @@
 #include "OBB.h"
 #include "Particle.h"
 #include "PlayerAnimator.h"
+#include "PlayerGrab.h"
 #include "PlayerHealth.h"
 #include "PlayerInput.h"
 #include "PlayerMove.h"
@@ -64,7 +65,8 @@ public:
 	// 本体の当たり判定
 	AABB GetBodyCol() const { return bodyCol_; }
 
-	Enemy* GetTargetEnemy() const { return heldEnemy_; }
+	// 敵のポインタ
+	Enemy* GetTargetEnemy() const { return grab_->GetHeldEnemy(); }
 
 	// 現在のHP取得Getter
 	float GetCurrentHP() const { return hp_->GetCurrentHP(); }
@@ -88,14 +90,10 @@ public:
 	Vector2 GetDirection() const { return lastMoveDirection_; }
 
 	// 敵を掴んでいるかどうかGetter
-	bool IsGrabbingEnemy() const { return isGrab_; }
-
-	void SetIsGrabReleased(bool isGrabReleased) { isGrabReleased_ = isGrabReleased; }
-
-	void SetIsHold(bool isHold) { isHold_ = isHold; }
+	bool IsGrabbingEnemy() const { return grab_->IsHoldingEnemy(); }
 
 	// 掴んでいる敵のポインタGetter
-	Enemy* GetGrabbedEnemy() { return heldEnemy_; }
+	Enemy* GetGrabbedEnemy() { return grab_->GetHeldEnemy(); }
 
 	// 攻撃フラグGetter
 	bool GetIsAttack() const { return isAttackTriggered_; }
@@ -109,6 +107,9 @@ public:
 
 	// 振動マネージャーGetter
 	GameRumbleController* GetRumbleManager() { return rumbleManager_.get(); }
+
+	// 死亡している敵のポインタを破棄
+	void ReleaseGrabbedEnemy() { grab_->ReleaseEnemyByGuard(); }
 
 private:
 	// 当たり判定の更新処理
@@ -145,33 +146,19 @@ private:
 	// 攻撃可能かどうかを表す変数
 	bool enableAttack_ = false;
 
-	// 掴み状態かどうか
-	bool isHold_ = false;
-
-	// つかんでいる敵のポインタを記憶するための変数
-	Enemy* heldEnemy_ = nullptr;
-
 	std::unique_ptr<ObjectRender> render_;       // 描画用インスタンス
 	std::unique_ptr<PlayerMove> move_;           // 移動用インスタンス
 	std::unique_ptr<PlayerHealth> hp_;           // HP管理用インスタンス
 	std::unique_ptr<PlayerInput> input_;         // 入力用インスタンス
 	std::unique_ptr<PlayerAnimator> animator_;   // アニメーション用インスタンス
 	std::unique_ptr<ThrowPreview> throwPreview_; // 軌道プレビュー用インスタンス
-
-	// 環境マップ　強さ
-	float envScale_ = 0.0f;
+	std::unique_ptr<PlayerGrab> grab_;           // プレイヤーアクション用インスタンス
 
 	// 現在移動中かどうかを保持するフラグ
 	bool isMoving_ = false;
 
-	// 掴める距離の閾値
-	float grabRange_ = 3.0f;
-
 	// 敵を掴んでいるときにかける速度倍率
 	float speedMultiplier_ = 1.0f;
-
-	// 攻撃用のオフセット
-	float attackOffset_ = 1.5f;
 
 	// 被弾時エフェクト
 	std::vector<std::unique_ptr<TinyEngine::Particle>> hitEffects_;
@@ -180,15 +167,11 @@ private:
 	// 回復エフェクト
 	std::vector<std::unique_ptr<TinyEngine::Particle>> healEffects_;
 
-	// 敵を掴んでいるかどうか
-	bool isGrab_ = false;
+	// 敵を掴んだ瞬間のフラグ
 	bool isGrabTriggered_ = false;
 
 	// 攻撃しているかどうか
 	bool isAttackTriggered_ = false;
-
-	// 敵を放したかどうか
-	bool isGrabReleased_ = false;
 
 	// 血痕の管理インスタンスポインタ
 	TinyEngine::DecalManager* bloodDecalManager_ = nullptr;
@@ -217,9 +200,6 @@ private:
 
 	// オーディオマネージャー
 	std::unique_ptr<TinyEngine::AudioManager> audioManager_;
-
-	Soap* heldSoap_ = nullptr;     // 掴んでいる石鹸
-	float soapThrowPower_ = 15.0f; // 石鹸を投げる初速
 
 	// 振動マネージャー
 	std::unique_ptr<GameRumbleController> rumbleManager_;

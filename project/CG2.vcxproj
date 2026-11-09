@@ -326,6 +326,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Application\GameObjects\Player\PlayerInput.cpp" />
     <ClCompile Include="Application\GameObjects\Player\PlayerAnimator.cpp" />
     <ClCompile Include="Application\GameObjects\Player\ThrowPreview.cpp" />
+    <ClCompile Include="Application\GameObjects\Player\PlayerGrab.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -597,6 +598,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\GameObjects\Player\PlayerInput.h" />
     <ClInclude Include="Application\GameObjects\Player\PlayerAnimator.h" />
     <ClInclude Include="Application\GameObjects\Player\ThrowPreview.h" />
+    <ClInclude Include="Application\GameObjects\Player\PlayerGrab.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />

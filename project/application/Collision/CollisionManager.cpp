@@ -79,8 +79,9 @@ void CollisionManager::CheckCollisions(
 						if (shieldEnemy->IsDead()) {
 							ProcessEnemyDeath(shieldEnemy);
 						}
-						player->SetIsGrabReleased(true);
-						player->SetIsHold(false);
+
+						// 敵のポインタを破棄
+						player->ReleaseGrabbedEnemy();
 					}
 				}
 			}

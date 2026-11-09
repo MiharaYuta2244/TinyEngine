@@ -24,7 +24,6 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 	render_->GetObject3d()->PlayAnimation(sneakWalkAnimation);
 	render_->SetColor(color_);
 	render_->SetTransform(transform_);
-	render_->SetEnvScale(envScale_);
 	render_->SetIsSkinning(true);
 
 	// 移動用インスタンス生成
@@ -47,6 +46,9 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 	// 投げ軌道プレビューの生成&初期化
 	throwPreview_ = std::make_unique<ThrowPreview>();
 	throwPreview_->Initialize(bloodDecalManager_);
+
+	// プレイヤーアクション用インスタンスの生成
+	grab_ = std::make_unique<PlayerGrab>();
 
 	// オーディオマネージャー
 	audioManager_ = std::make_unique<AudioManager>();
@@ -164,7 +166,7 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 	speedMultiplier_ = 1.0f;
 
 	// 掴んでいる場合は速度を低下
-	if (isHold_) {
+	if (grab_->IsHolding()) {
 		speedMultiplier_ *= 0.3f;
 	}
 
@@ -189,7 +191,7 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		}
 
 		// 移動更新
-		move_->Update(&transform_, inputDir, aimDir, deltaTime, speedMultiplier_, isHold_);
+		move_->Update(&transform_, inputDir, aimDir, deltaTime, speedMultiplier_, grab_->IsHolding());
 
 		// 攻撃等に使うベクトルの更新
 		lastMoveDirection_.x = std::sinf(transform_.rotate.y);
@@ -220,66 +222,18 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 	Enemy* targetEnemy = nullptr;
 	float enemyMinDist = FLT_MAX;
 
-	// 敵を掴んでいない時のみ新しいターゲットを探す
-	if (!isHold_) {
-		for (auto& enemy : enemyManager->GetEnemies()) {
-			if (enemy->IsDead())
-				continue;
-
-			Vector3 ePos = enemy->GetPos();
-			Vector3 diff = {ePos.x - transform_.translate.x, ePos.y - transform_.translate.y, ePos.z - transform_.translate.z};
-			float dist = std::sqrt(diff.x * diff.x + diff.y * diff.y + diff.z * diff.z);
-
-			if (dist < enemyMinDist && dist < grabRange_) {
-				enemyMinDist = dist;
-				targetEnemy = enemy.get();
-			}
-		}
-	}
-
-	// 掴める/突き飛ばせる一番近い石鹸を探す
-	Soap* targetSoap = nullptr;
-	if (!isHold_) {
-		float soapMinDist = FLT_MAX;
-		for (const auto& soap : soaps) {
-			// 破壊済みの石鹸は掴めないようにスキップする
-			if (soap->IsBroken()) {
-				continue;
-			}
-
-			Vector3 diff = soap->GetPos() - transform_.translate;
-			diff.y = 0.0f;
-			float dist = MathUtility::Length(diff);
-
-			if (dist < soapMinDist && dist < grabRange_) {
-				soapMinDist = dist;
-				targetSoap = soap.get();
-			}
-		}
-
-		// 敵の方が近ければ敵を、石鹸の方が近ければ石鹸を優先
-		if (targetSoap && targetEnemy) {
-			if (soapMinDist < enemyMinDist) {
-				targetEnemy = nullptr;
-			} else {
-				targetSoap = nullptr;
-			}
-		}
-	}
-
-	isGrab_ = input->MouseButtonDown(1);
-	isGrabReleased_ = input->MouseButtonReleased(1);
-	isAttackTriggered_ = input->MouseButtonTriggered(0);
-
-	// 掴みボタンが押された瞬間のフラグ
+	// 掴み、攻撃の入力フラグ
+	bool isGrab = input->MouseButtonDown(1);
+	bool isGrabReleased = input->MouseButtonReleased(1);
 	bool isGrabJustPressed = input->MouseButtonTriggered(1);
+	isAttackTriggered_ = input->MouseButtonTriggered(0);
 
 	if (gamePad && gamePad->GetState().connected) {
 		const auto& padState = gamePad->GetState();
 
 		// Lトリガーで掴み
-		if (padState.axes.lt > 0.3f && !isGrab_) {
-			isGrab_ = true;
+		if (padState.axes.lt > 0.3f && !isGrab) {
+			isGrab = true;
 			// 前フレームの入力が閾値以下だった場合のみ押した瞬間とみなす
 			if (preLt_ <= 0.3f) {
 				isGrabJustPressed = true;
@@ -287,8 +241,8 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		}
 
 		// 放す
-		if (isHold_ && !isGrab_) {
-			isGrabReleased_ = true;
+		if (grab_->IsHolding() && !isGrab) {
+			isGrabReleased = true;
 		}
 
 		// Rトリガーで突き飛ばし
@@ -305,121 +259,29 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		preRt_ = 0.0f;
 	}
 
-	// 石鹸の掴み・投げ処理
-	if (!isHold_ && isGrabJustPressed && targetSoap != nullptr) {
-		heldSoap_ = targetSoap;
-		heldSoap_->Grab();
-		isHold_ = true; // 掴みアニメーション・移動速度低下は敵と共通
-		isGrabTriggered_ = true;
-		move_->ResetVelocity();
+	// 掴み、投げ処理
+	PlayerGrab::Input grabInput{isGrab, isGrabJustPressed, isGrabReleased, isAttackTriggered_};
+	PlayerGrab::Context grabCtx{transform_.translate, transform_.rotate, lastMoveDirection_, enableAttack_};
+	PlayerGrab::Result grabResult = grab_->Update(grabInput, grabCtx, enemyManager, soaps);
+
+	if (grabResult.grabbedEnemy || grabResult.grabbedSoap) {
+		isGrabTriggered_ = true; // GamePlaySceneがカメラシェイクに使う
 	}
 
-	if (heldSoap_ != nullptr) {
-		if (isAttackTriggered_) {
-			// 掴んでいる石鹸を投げる
-			Vector3 velocity = {lastMoveDirection_.x * soapThrowPower_, 0.0f, lastMoveDirection_.y * soapThrowPower_};
-			heldSoap_->Throw(velocity);
-			heldSoap_ = nullptr;
-			isHold_ = false;
-			move_->ResetVelocity();
-		} else if (isGrab_) {
-			// 掴んでいる間はプレイヤーの前方に固定
-			Vector3 forward = {lastMoveDirection_.x, 0.0f, lastMoveDirection_.y};
-			Vector3 holdPos = heldSoap_->GetPos();
-			holdPos.x = transform_.translate.x + forward.x * attackOffset_;
-			holdPos.z = transform_.translate.z + forward.z * attackOffset_;
-			heldSoap_->SetPos(holdPos);
-		} else {
-			// 掴みボタンを離したらその場に置く
-			heldSoap_ = nullptr;
-			isHold_ = false;
-		}
-	} else if (targetSoap != nullptr && isAttackTriggered_) {
-		// 掴まずに直接突き飛ばす
-		Vector3 velocity = {lastMoveDirection_.x * soapThrowPower_, 0.0f, lastMoveDirection_.y * soapThrowPower_};
-		targetSoap->Throw(velocity);
-		move_->ResetVelocity();
+	if (grabResult.grabbedEnemy) {
+		animator_->PlayAction(PlayerAnim::Hold);
 	}
 
-	// 掴み・投げ処理の更新
-	if (enableAttack_ && !isHold_ && isGrabJustPressed) {
-		// 敵が近くにいた場合は掴み状態に移行する
-		if (targetEnemy != nullptr) {
-			isHold_ = true;
-			heldEnemy_ = targetEnemy;
-			heldEnemy_->SetEnableAI(false);
-			heldEnemy_->SetShotHoldState(true);
-			heldEnemy_->SetAIState(EnemyAI::State::Hold);
-			heldEnemy_->ResetShotTimer();
-			isGrabTriggered_ = true;
-
-			// 掴みアニメーション再生
-			animator_->PlayAction(PlayerAnim::Hold);
-
-			// 敵を掴んだ瞬間にプレイヤーの速度を0にする
-			move_->ResetVelocity();
-		}
-	}
-
-	// 掴んでいる最中の更新処理
-	if (isHold_) {
-		// 掴んでいる敵が死亡している場合はポインタを破棄して掴み状態を解除
-		if (heldEnemy_ != nullptr && heldEnemy_->IsDead()) {
-			isHold_ = false;
-			heldEnemy_ = nullptr;
-		}
-		// 掴んでいる間はプレイヤーの位置に敵を固定
-		else if (isGrab_ && heldEnemy_ != nullptr) {
-			Vector3 forward = {lastMoveDirection_.x, 0.0f, lastMoveDirection_.y};
-
-			// 前方オフセット
-			Vector3 holdPos = {transform_.translate.x + forward.x * attackOffset_, transform_.translate.y, transform_.translate.z + forward.z * attackOffset_};
-
-			heldEnemy_->SetPos(holdPos);
-			heldEnemy_->SetRotate(transform_.rotate);
-		}
-		// 手放す処理
-		else if (isGrabReleased_) {
-			isHold_ = false;
-			if (heldEnemy_) {
-				heldEnemy_->SetEnableAI(true);
-				heldEnemy_->SetAIState(EnemyAI::State::Normal);
-				heldEnemy_ = nullptr; // 手放す
-			}
-		}
-	}
-
-	// 投げる・攻撃処理
-	if (enableAttack_ && isAttackTriggered_) {
-		// 投げる対象を決定する（掴んでいる敵がいればそれ、いなければ近くの敵）
-		Enemy* throwTarget = nullptr;
-
-		if (isHold_ && heldEnemy_ != nullptr) {
-			// 掴んでいる敵を投げる場合
-			throwTarget = heldEnemy_;
-			isHold_ = false;
-			heldEnemy_ = nullptr; // 投げたのでポインタをクリア
-		} else if (!isHold_ && targetEnemy != nullptr) {
-			// 掴んでいないが、近くにいる敵を直接投げる場合
-			throwTarget = targetEnemy;
-		}
-
-		// 投げる対象がいればノックバック処理を実行
-		if (throwTarget != nullptr) {
-			throwTarget->SetEnableAI(true);
-			throwTarget->StartKnockBack({lastMoveDirection_.x, 0.0f, lastMoveDirection_.y});
-			throwTarget->SetAIState(EnemyAI::State::Normal);
-		}
-
-		// 攻撃アニメーション再生
+	if (grabResult.attacked) {
 		animator_->PlayAction(PlayerAnim::Push);
+	}
 
-		// 投げアクションを行った瞬間にプレイヤーの速度を0にする
+	if (grabResult.stopMovement) {
 		move_->ResetVelocity();
 	}
 
 	// アニメーションの更新
-	animator_->Update(deltaTime, isMoving_, isHold_);
+	animator_->Update(deltaTime, isMoving_, grab_->IsHolding());
 
 	// ヒットエフェクトの更新
 	for (auto& particle : hitEffects_) {
@@ -649,28 +511,14 @@ void Player::DrawImGui() {
 }
 
 void Player::UpdateThrowPreview(float deltaTime) {
-	// 敵（攻撃可能な状態）か石鹸のどちらかを掴んでいない場合は非表示
-	const bool isEnemyTarget = (heldEnemy_ != nullptr && enableAttack_);
-	const bool isSoapTarget = (heldSoap_ != nullptr);
-
-	if (!isHold_ || (!isEnemyTarget && !isSoapTarget)) {
-		throwPreview_->Hide();
-		return;
-	}
-
-	// 掴んでいる対象に応じた物理パラメータ
 	Vector3 pos{};
 	float power = 0.0f;
 	float friction = 1.0f;
 
-	if (isSoapTarget) {
-		pos = heldSoap_->GetPos();
-		power = soapThrowPower_;
-		friction = heldSoap_->GetFriction(); // Soapクラスの摩擦係数
-	} else {
-		pos = heldEnemy_->GetPos();
-		power = heldEnemy_->GetKnockBackPower();
-		friction = heldEnemy_->GetKnockBackFriction();
+	// 何も掴んでいなければプレビューを表示しない
+	if (!grab_->GetPreviewParams(enableAttack_, pos, power, friction)) {
+		throwPreview_->Hide();
+		return;
 	}
 
 	// 軌道プレビューの更新
