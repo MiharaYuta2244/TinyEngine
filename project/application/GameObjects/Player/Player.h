@@ -65,9 +65,6 @@ public:
 	// 本体の当たり判定
 	AABB GetBodyCol() const { return bodyCol_; }
 
-	// 敵のポインタ
-	Enemy* GetTargetEnemy() const { return grab_->GetHeldEnemy(); }
-
 	// 現在のHP取得Getter
 	float GetCurrentHP() const { return hp_->GetCurrentHP(); }
 
@@ -184,12 +181,6 @@ private:
 
 	// プレイヤーの生存時間
 	float aliveTImer_ = 0.0f;
-
-	// 前フレームのLTボタンの入力値
-	float preLt_ = 0.0f;
-
-	// 前フレームのRTボタンの入力値
-	float preRt_ = 0.0f;
 
 	// ポイントライト調整用パラメータ
 	float pointLightHeightOffset_ = 2.0f;                // プレイヤー中心からの高さ

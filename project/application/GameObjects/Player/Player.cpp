@@ -67,96 +67,15 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 	// 音声更新
 	audioManager_->Update();
 
-	// アナログ入力ベクトル
-	Vector2 inputDir = {0.0f, 0.0f};
-	Vector2 aimDir = {0.0f, 0.0f};
-
-	if (input->KeyDown(DIK_D))
-		inputDir.x += 1.0f;
-	if (input->KeyDown(DIK_A))
-		inputDir.x -= 1.0f;
-	if (input->KeyDown(DIK_W))
-		inputDir.y += 1.0f;
-	if (input->KeyDown(DIK_S))
-		inputDir.y -= 1.0f;
-
-	// マウスカーソル位置からプレイヤーの向く方向を計算
-	bool isGamePadConnected = (gamePad && gamePad->GetState().connected);
-
-	if (!isGamePadConnected && ctx_ && ctx_->object3dCommon) {
-		Camera* camera = ctx_->object3dCommon->GetDefaultCamera();
-		if (camera) {
-			Vector2 mousePos = input->GetMousePosition();
-
-			// スクリーン座標からNDC座標
-			float nx = (2.0f * mousePos.x) / static_cast<float>(WinApp::kClientWidth) - 1.0f;
-			float ny = 1.0f - (2.0f * mousePos.y) / static_cast<float>(WinApp::kClientHeight);
-
-			Matrix4x4 viewMat = camera->GetViewMatrix();
-			Matrix4x4 projMat = camera->GetProjection();
-			Matrix4x4 vpInv = MathUtility::Inverse(MathUtility::Multiply(viewMat, projMat));
-
-			Vector3 nearPos = {nx, ny, 0.0f};
-			Vector3 farPos = {nx, ny, 1.0f};
-			Vector3 nearWorld = MathUtility::Transform(nearPos, vpInv);
-			Vector3 farWorld = MathUtility::Transform(farPos, vpInv);
-			Vector3 rayDir = MathUtility::Normalize(farWorld - nearWorld);
-
-			// プレイヤーの足元の高さの平面とレイの交点を求める
-			float planeY = transform_.translate.y;
-			if (std::abs(rayDir.y) > 0.0001f) {
-				float t = (planeY - nearWorld.y) / rayDir.y;
-				if (t > 0.0f) {
-					Vector3 hitPos = nearWorld + rayDir * t;
-					Vector3 toCursor = hitPos - transform_.translate;
-					toCursor.y = 0.0f;
-
-					if (MathUtility::LengthSquared(toCursor) > 0.0001f) {
-						aimDir = {toCursor.x, toCursor.z};
-					}
-				}
-			}
-		}
-	}
-
-	// ゲームパッド入力
-	if (gamePad && gamePad->GetState().connected) {
-		const auto& padState = gamePad->GetState();
-
-		// 十字キー
-		if (padState.buttons.dpadRight)
-			inputDir.x += 1.0f;
-		if (padState.buttons.dpadLeft)
-			inputDir.x -= 1.0f;
-		if (padState.buttons.dpadUp)
-			inputDir.y += 1.0f;
-		if (padState.buttons.dpadDown)
-			inputDir.y -= 1.0f;
-
-		// 左スティック入力（デッドゾーンを超えていれば上書き）
-		if (std::abs(padState.axes.lx) > 0.1f || std::abs(padState.axes.ly) > 0.1f) {
-			inputDir.x = padState.axes.lx;
-			inputDir.y = -padState.axes.ly;
-		}
-
-		// 右スティック入力
-		if (std::abs(padState.axes.rx) > 0.1f || std::abs(padState.axes.ry) > 0.1f) {
-			aimDir.x = padState.axes.rx;
-			aimDir.y = -padState.axes.ry;
-		}
-	}
-
-	// ベクトルの長さを計算し、斜め移動時などに長さが1.0を超えないようにクランプ
-	float length = std::sqrtf(inputDir.x * inputDir.x + inputDir.y * inputDir.y);
-	if (length > 1.0f) {
-		inputDir.x /= length;
-		inputDir.y /= length;
-	}
+	// 入力の取得
+	const PlayerInputState in = input_->Poll(input, gamePad, ctx_, transform_.translate, grab_->IsHolding());
+	isAttackTriggered_ = in.attackPressed;
 
 	// 移動状態の更新と向きの記録
+	const float length = MathUtility::Length(in.moveDir);
 	if (length > 0.05f) {
 		// 正規化して記録（攻撃・投げの方向用）
-		lastMoveDirection_ = {inputDir.x / length, inputDir.y / length};
+		lastMoveDirection_ = {in.moveDir.x / length, in.moveDir.y / length};
 		isMoving_ = true;
 	} else {
 		isMoving_ = false;
@@ -178,7 +97,7 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 			Vector2 forward = {std::sinf(transform_.rotate.y), std::cosf(transform_.rotate.y)};
 
 			// 移動方向を正規化
-			Vector2 moveDir = {inputDir.x / length, inputDir.y / length};
+			Vector2 moveDir = {in.moveDir.x / length, in.moveDir.y / length};
 
 			// 向いている方向と移動方向の内積
 			float dot = forward.x * moveDir.x + forward.y * moveDir.y;
@@ -191,7 +110,7 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		}
 
 		// 移動更新
-		move_->Update(&transform_, inputDir, aimDir, deltaTime, speedMultiplier_, grab_->IsHolding());
+		move_->Update(&transform_, in.moveDir, in.aimDir, deltaTime, speedMultiplier_, grab_->IsHolding());
 
 		// 攻撃等に使うベクトルの更新
 		lastMoveDirection_.x = std::sinf(transform_.rotate.y);
@@ -218,54 +137,24 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 	// 衝突判定のために、移動後の座標で仮のAABBの更新
 	UpdateCollision();
 
-	// 掴み判定用：一番近い敵を探す
-	Enemy* targetEnemy = nullptr;
-	float enemyMinDist = FLT_MAX;
-
 	// 掴み、攻撃の入力フラグ
-	bool isGrab = input->MouseButtonDown(1);
-	bool isGrabReleased = input->MouseButtonReleased(1);
-	bool isGrabJustPressed = input->MouseButtonTriggered(1);
-	isAttackTriggered_ = input->MouseButtonTriggered(0);
+	PlayerGrab::Input grabInput;
+	grabInput.grabHeld = in.grabHeld;
+	grabInput.grabPressed = in.grabPressed;
+	grabInput.grabReleased = in.grabReleased;
+	grabInput.attackPressed = in.attackPressed;
 
-	if (gamePad && gamePad->GetState().connected) {
-		const auto& padState = gamePad->GetState();
+	PlayerGrab::Context grabCtx;
+	grabCtx.position = transform_.translate;
+	grabCtx.rotate = transform_.rotate;
+	grabCtx.forward = lastMoveDirection_;
+	grabCtx.enableAttack = enableAttack_;
 
-		// Lトリガーで掴み
-		if (padState.axes.lt > 0.3f && !isGrab) {
-			isGrab = true;
-			// 前フレームの入力が閾値以下だった場合のみ押した瞬間とみなす
-			if (preLt_ <= 0.3f) {
-				isGrabJustPressed = true;
-			}
-		}
+	const PlayerGrab::Result grabResult = grab_->Update(grabInput, grabCtx, enemyManager, soaps);
 
-		// 放す
-		if (grab_->IsHolding() && !isGrab) {
-			isGrabReleased = true;
-		}
-
-		// Rトリガーで突き飛ばし
-		if (padState.axes.rt > 0.3f && preRt_ <= 0.3f) {
-			isAttackTriggered_ = true;
-		}
-
-		// 現在のLT/RTの値を保存
-		preLt_ = padState.axes.lt;
-		preRt_ = padState.axes.rt;
-	} else {
-		// パッドが繋がっていない場合はリセット
-		preLt_ = 0.0f;
-		preRt_ = 0.0f;
-	}
-
-	// 掴み、投げ処理
-	PlayerGrab::Input grabInput{isGrab, isGrabJustPressed, isGrabReleased, isAttackTriggered_};
-	PlayerGrab::Context grabCtx{transform_.translate, transform_.rotate, lastMoveDirection_, enableAttack_};
-	PlayerGrab::Result grabResult = grab_->Update(grabInput, grabCtx, enemyManager, soaps);
-
+	// GamePlaySceneがカメラシェイクに使う
 	if (grabResult.grabbedEnemy || grabResult.grabbedSoap) {
-		isGrabTriggered_ = true; // GamePlaySceneがカメラシェイクに使う
+		isGrabTriggered_ = true;
 	}
 
 	if (grabResult.grabbedEnemy) {
@@ -276,6 +165,7 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		animator_->PlayAction(PlayerAnim::Push);
 	}
 
+	// 掴んだor投げた瞬間はプレイヤーの速度を0にする
 	if (grabResult.stopMovement) {
 		move_->ResetVelocity();
 	}
