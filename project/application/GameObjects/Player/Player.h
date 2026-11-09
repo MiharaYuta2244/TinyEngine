@@ -9,8 +9,11 @@
 #include "GameTimer.h"
 #include "OBB.h"
 #include "Particle.h"
+#include "PlayerAnimator.h"
 #include "PlayerHealth.h"
+#include "PlayerInput.h"
 #include "PlayerMove.h"
+#include "ThrowPreview.h"
 #include "Utility/GameRumbleController.h"
 
 class EnemyManager;
@@ -126,12 +129,6 @@ private:
 	// 投げ軌道プレビューの更新
 	void UpdateThrowPreview(float deltaTime);
 
-	// 投げ軌道プレビューを隠す
-	void HideThrowPreview();
-
-	// アニメーションヘルパー関数
-	void PlayActionAnimation(const std::string& modelName);
-
 private:
 	Vector2 velocity_;
 	OBB attackCol_;
@@ -154,9 +151,12 @@ private:
 	// つかんでいる敵のポインタを記憶するための変数
 	Enemy* heldEnemy_ = nullptr;
 
-	std::unique_ptr<ObjectRender> render_; // 描画用インスタンス
-	std::unique_ptr<PlayerMove> move_;     // 移動用インスタンス
-	std::unique_ptr<PlayerHealth> hp_;     // HP管理用インスタンス
+	std::unique_ptr<ObjectRender> render_;       // 描画用インスタンス
+	std::unique_ptr<PlayerMove> move_;           // 移動用インスタンス
+	std::unique_ptr<PlayerHealth> hp_;           // HP管理用インスタンス
+	std::unique_ptr<PlayerInput> input_;         // 入力用インスタンス
+	std::unique_ptr<PlayerAnimator> animator_;   // アニメーション用インスタンス
+	std::unique_ptr<ThrowPreview> throwPreview_; // 軌道プレビュー用インスタンス
 
 	// 環境マップ　強さ
 	float envScale_ = 0.0f;
@@ -202,10 +202,6 @@ private:
 	// プレイヤーの生存時間
 	float aliveTImer_ = 0.0f;
 
-	// アクション（攻撃・投げ）アニメーションの管理用
-	bool isActionAnimating_ = false;
-	float actionAnimTimer_ = 0.0f;
-
 	// 前フレームのLTボタンの入力値
 	float preLt_ = 0.0f;
 
@@ -221,16 +217,6 @@ private:
 
 	// オーディオマネージャー
 	std::unique_ptr<TinyEngine::AudioManager> audioManager_;
-
-	// 投げ軌道プレビュー用ドットの数
-	static const int kThrowPreviewDotCount_ = 12;
-
-	// 投げ軌道プレビュー用デカール
-	std::array<TinyEngine::DecalManager::DecalData*, kThrowPreviewDotCount_> throwPreviewDecals_{};
-
-	// 投げ軌道プレビューのスクロール
-	float throwPreviewScrollOffset_ = 0.0f;
-	float throwPreviewScrollSpeed_ = 4.0f;
 
 	Soap* heldSoap_ = nullptr;     // 掴んでいる石鹸
 	float soapThrowPower_ = 15.0f; // 石鹸を投げる初速

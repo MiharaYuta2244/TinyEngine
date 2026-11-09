@@ -34,18 +34,24 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 	hp_ = std::make_unique<PlayerHealth>();
 	hp_->Initialize(maxHP_);
 
+	// 入力用インスタンス生成
+	input_ = std::make_unique<PlayerInput>();
+
+	// アニメーション用インスタンス生成
+	animator_ = std::make_unique<PlayerAnimator>();
+	animator_->Initialize(render_.get());
+
 	// 血痕の管理インスタンスポインタ
 	bloodDecalManager_ = bloodDecalManager;
+
+	// 投げ軌道プレビューの生成&初期化
+	throwPreview_ = std::make_unique<ThrowPreview>();
+	throwPreview_->Initialize(bloodDecalManager_);
 
 	// オーディオマネージャー
 	audioManager_ = std::make_unique<AudioManager>();
 	audioManager_->Initialize();
 	audioManager_->LoadWave("Heal", "resources/sounds/se/Heal.mp3");
-
-	// 投げ軌道プレビュー用ドットをあらかじめ生成しておく
-	for (auto& decal : throwPreviewDecals_) {
-		decal = bloodDecalManager_->AddDecal("white.png", {0.0f, -1000.0f, 0.0f}, {std::numbers::pi_v<float> / 2.0f, 0, 0}, {0.15f, 0.15f, 1.0f}, {1.0f, 0.85f, 0.2f, 0.0f}, 0, 0, 100);
-	}
 
 	// 振動マネージャーの生成
 	rumbleManager_ = std::make_unique<GameRumbleController>();
@@ -55,14 +61,6 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 	// RumbleManagerの初期化と更新
 	rumbleManager_->Initialize(gamePad);
 	rumbleManager_->Update(deltaTime);
-
-	// アクションアニメーションのタイマー更新
-	if (isActionAnimating_) {
-		actionAnimTimer_ -= deltaTime;
-		if (actionAnimTimer_ <= 0.0f) {
-			isActionAnimating_ = false; // 指定時間経過でアクション終了
-		}
-	}
 
 	// 音声更新
 	audioManager_->Update();
@@ -158,30 +156,8 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		// 正規化して記録（攻撃・投げの方向用）
 		lastMoveDirection_ = {inputDir.x / length, inputDir.y / length};
 		isMoving_ = true;
-
-		// アクションアニメーション中でない場合のみ、歩きモデルに切り替え
-		if (!isActionAnimating_) {
-			std::string targetModel = isHold_ ? "GorillaHoldWalking.gltf" : "Gorilla.gltf";
-			if (render_->GetFilepath() != targetModel) {
-				render_->SetModel(targetModel);
-				KeyframeAnimation keyframeAnimation;
-				Animation walkAnimation = keyframeAnimation.LoadAnimationFile(targetModel);
-				render_->GetObject3d()->PlayAnimation(walkAnimation);
-			}
-		}
 	} else {
 		isMoving_ = false;
-
-		// アクションアニメーション中でない場合のみ、待機モデルに切り替え
-		if (!isActionAnimating_) {
-			std::string targetModel = isHold_ ? "GorillaHolding.gltf" : "GorillaIdle.gltf";
-			if (render_->GetFilepath() != targetModel) {
-				render_->SetModel(targetModel);
-				KeyframeAnimation keyframeAnimation;
-				Animation idleAnimation = keyframeAnimation.LoadAnimationFile(targetModel);
-				render_->GetObject3d()->PlayAnimation(idleAnimation);
-			}
-		}
 	}
 
 	// 基本速度
@@ -336,7 +312,6 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		isHold_ = true; // 掴みアニメーション・移動速度低下は敵と共通
 		isGrabTriggered_ = true;
 		move_->ResetVelocity();
-		PlayActionAnimation("GorillaHold.gltf");
 	}
 
 	if (heldSoap_ != nullptr) {
@@ -347,7 +322,6 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 			heldSoap_ = nullptr;
 			isHold_ = false;
 			move_->ResetVelocity();
-			PlayActionAnimation("GorillaPush.gltf");
 		} else if (isGrab_) {
 			// 掴んでいる間はプレイヤーの前方に固定
 			Vector3 forward = {lastMoveDirection_.x, 0.0f, lastMoveDirection_.y};
@@ -365,24 +339,10 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		Vector3 velocity = {lastMoveDirection_.x * soapThrowPower_, 0.0f, lastMoveDirection_.y * soapThrowPower_};
 		targetSoap->Throw(velocity);
 		move_->ResetVelocity();
-		PlayActionAnimation("GorillaPush.gltf");
 	}
 
 	// 掴み・投げ処理の更新
 	if (enableAttack_ && !isHold_ && isGrabJustPressed) {
-
-		// 敵の有無に関わらず、掴みアニメーションを再生
-		if (render_->GetFilepath() != "GorillaHold.gltf") {
-			render_->SetModel("GorillaHold.gltf");
-			KeyframeAnimation keyframeAnimation;
-			Animation holdAnimation = keyframeAnimation.LoadAnimationFile("GorillaHold.gltf");
-			render_->GetObject3d()->PlayAnimation(holdAnimation);
-
-			// アニメーション再生状態に設定
-			isActionAnimating_ = true;
-			actionAnimTimer_ = 0.2f;
-		}
-
 		// 敵が近くにいた場合は掴み状態に移行する
 		if (targetEnemy != nullptr) {
 			isHold_ = true;
@@ -392,6 +352,9 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 			heldEnemy_->SetAIState(EnemyAI::State::Hold);
 			heldEnemy_->ResetShotTimer();
 			isGrabTriggered_ = true;
+
+			// 掴みアニメーション再生
+			animator_->PlayAction(PlayerAnim::Hold);
 
 			// 敵を掴んだ瞬間にプレイヤーの速度を0にする
 			move_->ResetVelocity();
@@ -448,21 +411,15 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 			throwTarget->SetAIState(EnemyAI::State::Normal);
 		}
 
-		// アニメーション切り替え
-		if (render_->GetFilepath() != "GorillaPush.gltf") {
-			render_->SetModel("GorillaPush.gltf");
-			KeyframeAnimation keyframeAnimation;
-			Animation pushAnimation = keyframeAnimation.LoadAnimationFile("GorillaPush.gltf");
-			render_->GetObject3d()->PlayAnimation(pushAnimation);
-
-			// アクションアニメーションの再生開始を記録し、タイマーを設定
-			isActionAnimating_ = true;
-			actionAnimTimer_ = 0.2f;
-		}
+		// 攻撃アニメーション再生
+		animator_->PlayAction(PlayerAnim::Push);
 
 		// 投げアクションを行った瞬間にプレイヤーの速度を0にする
 		move_->ResetVelocity();
 	}
+
+	// アニメーションの更新
+	animator_->Update(deltaTime, isMoving_, isHold_);
 
 	// ヒットエフェクトの更新
 	for (auto& particle : hitEffects_) {
@@ -693,31 +650,15 @@ void Player::DrawImGui() {
 
 void Player::UpdateThrowPreview(float deltaTime) {
 	// 敵（攻撃可能な状態）か石鹸のどちらかを掴んでいない場合は非表示
-	bool isEnemyTarget = (heldEnemy_ != nullptr && enableAttack_);
-	bool isSoapTarget = (heldSoap_ != nullptr);
+	const bool isEnemyTarget = (heldEnemy_ != nullptr && enableAttack_);
+	const bool isSoapTarget = (heldSoap_ != nullptr);
 
 	if (!isHold_ || (!isEnemyTarget && !isSoapTarget)) {
-		HideThrowPreview();
-
-		// 非表示中はスクロール位置をリセット
-		throwPreviewScrollOffset_ = 0.0f;
-
+		throwPreview_->Hide();
 		return;
 	}
 
-	// 投げる方向の計算
-	Vector3 dir = {lastMoveDirection_.x, 0.0f, lastMoveDirection_.y};
-	float dirLen = std::sqrtf(dir.x * dir.x + dir.z * dir.z);
-
-	if (dirLen < 0.0001f) {
-		HideThrowPreview();
-		return;
-	}
-
-	dir.x /= dirLen;
-	dir.z /= dirLen;
-
-	// 掴んでいるオブジェクトに応じた物理パラメータの取得
+	// 掴んでいる対象に応じた物理パラメータ
 	Vector3 pos{};
 	float power = 0.0f;
 	float friction = 1.0f;
@@ -725,149 +666,13 @@ void Player::UpdateThrowPreview(float deltaTime) {
 	if (isSoapTarget) {
 		pos = heldSoap_->GetPos();
 		power = soapThrowPower_;
-		friction = 1.0f; // Soapクラスの摩擦係数
-	} else if (isEnemyTarget) {
+		friction = heldSoap_->GetFriction(); // Soapクラスの摩擦係数
+	} else {
 		pos = heldEnemy_->GetPos();
 		power = heldEnemy_->GetKnockBackPower();
 		friction = heldEnemy_->GetKnockBackFriction();
 	}
 
-	Vector2 velocity = {dir.x * power, dir.z * power};
-
-	constexpr float kSimDeltaTime = 1.0f / 60.0f;
-	constexpr int kMaxSimSteps = 240;
-
-	std::vector<Vector3> points;
-	points.reserve(kMaxSimSteps);
-
-	// 軌道シミュレーション
-	for (int step = 0; step < kMaxSimSteps; ++step) {
-		pos.x += velocity.x * kSimDeltaTime;
-		pos.z += velocity.y * kSimDeltaTime;
-
-		velocity.x = MathUtility::Lerp(velocity.x, 0.0f, friction * kSimDeltaTime);
-		velocity.y = MathUtility::Lerp(velocity.y, 0.0f, friction * kSimDeltaTime);
-
-		if (std::abs(velocity.x) < 0.1f && std::abs(velocity.y) < 0.1f) {
-			velocity = {0.0f, 0.0f};
-		}
-
-		points.push_back(pos);
-
-		if (velocity.x == 0.0f && velocity.y == 0.0f) {
-			break;
-		}
-	}
-
-	if (points.empty()) {
-		HideThrowPreview();
-		return;
-	}
-
-	// 各点の累積距離を計算
-	std::vector<float> accumulatedDistances;
-	accumulatedDistances.reserve(points.size());
-	accumulatedDistances.push_back(0.0f);
-
-	float totalDistance = 0.0f;
-
-	for (size_t i = 1; i < points.size(); ++i) {
-		float dx = points[i].x - points[i - 1].x;
-		float dz = points[i].z - points[i - 1].z;
-
-		float dist = std::sqrtf(dx * dx + dz * dz);
-
-		totalDistance += dist;
-		accumulatedDistances.push_back(totalDistance);
-	}
-
-	if (totalDistance <= 0.0001f) {
-		HideThrowPreview();
-		return;
-	}
-
-	// スクロール処理
-	throwPreviewScrollOffset_ += throwPreviewScrollSpeed_ * deltaTime;
-
-	// 軌道の終端まで行ったら先頭に戻す
-	while (throwPreviewScrollOffset_ >= totalDistance) {
-		throwPreviewScrollOffset_ -= totalDistance;
-	}
-
-	// 各ドットを配置
-	for (int i = 0; i < kThrowPreviewDotCount_; ++i) {
-		float baseDist = 0.0f;
-
-		if (kThrowPreviewDotCount_ > 1) {
-			baseDist = totalDistance * (static_cast<float>(i) / static_cast<float>(kThrowPreviewDotCount_ - 1));
-		}
-
-		// スクロール分だけ前へずらす
-		float targetDist = baseDist + throwPreviewScrollOffset_;
-
-		// 軌道の終端を超えたら先頭へループ
-		while (targetDist >= totalDistance) {
-			targetDist -= totalDistance;
-		}
-
-		Vector3 dotPos = points.front();
-
-		// 軌道上のtargetDistに対応する位置を探す
-		for (size_t j = 1; j < points.size(); ++j) {
-			if (accumulatedDistances[j] >= targetDist) {
-				float segmentLen = accumulatedDistances[j] - accumulatedDistances[j - 1];
-
-				if (segmentLen > 0.0001f) {
-					float t = (targetDist - accumulatedDistances[j - 1]) / segmentLen;
-
-					dotPos.x = points[j - 1].x + (points[j].x - points[j - 1].x) * t;
-					dotPos.z = points[j - 1].z + (points[j].z - points[j - 1].z) * t;
-				} else {
-					dotPos = points[j];
-				}
-
-				break;
-			}
-		}
-
-		dotPos.y = 0.1f;
-		throwPreviewDecals_[i]->transform.translate = dotPos;
-
-		// ドットサイズ
-		float sizeT = targetDist / totalDistance;
-
-		// 先頭ほど大きく、後ろほど小さく
-		constexpr float kMaxDotScale = 0.28f;
-		constexpr float kMinDotScale = 0.03f;
-
-		float dotScale = MathUtility::Lerp(kMaxDotScale, kMinDotScale, sizeT);
-
-		throwPreviewDecals_[i]->transform.scale = {dotScale, dotScale, 1.0f};
-
-		throwPreviewDecals_[i]->color = {1.0f, 0.85f, 0.2f, 0.8f};
-	}
-}
-
-void Player::HideThrowPreview() {
-	for (auto& decal : throwPreviewDecals_) {
-		if (decal) {
-			// 透明&画面外に
-			decal->color.w = 0.0f;
-			decal->transform.translate.y = -1000.0f;
-		}
-	}
-}
-
-void Player::PlayActionAnimation(const std::string& modelName) {
-	if (render_->GetFilepath() == modelName) {
-		return;
-	}
-
-	render_->SetModel(modelName);
-	KeyframeAnimation keyframeAnimation;
-	Animation animation = keyframeAnimation.LoadAnimationFile(modelName);
-	render_->GetObject3d()->PlayAnimation(animation);
-
-	isActionAnimating_ = true;
-	actionAnimTimer_ = 0.2f;
+	// 軌道プレビューの更新
+	throwPreview_->Update(deltaTime, pos, lastMoveDirection_, power, friction);
 }

@@ -61,6 +61,9 @@ public:
 	// 壊れた瞬間の処理
 	bool ConsumeJustBroken();
 
+	// 摩擦係数のGetter
+	float GetFriction() const { return friction_; }
+
 private:
 	// 速度・摩擦の適用
 	void UpdateMove(float deltaTime);

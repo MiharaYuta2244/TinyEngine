@@ -323,6 +323,9 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Application\Fade\SceneTransition.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\PiyoEffect.cpp" />
     <ClCompile Include="Application\GameObjects\Effect\StageClearCutIn.cpp" />
+    <ClCompile Include="Application\GameObjects\Player\PlayerInput.cpp" />
+    <ClCompile Include="Application\GameObjects\Player\PlayerAnimator.cpp" />
+    <ClCompile Include="Application\GameObjects\Player\ThrowPreview.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resources\shaders\Object3d.PS.hlsl">
@@ -591,6 +594,9 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\Fade\SceneTransition.h" />
     <ClInclude Include="Application\GameObjects\Enemy\PiyoEffect.h" />
     <ClInclude Include="Application\GameObjects\Effect\StageClearCutIn.h" />
+    <ClInclude Include="Application\GameObjects\Player\PlayerInput.h" />
+    <ClInclude Include="Application\GameObjects\Player\PlayerAnimator.h" />
+    <ClInclude Include="Application\GameObjects\Player\ThrowPreview.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="externals\imgui\LICENSE.txt" />
