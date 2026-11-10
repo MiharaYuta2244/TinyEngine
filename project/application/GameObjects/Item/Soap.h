@@ -3,6 +3,11 @@
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "GameObjects/PlaceableObject.h"
 #include "GameTimer.h"
+#include <vector>
+
+namespace TinyEngine {
+class Particle;
+}
 
 /// <summary>
 /// プレイヤーが掴んで投げられるアイテム
@@ -10,6 +15,7 @@
 class Soap : public PlaceableObject {
 public:
 	Soap();
+	~Soap();
 
 	// 初期化処理
 	void Initialize(EngineContext* ctx, const Transform& transform);
@@ -74,9 +80,19 @@ private:
 	// 泡エリアの発生・更新
 	void UpdateBubble(float deltaTime);
 
+	// 泡のエフェクト再生
+	void StartBubble();
+
+	// 泡のエフェクト削除
+	void StopBubble();
+
+	// 泡のエフェクト生成
+	void SpawnBubbleEffect();
+
 private:
+	EngineContext* ctx_ = nullptr;
 	std::unique_ptr<ObjectRender> render_;       // 本体描画
-	std::unique_ptr<ObjectRender> bubbleRender_; // 泡の描画
+	std::vector<std::unique_ptr<TinyEngine::Particle>> bubbleEffect_; // 泡のエフェクト
 
 	AABB collision_{};  // 本体の当たり判定
 	AABB bubbleArea_{}; // 泡の当たり判定
@@ -86,7 +102,7 @@ private:
 	float stopThreshold_ = 0.3f;            // これ以下で停止扱い
 
 	Vector3 halfSize_ = {0.5f, 0.3f, 0.5f};       // 本体当たり判定の半径
-	Vector3 bubbleHalfSize_ = {4.0f, 4.0f, 0.5f}; // 泡の当たり判定の半径
+	Vector3 bubbleHalfSize_ = {4.0f, 0.5f, 4.0f}; // 泡の当たり判定の半径
 
 	bool isThrown_ = false;       // 投げられて飛んでいる最中か
 	bool isBubbleActive_ = false; // 泡が発生しているか

@@ -1,7 +1,6 @@
 #include "Player.h"
 #include "ColorPalette.h"
 #include "GameObjects/Effect/EffectGenerator.h"
-#include "GameObjects/Enemy/Enemy.h"
 #include "GameObjects/Enemy/EnemyManager.h"
 #include "GameObjects/PlayTestConfig.h"
 #include "MathOperator.h"

@@ -1,5 +1,7 @@
 #include "Soap.h"
+#include "EffectLibrary.h"
 #include "MathUtility.h"
+#include "Particle.h"
 #include <algorithm>
 #include <numbers>
 
@@ -7,19 +9,16 @@ int Soap::index = 0;
 
 Soap::Soap() { id_ = index++; }
 
+Soap::~Soap() = default;
+
 void Soap::Initialize(EngineContext* ctx, const Transform& transform) {
+	ctx_ = ctx;
 	transform_ = transform;
 
 	// 本体描画
 	render_ = std::make_unique<ObjectRender>();
 	render_->Initialize(ctx, "Soup.obj");
 	render_->SetTransform(transform_);
-
-	// 泡の描画
-	bubbleRender_ = std::make_unique<ObjectRender>();
-	bubbleRender_->Initialize(ctx, "plane.obj");
-	bubbleRender_->SetEnableLighting(false);
-	bubbleRender_->SetColor({0.6f, 0.85f, 1.0f, 0.0f});
 
 	UpdateCollision();
 }
@@ -46,9 +45,9 @@ void Soap::Draw() {
 		render_->Draw();
 	}
 
-	// 泡描画
-	if (isBubbleActive_) {
-		bubbleRender_->Draw();
+	// 泡エフェクト描画
+	for (auto& particle : bubbleEffect_) {
+		particle->Draw();
 	}
 }
 
@@ -63,7 +62,7 @@ void Soap::Throw(const Vector3& velocity) {
 	}
 
 	isThrown_ = true;
-	isBubbleActive_ = false; // 投げ直された場合は前回の泡を消す
+	StopBubble(); // 投げ直された場合は前回の泡を消す
 }
 
 bool Soap::IsDangerous() const {
@@ -110,29 +109,22 @@ void Soap::UpdateCollision() {
 }
 
 void Soap::UpdateBubble(float deltaTime) {
+	// 泡エリアの当たり判定 
 	Vector3 pos = transform_.translate;
 	bubbleArea_.max = {pos.x + bubbleHalfSize_.x, pos.y, pos.z + bubbleHalfSize_.z};
 	bubbleArea_.min = {pos.x - bubbleHalfSize_.x, pos.y, pos.z - bubbleHalfSize_.z};
+
+	// エフェクトは泡の効果が切れた後も、残った粒が消えるまで更新する
+	for (auto& particle : bubbleEffect_) {
+		particle->Update();
+	}
+	std::erase_if(bubbleEffect_, [](const std::unique_ptr<TinyEngine::Particle>& p) { return p->IsFinished(); });
 
 	if (!isBubbleActive_) {
 		return;
 	}
 
 	bubbleTimer_.Update(deltaTime);
-
-	// 残り1秒でフェードアウトさせる
-	float remaining = bubbleDuration_ - bubbleTimer_.GetTimer();
-	float alpha = std::clamp(remaining / 1.0f, 0.0f, 1.0f) * 0.6f;
-
-	bubbleRender_->SetColor({0.6f, 0.85f, 1.0f, alpha});
-	bubbleRender_->SetTransform(
-	    Transform{
-	        {bubbleHalfSize_.x,                 bubbleHalfSize_.y, bubbleHalfSize_.z},
-            {-std::numbers::pi_v<float> / 2.0f, 0.0f,              0.0f             },
-            {pos.x,                             0.05f,             pos.z            }
-    });
-	bubbleRender_->Update();
-
 	if (bubbleTimer_.IsEnd()) {
 		isBubbleActive_ = false;
 	}
@@ -141,7 +133,7 @@ void Soap::UpdateBubble(float deltaTime) {
 void Soap::Grab() {
 	velocity_ = {0.0f, 0.0f, 0.0f};
 	isThrown_ = false;
-	isBubbleActive_ = false; // 持ち上げたら泡は消す
+	StopBubble(); // 持ち上げたら泡は消す
 }
 
 void Soap::Stop() {
@@ -153,13 +145,38 @@ void Soap::Stop() {
 		justBroken_ = true;
 	}
 
-	isBubbleActive_ = true;
 	isBroken_ = true;
-	bubbleTimer_.Initialize(bubbleDuration_);
+	StartBubble();
 }
 
 bool Soap::ConsumeJustBroken() {
 	bool result = justBroken_;
 	justBroken_ = false;
 	return result;
+}
+
+void Soap::StartBubble() {
+	isBubbleActive_ = true;
+	bubbleTimer_.Initialize(bubbleDuration_);
+	SpawnBubbleEffect();
+}
+
+void Soap::StopBubble() {
+	isBubbleActive_ = false;
+	bubbleEffect_.clear(); // 掴まれた・投げ直された時は余韻も含めて即消す
+}
+
+void Soap::SpawnBubbleEffect() {
+	bubbleEffect_.clear();
+
+	// 発生範囲は当たり判定と揃える
+	EffectBuilder::SpawnOptions opt;
+	opt.extent = Vector3{bubbleHalfSize_.x, 0.0f, bubbleHalfSize_.z};
+
+	EffectLibrary::Get().Spawn(ctx_, "SoapBubble", transform_.translate, bubbleEffect_, opt);
+
+	// 発生を止めるタイミングは泡の持続時間に合わせる
+	for (auto& particle : bubbleEffect_) {
+		particle->SetEmitMode(false, bubbleDuration_);
+	}
 }
