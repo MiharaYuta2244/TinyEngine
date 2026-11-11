@@ -58,7 +58,9 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 	rumbleManager_ = std::make_unique<GameRumbleController>();
 }
 
-void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps) {
+void Player::Update(
+    float deltaTime, DirectInput* input, GamePad* gamePad, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps,
+    const std::list<std::unique_ptr<Barricade>>& barricades) {
 	// RumbleManagerの初期化と更新
 	rumbleManager_->Initialize(gamePad);
 	rumbleManager_->Update(deltaTime);
@@ -67,6 +69,8 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 	audioManager_->Update();
 
 	// 入力の取得
+	grab_->ValidateBarricade(barricades);
+	const bool wasHoldingBarricade = grab_->IsHoldingBarricade();
 	const PlayerInputState in = input_->Poll(input, gamePad, ctx_, transform_.translate, grab_->IsHolding());
 	isAttackTriggered_ = in.attackPressed;
 
@@ -109,7 +113,8 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 		}
 
 		// 移動更新
-		move_->Update(&transform_, in.moveDir, in.aimDir, deltaTime, speedMultiplier_, grab_->IsHolding());
+		const Vector2 moveDir = grab_->IsPullingBarricade() && in.grabHeld ? Vector2{} : in.moveDir;
+		move_->Update(&transform_, moveDir, in.aimDir, deltaTime, speedMultiplier_, grab_->IsHolding());
 
 		// 攻撃等に使うベクトルの更新
 		lastMoveDirection_.x = std::sinf(transform_.rotate.y);
@@ -142,21 +147,29 @@ void Player::Update(float deltaTime, DirectInput* input, GamePad* gamePad, Enemy
 	grabInput.grabPressed = in.grabPressed;
 	grabInput.grabReleased = in.grabReleased;
 	grabInput.attackPressed = in.attackPressed;
+	grabInput.moveDir = in.moveDir;
 
 	PlayerGrab::Context grabCtx;
 	grabCtx.position = transform_.translate;
 	grabCtx.rotate = transform_.rotate;
 	grabCtx.forward = lastMoveDirection_;
 	grabCtx.enableAttack = enableAttack_;
+	grabCtx.deltaTime = deltaTime;
 
-	const PlayerGrab::Result grabResult = grab_->Update(grabInput, grabCtx, enemyManager, soaps);
+	PlayerGrab::Result grabResult;
+	if (!hp_->IsDead()) {
+		grabResult = grab_->Update(grabInput, grabCtx, enemyManager, soaps, barricades);
+	}
+	if (wasHoldingBarricade || grabResult.grabbedBarricade) {
+		isAttackTriggered_ = false;
+	}
 
 	// GamePlaySceneがカメラシェイクに使う
-	if (grabResult.grabbedEnemy || grabResult.grabbedSoap) {
+	if (grabResult.grabbedEnemy || grabResult.grabbedSoap || grabResult.grabbedBarricade) {
 		isGrabTriggered_ = true;
 	}
 
-	if (grabResult.grabbedEnemy) {
+	if (grabResult.grabbedEnemy || grabResult.grabbedBarricade) {
 		animator_->PlayAction(PlayerAnim::Hold);
 	}
 
@@ -203,6 +216,11 @@ void Player::PostUpdate() {
 	// 押し戻しによってtransform_が変更された場合、それに合わせてAABBも最終的な正しい位置に合わせる
 	UpdateCollision();
 
+	grab_->PlaceShield(transform_.translate, lastMoveDirection_, transform_.rotate.y);
+	if (hp_->IsDead()) {
+		grab_->ReleaseBarricade();
+	}
+
 	// 最後に描画用の更新を行う
 	render_->Update(transform_);
 }
@@ -223,6 +241,16 @@ void Player::Draw() {
 }
 
 bool Player::IsDead() const { return hp_->IsDead(); }
+
+bool Player::BlocksWithShield(const Vector3& towardAttack) const {
+	if (!grab_->IsHoldingShield() || hp_->IsDead()) {
+		return false;
+	}
+	// 前方の左右60度をガード範囲にする
+	const float dot = lastMoveDirection_.x * towardAttack.x + lastMoveDirection_.y * towardAttack.z;
+	const float lengthSq = towardAttack.x * towardAttack.x + towardAttack.z * towardAttack.z;
+	return dot > 0.0f && dot * dot >= 0.25f * lengthSq;
+}
 
 void Player::Damage(float value) {
 	if (hp_->GetIsInvincible())

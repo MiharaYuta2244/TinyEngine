@@ -4,7 +4,7 @@
 /// <summary>
 /// エディターからドラッグ&ドロップで生成できるオブジェクトの種類
 /// </summary>
-enum class SpawnType { Wall, Door, Glass, Cage, HealArea, Soap, Enemy };
+enum class SpawnType { Wall, Door, Glass, Cage, HealArea, Soap, Enemy, Barricade };
 
 /// <summary>
 /// 生成リクエスト

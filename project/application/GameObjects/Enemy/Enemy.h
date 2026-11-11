@@ -32,7 +32,7 @@ public:
 
 	// 更新処理
 	void Update(
-	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager);
+	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager);
 
 	// 押し戻し完了後に呼ぶ最終更新処理
 	void PostUpdate();
@@ -154,7 +154,7 @@ private:
 	void UpdateEffects(float deltaTime);
 
 	// 状態に応じた視界の更新処理
-	void UpdateVisionCone(WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager);
+	void UpdateVisionCone(const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager);
 
 	// ノックバックの更新
 	void UpdateKnockback(float deltaTime);

@@ -8,7 +8,7 @@ const float NODE_DIAMETER = NODE_RADIUS * 2.0f; // 1マスのサイズ
 const int GRID_SIZE_X = 40;                     // 探索範囲のX方向のマス数
 const int GRID_SIZE_Z = 40;                     // 探索範囲のZ方向のマス数
 
-std::vector<Vector3> AStarPathfinder::FindPath(const Vector3& startPos, const Vector3& targetPos, WallManager* wallManager) {
+std::vector<Vector3> AStarPathfinder::FindPath(const Vector3& startPos, const Vector3& targetPos, const std::vector<AABB>& obstacles) {
 	// 探索用グリッドの動的生成
 	Vector3 gridBottomLeft = startPos;
 	gridBottomLeft.x -= (GRID_SIZE_X * NODE_RADIUS);
@@ -26,7 +26,7 @@ std::vector<Vector3> AStarPathfinder::FindPath(const Vector3& startPos, const Ve
 			worldPoint.z += (z * NODE_DIAMETER + NODE_RADIUS);
 
 			// マスが壁と重なっているかチェック
-			bool walkable = CheckWalkable(worldPoint, NODE_RADIUS, wallManager);
+			bool walkable = CheckWalkable(worldPoint, NODE_RADIUS, obstacles);
 			grid[x].emplace_back(walkable, worldPoint, x, z);
 		}
 	}
@@ -158,17 +158,14 @@ float AStarPathfinder::GetDistance(PathNode* nodeA, PathNode* nodeB) {
 	return 14.0f * dstX + 10.0f * (dstZ - dstX);
 }
 
-bool AStarPathfinder::CheckWalkable(const Vector3& nodePos, float nodeRadius, WallManager* wallManager) {
-	const auto& walls = wallManager->GetObjects();
-
+bool AStarPathfinder::CheckWalkable(const Vector3& nodePos, float nodeRadius, const std::vector<AABB>& obstacles) {
 	// マス目の2D AABB（Y軸を無視したXとZの四角形）
 	float minX = nodePos.x - nodeRadius;
 	float maxX = nodePos.x + nodeRadius;
 	float minZ = nodePos.z - nodeRadius;
 	float maxZ = nodePos.z + nodeRadius;
 
-	for (const auto& wall : walls) {
-		AABB wallCol = wall->GetCollision();
+	for (const auto& wallCol : obstacles) {
 		// 2D平面(XとZ)でのAABB同士の交差判定
 		if (minX <= wallCol.max.x && maxX >= wallCol.min.x && minZ <= wallCol.max.z && maxZ >= wallCol.min.z) {
 			return false; // 壁と重なっているので歩けない

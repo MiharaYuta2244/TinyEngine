@@ -19,6 +19,7 @@ struct StageMiniature::MeshBuild {
 namespace {
 // ミニチュア用の高さ
 constexpr float kWallHalfH = 4.0f;
+constexpr float kBarricadeHalfH = 2.0f;
 constexpr float kDoorHalfH = 3.5f;
 constexpr float kCageHalfH = 3.0f;
 constexpr float kGlassHalfH = 3.0f;
@@ -69,7 +70,7 @@ void StageMiniature::Initialize(EngineContext* ctx, const std::string& stagePath
 	layers_.clear();
 
 	// JSONから箱を集める
-	std::vector<Box> walls, doors, cages, glasses;
+	std::vector<Box> walls, barricades, doors, cages, glasses;
 
 	auto load = [&](const std::string& file, float halfH, bool isDoor, std::vector<Box>& out) {
 		std::vector<Json> entries;
@@ -95,12 +96,13 @@ void StageMiniature::Initialize(EngineContext* ctx, const std::string& stagePath
 	};
 
 	load("Walls.json", kWallHalfH, false, walls);
+	load("Barricades.json", kBarricadeHalfH, false, barricades);
 	load("Doors.json", kDoorHalfH, true, doors);
 	load("Cages.json", kCageHalfH, false, cages);
 	load("Glasses.json", kGlassHalfH, false, glasses);
 
 	std::vector<float> xs, zs;
-	for (auto* list : {&walls, &doors, &cages, &glasses}) {
+	for (auto* list : {&walls, &barricades, &doors, &cages, &glasses}) {
 		for (const Box& b : *list) {
 			xs.push_back(b.pos.x);
 			zs.push_back(b.pos.z);
@@ -113,7 +115,7 @@ void StageMiniature::Initialize(EngineContext* ctx, const std::string& stagePath
 
 	// 全体のバウンディングからXZ中心を求める
 	float minX = 1e9f, maxX = -1e9f, minZ = 1e9f, maxZ = -1e9f;
-	for (auto* list : {&walls, &doors, &cages, &glasses}) {
+	for (auto* list : {&walls, &barricades, &doors, &cages, &glasses}) {
 		for (const Box& b : *list) {
 			// Y回転を考慮した、ワールド軸に沿った半幅を求める
 			const float c = std::abs(std::cos(b.yaw));
@@ -156,6 +158,7 @@ void StageMiniature::Initialize(EngineContext* ctx, const std::string& stagePath
 	};
 
 	build(walls, {0.75f, 0.8f, 0.95f, 1.0f}, false);
+	build(barricades, {0.55f, 0.32f, 0.16f, 1.0f}, false);
 	build(doors, {0.9f, 0.6f, 0.2f, 1.0f}, false);
 	build(cages, {0.4f, 0.4f, 0.45f, 1.0f}, false);
 	build(glasses, {0.5f, 0.9f, 1.0f, 0.35f}, true);

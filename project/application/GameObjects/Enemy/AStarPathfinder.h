@@ -1,10 +1,7 @@
 #pragma once
+#include "AABB.h"
 #include "Vector3.h"
 #include <vector>
-#include "GameObjects/GameObjectManager.h"
-#include "GameObjects/StageObjects/Wall/Wall.h"
-
-using WallManager = GameObjectManager<Wall>;
 
 // 1つのマス目を表す構造体
 struct PathNode {
@@ -28,7 +25,7 @@ struct PathNode {
 class AStarPathfinder {
 public:
 	// スタート座標からゴール座標までの経路リストを計算して返す
-	static std::vector<Vector3> FindPath(const Vector3& startPos, const Vector3& targetPos, WallManager* wallManager);
+	static std::vector<Vector3> FindPath(const Vector3& startPos, const Vector3& targetPos, const std::vector<AABB>& obstacles);
 
 private:
 	// ワールド座標からグリッドのインデックスに変換
@@ -41,5 +38,5 @@ private:
 	static float GetDistance(PathNode* nodeA, PathNode* nodeB);
 
 	// そのマスが壁と重なっていないかを判定
-	static bool CheckWalkable(const Vector3& nodePos, float nodeRadius, WallManager* wallManager);
+	static bool CheckWalkable(const Vector3& nodePos, float nodeRadius, const std::vector<AABB>& obstacles);
 };

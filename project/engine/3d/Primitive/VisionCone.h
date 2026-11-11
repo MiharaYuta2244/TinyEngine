@@ -1,15 +1,18 @@
 #pragma once
+#include "AABB.h"
 #include "EngineContext.h"
 #include "Material.h"
 #include "Transform.h"
 #include "TransformationMatrix.h"
 #include "CameraForGPU.h"
 #include <d3d12.h>
+#include <list>
+#include <memory>
 #include <string>
+#include <vector>
 #include <wrl.h>
 
 class Door;
-class Wall;
 class Glass;
 
 namespace TinyEngine {
@@ -37,7 +40,7 @@ public:
 	/// <summary>
 	/// 更新処理
 	/// </summary>
-	void Update(const std::list<std::unique_ptr<Wall>>& walls, const std::list<std::unique_ptr<Door>>& doors, const std::list<std::unique_ptr<Glass>>& glasses);
+	void Update(const std::vector<AABB>& obstacles, const std::list<std::unique_ptr<Door>>& doors, const std::list<std::unique_ptr<Glass>>& glasses);
 
 	/// <summary>
 	/// 描画処理

@@ -54,7 +54,7 @@ void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalMan
 }
 
 void Enemy::Update(
-    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager) {
+    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager) {
 	if (isDead_)
 		return;
 
@@ -101,7 +101,7 @@ void Enemy::Update(
 	Vector3 prevPos = transform_.translate;
 
 	// AIインスタンス更新
-	ai_->Update(deltaTime, player, enemyBulletManager, wallManager, doorManager, glassManager, enemyBombManager);
+	ai_->Update(deltaTime, player, enemyBulletManager, obstacles, doorManager, glassManager, enemyBombManager);
 
 	// アニメーション更新処理
 	UpdateAnimation(prevPos);
@@ -117,7 +117,7 @@ void Enemy::Update(
 	}
 
 	// 状態に応じた視界の更新処理
-	UpdateVisionCone(wallManager, doorManager, glassManager);
+	UpdateVisionCone(obstacles, doorManager, glassManager);
 
 	// 「!」マークのアニメーションが終了していれば「!」マークインスタンスを削除
 	if (exclamationMark_) {
@@ -442,7 +442,7 @@ void Enemy::UpdateEffects(float deltaTime) {
 	}
 }
 
-void Enemy::UpdateVisionCone(WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager) {
+void Enemy::UpdateVisionCone(const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager) {
 	const bool obscure = PlaytestConfig::obscureMode;
 	visionCone_->SetIgnoreObstacles(obscure);
 
@@ -466,7 +466,7 @@ void Enemy::UpdateVisionCone(WallManager* wallManager, DoorManager* doorManager,
 	// 視界
 	visionCone_->SetTranslate(transform_.translate);
 	visionCone_->SetRotate(transform_.rotate);
-	visionCone_->Update(wallManager->GetObjects(), doorManager->GetObjects(), glassManager->GetObjects());
+	visionCone_->Update(obstacles, doorManager->GetObjects(), glassManager->GetObjects());
 }
 
 void Enemy::UpdateKnockback(float deltaTime) {

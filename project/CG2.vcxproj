@@ -293,6 +293,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Application\GameObjects\ObjectRender\ObjectRender.cpp" />
     <ClCompile Include="Application\GameObjects\Player\PlayerHealth.cpp" />
     <ClCompile Include="Application\GameObjects\StageObjects\Wall\Wall.cpp" />
+    <ClCompile Include="Application\GameObjects\StageObjects\Barricade\Barricade.cpp" />
     <ClCompile Include="Application\Menu\MenuList.cpp" />
     <ClCompile Include="Application\Scene\PauseScene.cpp" />
     <ClCompile Include="Application\Scene\ResultScene.cpp" />
@@ -543,6 +544,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\GameObjects\Player\PlayerHealth.h" />
     <ClInclude Include="Engine\base\utility\gameTimer\GameTimer.h" />
     <ClInclude Include="Application\GameObjects\StageObjects\Wall\Wall.h" />
+    <ClInclude Include="Application\GameObjects\StageObjects\Barricade\Barricade.h" />
     <ClInclude Include="Application\GameObjects\StageObjects\Goal\Goal.h" />
     <ClInclude Include="Engine\tool\json\JsonManager.h" />
     <ClInclude Include="Application\Menu\MenuList.h" />

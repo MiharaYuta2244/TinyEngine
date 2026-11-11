@@ -2,14 +2,54 @@
 #include "GameObjects/Enemy/Enemy.h"
 #include "GameObjects/Enemy/EnemyManager.h"
 #include "GameObjects/Item/Soap.h"
+#include "GameObjects/StageObjects/Barricade/Barricade.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
 #include <cfloat>
+#include <algorithm>
 
-PlayerGrab::Result PlayerGrab::Update(const Input& input, const Context& ctx, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps) {
+PlayerGrab::Result PlayerGrab::Update(
+    const Input& input, const Context& ctx, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps,
+    const std::list<std::unique_ptr<Barricade>>& barricades) {
 	Result result;
 
-	FindTargets(ctx, enemyManager, soaps);
+	if (heldBarricade_) {
+		if (heldBarricade_->IsShield() && input.attackPressed) {
+			heldBarricade_->Throw(ctx.position, ctx.forward, ctx.rotate.y);
+			heldBarricade_ = nullptr;
+			result.attacked = true;
+			result.stopMovement = true;
+		} else if (input.grabHeld) {
+			if (heldBarricade_->IsPulling()) {
+				heldBarricade_->Pull(input.moveDir, ctx.deltaTime);
+			}
+		} else {
+			ReleaseBarricade();
+		}
+		return result;
+	}
+
+	const float nearestTarget = FindTargets(ctx, enemyManager, soaps);
+	if (!IsHolding() && input.grabPressed) {
+		float nearest = std::min(nearestTarget, grabRange_);
+		for (const auto& barricade : barricades) {
+			if (!barricade->CanGrab() || std::abs(barricade->GetCollision().min.y - ctx.position.y) > grabRange_) {
+				continue;
+			}
+			const float distance = MathUtility::Length(barricade->GetGrabOffset(ctx.position));
+			if (distance < nearest) {
+				nearest = distance;
+				heldBarricade_ = barricade.get();
+			}
+		}
+		if (heldBarricade_) {
+			heldBarricade_->Grab(ctx.position);
+			result.grabbedBarricade = true;
+			result.stopMovement = true;
+			return result;
+		}
+	}
+
 	UpdateSoap(input, ctx, result);
 	TryGrabEnemy(input, ctx, result);
 	UpdateHeldEnemy(input, ctx);
@@ -18,13 +58,13 @@ PlayerGrab::Result PlayerGrab::Update(const Input& input, const Context& ctx, En
 	return result;
 }
 
-void PlayerGrab::FindTargets(const Context& ctx, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps) {
+float PlayerGrab::FindTargets(const Context& ctx, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps) {
 	nearEnemy_ = nullptr;
 	nearSoap_ = nullptr;
 
 	// 何かを掴んでいる間は新しいターゲットを探さない
 	if (IsHolding()) {
-		return;
+		return grabRange_;
 	}
 
 	// 一番近い敵(3D距離)
@@ -67,6 +107,37 @@ void PlayerGrab::FindTargets(const Context& ctx, EnemyManager* enemyManager, con
 			nearSoap_ = nullptr;
 		}
 	}
+	return std::min(soapMinDist, ctx.enableAttack ? enemyMinDist : FLT_MAX);
+}
+
+void PlayerGrab::ValidateBarricade(const std::list<std::unique_ptr<Barricade>>& barricades) {
+	// エディターで削除された場合は参照を破棄する
+	if (heldBarricade_ && std::none_of(barricades.begin(), barricades.end(), [this](const auto& barricade) {
+		    return barricade.get() == heldBarricade_ && (barricade->IsPulling() || barricade->IsShield());
+	    })) {
+		heldBarricade_ = nullptr;
+	}
+}
+
+void PlayerGrab::ReleaseBarricade() {
+	if (heldBarricade_) {
+		heldBarricade_->Release();
+		heldBarricade_ = nullptr;
+	}
+}
+
+void PlayerGrab::PlaceShield(const Vector3& position, const Vector2& forward, float yaw) {
+	if (IsHoldingShield()) {
+		heldBarricade_->PlaceShield(position, forward, yaw);
+	}
+}
+
+bool PlayerGrab::IsPullingBarricade() const {
+	return heldBarricade_ && heldBarricade_->IsPulling();
+}
+
+bool PlayerGrab::IsHoldingShield() const {
+	return heldBarricade_ && heldBarricade_->IsShield();
 }
 
 void PlayerGrab::UpdateSoap(const Input& input, const Context& ctx, Result& result) {

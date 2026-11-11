@@ -6,7 +6,6 @@
 #include "GameObjects/GameObjectManager.h"
 #include "GameObjects/StageObjects/Door/Door.h"
 #include "GameObjects/StageObjects/Glass/Glass.h"
-#include "GameObjects/StageObjects/Wall/Wall.h"
 #include "Transform.h"
 #include <vector>
 
@@ -14,7 +13,6 @@ class EnemyBulletManager;
 class EnemyBombManager;
 class Player;
 
-using WallManager = GameObjectManager<Wall>;
 using DoorManager = GameObjectManager<Door>;
 using GlassManager = GameObjectManager<Glass, TinyEngine::DecalManager*>;
 
@@ -36,7 +34,7 @@ public:
 
 	// 更新処理
 	void Update(
-	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager);
+	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager);
 
 	// Getter
 	State GetState() const { return state_; }
@@ -115,17 +113,17 @@ private:
 	void LookatPlayer(float deltaTime, Vector3 playerPos, Vector3 enemyPos, float turnSpeed = 6.0f);
 
 	// 通常状態の更新処理
-	void UpdateNormal(float deltaTime, Player* player, WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager);
+	void UpdateNormal(float deltaTime, Player* player, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager);
 
 	// 警戒状態の更新処理
 	void UpdateVigilance(
-	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager);
+	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager);
 
 	// 拘束状態の更新処理
 	void UpdateHold(float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager);
 
 	// プレイヤーが視界内にいるか判定する
-	bool CheckPlayerInVision(Player* player, WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager);
+	bool CheckPlayerInVision(Player* player, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager);
 
 	// 線分（敵からプレイヤー）とAABB（壁）の交差判定
 	bool IsSegmentIntersectAABB(const Vector3& start, const Vector3& end, const AABB& aabb);

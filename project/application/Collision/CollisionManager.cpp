@@ -9,6 +9,7 @@
 #include "GameObjects/Player/Player.h"
 #include "GameObjects/StageObjects/Stage.h"
 #include <algorithm>
+#include <limits>
 
 using namespace TinyEngine;
 
@@ -41,7 +42,7 @@ void CollisionManager::CheckCollisions(
 			const float blastRadius = enemy->GetDeathBlastRadius();
 
 			// プレイヤーが爆風範囲内にいた場合
-			if (blastRadius > 0.0f && distSq <= blastRadius * blastRadius) {
+			if (blastRadius > 0.0f && distSq <= blastRadius * blastRadius && !player->BlocksWithShield(ePos - pPos)) {
 				player->Damage(player->GetMaxHP()); // プレイヤーを一撃死させる
 				glitchTimer = 0.5f;
 				blurTimer = 1.0f;
@@ -59,8 +60,11 @@ void CollisionManager::CheckCollisions(
 		if (!bullet->IsCollisionActive())
 			continue;
 
-		if (Collision::Intersect(player->GetBodyCol(), bullet->GetCollision())) {
-			bool isGuarded = false;
+		const OBB bulletCollision = bullet->GetCollision();
+		if (Collision::Intersect(player->GetBodyCol(), bulletCollision)) {
+			// レーザーは長いため、中心座標ではなく進行方向の逆を攻撃元とする
+			const Vector3 direction = bulletCollision.orientations[2];
+			bool isGuarded = player->BlocksWithShield({-direction.x, 0.0f, -direction.z});
 
 			if (!camera->GetIsShake()) {
 				camera->StartShake(0.1f, 0.1f);
@@ -139,10 +143,9 @@ void CollisionManager::CheckCollisions(
 	// ==========================================
 	AABB playerAABB = player->GetBodyCol();
 	Vector3 playerPos = player->GetPosition();
+	const auto solidObstacles = stage->GetSolidObstacles();
 
-	for (const auto& wall : stage->GetWallManager()->GetObjects()) {
-		AABB wallAABB = wall->GetCollision();
-
+	for (const auto& wallAABB : solidObstacles) {
 		// AABB同士の交差判定
 		if (playerAABB.min.x <= wallAABB.max.x && playerAABB.max.x >= wallAABB.min.x && playerAABB.min.y <= wallAABB.max.y && playerAABB.max.y >= wallAABB.min.y &&
 		    playerAABB.min.z <= wallAABB.max.z && playerAABB.max.z >= wallAABB.min.z) {
@@ -288,6 +291,57 @@ void CollisionManager::CheckCollisions(
 	}
 
 	// ==========================================
+	// 投げた盾は移動区間で最初に当たった障害物か敵で止まる
+	// ==========================================
+	for (const auto& barricade : stage->GetBarricadeManager()->GetObjects()) {
+		if (!barricade->IsThrown()) {
+			continue;
+		}
+
+		float closestHit = std::numeric_limits<float>::infinity();
+		auto testObstacle = [&](const AABB& obstacle) {
+			float hitTime;
+			if (barricade->CheckThrowHit(obstacle, hitTime)) {
+				closestHit = std::min(closestHit, hitTime);
+			}
+		};
+
+		for (const auto& obstacle : solidObstacles) {
+			testObstacle(obstacle);
+		}
+		for (const auto& door : stage->GetDoorManager()->GetObjects()) {
+			if (!door->GetIsOpen()) {
+				testObstacle(door->GetCollision());
+			}
+		}
+		for (const auto& glass : stage->GetGlassManager()->GetObjects()) {
+			testObstacle(glass->GetCollision());
+		}
+		for (const auto& cage : stage->GetCageManager()->GetObjects()) {
+			testObstacle(cage->GetCollision());
+		}
+
+		Enemy* hitEnemy = nullptr;
+		for (const auto& enemy : enemyManager->GetEnemies()) {
+			float hitTime;
+			if (!enemy->IsDead() && barricade->CheckThrowHit(enemy->GetBodyCol(), hitTime) && hitTime < closestHit) {
+				closestHit = hitTime;
+				hitEnemy = enemy.get();
+			}
+		}
+
+		if (closestHit <= 1.0f) {
+			barricade->LandThrow(closestHit);
+			if (hitEnemy) {
+				hitEnemy->Kill();
+				ProcessEnemyDeath(hitEnemy);
+			}
+		} else if (barricade->HasReachedThrowRange()) {
+			barricade->LandThrow(1.0f);
+		}
+	}
+
+	// ==========================================
 	// 敵と壁の判定（めり込み防止 ＆ ノックバック時死亡）
 	// ==========================================
 	for (auto& enemy : enemyManager->GetEnemies()) {
@@ -297,9 +351,7 @@ void CollisionManager::CheckCollisions(
 		AABB enemyAABB = enemy->GetBodyCol();
 		Vector3 enemyPos = enemy->GetPos();
 
-		for (const auto& wall : stage->GetWallManager()->GetObjects()) {
-			AABB wallAABB = wall->GetCollision();
-
+		for (const auto& wallAABB : solidObstacles) {
 			// AABB同士の交差判定
 			if (enemyAABB.min.x <= wallAABB.max.x && enemyAABB.max.x >= wallAABB.min.x && enemyAABB.min.y <= wallAABB.max.y && enemyAABB.max.y >= wallAABB.min.y && enemyAABB.min.z <= wallAABB.max.z &&
 			    enemyAABB.max.z >= wallAABB.min.z) {
@@ -504,7 +556,7 @@ void CollisionManager::CheckCollisions(
 				camera->StartShake(0.1f, 0.1f);
 			}
 
-			if (bomb->IsExploded()) {
+			if (bomb->IsExploded() && !player->BlocksWithShield(bomb->GetPosition() - player->GetPosition())) {
 				// プレイヤー死亡
 				player->Damage(3);
 			}
@@ -531,7 +583,9 @@ void CollisionManager::CheckCollisions(
 		}
 
 		AABB col = soap->GetCollision();
-		bool hit = HitAny(col, stage->GetWallManager()->GetObjects()) || HitAny(col, stage->GetGlassManager()->GetObjects()) || HitAny(col, stage->GetCageManager()->GetObjects());
+		bool hit = std::any_of(solidObstacles.begin(), solidObstacles.end(), [&](const AABB& obstacle) {
+			return Overlap2D(col, obstacle);
+		}) || HitAny(col, stage->GetGlassManager()->GetObjects()) || HitAny(col, stage->GetCageManager()->GetObjects());
 
 		// 閉じているドアのみ障害物扱い
 		if (!hit) {

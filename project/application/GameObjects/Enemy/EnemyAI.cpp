@@ -19,16 +19,16 @@ void EnemyAI::Initialize(Transform* transform, EngineContext* ctx, IEnemyBehavio
 }
 
 void EnemyAI::Update(
-    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager) {
+    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager) {
 	isShotThisFrame_ = false;
 
 	// 状態に応じたUpdateを呼ぶ
 	switch (state_) {
 	case State::Normal:
-		UpdateNormal(deltaTime, player, wallManager, doorManager, glassManager);
+		UpdateNormal(deltaTime, player, obstacles, doorManager, glassManager);
 		break;
 	case State::Vigilance:
-		UpdateVigilance(deltaTime, player, enemyBulletManager, wallManager, doorManager, glassManager, enemyBombManager);
+		UpdateVigilance(deltaTime, player, enemyBulletManager, obstacles, doorManager, glassManager, enemyBombManager);
 		break;
 	case State::Hold:
 		UpdateHold(deltaTime, player, enemyBulletManager, enemyBombManager);
@@ -54,9 +54,9 @@ void EnemyAI::LookatPlayer(float deltaTime, Vector3 playerPos, Vector3 enemyPos,
 	}
 }
 
-void EnemyAI::UpdateNormal(float deltaTime, Player* player, WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager) {
+void EnemyAI::UpdateNormal(float deltaTime, Player* player, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager) {
 	// 視界チェックを行い、見つけたら警戒状態へ遷移
-	if (CheckPlayerInVision(player, wallManager, doorManager, glassManager)) {
+	if (CheckPlayerInVision(player, obstacles, doorManager, glassManager)) {
 		state_ = State::Vigilance;
 		return;
 	}
@@ -117,9 +117,8 @@ void EnemyAI::UpdateNormal(float deltaTime, Player* player, WallManager* wallMan
 			checkPos.z += patrolDir_.z * checkDistance;
 
 			bool isHitWall = false;
-			const auto& walls = wallManager->GetObjects();
-			for (const auto& wall : walls) {
-				if (IsSegmentIntersectAABB(transform_->translate, checkPos, wall->GetCollision())) {
+			for (const auto& obstacle : obstacles) {
+				if (IsSegmentIntersectAABB(transform_->translate, checkPos, obstacle)) {
 					isHitWall = true;
 					break;
 				}
@@ -143,12 +142,12 @@ void EnemyAI::UpdateNormal(float deltaTime, Player* player, WallManager* wallMan
 }
 
 void EnemyAI::UpdateVigilance(
-    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager) {
+    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager) {
 	Vector3 playerPos = player->GetPosition();
 	Vector3 enemyPos = transform_->translate;
 
 	// 現在プレイヤーが見えているかチェック
-	bool canSeePlayer = CheckPlayerInVision(player, wallManager, doorManager, glassManager);
+	bool canSeePlayer = CheckPlayerInVision(player, obstacles, doorManager, glassManager);
 	canSeePlayer_ = canSeePlayer;
 
 	if (canSeePlayer) {
@@ -201,7 +200,7 @@ void EnemyAI::UpdateVigilance(
 		pathUpdateTimer_ -= deltaTime;
 
 		if (pathUpdateTimer_ <= 0.0f) {
-			currentPath_ = AStarPathfinder::FindPath(enemyPos, lastKnownPlayerPos_, wallManager);
+			currentPath_ = AStarPathfinder::FindPath(enemyPos, lastKnownPlayerPos_, obstacles);
 			currentWaypointIndex_ = 0;
 			pathUpdateTimer_ = 0.5f; // 再計算の頻度
 		}
@@ -286,7 +285,7 @@ void EnemyAI::UpdateHold(float deltaTime, Player* player, EnemyBulletManager* en
 	}
 }
 
-bool EnemyAI::CheckPlayerInVision(Player* player, WallManager* wallManager, DoorManager* doorManager, GlassManager* glassManager) {
+bool EnemyAI::CheckPlayerInVision(Player* player, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager) {
 	Vector3 playerPos = player->GetPosition();
 	Vector3 enemyPos = transform_->translate;
 
@@ -321,11 +320,8 @@ bool EnemyAI::CheckPlayerInVision(Player* player, WallManager* wallManager, Door
 	}
 
 	// 遮蔽物判定（レイキャスト / 線分とAABB）
-	// 壁マネージャーから全ての壁を取得し、間に壁がないかチェック
-	const auto& walls = wallManager->GetObjects();
-	for (const auto& wall : walls) {
-		AABB wallCol = wall->GetCollision();
-		if (IsSegmentIntersectAABB(enemyPos, playerPos, wallCol)) {
+	for (const auto& obstacle : obstacles) {
+		if (IsSegmentIntersectAABB(enemyPos, playerPos, obstacle)) {
 			return false; // 壁に遮られている
 		}
 	}

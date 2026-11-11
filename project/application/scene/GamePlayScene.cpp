@@ -179,10 +179,11 @@ void GamePlayScene::Update() {
 	postEffectController_->Update(deltaTime, player_->GetCurrentHP(), player_->IsDead());
 
 	// プレイヤーの更新処理
-	player_->Update(deltaTime, ctx_.keyboard, ctx_.gamePad, enemyManager_.get(), stage_->GetSoapManager()->GetObjects());
+	player_->Update(
+	    deltaTime, ctx_.keyboard, ctx_.gamePad, enemyManager_.get(), stage_->GetSoapManager()->GetObjects(), stage_->GetBarricadeManager()->GetObjects());
 
 	// 敵の更新処理
-	enemyManager_->Update(deltaTime, player_.get(), enemyBulletManager_.get(), stage_->GetWallManager(), stage_->GetDoorManager(), stage_->GetGlassManager(), enemyBombManager_.get());
+	enemyManager_->Update(deltaTime, player_.get(), enemyBulletManager_.get(), stage_->GetSolidObstacles(), stage_->GetDoorManager(), stage_->GetGlassManager(), enemyBombManager_.get());
 
 	// 敵の弾の更新処理
 	enemyBulletManager_->Update(deltaTime);
@@ -286,6 +287,9 @@ void GamePlayScene::Update() {
 	}
 	for (auto& wall : stage_->GetWallManager()->GetObjects()) {
 		editObjects.push_back(wall.get());
+	}
+	for (auto& barricade : stage_->GetBarricadeManager()->GetObjects()) {
+		editObjects.push_back(barricade.get());
 	}
 	for (auto& door : stage_->GetDoorManager()->GetObjects()) {
 		editObjects.push_back(door.get());
@@ -543,6 +547,8 @@ IGameObject* GamePlayScene::SpawnObject(const SpawnRequest& request) {
 	switch (request.type) {
 	case SpawnType::Wall:
 		return stage_->GetWallManager()->AddObject(request.position);
+	case SpawnType::Barricade:
+		return stage_->GetBarricadeManager()->AddObject(request.position);
 	case SpawnType::Door:
 		return stage_->GetDoorManager()->AddObject(request.position);
 	case SpawnType::Glass:

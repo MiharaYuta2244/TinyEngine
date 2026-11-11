@@ -1,7 +1,6 @@
 #include "VisionCone.h"
 #include "Collision.h"
 #include "DirectXUtils.h"
-#include "GameObjects/StageObjects/Wall/Wall.h"
 #include "GameObjects/Stageobjects/Door/Door.h"
 #include "GameObjects/Stageobjects/Glass/Glass.h"
 #include "MathUtility.h"
@@ -130,7 +129,7 @@ void VisionCone::CreateConstantBuffers() {
 	cameraResource_->Map(0, nullptr, reinterpret_cast<void**>(&cameraData_));
 }
 
-void VisionCone::Update(const std::list<std::unique_ptr<Wall>>& walls, const std::list<std::unique_ptr<Door>>& doors, const std::list<std::unique_ptr<Glass>>& glasses) {
+void VisionCone::Update(const std::vector<AABB>& obstacles, const std::list<std::unique_ptr<Door>>& doors, const std::list<std::unique_ptr<Glass>>& glasses) {
 	// ワールド行列の再計算
 	worldMatrix_ = MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
 
@@ -163,9 +162,9 @@ void VisionCone::Update(const std::list<std::unique_ptr<Wall>>& walls, const std
 
 		if (!ignoreObstacles_) {
 			// 全ての壁に対して交差判定を行う
-			for (const auto& wall : walls) {
+			for (const auto& obstacle : obstacles) {
 				float t = 0.0f;
-				if (Collision::Intersect(ray, wall->GetCollision(), t)) {
+				if (Collision::Intersect(ray, obstacle, t)) {
 					// 最も手前にある壁の衝突地点を記録
 					if (t < closestT) {
 						closestT = t;

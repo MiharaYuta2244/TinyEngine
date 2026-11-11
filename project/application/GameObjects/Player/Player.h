@@ -29,7 +29,9 @@ public:
 	void Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecalManager);
 
 	// 更新処理
-	void Update(float deltaTime, DirectInput* input, GamePad* gamePad, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps);
+	void Update(
+	    float deltaTime, DirectInput* input, GamePad* gamePad, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps,
+	    const std::list<std::unique_ptr<Barricade>>& barricades);
 
 	// 当たり判定などの解決後に行う最終更新処理
 	void PostUpdate();
@@ -49,6 +51,7 @@ public:
 
 	// ダメージ処理
 	void Damage(float value);
+	bool BlocksWithShield(const Vector3& towardAttack) const;
 
 	// 回復処理
 	void Heal(float value);

@@ -28,6 +28,7 @@ public:
 	// 当たり判定のGetter
 	AABB GetCollision() const { return collision_; };
 	AABB GetBombCollision() const { return bombCollision_; };
+	Vector3 GetPosition() const { return transform_.translate; }
 
 	// 終了フラグGetter
 	bool IsFinished() const { return isFinished_; }

@@ -261,6 +261,9 @@
     <ClCompile Include="Application\GameObjects\StageObjects\Wall\Wall.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Application\GameObjects\StageObjects\Barricade\Barricade.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
     <ClCompile Include="Application\GameObjects\StageObjects\Goal\Goal.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -827,6 +830,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObjects\StageObjects\Wall\Wall.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\GameObjects\StageObjects\Barricade\Barricade.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObjects\StageObjects\Goal\Goal.h">

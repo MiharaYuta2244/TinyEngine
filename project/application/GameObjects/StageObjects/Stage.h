@@ -1,4 +1,5 @@
 #pragma once
+#include "Barricade/Barricade.h"
 #include "GameObjects/GameObjectManager.h"
 #include "GameObjects/Item/Soap.h"
 #include "GameObjects/StageObjects/Cage/Cage.h"
@@ -7,9 +8,12 @@
 #include "Goal/Goal.h"
 #include "Ground/Ground.h"
 #include "SceneContext.h"
+#include "Wall/Wall.h"
 #include <memory>
+#include <vector>
 
 using WallManager = GameObjectManager<Wall>;
+using BarricadeManager = GameObjectManager<Barricade>;
 using DoorManager = GameObjectManager<Door>;
 using CageManager = GameObjectManager<Cage>;
 using HealAreaManager = GameObjectManager<HealArea>;
@@ -38,6 +42,8 @@ public:
 
 	// 各種マネージャーへのアクセス用ゲッター
 	WallManager* GetWallManager() const { return wallManager_.get(); }
+	BarricadeManager* GetBarricadeManager() const { return barricadeManager_.get(); }
+	std::vector<AABB> GetSolidObstacles() const;
 	DoorManager* GetDoorManager() const { return doorManager_.get(); }
 	GlassManager* GetGlassManager() const { return glassManager_.get(); }
 	CageManager* GetCageManager() const { return cageManager_.get(); }
@@ -48,6 +54,7 @@ public:
 
 private:
 	std::unique_ptr<WallManager> wallManager_;
+	std::unique_ptr<BarricadeManager> barricadeManager_;
 	std::unique_ptr<DoorManager> doorManager_;
 	std::unique_ptr<GlassManager> glassManager_;
 	std::unique_ptr<CageManager> cageManager_;

@@ -16,6 +16,11 @@ void Stage::Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalM
             {0, 0,  0}
     });
 
+	barricadeManager_ = std::make_unique<BarricadeManager>();
+	barricadeManager_->Initialize(
+	    ctx.engineContext, "BarricadeEditor", stagePath + "Barricades.json",
+	    Transform{{1.5f, 2.0f, 0.25f}, {}, {}});
+
 	// ドアの管理インスタンス生成&初期化
 	doorManager_ = std::make_unique<DoorManager>();
 	doorManager_->Initialize(
@@ -87,6 +92,7 @@ void Stage::Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalM
 
 void Stage::Update(float deltaTime, const Vector3& playerPos, Camera* camera) {
 	wallManager_->Update(deltaTime);
+	barricadeManager_->Update(deltaTime);
 	doorManager_->Update(deltaTime, playerPos);
 	glassManager_->Update();
 	cageManager_->Update(deltaTime);
@@ -100,6 +106,7 @@ void Stage::Draw() {
 	ground_->Draw();
 	doorManager_->Draw();
 	wallManager_->Draw();
+	barricadeManager_->Draw();
 	cageManager_->Draw();
 	soapManager_->Draw();
 	goal_->Draw();
@@ -112,9 +119,29 @@ void Stage::DrawTransparent() {
 
 void Stage::DrawImGui() {
 	wallManager_->DrawImGui();
+	barricadeManager_->DrawImGui();
 	doorManager_->DrawImGui();
 	glassManager_->DrawImGui();
 	cageManager_->DrawImGui();
 	healAreaManager_->DrawImGui();
 	soapManager_->DrawImGui();
+}
+
+std::vector<AABB> Stage::GetSolidObstacles() const {
+	const auto& walls = wallManager_->GetObjects();
+	const auto& barricades = barricadeManager_->GetObjects();
+	std::vector<AABB> obstacles;
+	obstacles.reserve(walls.size() + barricades.size());
+
+	for (const auto& wall : walls) {
+		obstacles.push_back(wall->GetCollision());
+	}
+
+	for (const auto& barricade : barricades) {
+		if (barricade->IsSolid()) {
+			obstacles.push_back(barricade->GetCollision());
+		}
+	}
+
+	return obstacles;
 }
