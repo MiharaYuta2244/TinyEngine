@@ -19,7 +19,11 @@ void Stage::Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalM
 	barricadeManager_ = std::make_unique<BarricadeManager>();
 	barricadeManager_->Initialize(
 	    ctx.engineContext, "BarricadeEditor", stagePath + "Barricades.json",
-	    Transform{{1.5f, 2.0f, 0.25f}, {}, {}});
+	    Transform{
+	        {1.5f, 2.0f, 0.25f},
+            {},
+            {}
+    });
 
 	// ドアの管理インスタンス生成&初期化
 	doorManager_ = std::make_unique<DoorManager>();
@@ -41,6 +45,10 @@ void Stage::Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalM
             {0, 0,  0}
     },
 	    decalManager_);
+
+	// ガラスの破片クラス生成&初期化
+	glassShardScatter_ = std::make_unique<GlassShardScatter>();
+	glassShardScatter_->Initialize(decalManager_);
 
 	// 檻の管理インスタンス生成&初期化
 	cageManager_ = std::make_unique<CageManager>();
@@ -68,8 +76,8 @@ void Stage::Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalM
 	    ctx.engineContext, "SoapEditor", stagePath + "Soap.json",
 	    Transform{
 	        {1, 1, 1},
-            {0, 0,  0},
-            {0, 0,  0}
+            {0, 0, 0},
+            {0, 0, 0}
     });
 
 	// 地面の生成&初期化
@@ -95,6 +103,7 @@ void Stage::Update(float deltaTime, const Vector3& playerPos, Camera* camera) {
 	barricadeManager_->Update(deltaTime);
 	doorManager_->Update(deltaTime, playerPos);
 	glassManager_->Update();
+	glassShardScatter_->Update(deltaTime);
 	cageManager_->Update(deltaTime);
 	healAreaManager_->Update(deltaTime);
 	soapManager_->Update(deltaTime);

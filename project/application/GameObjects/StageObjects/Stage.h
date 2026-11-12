@@ -1,5 +1,6 @@
 #pragma once
 #include "Barricade/Barricade.h"
+#include "GameObjects/StageObjects/Glass/GlassShardScatter.h"
 #include "GameObjects/GameObjectManager.h"
 #include "GameObjects/Item/Soap.h"
 #include "GameObjects/StageObjects/Cage/Cage.h"
@@ -27,7 +28,7 @@ class Stage {
 public:
 	// 初期化
 	void Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalManager, const std::string& stagePath);
-	
+
 	// 更新
 	void Update(float deltaTime, const Vector3& playerPos, Camera* camera);
 
@@ -51,6 +52,7 @@ public:
 	SoapManager* GetSoapManager() const { return soapManager_.get(); }
 	Goal* GetGoal() const { return goal_.get(); }
 	Ground* GetGround() const { return ground_.get(); }
+	GlassShardScatter* GetGlassShardScatter() const { return glassShardScatter_.get(); }
 
 private:
 	std::unique_ptr<WallManager> wallManager_;
@@ -63,4 +65,5 @@ private:
 	std::unique_ptr<Ground> ground_;
 	std::unique_ptr<Goal> goal_;
 	TinyEngine::DecalManager* decalManager_;
+	std::unique_ptr<GlassShardScatter> glassShardScatter_;
 };

@@ -116,9 +116,16 @@ void CollisionManager::CheckCollisions(
 			if (Collision::Intersect(player->GetAttackCol(), glass->GetCollision())) {
 				// ガラス破片生成
 				glass->AddGlassesDecal({0.1f, 0.1f, 0.1f});
+				Transform& t = glass->GetTransform();
+				
+				// 叩いた方向
+				Vector2 pd = player->GetDirection();
+				Vector3 hitDir = {pd.x, 0.0f, pd.y};
+
+				// ガラス破片をデカールで飛ばす
+				stage->GetGlassShardScatter()->Spawn(t.translate, {t.scale.x, 0.0f, t.scale.z}, hitDir);
 
 				// 破壊エフェクト
-				Transform& t = glass->GetTransform();
 				glassBreakCallback({t.translate.x, 1.0f, t.translate.z}, {t.scale.x, 1.0f, t.scale.z});
 
 				// 軽くカメラを揺らす
