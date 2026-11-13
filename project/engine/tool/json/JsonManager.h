@@ -34,6 +34,11 @@ public:
 			}
 
 			file << j.dump(4);
+			file.close();
+			if (!file) {
+				Logger::Log("[JsonManager] Failed to write file: " + fullpath, LogLevel::Error);
+				return false;
+			}
 
 			std::cerr << "[JsonManager] Save Success: " << fullpath << std::endl;
 			Logger::Log("[JsonManager] Save Success: " + fullpath, LogLevel::Info);

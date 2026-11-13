@@ -49,6 +49,7 @@ private:
 	void UpdateCollision();
 	void DropShield();
 
+private:
 	State state_ = State::Attached;
 	Vector2 pullDirection_{};
 	float pullTime_ = 0.0f;

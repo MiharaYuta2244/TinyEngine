@@ -1,5 +1,4 @@
 #pragma once
-#include "Cinematic/CameraDeathZoomController.h"
 #include "EditorCommand.h"
 #include "GameObjects/Enemy/EnemyManager.h"
 #include "GameObjects/IGameObject.h"
@@ -19,9 +18,7 @@ public:
 	void Initialize();
 
 	// 毎フレームの更新処理
-	void Update(
-	    const SceneContext& ctx, const std::vector<IGameObject*>& objects, Player* player, EnemyManager* enemyManager, CameraDeathZoomController* cameraZoomController, float& cameraPosY,
-	    bool& isDebugCameraActive, Vector3& currentCameraPivot);
+	void Update(const SceneContext& ctx, const std::vector<IGameObject*>& objects, Player* player, EnemyManager* enemyManager, bool& isDebugCameraActive);
 
 	// デバッグフラグのSetter
 	void SetIsDebug(bool isDebug) { isDebug_ = isDebug; }
@@ -45,13 +42,13 @@ public:
 
 private:
 	// ImGuiの統合更新
-	void UpdateImGui(const SceneContext& ctx, Player* player, float& cameraPosY);
+	void UpdateImGui(const SceneContext& ctx, Player* player);
 
 	// マウスの画面座標をRayに変換して判定を取る
 	void UpdatePicking(const SceneContext& ctx);
 
 	// 入力系デバッグ処理
-	void DebugInput(const SceneContext& ctx, Player* player, EnemyManager* enemyManager, CameraDeathZoomController* cameraZoomController, bool& isDebugCameraActive, Vector3& currentCameraPivot);
+	void DebugInput(const SceneContext& ctx, EnemyManager* enemyManager, bool& isDebugCameraActive);
 
 	// 対象オブジェクトが現在もobjects_内に存在するかを確認する
 	bool IsObjectAlive(IGameObject* obj) const;
@@ -106,6 +103,9 @@ private:
 
 	// デバッグフラグ
 	bool isDebug_ = false;
+	Vector3 gameCameraTranslation_{};
+	Vector3 gameCameraEuler_{};
+	Vector3 gameCameraPivot_{};
 
 	std::optional<SpawnRequest> pendingSpawn_;
 	float spawnY_ = 0.0f; // 生成時に固定するY座標

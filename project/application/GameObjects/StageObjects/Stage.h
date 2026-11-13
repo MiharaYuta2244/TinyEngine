@@ -11,6 +11,7 @@
 #include "SceneContext.h"
 #include "Wall/Wall.h"
 #include <memory>
+#include <string>
 #include <vector>
 
 using WallManager = GameObjectManager<Wall>;
@@ -55,6 +56,10 @@ public:
 	GlassShardScatter* GetGlassShardScatter() const { return glassShardScatter_.get(); }
 
 private:
+	// ゴール地点の座標を読み込む関数
+	bool LoadGoalPosition(Vector3& position) const;
+
+private:
 	std::unique_ptr<WallManager> wallManager_;
 	std::unique_ptr<BarricadeManager> barricadeManager_;
 	std::unique_ptr<DoorManager> doorManager_;
@@ -64,6 +69,8 @@ private:
 	std::unique_ptr<SoapManager> soapManager_;
 	std::unique_ptr<Ground> ground_;
 	std::unique_ptr<Goal> goal_;
+	std::string goalPositionPath_;
+	std::string goalEditorMessage_;
 	TinyEngine::DecalManager* decalManager_;
 	std::unique_ptr<GlassShardScatter> glassShardScatter_;
 };

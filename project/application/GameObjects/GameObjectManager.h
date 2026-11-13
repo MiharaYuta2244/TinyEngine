@@ -1,6 +1,7 @@
 #pragma once
 #include "GameObjects/PlaceableObject.h"
 #include "JsonManager.h"
+#include "MathUtility.h"
 #include "Transform.h"
 #include <list>
 #include <memory>
@@ -118,8 +119,22 @@ private:
 		}
 
 		// 生成
-		for (const auto& j : entries) {
-			auto obj = CreateObject(j.get<Transform>());
+		for (std::size_t index = 0; index < entries.size(); ++index) {
+			const auto& j = entries[index];
+			Transform transform{};
+			try {
+				j.get_to(transform);
+			} catch (const Json::exception& e) {
+				Logger::Log("[GameObjectManager] Invalid transform in " + filepath + "[" + std::to_string(index) + "]: " + e.what(), LogLevel::Warning);
+				continue;
+			}
+
+			if (!MathUtility::IsFinite(transform.translate) || !MathUtility::IsFinite(transform.rotate) || !MathUtility::IsFinite(transform.scale)) {
+				Logger::Log("[GameObjectManager] Non-finite transform in " + filepath + "[" + std::to_string(index) + "]", LogLevel::Warning);
+				continue;
+			}
+
+			auto obj = CreateObject(transform);
 			obj->FromExtraJson(j);
 			objects_.push_back(std::move(obj));
 		}

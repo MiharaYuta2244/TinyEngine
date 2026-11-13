@@ -4,6 +4,14 @@
 
 MathUtility::MathUtility() {}
 
+bool MathUtility::IsFinite(const Vector3& v) {
+	return std::isfinite(v.x) && std::isfinite(v.y) && std::isfinite(v.z);
+}
+
+bool MathUtility::IsFinite(const Vector4& v) {
+	return std::isfinite(v.x) && std::isfinite(v.y) && std::isfinite(v.z) && std::isfinite(v.w);
+}
+
 Vector2 MathUtility::Add(const Vector2& v1, const Vector2& v2) {
 	Vector2 result;
 	result.x = v1.x + v2.x;

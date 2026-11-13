@@ -3,18 +3,18 @@
 
 using namespace TinyEngine;
 
-void Goal::Initialize(EngineContext* ctx) {
+void Goal::Initialize(EngineContext* ctx, const Vector3& position) {
 	ctx_ = ctx;
 
 	transform_.scale = {1.0f, 1.0f, 5.0f};
 	transform_.rotate = {0.0f, 0.0f, 0.0f};
-	transform_.translate = {542.0f, 0.0f, -17.0f};
+	transform_.translate = position;
 
 	// エフェクトの生成
 	particle_.clear();
 	EffectLibrary::Get().Spawn(ctx_, "GoalLine", transform_.translate, particle_);
 
-	// SetPosやImGuiで座標が動いても、発生済みの粒ごと追従させる
+	// 座標を編集したときは、発生済みの粒も追従させる
 	for (auto& particle : particle_) {
 		particle->SetFollowTarget(true);
 	}
@@ -40,12 +40,6 @@ void Goal::Update(float deltaTime) {
 
 	// ギズモ用当たり判定更新
 	UpdateAABBForGizmo();
-
-	#ifdef USE_IMGUI
-	ImGui::Begin("Goal");
-	ImGui::DragFloat3("Pos", &transform_.translate.x, 0.1f);
-	ImGui::End();
-	#endif
 }
 
 void Goal::Draw() {

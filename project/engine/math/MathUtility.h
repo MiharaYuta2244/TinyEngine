@@ -13,6 +13,10 @@ class MathUtility {
 public:
 	MathUtility();
 
+	// すべての成分が有限値かを判定する
+	static bool IsFinite(const Vector3& v);
+	static bool IsFinite(const Vector4& v);
+
 	static Vector2 Add(const Vector2& v1, const Vector2& v2);
 
 	static Vector2 Subtract(const Vector2& v1, const Vector2& v2);

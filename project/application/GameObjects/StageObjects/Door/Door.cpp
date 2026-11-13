@@ -1,5 +1,7 @@
 #include "Door.h"
+#include "Logger.h"
 #include "MathOperator.h"
+#include "MathUtility.h"
 
 int Door::index = 0;
 
@@ -171,7 +173,20 @@ void Door::DrawExtraImGui() {
 void Door::ToExtraJson(Json& j) const { j["color"] = color_; }
 
 void Door::FromExtraJson(const Json& j) {
-	if (j.contains("color")) {
-		color_ = j.at("color").get<Vector4>();
+	if (!j.contains("color")) {
+		return;
 	}
+
+	try {
+		const Vector4 color = j.at("color").get<Vector4>();
+		if (MathUtility::IsFinite(color)) {
+			color_ = color;
+			return;
+		}
+	} catch (const Json::exception& e) {
+		Logger::Log(std::string("[Door] Invalid color: ") + e.what(), LogLevel::Warning);
+		return;
+	}
+
+	Logger::Log("[Door] Non-finite color", LogLevel::Warning);
 }

@@ -1,4 +1,10 @@
 #include "Stage.h"
+#include "JsonManager.h"
+#include "MathUtility.h"
+
+#ifdef USE_IMGUI
+#include "imgui.h"
+#endif
 
 using namespace TinyEngine;
 
@@ -85,17 +91,30 @@ void Stage::Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalM
 	ground_->Initialize(ctx.engineContext);
 
 	// ゴール判定インスタンス生成&初期化
+	goalPositionPath_ = stagePath + "Goal.json";
+	Vector3 goalPosition{0.0f, 0.0f, 0.0f};
+	LoadGoalPosition(goalPosition);
 	goal_ = std::make_unique<Goal>();
-	goal_->Initialize(ctx.engineContext);
+	goal_->Initialize(ctx.engineContext, goalPosition);
+	goalEditorMessage_.clear();
+}
 
-	// ステージごとのゴール初期配置
-	if (stagePath == "Stage1/") {
-		goal_->SetPos({548.0f, 0.0f, -17.0f});
-	} else if (stagePath == "Stage2/") {
-		goal_->SetPos({560.0f, 0.0f, 0.0f});
-	} else if (stagePath == "Stage3/") {
-		goal_->SetPos({601.0f, 0.0f, 0.0f});
+bool Stage::LoadGoalPosition(Vector3& position) const {
+	JsonManager::json data;
+	if (!JsonManager::Load(goalPositionPath_, data) ||
+	    !data.is_object() || !data.contains("x") || !data["x"].is_number() ||
+	    !data.contains("y") || !data["y"].is_number() ||
+	    !data.contains("z") || !data["z"].is_number()) {
+		return false;
 	}
+
+	const Vector3 loadedPosition = data.get<Vector3>();
+	if (!MathUtility::IsFinite(loadedPosition)) {
+		return false;
+	}
+
+	position = loadedPosition;
+	return true;
 }
 
 void Stage::Update(float deltaTime, const Vector3& playerPos, Camera* camera) {
@@ -134,6 +153,29 @@ void Stage::DrawImGui() {
 	cageManager_->DrawImGui();
 	healAreaManager_->DrawImGui();
 	soapManager_->DrawImGui();
+
+#ifdef USE_IMGUI
+	if (ImGui::Begin("Goal")) {
+		ImGui::TextUnformatted(goalPositionPath_.c_str());
+		auto& position = goal_->GetTransform().translate;
+		Vector3 editedPosition = position;
+		if (ImGui::DragFloat3("Position", &editedPosition.x, 0.1f) && MathUtility::IsFinite(editedPosition)) {
+			position = editedPosition;
+			goalEditorMessage_.clear();
+		}
+
+		if (ImGui::Button("Save")) {
+			const bool saved = MathUtility::IsFinite(position) && JsonManager::Save(goalPositionPath_, position);
+			goalEditorMessage_ = saved ? "Saved." : "Could not save goal position.";
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Load")) {
+			goalEditorMessage_ = LoadGoalPosition(position) ? "Loaded." : "Could not load goal position.";
+		}
+		ImGui::TextUnformatted(goalEditorMessage_.c_str());
+	}
+	ImGui::End();
+#endif
 }
 
 std::vector<AABB> Stage::GetSolidObstacles() const {

@@ -308,7 +308,7 @@ void GamePlayScene::Update() {
 	}
 
 	// シーンエディターの更新
-	sceneEditor_->Update(ctx_, editObjects, player_.get(), enemyManager_.get(), cameraZoomController_.get(), cameraPosY_, isDebugCameraActive_, ctx_.currentCamera->GetPivot());
+	sceneEditor_->Update(ctx_, editObjects, player_.get(), enemyManager_.get(), isDebugCameraActive_);
 
 	// ドラッグ＆ドロップで要求されたオブジェクトを生成
 	if (auto request = sceneEditor_->PollSpawnRequest()) {

@@ -11,7 +11,7 @@
 class Goal : public IGameObject {
 public:
 	// 初期化処理
-	void Initialize(EngineContext* ctx);
+	void Initialize(EngineContext* ctx, const Vector3& position);
 
 	// 更新処理
 	void Update(float deltaTime);

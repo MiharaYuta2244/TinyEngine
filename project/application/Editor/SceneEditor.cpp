@@ -11,13 +11,12 @@ void SceneEditor::Initialize() {
 }
 
 void SceneEditor::Update(
-    const SceneContext& ctx, const std::vector<IGameObject*>& objects, Player* player, EnemyManager* enemyManager, CameraDeathZoomController* cameraZoomController, float& cameraPosY,
-    bool& isDebugCameraActive, Vector3& currentCameraPivot) {
+    const SceneContext& ctx, const std::vector<IGameObject*>& objects, Player* player, EnemyManager* enemyManager, bool& isDebugCameraActive) {
 	// 毎フレーム最新のオブジェクトリストを保持
 	objects_ = objects;
 
 	// 入力系のデバッグ機能
-	DebugInput(ctx, player, enemyManager, cameraZoomController, isDebugCameraActive, currentCameraPivot);
+	DebugInput(ctx, enemyManager, isDebugCameraActive);
 
 	// デバッグフラグが立っていなければ早期リターン
 	if (!isDebug_)
@@ -35,7 +34,7 @@ void SceneEditor::Update(
 	UpdatePicking(ctx);
 
 	// ImGuiの更新
-	UpdateImGui(ctx, player, cameraPosY);
+	UpdateImGui(ctx, player);
 
 	// 生成するオブジェクトの一覧
 	UpdateSpawnPalette();
@@ -44,7 +43,7 @@ void SceneEditor::Update(
 	UpdateSpawnDropTarget(ctx);
 }
 
-void SceneEditor::UpdateImGui(const SceneContext& ctx, Player* player, float& cameraPosY) {
+void SceneEditor::UpdateImGui(const SceneContext& ctx, Player* player) {
 #ifdef USE_IMGUI
 	// 選択中のオブジェクトが破棄されていないか検証
 	bool isSelectedValid = false;
@@ -314,21 +313,26 @@ void SceneEditor::UpdatePicking(const SceneContext& ctx) {
 #endif
 }
 
-void SceneEditor::DebugInput(
-    const SceneContext& ctx, Player* player, EnemyManager* enemyManager, CameraDeathZoomController* cameraZoomController, bool& isDebugCameraActive, Vector3& currentCameraPivot) {
+void SceneEditor::DebugInput(const SceneContext& ctx, EnemyManager* enemyManager, bool& isDebugCameraActive) {
 #if _DEBUG || NDEBUG
 	// ステージ編集モード切り替え
 	if (ctx.keyboard->KeyTriggered(DIK_F2)) {
 		isDebugCameraActive = !isDebugCameraActive;
+		Camera& camera = *ctx.currentCamera;
 
 		if (isDebugCameraActive) {
-			ctx.currentCamera->SetTranslation({0.0f, 200.0f, 0.0f});
-			isDebug_ = true;
+			gameCameraTranslation_ = camera.GetTranslation();
+			gameCameraEuler_ = camera.GetEuler();
+			gameCameraPivot_ = camera.GetPivot();
+			camera.SetTranslation({0.0f, 200.0f, 0.0f});
+			camera.UpdateViewMatrix();
 		} else {
-			ctx.currentCamera->SetTranslation({player->GetPosition().x, 60.0f, player->GetPosition().z});
-			ctx.currentCamera->SetPivot(currentCameraPivot);
-			isDebug_ = false;
+			// SetPivot は位置も移動するため、保存した位置はその後に戻す。
+			camera.SetPivot(gameCameraPivot_);
+			camera.SetTranslation(gameCameraTranslation_);
+			camera.SetRotate(gameCameraEuler_);
 		}
+		isDebug_ = isDebugCameraActive;
 	}
 
 	// 敵の動きをON
