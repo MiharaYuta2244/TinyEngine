@@ -14,6 +14,9 @@ class Particle;
 /// </summary>
 class Soap : public PlaceableObject {
 public:
+	CollisionTag GetTag() const override { return CollisionTag::Soap; }
+	void OnCollisionEnter(const CollisionEvent& event, const CollisionContext& context) override;
+
 	Soap();
 	~Soap();
 
@@ -59,6 +62,7 @@ public:
 
 	// 破壊されたかどうかのGetter
 	bool IsBroken() const { return isBroken_; }
+	bool IsConsumed() const { return isConsumed_; }
 
 	// 投げるスピードのGetter/Setter
 	float GetThrowSpeed() const { return throwSpeed_; }
@@ -126,4 +130,5 @@ private:
 
 	// 破壊された瞬間のフラグ
 	bool justBroken_ = false;
+	bool isConsumed_ = false;
 };

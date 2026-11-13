@@ -25,6 +25,11 @@ class Enemy;
 /// </summary>
 class Player : public IGameObject {
 public:
+	CollisionTag GetTag() const override { return CollisionTag::Player; }
+	void OnCollisionEnter(const CollisionEvent& event, const CollisionContext& context) override;
+	void OnCollisionStay(const CollisionEvent& event, const CollisionContext& context) override;
+	void ApplyCollisionDisplacement(const Vector3& displacement);
+
 	// 初期化処理
 	void Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecalManager);
 

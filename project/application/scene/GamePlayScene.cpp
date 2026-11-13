@@ -1,4 +1,5 @@
 #include "GamePlayScene.h"
+#include "MathUtility.h"
 #include "GameObjects/Effect/EffectGenerator.h"
 #include "SceneManager.h"
 
@@ -195,10 +196,13 @@ void GamePlayScene::Update() {
 	stage_->Update(deltaTime, player_->GetPosition(), ctx_.currentCamera);
 
 	// 当たり判定
-	collisionManager_->CheckCollisions(
-	    player_.get(), enemyManager_.get(), enemyBulletManager_.get(), enemyBombManager_.get(), stage_.get(), ctx_.currentCamera, commonData_,
-	    [this](Enemy* enemy) { GenerateEnemyDeathEffect(enemy); }, [this](const Vector3& pos, const Vector3& extent) { GenerateGlassBreakEffect(pos, extent); },
-	    postEffectController_->GetGlitchTimer(), postEffectController_->GetDamageBlurTimer());
+	const CollisionContext collisionContext{
+	    *ctx_.currentCamera,
+	    [this](Enemy& enemy) { OnEnemyDeath(enemy); },
+	    [this](Glass& glass, const Vector3& direction) { OnGlassBreak(glass, direction); },
+	    [this] { TriggerPlayerHitEffect(); },
+	};
+	collisionManager_->CheckCollisions(*player_, *enemyManager_, *enemyBulletManager_, *enemyBombManager_, *stage_, collisionContext);
 
 	// 壊れた石鹸のエフェクト生成
 	for (auto& soap : stage_->GetSoapManager()->GetObjects()) {
@@ -460,6 +464,38 @@ void GamePlayScene::Finalize() {
 
 	// BGM停止
 	audioManager_->StopBGM();
+}
+
+void GamePlayScene::OnEnemyDeath(Enemy& enemy) {
+	++commonData_->killCount;
+	GenerateEnemyDeathEffect(&enemy);
+	if (auto* rumble = player_->GetRumbleManager()) {
+		rumble->TriggerEnemyDeath();
+	}
+
+	const float radius = enemy.GetDeathBlastRadius();
+	const Vector3 towardEnemy = enemy.GetPos() - player_->GetPosition();
+	if (enemy.GetEnemyType() == EnemyType::Bomber && radius > 0.0f &&
+	    MathUtility::LengthSquared(towardEnemy) <= radius * radius && !player_->BlocksWithShield(towardEnemy)) {
+		player_->Damage(player_->GetMaxHP());
+		TriggerPlayerHitEffect();
+		if (!ctx_.currentCamera->GetIsShake()) {
+			ctx_.currentCamera->StartShake(0.5f, 0.5f);
+		}
+	}
+}
+
+void GamePlayScene::OnGlassBreak(Glass& glass, const Vector3& hitDirection) {
+	const Transform& transform = glass.GetTransform();
+	const Vector3& position = transform.translate;
+	const Vector3& scale = transform.scale;
+	stage_->GetGlassShardScatter()->Spawn(position, {scale.x, 0.0f, scale.z}, hitDirection);
+	GenerateGlassBreakEffect({position.x, 1.0f, position.z}, {scale.x, 1.0f, scale.z});
+}
+
+void GamePlayScene::TriggerPlayerHitEffect() {
+	postEffectController_->GetGlitchTimer() = 0.5f;
+	postEffectController_->GetDamageBlurTimer() = 1.0f;
 }
 
 void GamePlayScene::GenerateEnemyDeathEffect(Enemy* enemy) {

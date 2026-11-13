@@ -9,6 +9,8 @@
 /// </summary>
 class Door : public PlaceableObject {
 public:
+	CollisionTag GetTag() const override { return CollisionTag::Door; }
+
 	Door();
 
 	// 初期化処理

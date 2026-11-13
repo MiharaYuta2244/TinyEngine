@@ -47,6 +47,9 @@ public:
 private:
 	// 敵死亡時パーティクル生成
 	void GenerateEnemyDeathEffect(Enemy* enemy);
+	void OnEnemyDeath(Enemy& enemy);
+	void OnGlassBreak(Glass& glass, const Vector3& hitDirection);
+	void TriggerPlayerHitEffect();
 
 	// ゴール確認用カメラ演出の更新
 	void UpdateCameraIntro(float deltaTime);

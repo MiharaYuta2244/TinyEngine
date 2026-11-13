@@ -1,5 +1,6 @@
 #pragma once
 #include "AABB.h"
+#include "Collision/CollisionEvent.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "GameTimer.h"
 #include <memory>
@@ -12,8 +13,10 @@ class Particle;
 /// <summary>
 /// 敵の爆弾
 /// </summary>
-class EnemyBomb {
+class EnemyBomb : public CollisionObject {
 public:
+	CollisionTag GetTag() const override { return CollisionTag::EnemyBomb; }
+
 	~EnemyBomb();
 
 	// 初期化処理

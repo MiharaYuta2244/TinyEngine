@@ -1,11 +1,12 @@
 #pragma once
 #include "AABB.h"
+#include "Collision/CollisionEvent.h"
 #include "Transform.h"
 
 /// <summary>
 /// ゲームオブジェクトの基底クラス
 /// </summary>
-class IGameObject {
+class IGameObject : public CollisionObject {
 public:
 	virtual ~IGameObject() = default;
 

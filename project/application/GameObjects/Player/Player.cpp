@@ -1,4 +1,7 @@
 #include "Player.h"
+#include "DebugCamera.h"
+#include "GameObjects/Enemy/Weapon/EnemyBullet.h"
+#include "GameObjects/Enemy/Weapon/EnemyBomb.h"
 #include "ColorPalette.h"
 #include "GameObjects/Effect/EffectGenerator.h"
 #include "GameObjects/Enemy/EnemyManager.h"
@@ -440,4 +443,73 @@ void Player::UpdateThrowPreview(float deltaTime) {
 
 	// 軌道プレビューの更新
 	throwPreview_->Update(deltaTime, pos, lastMoveDirection_, power, friction);
+}
+
+void Player::OnCollisionEnter(const CollisionEvent& event, const CollisionContext& context) {
+	if (event.selfPart != CollisionPart::Body) {
+		return;
+	}
+
+	// 敵の爆弾攻撃をくらったら
+	if (event.other.CompareTag(CollisionTag::EnemyBomb) && event.otherPart == CollisionPart::Explosion) {
+		const auto& bomb = static_cast<const EnemyBomb&>(event.other);
+		
+		// カメラのシェイク開始処理
+		if (!context.camera.GetIsShake()) {
+			context.camera.StartShake(0.1f, 0.1f);
+		}
+
+		// ダメージ処理
+		if (!BlocksWithShield(bomb.GetPosition() - GetPosition())) {
+			Damage(3);
+		}
+		return;
+	}
+
+	if (!event.other.CompareTag(CollisionTag::EnemyBullet)) {
+		return;
+	}
+	const auto& bullet = static_cast<const EnemyBullet&>(event.other);
+
+	// レーザーの進行方向の逆を攻撃元とする。
+	const Vector3 direction = bullet.GetCollision().orientations[2];
+	bool guarded = BlocksWithShield({-direction.x, 0.0f, -direction.z});
+	if (!context.camera.GetIsShake()) {
+		context.camera.StartShake(0.1f, 0.1f);
+	}
+
+	// 敵を盾にしたとき
+	if (Enemy* shieldEnemy = GetGrabbedEnemy()) {
+		const Vector3 toBullet = MathUtility::Normalize(bullet.GetPosition() - GetPosition());
+		const Vector2 facing = GetDirection();
+		if (facing.x * toBullet.x + facing.y * toBullet.z < 0.0f) {
+			guarded = true;
+			const bool wasAlive = !shieldEnemy->IsDead();
+			shieldEnemy->Damage();
+			if (wasAlive && shieldEnemy->IsDead()) {
+				context.onEnemyDeath(*shieldEnemy);
+			}
+
+			// 敵ポインタを破棄
+			ReleaseGrabbedEnemy();
+		}
+	}
+
+	// ガードできなかった時はダメージ処理
+	if (!guarded) {
+		Damage(1);
+		context.onPlayerHit();
+	}
+}
+
+void Player::OnCollisionStay(const CollisionEvent& event, const CollisionContext&) {
+	// 1度でも攻撃判定と敵が当たると攻撃可能状態にする
+	if (event.selfPart == CollisionPart::Attack && event.other.CompareTag(CollisionTag::Enemy)) {
+		SetEnableAttack(true);
+	}
+}
+
+void Player::ApplyCollisionDisplacement(const Vector3& displacement) {
+	transform_.translate += displacement;
+	UpdateCollision();
 }

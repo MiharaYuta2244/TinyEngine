@@ -1,4 +1,5 @@
 #include "HealArea.h"
+#include "GameObjects/Player/Player.h"
 
 using namespace TinyEngine;
 
@@ -30,4 +31,11 @@ void HealArea::Draw() {
 
 	// 描画
 	render_->Draw();
+}
+
+void HealArea::OnCollisionEnter(const CollisionEvent& event, const CollisionContext&) {
+	if (GetIsActive() && event.other.CompareTag(CollisionTag::Player) && event.otherPart == CollisionPart::Body) {
+		static_cast<Player&>(event.other).AllHeal();
+		SetIsActive(false);
+	}
 }

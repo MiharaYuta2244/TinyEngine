@@ -1,4 +1,6 @@
 #include "Glass.h"
+#include "DebugCamera.h"
+#include "GameObjects/Player/Player.h"
 #include "ColorPalette.h"
 #include "Random.h"
 
@@ -49,4 +51,21 @@ void Glass::AddGlassesDecal(Vector3 scale) {
 		Vector3 rotate = {std::numbers::pi_v<float> / 2.0f, RandomUtils::RangeFloat(0.0f, std::numbers::pi_v<float>), 0.0f};
 		glassesDecalManager_->AddDecal("Shard.png", pos, {rotate.x, rotate.y, rotate.z}, scale, ColorPalette::White());
 	}
+}
+
+void Glass::OnCollisionEnter(const CollisionEvent& event, const CollisionContext& context) {
+	if (!GetIsActive() || !event.other.CompareTag(CollisionTag::Player) || event.otherPart != CollisionPart::Attack) {
+		return;
+	}
+	auto& player = static_cast<Player&>(event.other);
+	AddGlassesDecal({0.1f, 0.1f, 0.1f});
+	const Vector2 direction = player.GetDirection();
+	context.onGlassBreak(*this, {direction.x, 0.0f, direction.y});
+	if (!context.camera.GetIsShake()) {
+		context.camera.StartShake(0.15f, 0.15f);
+	}
+	if (auto* rumble = player.GetRumbleManager()) {
+		rumble->TriggerGlassBreak();
+	}
+	SetIsActive(false);
 }

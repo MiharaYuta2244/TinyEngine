@@ -25,6 +25,11 @@ using DoorManager = GameObjectManager<Door>;
 /// </summary>
 class Enemy : public IGameObject {
 public:
+	CollisionTag GetTag() const override { return CollisionTag::Enemy; }
+	void OnCollisionEnter(const CollisionEvent& event, const CollisionContext& context) override;
+	void OnCollisionStay(const CollisionEvent& event, const CollisionContext& context) override;
+	void ApplyCollisionDisplacement(const Vector3& displacement);
+
 	Enemy();
 
 	// 初期化処理

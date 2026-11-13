@@ -8,6 +8,8 @@
 /// </summary>
 class Wall : public PlaceableObject {
 public:
+	CollisionTag GetTag() const override { return CollisionTag::Wall; }
+
 	Wall();
 
 	// 初期化処理

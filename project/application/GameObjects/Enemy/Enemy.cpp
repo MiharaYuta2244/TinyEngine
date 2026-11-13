@@ -1,4 +1,5 @@
 #include "Enemy.h"
+#include "MathOperator.h"
 #include "ChargeModule.h"
 #include "ColorPalette.h"
 #include "GameObjects/Effect/EffectGenerator.h"
@@ -491,4 +492,72 @@ void Enemy::UpdateAnimation(Vector3 prevPos) {
 	const float dx = transform_.translate.x - prevPos.x;
 	const float dz = transform_.translate.z - prevPos.z;
 	animator_.Update(ai_->GetState(), (dx * dx + dz * dz) > 0.0001f); // 移動時のみ更新
+}
+
+void Enemy::OnCollisionEnter(const CollisionEvent& event, const CollisionContext& context) {
+	if (IsDead()) {
+		return;
+	}
+
+	if (event.other.CompareTag(CollisionTag::Barricade) && event.otherPart == CollisionPart::Thrown) {
+		// 
+		Kill();
+	} else if (event.other.CompareTag(CollisionTag::EnemyBullet)) {
+		// 敵の弾に当たったらダメージ
+		Damage();
+	}
+
+	// ダメージ判定後死亡したら
+	if (IsDead()) {
+		context.onEnemyDeath(*this);
+	}
+}
+
+void Enemy::OnCollisionStay(const CollisionEvent& event, const CollisionContext& context) {
+	if (IsDead()) {
+		return;
+	}
+
+	switch (event.other.GetTag()) {
+	case CollisionTag::Wall:
+	case CollisionTag::Door:
+	case CollisionTag::Barricade:
+		// ノックバック中にステージオブジェクトに当たると死亡
+		if (event.otherPart == CollisionPart::Body && IsKnockBack()) {
+			Kill();
+			context.onEnemyDeath(*this);
+		}
+		break;
+	case CollisionTag::Enemy: {
+		auto& other = static_cast<Enemy&>(event.other);
+		if (other.IsDead() || (!IsKnockBack() && !other.IsKnockBack())) {
+			break;
+		}
+
+		// ノックバック状態の敵と当たるとダメージ処理
+		Damage();
+		other.Damage();
+		StopKnockback();
+		other.StopKnockback();
+		
+		// 死んだ場合
+		if (IsDead()) {
+			context.onEnemyDeath(*this);
+		}
+
+		// 当たった相手が死んだ場合
+		if (other.IsDead()) {
+			context.onEnemyDeath(other);
+		}
+
+		break;
+	}
+	default:
+		break;
+	}
+}
+
+void Enemy::ApplyCollisionDisplacement(const Vector3& displacement) {
+	transform_.translate += displacement;
+	UpdateCollision();
 }

@@ -4,6 +4,9 @@
 
 class HealArea : public PlaceableObject {
 public:
+	CollisionTag GetTag() const override { return CollisionTag::HealArea; }
+	void OnCollisionEnter(const CollisionEvent& event, const CollisionContext& context) override;
+
 	HealArea();
 
 	void Initialize(EngineContext* ctx, const Transform& transform);

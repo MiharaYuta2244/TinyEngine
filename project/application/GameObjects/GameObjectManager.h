@@ -101,6 +101,11 @@ public:
 	// オブジェクトのリストGetter
 	const std::list<std::unique_ptr<T>>& GetObjects() const { return objects_; }
 
+	template<typename Predicate>
+	void RemoveObjectsIf(Predicate predicate) {
+		std::erase_if(objects_, [&](const auto& object) { return predicate(*object); });
+	}
+
 private:
 	std::unique_ptr<T> CreateObject(const Transform& t) {
 		auto obj = std::make_unique<T>();

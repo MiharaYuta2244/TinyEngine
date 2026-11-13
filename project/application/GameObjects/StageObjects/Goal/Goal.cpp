@@ -1,4 +1,5 @@
 #include "Goal.h"
+
 #include "EffectLibrary.h"
 
 using namespace TinyEngine;
@@ -46,5 +47,11 @@ void Goal::Draw() {
 	// パーティクルの描画
 	for (auto& particle : particle_) {
 		particle->Draw();
+	}
+}
+
+void Goal::OnCollisionEnter(const CollisionEvent& event, const CollisionContext&) {
+	if (event.other.CompareTag(CollisionTag::Player) && event.otherPart == CollisionPart::Body) {
+		SetIsGoal(true);
 	}
 }

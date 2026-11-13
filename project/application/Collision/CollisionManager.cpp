@@ -1,640 +1,272 @@
 #include "CollisionManager.h"
 #include "Collision.h"
-#include "DebugCamera.h"
-#include "GameObjects/CommonData.h"
-#include "GameObjects/Enemy/Enemy.h"
 #include "GameObjects/Enemy/EnemyManager.h"
 #include "GameObjects/Enemy/Weapon/EnemyBombManager.h"
 #include "GameObjects/Enemy/Weapon/EnemyBulletManager.h"
 #include "GameObjects/Player/Player.h"
 #include "GameObjects/StageObjects/Stage.h"
 #include <algorithm>
+#include <iterator>
 #include <limits>
+#include <utility>
+#include <vector>
 
-using namespace TinyEngine;
+namespace {
+// 判定に使う範囲と、押し戻しの対象を保持する
+struct Obstacle {
+	CollisionObject& object;
+	AABB bounds;
+	bool blocksPlayer;
+	bool blocksEnemy;
+};
+} // namespace
 
-void CollisionManager::CheckCollisions(
-    Player* player, EnemyManager* enemyManager, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager, Stage* stage, Camera* camera, CommonData* commonData,
-    std::function<void(Enemy*)> generateParticleCallback, std::function<void(const Vector3&, const Vector3&)> glassBreakCallback, float& glitchTimer, float& blurTimer) {
+#pragma region 接触イベントの通知
+void CollisionManager::NotifyContact(CollisionObject& first, CollisionPart firstPart, CollisionObject& second, CollisionPart secondPart, const CollisionContext& context) {
+	// 判定の順序が逆でも、同じオブジェクトと判定部位の組み合わせとして記録する
+	const auto firstCollider = std::pair{first.GetCollisionId(), firstPart};
+	const auto secondCollider = std::pair{second.GetCollisionId(), secondPart};
+	const auto& low = std::min(firstCollider, secondCollider);
+	const auto& high = std::max(firstCollider, secondCollider);
+	const Contact contact{low.first, low.second, high.first, high.second};
+	if (!currentContacts_.insert(contact).second) {
+		return;
+	}
 
-	// ==========================================
-	// 敵死亡時の共通処理
-	// ==========================================
-	auto ProcessEnemyDeath = [&](Enemy* enemy) {
-		commonData->killCount += 1;
-		generateParticleCallback(enemy);
+	const CollisionEvent firstEvent{second, firstPart, secondPart};
+	const CollisionEvent secondEvent{first, secondPart, firstPart};
 
-		// 敵死亡時の振動
-		if (player->GetRumbleManager()) {
-			player->GetRumbleManager()->TriggerEnemyDeath();
+	// 接触開始は前フレームに接触していなかったペアだけに通知する
+	if (!previousContacts_.contains(contact)) {
+		first.OnCollisionEnter(firstEvent, context);
+		second.OnCollisionEnter(secondEvent, context);
+	}
+
+	first.OnCollisionStay(firstEvent, context);
+	second.OnCollisionStay(secondEvent, context);
+}
+#pragma endregion 接触イベントの通知
+
+void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManager, EnemyBulletManager& bulletManager, EnemyBombManager& bombManager, Stage& stage, const CollisionContext& context) {
+#pragma region 当たり判定に使うオブジェクトの取得
+	using enum CollisionPart;
+	auto& enemies = enemyManager.GetEnemies();
+	const auto& bullets = bulletManager.GetBullets();
+	auto& glassManager = *stage.GetGlassManager();
+	auto& soapManager = *stage.GetSoapManager();
+	const auto& glasses = glassManager.GetObjects();
+	const auto& soaps = soapManager.GetObjects();
+#pragma endregion 当たり判定に使うオブジェクトの取得
+
+#pragma region 敵の弾がプレイヤーに当たった時の処理
+	for (const auto& bullet : bullets) {
+		if (bullet->IsCollisionActive() && Collision::Intersect(player.GetBodyCol(), bullet->GetCollision())) {
+			NotifyContact(player, Body, *bullet, Body, context);
 		}
+	}
+#pragma endregion 敵の弾がプレイヤーに当たった時の処理
 
-		// Bomberタイプの死亡時の爆発判定
-		if (enemy->GetEnemyType() == EnemyType::Bomber) {
-			Vector3 pPos = player->GetPosition();
-			Vector3 ePos = enemy->GetPos();
-			float dx = pPos.x - ePos.x;
-			float dy = pPos.y - ePos.y;
-			float dz = pPos.z - ePos.z;
-			float distSq = dx * dx + dy * dy + dz * dz;
+#pragma region プレイヤーの攻撃範囲当たり判定
+	player.SetEnableAttack(false);
 
-			// 爆風の範囲
-			const float blastRadius = enemy->GetDeathBlastRadius();
-
-			// プレイヤーが爆風範囲内にいた場合
-			if (blastRadius > 0.0f && distSq <= blastRadius * blastRadius && !player->BlocksWithShield(ePos - pPos)) {
-				player->Damage(player->GetMaxHP()); // プレイヤーを一撃死させる
-				glitchTimer = 0.5f;
-				blurTimer = 1.0f;
-				if (!camera->GetIsShake()) {
-					camera->StartShake(0.5f, 0.5f);
-				}
-			}
-		}
-	};
-
-	// ==========================================
-	// プレイヤーと敵の弾の当たり判定
-	// ==========================================
-	for (auto& bullet : enemyBulletManager->GetBullets()) {
-		if (!bullet->IsCollisionActive())
-			continue;
-
-		const OBB bulletCollision = bullet->GetCollision();
-		if (Collision::Intersect(player->GetBodyCol(), bulletCollision)) {
-			// レーザーは長いため、中心座標ではなく進行方向の逆を攻撃元とする
-			const Vector3 direction = bulletCollision.orientations[2];
-			bool isGuarded = player->BlocksWithShield({-direction.x, 0.0f, -direction.z});
-
-			if (!camera->GetIsShake()) {
-				camera->StartShake(0.1f, 0.1f);
-			}
-
-			if (player->IsGrabbingEnemy()) {
-				Vector2 playerDir = player->GetDirection();
-				Vector3 playerToBullet = MathUtility::Normalize(bullet->GetPosition() - player->GetPosition());
-				float dot = playerDir.x * playerToBullet.x + playerDir.y * playerToBullet.z;
-
-				if (dot < 0.0f) {
-					isGuarded = true;
-					Enemy* shieldEnemy = player->GetGrabbedEnemy();
-					if (shieldEnemy) {
-						shieldEnemy->Damage();
-						if (shieldEnemy->IsDead()) {
-							ProcessEnemyDeath(shieldEnemy);
-						}
-
-						// 敵のポインタを破棄
-						player->ReleaseGrabbedEnemy();
-					}
-				}
-			}
-
-			if (!isGuarded) {
-				player->Damage(1);
-				glitchTimer = 0.5f;
-				blurTimer = 1.0f;
-			}
+	// プレイヤーの攻撃範囲と敵
+	for (const auto& enemy : enemies) {
+		if (!enemy->IsDead() && Collision::Intersect(player.GetAttackCol(), enemy->GetBodyCol())) {
+			NotifyContact(player, Attack, *enemy, Body, context);
 		}
 	}
 
-	// ==========================================
-	// プレイヤーの攻撃用範囲と敵の当たり判定
-	// ==========================================
-	for (auto& enemy : enemyManager->GetEnemies()) {
-		if (Collision::Intersect(player->GetAttackCol(), enemy->GetBodyCol())) {
-			// プレイヤーの攻撃フラグを立てる
-			player->SetEnableAttack(true);
-		}
-	}
-
-	// ==========================================
-	// プレイヤーの攻撃用範囲とガラスの当たり判定
-	// ==========================================
-	if (player->GetIsAttack()) {
-		for (auto& glass : stage->GetGlassManager()->GetObjects()) {
-			if (Collision::Intersect(player->GetAttackCol(), glass->GetCollision())) {
-				// ガラス破片生成
-				glass->AddGlassesDecal({0.1f, 0.1f, 0.1f});
-				Transform& t = glass->GetTransform();
-				
-				// 叩いた方向
-				Vector2 pd = player->GetDirection();
-				Vector3 hitDir = {pd.x, 0.0f, pd.y};
-
-				// ガラス破片をデカールで飛ばす
-				stage->GetGlassShardScatter()->Spawn(t.translate, {t.scale.x, 0.0f, t.scale.z}, hitDir);
-
-				// 破壊エフェクト
-				glassBreakCallback({t.translate.x, 1.0f, t.translate.z}, {t.scale.x, 1.0f, t.scale.z});
-
-				// 軽くカメラを揺らす
-				if (!camera->GetIsShake()) {
-					camera->StartShake(0.15f, 0.15f);
-				}
-
-				// ガラス破壊時の振動
-				if (player->GetRumbleManager()) {
-					player->GetRumbleManager()->TriggerGlassBreak();
-				}
-
-				// ガラス削除
-				stage->GetGlassManager()->RemoveObject(glass.get());
+	// プレイヤーの攻撃範囲とガラス
+	if (player.GetIsAttack()) {
+		for (const auto& glass : glasses) {
+			if (glass->GetIsActive() && Collision::Intersect(player.GetAttackCol(), glass->GetCollision())) {
+				NotifyContact(player, Attack, *glass, Body, context);
 				break;
 			}
 		}
 	}
 
-	// ==========================================
-	// プレイヤーと壁の押し出し判定
-	// ==========================================
-	AABB playerAABB = player->GetBodyCol();
-	Vector3 playerPos = player->GetPosition();
-	const auto solidObstacles = stage->GetSolidObstacles();
+	glassManager.RemoveObjectsIf([](const Glass& glass) { return !glass.GetIsActive(); });
+#pragma endregion プレイヤーの攻撃範囲当たり判定
 
-	for (const auto& wallAABB : solidObstacles) {
-		// AABB同士の交差判定
-		if (playerAABB.min.x <= wallAABB.max.x && playerAABB.max.x >= wallAABB.min.x && playerAABB.min.y <= wallAABB.max.y && playerAABB.max.y >= wallAABB.min.y &&
-		    playerAABB.min.z <= wallAABB.max.z && playerAABB.max.z >= wallAABB.min.z) {
+#pragma region 障害物の収集
+	std::vector<Obstacle> obstacles;
+	const auto appendObstacles = [&](const auto& objects, bool blocksEnemy) {
+		for (const auto& object : objects) {
+			obstacles.push_back({*object, object->GetCollision(), true, blocksEnemy});
+		}
+	};
 
-			// めり込み量の計算
-			// X軸方向のめり込み量
-			float overlapX1 = wallAABB.max.x - playerAABB.min.x; // 右から左へ押す量
-			float overlapX2 = playerAABB.max.x - wallAABB.min.x; // 左から右へ押す量
-			// Z軸方向のめり込み量
-			float overlapZ1 = wallAABB.max.z - playerAABB.min.z; // 奥から手前へ押す量
-			float overlapZ2 = playerAABB.max.z - wallAABB.min.z; // 手前から奥へ押す量
-
-			// 最小のめり込み量を選ぶ（正の値にする）
-			float minOverlapX = std::min(overlapX1, overlapX2);
-			float minOverlapZ = std::min(overlapZ1, overlapZ2);
-
-			// めり込みが少ない軸の方向に押し出す
-			if (minOverlapX < minOverlapZ) {
-				// X軸方向に押し出す
-				if (overlapX1 < overlapX2) {
-					playerPos.x += overlapX1; // 右へ押し出す
-				} else {
-					playerPos.x -= overlapX2; // 左へ押し出す
-				}
-			} else {
-				// Z軸方向に押し出す
-				if (overlapZ1 < overlapZ2) {
-					playerPos.z += overlapZ1; // 奥へ押し出す
-				} else {
-					playerPos.z -= overlapZ2; // 手前へ押し出す
-				}
-			}
-
-			// 押し出した結果をプレイヤーの座標に反映
-			player->SetPosition(playerPos);
-
-			// 複数の壁と連続で当たるケースを考慮し、判定用AABBもその場で更新
-			playerAABB.max.x = playerPos.x + 0.5f;
-			playerAABB.min.x = playerPos.x - 0.5f;
-			playerAABB.max.z = playerPos.z + 0.5f;
-			playerAABB.min.z = playerPos.z - 0.5f;
+	appendObstacles(stage.GetWallManager()->GetObjects(), true);
+	for (const auto& barricade : stage.GetBarricadeManager()->GetObjects()) {
+		if (barricade->IsSolid()) {
+			obstacles.push_back({*barricade, barricade->GetCollision(), true, true});
 		}
 	}
 
-	// ==========================================
-	// プレイヤーとガラスの押し出し判定
-	// ==========================================
-	for (const auto& glass : stage->GetGlassManager()->GetObjects()) {
-		AABB glassAABB = glass->GetCollision();
-
-		// AABB同士の交差判定
-		if (playerAABB.min.x <= glassAABB.max.x && playerAABB.max.x >= glassAABB.min.x && playerAABB.min.y <= glassAABB.max.y && playerAABB.max.y >= glassAABB.min.y &&
-		    playerAABB.min.z <= glassAABB.max.z && playerAABB.max.z >= glassAABB.min.z) {
-
-			// めり込み量の計算
-			// X軸方向のめり込み量
-			float overlapX1 = glassAABB.max.x - playerAABB.min.x; // 右から左へ押す量
-			float overlapX2 = playerAABB.max.x - glassAABB.min.x; // 左から右へ押す量
-			// Z軸方向のめり込み量
-			float overlapZ1 = glassAABB.max.z - playerAABB.min.z; // 奥から手前へ押す量
-			float overlapZ2 = playerAABB.max.z - glassAABB.min.z; // 手前から奥へ押す量
-
-			// 最小のめり込み量を選ぶ（正の値にする）
-			float minOverlapX = std::min(overlapX1, overlapX2);
-			float minOverlapZ = std::min(overlapZ1, overlapZ2);
-
-			// めり込みが少ない軸の方向に押し出す
-			if (minOverlapX < minOverlapZ) {
-				// X軸方向に押し出す
-				if (overlapX1 < overlapX2) {
-					playerPos.x += overlapX1; // 右へ押し出す
-				} else {
-					playerPos.x -= overlapX2; // 左へ押し出す
-				}
-			} else {
-				// Z軸方向に押し出す
-				if (overlapZ1 < overlapZ2) {
-					playerPos.z += overlapZ1; // 奥へ押し出す
-				} else {
-					playerPos.z -= overlapZ2; // 手前へ押し出す
-				}
-			}
-
-			// 押し出した結果をプレイヤーの座標に反映
-			player->SetPosition(playerPos);
-
-			// 複数の壁と連続で当たるケースを考慮し、判定用AABBもその場で更新
-			playerAABB.max.x = playerPos.x + 0.5f;
-			playerAABB.min.x = playerPos.x - 0.5f;
-			playerAABB.max.z = playerPos.z + 0.5f;
-			playerAABB.min.z = playerPos.z - 0.5f;
+	// ドアはプレイヤーの接近で開き、閉じている間は敵の移動を妨げる
+	for (const auto& door : stage.GetDoorManager()->GetObjects()) {
+		if (!door->GetIsOpen()) {
+			obstacles.push_back({*door, door->GetCollision(), false, true});
 		}
 	}
 
-	// ==========================================
-	// プレイヤーと檻の押し出し判定
-	// ==========================================
-	for (const auto& cage : stage->GetCageManager()->GetObjects()) {
-		AABB cageAABB = cage->GetCollision();
+	appendObstacles(glasses, false);
+	appendObstacles(stage.GetCageManager()->GetObjects(), false);
+#pragma endregion 障害物の収集
 
-		// AABB同士の交差判定
-		if (playerAABB.min.x <= cageAABB.max.x && playerAABB.max.x >= cageAABB.min.x && playerAABB.min.y <= cageAABB.max.y && playerAABB.max.y >= cageAABB.min.y &&
-		    playerAABB.min.z <= cageAABB.max.z && playerAABB.max.z >= cageAABB.min.z) {
-
-			// めり込み量の計算
-			// X軸方向のめり込み量
-			float overlapX1 = cageAABB.max.x - playerAABB.min.x; // 右から左へ押す量
-			float overlapX2 = playerAABB.max.x - cageAABB.min.x; // 左から右へ押す量
-			// Z軸方向のめり込み量
-			float overlapZ1 = cageAABB.max.z - playerAABB.min.z; // 奥から手前へ押す量
-			float overlapZ2 = playerAABB.max.z - cageAABB.min.z; // 手前から奥へ押す量
-
-			// 最小のめり込み量を選ぶ（正の値にする）
-			float minOverlapX = std::min(overlapX1, overlapX2);
-			float minOverlapZ = std::min(overlapZ1, overlapZ2);
-
-			// めり込みが少ない軸の方向に押し出す
-			if (minOverlapX < minOverlapZ) {
-				// X軸方向に押し出す
-				if (overlapX1 < overlapX2) {
-					playerPos.x += overlapX1; // 右へ押し出す
-				} else {
-					playerPos.x -= overlapX2; // 左へ押し出す
-				}
-			} else {
-				// Z軸方向に押し出す
-				if (overlapZ1 < overlapZ2) {
-					playerPos.z += overlapZ1; // 奥へ押し出す
-				} else {
-					playerPos.z -= overlapZ2; // 手前へ押し出す
-				}
+#pragma region 障害物からの押し戻しとプレイヤーへの適用
+	const auto resolveObstacles = [&](auto& character, bool Obstacle::* blocksCharacter) {
+		for (const auto& obstacle : obstacles) {
+			if (!(obstacle.*blocksCharacter) || !Collision::Intersect(character.GetBodyCol(), obstacle.bounds)) {
+				continue;
 			}
 
-			// 押し出した結果をプレイヤーの座標に反映
-			player->SetPosition(playerPos);
+			// ノックバック中の敵は、接触通知で死亡することがある
+			NotifyContact(character, Body, obstacle.object, Body, context);
+			if (character.IsDead()) {
+				break;
+			}
 
-			// 複数の壁と連続で当たるケースを考慮し、判定用AABBもその場で更新
-			playerAABB.max.x = playerPos.x + 0.5f;
-			playerAABB.min.x = playerPos.x - 0.5f;
-			playerAABB.max.z = playerPos.z + 0.5f;
-			playerAABB.min.z = playerPos.z - 0.5f;
+			const Vector3 displacement = Collision::CalculatePushbackXZ(character.GetBodyCol(), obstacle.bounds);
+			if (displacement.x != 0.0f || displacement.z != 0.0f) {
+				character.ApplyCollisionDisplacement(displacement);
+			}
 		}
-	}
+	};
+	resolveObstacles(player, &Obstacle::blocksPlayer);
+#pragma endregion 障害物からの押し戻しとプレイヤーへの適用
 
-	// ==========================================
-	// 投げた盾は移動区間で最初に当たった障害物か敵で止まる
-	// ==========================================
-	for (const auto& barricade : stage->GetBarricadeManager()->GetObjects()) {
+#pragma region 投げたバリケードの当たり判定
+	for (const auto& barricade : stage.GetBarricadeManager()->GetObjects()) {
 		if (!barricade->IsThrown()) {
 			continue;
 		}
 
+		// 移動区間内で最初に当たる障害物または敵を探す
 		float closestHit = std::numeric_limits<float>::infinity();
-		auto testObstacle = [&](const AABB& obstacle) {
+		CollisionObject* hitObject = nullptr;
+		const auto test = [&](CollisionObject& object, const AABB& bounds) {
 			float hitTime;
-			if (barricade->CheckThrowHit(obstacle, hitTime)) {
-				closestHit = std::min(closestHit, hitTime);
+			if (barricade->CheckThrowHit(bounds, hitTime) && hitTime < closestHit) {
+				closestHit = hitTime;
+				hitObject = &object;
 			}
 		};
 
-		for (const auto& obstacle : solidObstacles) {
-			testObstacle(obstacle);
-		}
-		for (const auto& door : stage->GetDoorManager()->GetObjects()) {
-			if (!door->GetIsOpen()) {
-				testObstacle(door->GetCollision());
-			}
-		}
-		for (const auto& glass : stage->GetGlassManager()->GetObjects()) {
-			testObstacle(glass->GetCollision());
-		}
-		for (const auto& cage : stage->GetCageManager()->GetObjects()) {
-			testObstacle(cage->GetCollision());
+		for (const auto& obstacle : obstacles) {
+			test(obstacle.object, obstacle.bounds);
 		}
 
-		Enemy* hitEnemy = nullptr;
-		for (const auto& enemy : enemyManager->GetEnemies()) {
-			float hitTime;
-			if (!enemy->IsDead() && barricade->CheckThrowHit(enemy->GetBodyCol(), hitTime) && hitTime < closestHit) {
-				closestHit = hitTime;
-				hitEnemy = enemy.get();
+		for (const auto& enemy : enemies) {
+			if (!enemy->IsDead()) {
+				test(*enemy, enemy->GetBodyCol());
 			}
 		}
 
-		if (closestHit <= 1.0f) {
+		if (hitObject && closestHit <= 1.0f) {
 			barricade->LandThrow(closestHit);
-			if (hitEnemy) {
-				hitEnemy->Kill();
-				ProcessEnemyDeath(hitEnemy);
-			}
+			NotifyContact(*barricade, Thrown, *hitObject, Body, context);
 		} else if (barricade->HasReachedThrowRange()) {
 			barricade->LandThrow(1.0f);
 		}
 	}
+#pragma endregion 投げたバリケードの当たり判定
 
-	// ==========================================
-	// 敵と壁の判定（めり込み防止 ＆ ノックバック時死亡）
-	// ==========================================
-	for (auto& enemy : enemyManager->GetEnemies()) {
-		if (enemy->IsDead())
-			continue;
+#pragma region 敵と障害物の当たり判定
+	for (const auto& enemy : enemies) {
+		if (!enemy->IsDead()) {
+			resolveObstacles(*enemy, &Obstacle::blocksEnemy);
+		}
+	}
+#pragma endregion 敵と障害物の当たり判定
 
-		AABB enemyAABB = enemy->GetBodyCol();
-		Vector3 enemyPos = enemy->GetPos();
+#pragma region プレイヤーとゴールの当たり判定
+	if (auto* goal = stage.GetGoal(); goal && Collision::Intersect(player.GetBodyCol(), goal->GetCollision())) {
+		NotifyContact(player, Body, *goal, Body, context);
+	}
+#pragma endregion プレイヤーとゴールの当たり判定
 
-		for (const auto& wallAABB : solidObstacles) {
-			// AABB同士の交差判定
-			if (enemyAABB.min.x <= wallAABB.max.x && enemyAABB.max.x >= wallAABB.min.x && enemyAABB.min.y <= wallAABB.max.y && enemyAABB.max.y >= wallAABB.min.y && enemyAABB.min.z <= wallAABB.max.z &&
-			    enemyAABB.max.z >= wallAABB.min.z) {
-
-				// ----------------------------------------
-				// 壁激突死の判定：もしノックバック中なら死亡させて処理を抜ける
-				// ----------------------------------------
-				if (enemy->IsKnockBack()) {
-					enemy->Kill();
-					ProcessEnemyDeath(enemy.get());
-
-					break;
-				}
-
-				// ----------------------------------------
-				// 通常時の押し出し処理
-				// ----------------------------------------
-				float overlapX1 = wallAABB.max.x - enemyAABB.min.x;
-				float overlapX2 = enemyAABB.max.x - wallAABB.min.x;
-				float overlapZ1 = wallAABB.max.z - enemyAABB.min.z;
-				float overlapZ2 = enemyAABB.max.z - wallAABB.min.z;
-
-				float minOverlapX = std::min(overlapX1, overlapX2);
-				float minOverlapZ = std::min(overlapZ1, overlapZ2);
-
-				if (minOverlapX < minOverlapZ) {
-					if (overlapX1 < overlapX2) {
-						enemyPos.x += overlapX1;
-					} else {
-						enemyPos.x -= overlapX2;
-					}
-				} else {
-					if (overlapZ1 < overlapZ2) {
-						enemyPos.z += overlapZ1;
-					} else {
-						enemyPos.z -= overlapZ2;
-					}
-				}
-
-				// 結果を敵の座標に反映
-				enemy->SetPos(enemyPos);
-
-				// 連続で壁に当たるケースを考慮してAABB更新
-				enemyAABB.max.x = enemyPos.x + 0.5f;
-				enemyAABB.min.x = enemyPos.x - 0.5f;
-				enemyAABB.max.z = enemyPos.z + 0.5f;
-				enemyAABB.min.z = enemyPos.z - 0.5f;
+#pragma region 敵同士の当たり判定
+	// 各ペアを一度だけ調べ、衝突で死亡した敵の判定は打ち切る
+	for (auto first = enemies.begin(); first != enemies.end(); ++first) {
+		for (auto second = std::next(first); second != enemies.end() && !(*first)->IsDead(); ++second) {
+			if (!(*second)->IsDead() && Collision::Intersect((*first)->GetBodyCol(), (*second)->GetBodyCol())) {
+				NotifyContact(**first, Body, **second, Body, context);
 			}
 		}
 	}
+#pragma endregion 敵同士の当たり判定
 
-	// =========================================================
-	// 敵とドアの当たり判定
-	// =========================================================
-	for (auto& enemy : enemyManager->GetEnemies()) {
-		for (auto& door : stage->GetDoorManager()->GetObjects()) {
-			AABB wallAABB = door->GetCollision();
-			AABB enemyAABB = enemy->GetBodyCol();
-			Vector3 enemyPos = enemy->GetPos();
-
-			// ドアが開いているなら敵は通り抜けられるのでスキップ
-			if (door->GetIsOpen()) {
-				continue;
-			}
-
-			// 衝突判定
-			if (Collision::Intersect(enemy->GetBodyCol(), door->GetCollision())) {
-				// 押し戻し・衝突応答処理
-				// --------------------------------------------------
-				// 壁激突死の判定：もしノックバック中なら死亡させて処理を抜ける
-				// --------------------------------------------------
-				if (enemy->IsKnockBack()) {
-					enemy->Kill();
-					ProcessEnemyDeath(enemy.get());
-
-					break;
-				}
-
-				// ----------------------------------------
-				// 通常時の押し出し処理
-				// ----------------------------------------
-				float overlapX1 = wallAABB.max.x - enemyAABB.min.x;
-				float overlapX2 = enemyAABB.max.x - wallAABB.min.x;
-				float overlapZ1 = wallAABB.max.z - enemyAABB.min.z;
-				float overlapZ2 = enemyAABB.max.z - wallAABB.min.z;
-
-				float minOverlapX = std::min(overlapX1, overlapX2);
-				float minOverlapZ = std::min(overlapZ1, overlapZ2);
-
-				if (minOverlapX < minOverlapZ) {
-					if (overlapX1 < overlapX2) {
-						enemyPos.x += overlapX1;
-					} else {
-						enemyPos.x -= overlapX2;
-					}
-				} else {
-					if (overlapZ1 < overlapZ2) {
-						enemyPos.z += overlapZ1;
-					} else {
-						enemyPos.z -= overlapZ2;
-					}
-				}
-
-				// 結果を敵の座標に反映
-				enemy->SetPos(enemyPos);
-
-				// 連続で壁に当たるケースを考慮してAABB更新
-				enemyAABB.max.x = enemyPos.x + 0.5f;
-				enemyAABB.min.x = enemyPos.x - 0.5f;
-				enemyAABB.max.z = enemyPos.z + 0.5f;
-				enemyAABB.min.z = enemyPos.z - 0.5f;
-			}
-		}
-	}
-
-	// ==========================================
-	// プレイヤーとゴールの当たり判定
-	// ==========================================
-	if (Collision::Intersect(player->GetBodyCol(), stage->GetGoal()->GetCollision())) {
-		// ゴールフラグを立てる
-		stage->GetGoal()->SetIsGoal(true);
-	}
-
-	// ==========================================
-	// 敵同士の当たり判定
-	// ==========================================
-	auto& enemies = enemyManager->GetEnemies();
-
-	for (auto itA = enemies.begin(); itA != enemies.end(); ++itA) {
-		Enemy* a = itA->get();
-		if (a->IsDead())
-			continue;
-
-		auto itB = itA;
-		++itB;
-
-		for (; itB != enemies.end(); ++itB) {
-			Enemy* b = itB->get();
-			if (b->IsDead())
-				continue;
-
-			// 当たり判定
-			if (Collision::Intersect(a->GetBodyCol(), b->GetBodyCol())) {
-				// どちらかがノックバック状態であれば
-				if (a->IsKnockBack() || b->IsKnockBack()) {
-					a->Damage();
-					b->Damage();
-					a->StopKnockback();
-					b->StopKnockback();
-
-					// ダメージの結果死亡した場合のみ処理を行う
-					if (a->IsDead()) {
-						ProcessEnemyDeath(a);
-					}
-					if (b->IsDead()) {
-						ProcessEnemyDeath(b);
-					}
+#pragma region 敵と敵の弾の当たり判定
+	if (player.GetGrabbedEnemy()) {
+		for (const auto& enemy : enemies) {
+			for (const auto& bullet : bullets) {
+				if (!enemy->IsDead() && bullet->IsCollisionActive() && Collision::Intersect(enemy->GetBodyCol(), bullet->GetCollision())) {
+					NotifyContact(*enemy, Body, *bullet, Body, context);
 				}
 			}
 		}
 	}
+#pragma endregion 敵と敵の弾の当たり判定
 
-	// ==========================================
-	// 敵と敵の弾の当たり判定
-	// ==========================================
-	if (player->GetGrabbedEnemy() != nullptr) {
-		for (const auto& enemy : enemyManager->GetEnemies()) {
-			for (const auto& bullet : enemyBulletManager->GetBullets()) {
-				// 発射された1フレーム目以外は判定を行わない
-				if (!bullet->IsCollisionActive()) {
-					continue;
-				}
-
-				// 衝突判定
-				if (Collision::Intersect(enemy->GetBodyCol(), bullet->GetCollision())) {
-					enemy->Damage();
-
-					if (enemy->IsDead()) {
-						ProcessEnemyDeath(enemy.get());
-					}
-				}
-			}
+#pragma region プレイヤーと回復エリアの当たり判定
+	for (const auto& healArea : stage.GetHealAreaManager()->GetObjects()) {
+		if (healArea->GetIsActive() && Collision::Intersect(player.GetBodyCol(), healArea->GetCollision())) {
+			NotifyContact(player, Body, *healArea, Body, context);
 		}
 	}
+#pragma endregion プレイヤーと回復エリアの当たり判定
 
-	// ==========================================
-	// プレイヤーと回復エリアの当たり判定
-	// ==========================================
-	for (const auto& healArea : stage->GetHealAreaManager()->GetObjects()) {
-		if (Collision::Intersect(player->GetBodyCol(), healArea->GetCollision())) {
-			player->AllHeal();
-			healArea->SetIsActive(false);
+#pragma region プレイヤーと爆発範囲の当たり判定
+	for (const auto& bomb : bombManager.GetBombs()) {
+		if (bomb->IsExploded() && Collision::Intersect(player.GetBodyCol(), bomb->GetBombCollision())) {
+			NotifyContact(player, Body, *bomb, Explosion, context);
 		}
 	}
+#pragma endregion プレイヤーと爆発範囲の当たり判定
 
-	// ==========================================
-	// プレイヤーと敵の爆弾の当たり判定
-	// ==========================================
-	for (auto& bomb : enemyBombManager->GetBombs()) {
-		if (Collision::Intersect(player->GetBodyCol(), bomb->GetBombCollision())) {
-			if (!camera->GetIsShake()) {
-				camera->StartShake(0.1f, 0.1f);
-			}
-
-			if (bomb->IsExploded() && !player->BlocksWithShield(bomb->GetPosition() - player->GetPosition())) {
-				// プレイヤー死亡
-				player->Damage(3);
-			}
-		}
-	}
-
-	// ==========================================
-	// 投げられた石鹼と障害物の判定
-	// ==========================================
-	auto Overlap2D = [](const AABB& a, const AABB& b) { return a.min.x <= b.max.x && a.max.x >= b.min.x && a.min.z <= b.max.z && a.max.z >= b.min.z; };
-
-	auto HitAny = [&](const AABB& col, const auto& objects) {
-		for (const auto& obj : objects) {
-			if (Overlap2D(col, obj->GetCollision())) {
-				return true;
-			}
-		}
-		return false;
-	};
-
-	for (const auto& soap : stage->GetSoapManager()->GetObjects()) {
+#pragma region 投げた石鹸と障害物の当たり判定
+	// 石鹸と障害物の接触は高さを除いて判定する。
+	for (const auto& soap : soaps) {
 		if (!soap->IsThrown()) {
 			continue;
 		}
 
-		AABB col = soap->GetCollision();
-		bool hit = std::any_of(solidObstacles.begin(), solidObstacles.end(), [&](const AABB& obstacle) {
-			return Overlap2D(col, obstacle);
-		}) || HitAny(col, stage->GetGlassManager()->GetObjects()) || HitAny(col, stage->GetCageManager()->GetObjects());
-
-		// 閉じているドアのみ障害物扱い
-		if (!hit) {
-			for (const auto& door : stage->GetDoorManager()->GetObjects()) {
-				if (!door->GetIsOpen() && Overlap2D(col, door->GetCollision())) {
-					hit = true;
-					break;
-				}
-			}
-		}
-
-		if (hit) {
-			soap->Stop();
-		}
-	}
-
-	// ==========================================
-	// 敵と石鹸の判定
-	// ==========================================
-	for (const auto& soap : stage->GetSoapManager()->GetObjects()) {
-		for (auto& enemy : enemyManager->GetEnemies()) {
-			if (enemy->IsDead() || enemy->IsDown()) {
-				continue;
-			}
-
-			// 勢いよく直接ぶつかった場合は即ダウン
-			if (soap->IsDangerous() && Collision::Intersect(enemy->GetBodyCol(), soap->GetCollision())) {
-				enemy->StartDown();
-				soap->Stop();
-				continue;
-			}
-
-			// 泡エリアに重なっていてもダウン
-			if (soap->GetIsBubbleActive() && Collision::Intersect(enemy->GetBodyCol(), soap->GetBubbleArea())) {
-				enemy->StartDown();
-
-				// 泡と敵が当たったので石鹸オブジェクトを削除
-				stage->GetSoapManager()->RemoveObject(soap.get());
-
-				// 石鹸が削除されるため、他の敵との判定を抜ける
+		for (const auto& obstacle : obstacles) {
+			if (Collision::IntersectXZ(soap->GetCollision(), obstacle.bounds)) {
+				NotifyContact(*soap, Thrown, obstacle.object, Body, context);
 				break;
 			}
 		}
 	}
+#pragma endregion 投げた石鹸と障害物の当たり判定
+
+#pragma region 石鹸と敵の当たり判定
+	for (const auto& soap : soaps) {
+		for (const auto& enemy : enemies) {
+			if (enemy->IsDead() || enemy->IsDown()) {
+				continue;
+			}
+
+			// 同じ敵に対しては、泡よりも石鹸本体の直撃を優先する
+			if (soap->IsDangerous() && Collision::Intersect(enemy->GetBodyCol(), soap->GetCollision())) {
+				NotifyContact(*soap, Thrown, *enemy, Body, context);
+				continue;
+			}
+
+			// 泡と敵の当たり判定
+			if (soap->GetIsBubbleActive() && Collision::Intersect(enemy->GetBodyCol(), soap->GetBubbleArea())) {
+				NotifyContact(*soap, Bubble, *enemy, Body, context);
+				break;
+			}
+		}
+	}
+	soapManager.RemoveObjectsIf([](const Soap& soap) { return soap.IsConsumed(); });
+#pragma endregion 石鹸と敵の当たり判定
+
+#pragma region 次フレーム用の接触履歴の更新
+	previousContacts_.swap(currentContacts_);
+	currentContacts_.clear();
+#pragma endregion 次フレーム用の接触履歴の更新
 }

@@ -10,6 +10,8 @@
 /// </summary>
 class Barricade : public PlaceableObject {
 public:
+	CollisionTag GetTag() const override { return CollisionTag::Barricade; }
+
 	Barricade();
 
 	// 初期化処理

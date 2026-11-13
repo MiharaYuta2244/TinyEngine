@@ -6,6 +6,9 @@
 
 class Glass : public PlaceableObject {
 public:
+	CollisionTag GetTag() const override { return CollisionTag::Glass; }
+	void OnCollisionEnter(const CollisionEvent& event, const CollisionContext& context) override;
+
 	Glass();
 
 	void Initialize(EngineContext* ctx, const Transform& transform, TinyEngine::DecalManager* decalManager);

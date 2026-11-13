@@ -1,4 +1,5 @@
 #include "Soap.h"
+#include "GameObjects/Enemy/Enemy.h"
 #include "EffectLibrary.h"
 #include "MathUtility.h"
 #include "Particle.h"
@@ -178,5 +179,36 @@ void Soap::SpawnBubbleEffect() {
 	// 発生を止めるタイミングは泡の持続時間に合わせる
 	for (auto& particle : bubbleEffect_) {
 		particle->SetEmitMode(false, bubbleDuration_);
+	}
+}
+
+void Soap::OnCollisionEnter(const CollisionEvent& event, const CollisionContext&) {
+	switch (event.other.GetTag()) {
+	case CollisionTag::Wall:
+	case CollisionTag::Barricade:
+	case CollisionTag::Glass:
+	case CollisionTag::Cage:
+	case CollisionTag::Door:
+		if (IsThrown()) {
+			Stop();
+		}
+		break;
+	case CollisionTag::Enemy: {
+		auto& enemy = static_cast<Enemy&>(event.other);
+		if (enemy.IsDead() || enemy.IsDown()) {
+			break;
+		}
+		if (event.selfPart == CollisionPart::Thrown && IsDangerous()) {
+			enemy.StartDown();
+			Stop();
+		} else if (event.selfPart == CollisionPart::Bubble && GetIsBubbleActive()) {
+			enemy.StartDown();
+			StopBubble();
+			isConsumed_ = true;
+		}
+		break;
+	}
+	default:
+		break;
 	}
 }

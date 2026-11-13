@@ -10,6 +10,9 @@
 /// </summary>
 class Goal : public IGameObject {
 public:
+	CollisionTag GetTag() const override { return CollisionTag::Goal; }
+	void OnCollisionEnter(const CollisionEvent& event, const CollisionContext& context) override;
+
 	// 初期化処理
 	void Initialize(EngineContext* ctx, const Vector3& position);
 

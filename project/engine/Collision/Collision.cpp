@@ -16,15 +16,31 @@ bool Collision::Intersect(const Sphere& s1, const Sphere& s2) {
 }
 
 bool Collision::Intersect(const AABB& aabb1, const AABB& aabb2) {
-	if ((aabb1.min.x <= aabb2.max.x && aabb1.max.x >= aabb2.min.x) && // x軸
-	    (aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y) && // y軸
-	    (aabb1.min.z <= aabb2.max.z && aabb1.max.z >= aabb2.min.z)) { // z軸
-		// 衝突
-		return true;
+	return IntersectXZ(aabb1, aabb2) && aabb1.min.y <= aabb2.max.y && aabb1.max.y >= aabb2.min.y;
+}
+
+bool Collision::IntersectXZ(const AABB& a, const AABB& b) {
+	return a.min.x <= b.max.x && a.max.x >= b.min.x && a.min.z <= b.max.z && a.max.z >= b.min.z;
+}
+
+Vector3 Collision::CalculatePushbackXZ(const AABB& moving, const AABB& obstacle) {
+	if (!Intersect(moving, obstacle)) {
+		return {};
 	}
 
-	// 衝突なし
-	return false;
+	const float positiveX = obstacle.max.x - moving.min.x;
+	const float negativeX = moving.max.x - obstacle.min.x;
+	const float positiveZ = obstacle.max.z - moving.min.z;
+	const float negativeZ = moving.max.z - obstacle.min.z;
+
+	const float x = positiveX < negativeX ? positiveX : -negativeX;
+	const float z = positiveZ < negativeZ ? positiveZ : -negativeZ;
+
+	if (std::abs(x) < std::abs(z)) {
+		return {x, 0.0f, 0.0f};
+	}
+
+	return {0.0f, 0.0f, z};
 }
 
 bool Collision::Intersect(const AABB& aabb, const Sphere& sphere) {

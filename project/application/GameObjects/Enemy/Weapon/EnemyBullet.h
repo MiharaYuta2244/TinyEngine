@@ -1,5 +1,6 @@
 #pragma once
 #include "AABB.h"
+#include "Collision/CollisionEvent.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "OBB.h"
 #include "Rect.h"
@@ -8,8 +9,10 @@
 /// <summary>
 /// 敵の弾クラス
 /// </summary>
-class EnemyBullet {
+class EnemyBullet : public CollisionObject {
 public:
+	CollisionTag GetTag() const override { return CollisionTag::EnemyBullet; }
+
 	// 初期化処理
 	void Initialize(EngineContext* ctx, Vector2 dir, Vector3 pos);
 

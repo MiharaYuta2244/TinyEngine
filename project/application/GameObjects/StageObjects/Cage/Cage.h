@@ -8,6 +8,8 @@
 /// </summary>
 class Cage : public PlaceableObject {
 public:
+	CollisionTag GetTag() const override { return CollisionTag::Cage; }
+
 	Cage();
 
 	// 初期化処理
