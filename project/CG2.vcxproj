@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -311,6 +311,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Engine\3d\particle\modules\MuzzleSmokeModule.cpp" />
     <ClCompile Include="Application\Editor\SceneEditor.cpp" />
     <ClCompile Include="Application\GameObjects\StageObjects\Stage.cpp" />
+    <ClCompile Include="Application\GameObjects\StageObjects\Decoration\Decoration.cpp" />
     <ClCompile Include="Application\GameObjects\StageObjects\HealArea\HealArea.cpp" />
     <ClCompile Include="Application\Menu\ResultScoreDisplay.cpp" />
     <ClCompile Include="Application\Scene\StageSelectScene.cpp" />
@@ -572,6 +573,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\GameObjects\StageObjects\Glass\Glass.h" />
     <ClInclude Include="Application\Editor\SceneEditor.h" />
     <ClInclude Include="Application\GameObjects\StageObjects\Stage.h" />
+    <ClInclude Include="Application\GameObjects\StageObjects\Decoration\Decoration.h" />
     <ClInclude Include="Application\GameObjects\StageObjects\HealArea\HealArea.h" />
     <ClInclude Include="Engine\3d\particle\GPUParticle.h" />
     <ClInclude Include="Engine\3d\particle\modules\HealCrossModule.h" />

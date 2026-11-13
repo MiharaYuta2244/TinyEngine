@@ -13,10 +13,11 @@
 /// </summary>
 class Object3dCommon {
 public:
+	static constexpr UINT kInstanceDataRootIndex = 11;
 	/// <summary>
 	/// 共通描画設定
 	/// </summary>
-	void DrawSettingCommon(TextureManager* textureManager);
+	void DrawSettingCommon(TextureManager* textureManager, bool instanced = false);
 
 	/// <summary>
 	/// アウトライン用の設定を適用する関数
@@ -106,6 +107,7 @@ private:
 	// Root Signature / Pipeline
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> rootSignature_;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> graphicsPipelineState_;
+	Microsoft::WRL::ComPtr<ID3D12PipelineState> instancedPipelineState_;
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> outlinePipelineState_;
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> skinningRootSignature_;
 	Microsoft::WRL::ComPtr<ID3D12RootSignature> skinningComputeRootSignature_;

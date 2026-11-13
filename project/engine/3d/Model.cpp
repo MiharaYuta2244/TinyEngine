@@ -4,6 +4,7 @@
 #include "MathUtility.h"
 #include "ModelCommon.h"
 #include "TextureManager.h"
+#include <algorithm>
 #include <assert.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -20,6 +21,15 @@ void Model::Initialize(ModelCommon* modelCommon, TextureManager* textureManager,
 
 	// モデル読み込み
 	modelData_ = LoadModelFile(filename_);
+	if (!modelData_.vertices.empty()) {
+		const auto& first = modelData_.vertices.front().position;
+		localBounds_.min = localBounds_.max = {first.x, first.y, first.z};
+		for (const auto& vertex : modelData_.vertices) {
+			const auto& p = vertex.position;
+			localBounds_.min = {std::min(localBounds_.min.x, p.x), std::min(localBounds_.min.y, p.y), std::min(localBounds_.min.z, p.z)};
+			localBounds_.max = {std::max(localBounds_.max.x, p.x), std::max(localBounds_.max.y, p.y), std::max(localBounds_.max.z, p.z)};
+		}
+	}
 
 	// 頂点データの初期化
 	CreateVertexData();
@@ -243,7 +253,7 @@ void Model::DispatchSkinning(ID3D12GraphicsCommandList* commandList, const SkinC
 	commandList->Dispatch(threadGroupCount, 1, 1);
 }
 
-void Model::Draw(const std::string& textureFilePath, const SkinCluster* skinCluster) {
+void Model::Draw(const std::string& textureFilePath, const SkinCluster* skinCluster, UINT instanceCount) {
 	auto commandList = modelCommon_->GetDxCommon()->GetCommandList();
 
 	if (skinCluster) {
@@ -269,7 +279,7 @@ void Model::Draw(const std::string& textureFilePath, const SkinCluster* skinClus
 		commandList->SetGraphicsRootDescriptorTable(2, textureManager_->GetSrvHandleGPU(path));
 
 		// メッシュのインデックス数とオフセットを指定して描画
-		commandList->DrawIndexedInstanced(mesh.indexCount, 1, mesh.indexOffset, 0, 0);
+		commandList->DrawIndexedInstanced(mesh.indexCount, instanceCount, mesh.indexOffset, 0, 0);
 	}
 
 	if (skinCluster) {

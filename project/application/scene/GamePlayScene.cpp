@@ -292,6 +292,9 @@ void GamePlayScene::Update() {
 	for (auto& wall : stage_->GetWallManager()->GetObjects()) {
 		editObjects.push_back(wall.get());
 	}
+	for (auto& decoration : stage_->GetDecorationManager()->GetObjects()) {
+		editObjects.push_back(decoration.get());
+	}
 	for (auto& barricade : stage_->GetBarricadeManager()->GetObjects()) {
 		editObjects.push_back(barricade.get());
 	}
@@ -406,7 +409,7 @@ void GamePlayScene::Draw() {
 	ctx_.engineContext->object3dCommon->DrawSettingCommon(ctx_.engineContext->textureManager);
 
 	// ステージオブジェクトの描画
-	stage_->Draw();
+	stage_->Draw(ctx_.currentCamera);
 
 	// 敵の描画処理
 	enemyManager_->Draw();
@@ -583,6 +586,8 @@ IGameObject* GamePlayScene::SpawnObject(const SpawnRequest& request) {
 	switch (request.type) {
 	case SpawnType::Wall:
 		return stage_->GetWallManager()->AddObject(request.position);
+	case SpawnType::Decoration:
+		return stage_->GetDecorationManager()->AddObject(request.position);
 	case SpawnType::Barricade:
 		return stage_->GetBarricadeManager()->AddObject(request.position);
 	case SpawnType::Door:

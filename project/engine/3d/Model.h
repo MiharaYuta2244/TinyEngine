@@ -1,4 +1,5 @@
 #pragma once
+#include "AABB.h"
 #include "KeyframeAnimation.h"
 #include "Material.h"
 #include "MaterialData.h"
@@ -66,13 +67,14 @@ public:
 	void Initialize(ModelCommon* modelCommon, TextureManager* textureManager, const std::string& filename);
 
 	// 描画関数
-	void Draw(const std::string& textureFilePath = "", const SkinCluster* skinCluster = nullptr);
+	void Draw(const std::string& textureFilePath = "", const SkinCluster* skinCluster = nullptr, UINT instanceCount = 1);
 
 	// 更新関数
 	void Update();
 
 	// Getter
 	const ModelData& GetModelData() const { return modelData_; }
+	const AABB& GetLocalBounds() const { return localBounds_; }
 
 	Skeleton CreateSkeleton(const Node& rootNode);
 
@@ -127,6 +129,7 @@ private:
 
 	// objファイルのデータ
 	ModelData modelData_;
+	AABB localBounds_{};
 
 	// メッシュデータ
 	MeshData meshData_;

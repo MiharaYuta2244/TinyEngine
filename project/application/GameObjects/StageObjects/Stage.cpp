@@ -1,6 +1,15 @@
 #include "Stage.h"
+#include "CameraForGPU.h"
+#include "DirectXUtils.h"
+#include "FogParam.h"
+#include "TimeParam.h"
+#include <cmath>
+#include <cstddef>
+#include <cstring>
 #include "JsonManager.h"
 #include "MathUtility.h"
+#include "MathOperator.h"
+#include <algorithm>
 
 #ifdef USE_IMGUI
 #include "imgui.h"
@@ -8,9 +17,21 @@
 
 using namespace TinyEngine;
 
+namespace {
+struct DecorationConstants {
+	alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) Material material{};
+	alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) CameraForGPU camera{};
+	alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) FogParam fog{};
+	alignas(D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT) TimeParam time{};
+};
+}
+
 void Stage::Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalManager, const std::string& stagePath) {
 	// デカール管理インスタンスの受け渡し
 	decalManager_ = decalManager;
+	engineContext_ = ctx.engineContext;
+	decorationManager_ = std::make_unique<DecorationManager>();
+	decorationManager_->Initialize(engineContext_, "DecorationEditor", stagePath + "Decorations.json", Transform{{2, 2, 2}, {}, {}});
 
 	// 壁の管理インスタンス生成&初期化
 	wallManager_ = std::make_unique<WallManager>();
@@ -130,7 +151,7 @@ void Stage::Update(float deltaTime, const Vector3& playerPos, Camera* camera) {
 	goal_->Update(deltaTime);
 }
 
-void Stage::Draw() {
+void Stage::Draw(Camera* camera) {
 	ground_->Draw();
 	doorManager_->Draw();
 	wallManager_->Draw();
@@ -138,6 +159,95 @@ void Stage::Draw() {
 	cageManager_->Draw();
 	soapManager_->Draw();
 	goal_->Draw();
+	if (camera) {
+		DrawDecorations(*camera);
+	}
+}
+
+void Stage::DrawDecorations(Camera& camera) {
+	const auto& decorations = decorationManager_->GetObjects();
+	if (decorations.empty()) {
+		return;
+	}
+
+	for (auto& [model, instances] : decorationBatches_) {
+		instances.clear();
+	}
+
+	const auto& viewProjection = camera.GetViewProjectionMatrix();
+	for (const auto& decoration : decorations) {
+		const auto world = decoration->GetModelWorldMatrix();
+		const float determinant = MathUtility::Dot(
+		    Vector3{world.m[0][0], world.m[0][1], world.m[0][2]},
+		    MathUtility::Cross({world.m[1][0], world.m[1][1], world.m[1][2]}, {world.m[2][0], world.m[2][1], world.m[2][2]}));
+		const auto normalMatrix = std::abs(determinant) > 1e-6f
+		    ? MathUtility::Transpose(MathUtility::Inverse(world))
+		    : MathUtility::MakeIdentity4x4();
+		decorationBatches_[decoration->GetModel()].push_back({world * viewProjection, world, normalMatrix});
+	}
+
+	auto* common = engineContext_->object3dCommon;
+	auto* dx = common->GetDxCommon();
+	const auto device = dx->GetDevice();
+
+	// フレーム末尾でGPUの完了を待つため、次フレームで同じアップロードバッファを再利用できる。
+	if (decorations.size() > decorationInstanceCapacity_) {
+		const size_t capacity = std::max(decorations.size(), decorationInstanceCapacity_ * 2);
+		auto buffer = DirectXUtils::CreateBufferResource(device, capacity * sizeof(TransformationMatrix));
+		if (!buffer) {
+			return;
+		}
+		decorationInstanceBuffer_ = std::move(buffer);
+		decorationInstanceCapacity_ = capacity;
+	}
+	if (!decorationConstants_) {
+		decorationConstants_ = DirectXUtils::CreateBufferResource(device, sizeof(DecorationConstants));
+		if (!decorationConstants_) {
+			return;
+		}
+	}
+
+	DecorationConstants constants{};
+	constants.material.color = {1, 1, 1, 1};
+	constants.material.uvTransform = MathUtility::MakeIdentity4x4();
+	constants.material.enableLighting = true;
+	constants.material.shininess = 64.0f;
+	constants.camera.worldPosition = camera.GetTranslation();
+
+	const D3D12_RANGE noRead{0, 0};
+	void* mappedConstants = nullptr;
+	if (FAILED(decorationConstants_->Map(0, &noRead, &mappedConstants))) {
+		return;
+	}
+	std::memcpy(mappedConstants, &constants, sizeof(constants));
+	decorationConstants_->Unmap(0, nullptr);
+
+	void* mappedInstances = nullptr;
+	if (FAILED(decorationInstanceBuffer_->Map(0, &noRead, &mappedInstances))) {
+		return;
+	}
+
+	common->DrawSettingCommon(engineContext_->textureManager, true);
+	const auto commandList = dx->GetCommandList();
+	const auto constantsAddress = decorationConstants_->GetGPUVirtualAddress();
+	commandList->SetGraphicsRootConstantBufferView(0, constantsAddress + offsetof(DecorationConstants, material));
+	commandList->SetGraphicsRootConstantBufferView(4, constantsAddress + offsetof(DecorationConstants, camera));
+	commandList->SetGraphicsRootConstantBufferView(5, constantsAddress + offsetof(DecorationConstants, fog));
+	commandList->SetGraphicsRootConstantBufferView(6, constantsAddress + offsetof(DecorationConstants, time));
+
+	const auto instanceAddress = decorationInstanceBuffer_->GetGPUVirtualAddress();
+	size_t byteOffset = 0;
+	for (const auto& [model, instances] : decorationBatches_) {
+		if (instances.empty()) {
+			continue;
+		}
+		const size_t batchBytes = instances.size() * sizeof(TransformationMatrix);
+		std::memcpy(static_cast<char*>(mappedInstances) + byteOffset, instances.data(), batchBytes);
+		commandList->SetGraphicsRootShaderResourceView(Object3dCommon::kInstanceDataRootIndex, instanceAddress + byteOffset);
+		model->Draw("", nullptr, static_cast<UINT>(instances.size()));
+		byteOffset += batchBytes;
+	}
+	decorationInstanceBuffer_->Unmap(0, nullptr);
 }
 
 void Stage::DrawTransparent() {
@@ -147,6 +257,7 @@ void Stage::DrawTransparent() {
 
 void Stage::DrawImGui() {
 	wallManager_->DrawImGui();
+	decorationManager_->DrawImGui();
 	barricadeManager_->DrawImGui();
 	doorManager_->DrawImGui();
 	glassManager_->DrawImGui();
@@ -182,10 +293,15 @@ std::vector<AABB> Stage::GetSolidObstacles() const {
 	const auto& walls = wallManager_->GetObjects();
 	const auto& barricades = barricadeManager_->GetObjects();
 	std::vector<AABB> obstacles;
-	obstacles.reserve(walls.size() + barricades.size());
+	const auto& decorations = decorationManager_->GetObjects();
+	obstacles.reserve(walls.size() + barricades.size() + decorations.size());
 
 	for (const auto& wall : walls) {
 		obstacles.push_back(wall->GetCollision());
+	}
+
+	for (const auto& decoration : decorations) {
+		obstacles.push_back(decoration->GetCollision());
 	}
 
 	for (const auto& barricade : barricades) {

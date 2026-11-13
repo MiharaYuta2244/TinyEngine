@@ -36,6 +36,16 @@ void ModelManager::LoadModel(const std::string& filePath) {
 	models.insert(std::make_pair(filePath, std::move(model)));
 }
 
+std::vector<std::string> ModelManager::GetObjModelNames() const {
+	std::vector<std::string> names;
+	for (const auto& [name, model] : models) {
+		if (fs::path(name).extension() == ".obj") {
+			names.push_back(name);
+		}
+	}
+	return names;
+}
+
 void ModelManager::AllModelLoad(){
 	std::string directoryPath = "resources/models/";
 

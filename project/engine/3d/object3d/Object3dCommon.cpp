@@ -7,10 +7,10 @@
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-void Object3dCommon::DrawSettingCommon(TextureManager* textureManager) {
+void Object3dCommon::DrawSettingCommon(TextureManager* textureManager, bool instanced) {
 	// RootSignatureを設定。PSOに設定しているけど別途設定が必要
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature_.Get());
-	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState_.Get()); // PSOを設定
+	dxCommon_->GetCommandList()->SetPipelineState(instanced ? instancedPipelineState_.Get() : graphicsPipelineState_.Get());
 	// 形状を設定。PSOに設定しているものとはまた別。同じものを設定すると考えておけば良い
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
@@ -111,7 +111,7 @@ void Object3dCommon::CreateRootSignature() {
 	descriptorRange[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	// RootParameter作成。複数設定できるので配列。
-	D3D12_ROOT_PARAMETER rootParameters[11] = {};
+	D3D12_ROOT_PARAMETER rootParameters[kInstanceDataRootIndex + 1] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;              // CBVを使う
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;           // PixelShaderで使う
 	rootParameters[0].Descriptor.ShaderRegister = 0;                              // レジスタ番号0とバインド
@@ -148,6 +148,11 @@ void Object3dCommon::CreateRootSignature() {
 	rootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[10].DescriptorTable.pDescriptorRanges = &descriptorRange[1];
 	rootParameters[10].DescriptorTable.NumDescriptorRanges = 1;
+
+	auto& instanceData = rootParameters[kInstanceDataRootIndex];
+	instanceData.ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+	instanceData.ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	instanceData.Descriptor.ShaderRegister = 0;
 
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;   // バイリニアフィルタ
@@ -282,6 +287,15 @@ void Object3dCommon::CreateGraphicsPipeline() {
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	// 実際に生成
 	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState_));
+	assert(SUCCEEDED(hr));
+
+	ComPtr<IDxcBlob> instancedVS;
+	instancedVS.Attach(DirectXUtils::CompileShader(
+	    L"resources/shaders/Object3dInstanced.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get()));
+	assert(instancedVS);
+	graphicsPipelineStateDesc.VS = {instancedVS->GetBufferPointer(), instancedVS->GetBufferSize()};
+	graphicsPipelineStateDesc.InputLayout.NumElements = 3; // POSITION, TEXCOORD, NORMAL
+	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&instancedPipelineState_));
 	assert(SUCCEEDED(hr));
 }
 

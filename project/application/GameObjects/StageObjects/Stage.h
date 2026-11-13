@@ -1,5 +1,6 @@
 #pragma once
 #include "Barricade/Barricade.h"
+#include "Decoration/Decoration.h"
 #include "GameObjects/StageObjects/Glass/GlassShardScatter.h"
 #include "GameObjects/GameObjectManager.h"
 #include "GameObjects/Item/Soap.h"
@@ -10,11 +11,14 @@
 #include "Ground/Ground.h"
 #include "SceneContext.h"
 #include "Wall/Wall.h"
+#include "TransformationMatrix.h"
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
 
 using WallManager = GameObjectManager<Wall>;
+using DecorationManager = GameObjectManager<Decoration>;
 using BarricadeManager = GameObjectManager<Barricade>;
 using DoorManager = GameObjectManager<Door>;
 using CageManager = GameObjectManager<Cage>;
@@ -34,7 +38,7 @@ public:
 	void Update(float deltaTime, const Vector3& playerPos, Camera* camera);
 
 	// 不透明オブジェクトの描画
-	void Draw();
+	void Draw(Camera* camera);
 
 	// 半透明オブジェクトの描画
 	void DrawTransparent();
@@ -44,6 +48,7 @@ public:
 
 	// 各種マネージャーへのアクセス用ゲッター
 	WallManager* GetWallManager() const { return wallManager_.get(); }
+	DecorationManager* GetDecorationManager() const { return decorationManager_.get(); }
 	BarricadeManager* GetBarricadeManager() const { return barricadeManager_.get(); }
 	std::vector<AABB> GetSolidObstacles() const;
 	DoorManager* GetDoorManager() const { return doorManager_.get(); }
@@ -58,9 +63,16 @@ public:
 private:
 	// ゴール地点の座標を読み込む関数
 	bool LoadGoalPosition(Vector3& position) const;
+	void DrawDecorations(Camera& camera);
 
 private:
 	std::unique_ptr<WallManager> wallManager_;
+	std::unique_ptr<DecorationManager> decorationManager_;
+	EngineContext* engineContext_ = nullptr;
+	std::map<Model*, std::vector<TransformationMatrix>> decorationBatches_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> decorationInstanceBuffer_;
+	Microsoft::WRL::ComPtr<ID3D12Resource> decorationConstants_;
+	size_t decorationInstanceCapacity_ = 0;
 	std::unique_ptr<BarricadeManager> barricadeManager_;
 	std::unique_ptr<DoorManager> doorManager_;
 	std::unique_ptr<GlassManager> glassManager_;

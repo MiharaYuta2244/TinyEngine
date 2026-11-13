@@ -424,6 +424,7 @@ void SceneEditor::UpdateSpawnPalette() {
 	static const Item kItems[] = {
 	    {SpawnType::Wall,     "Wall"    },
 	    {SpawnType::Barricade, "Barricade"},
+	    {SpawnType::Decoration, "Decoration"},
         {SpawnType::Door,     "Door"    },
         {SpawnType::Glass,    "Glass"   },
         {SpawnType::Cage,     "Cage"    },

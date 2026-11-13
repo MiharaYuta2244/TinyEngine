@@ -98,6 +98,7 @@ void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManage
 	};
 
 	appendObstacles(stage.GetWallManager()->GetObjects(), true);
+	appendObstacles(stage.GetDecorationManager()->GetObjects(), true);
 	for (const auto& barricade : stage.GetBarricadeManager()->GetObjects()) {
 		if (barricade->IsSolid()) {
 			obstacles.push_back({*barricade, barricade->GetCollision(), true, true});

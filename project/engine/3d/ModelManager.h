@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 /// <summary>
 /// モデルマネージャークラス
@@ -30,6 +31,9 @@ public:
 	/// プロジェクト内のすべてのモデルを読み込む
 	/// </summary>
 	void AllModelLoad();
+
+	// 読み込み済みの静的モデルを配置エディターに表示する
+	std::vector<std::string> GetObjModelNames() const;
 
 private:
 	std::unique_ptr<ModelCommon> modelCommon_ = nullptr;
