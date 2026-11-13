@@ -26,9 +26,6 @@ private:
 	// グラフィックスパイプラインの生成
 	void CreateGraphicsPipeline();
 
-	// シェーダコンパイラの初期化
-	void InitializeShaderCompiler();
-
 private:
 	DirectXCommon* dxCommon_ = nullptr;
 

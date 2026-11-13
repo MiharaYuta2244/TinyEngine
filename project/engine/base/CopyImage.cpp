@@ -8,14 +8,6 @@ using namespace TinyEngine;
 
 CopyImage::~CopyImage(){ Logger::Log("CopyImage Destructor Called!\n", LogLevel::Error); }
 
-void CopyImage::InitializeShaderCompiler() {
-	HRESULT hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
-	assert(SUCCEEDED(hr));
-	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
-	assert(SUCCEEDED(hr));
-	hr = dxcUtils_->CreateDefaultIncludeHandler(&includeHandler_);
-	assert(SUCCEEDED(hr));
-}
 
 void CopyImage::CreateGraphicsPipeline(DirectXCommon* dx) {
 	auto device = dx->GetDevice();
@@ -80,21 +72,7 @@ void CopyImage::CreateGraphicsPipeline(DirectXCommon* dx) {
 	rootDesc.pStaticSamplers = staticSamplers;
 	rootDesc.NumStaticSamplers = _countof(staticSamplers);
 
-	ID3DBlob* signatureBlob = nullptr;
-	ID3DBlob* errorBlob = nullptr;
-	HRESULT hr = D3D12SerializeRootSignature(&rootDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hr)) {
-		if (errorBlob) {
-			OutputDebugStringA(reinterpret_cast<const char*>(errorBlob->GetBufferPointer()));
-		}
-		assert(false);
-	}
-	hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
-	assert(SUCCEEDED(hr));
-	if (signatureBlob)
-		signatureBlob->Release();
-	if (errorBlob)
-		errorBlob->Release();
+	rootSignature_ = DirectXUtils::CreateRootSignature(device.Get(), rootDesc);
 
 	// PSO設定
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc{};
@@ -124,7 +102,7 @@ void CopyImage::CreateGraphicsPipeline(DirectXCommon* dx) {
 	psoDesc.DSVFormat = DXGI_FORMAT_UNKNOWN;
 	psoDesc.SampleDesc.Count = 1;
 
-	hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState_));
+	HRESULT hr = device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&pipelineState_));
 	assert(SUCCEEDED(hr));
 }
 
@@ -166,7 +144,7 @@ void CopyImage::Initialize(DirectXCommon* dx, PostEffectType type, TextureManage
 	CreateCB();
 
 	// シェーダコンパイラ初期化
-	InitializeShaderCompiler();
+	DirectXUtils::InitializeShaderCompiler(dxcUtils_, dxcCompiler_, includeHandler_);
 
 	// PSO,RootSignature作成
 	CreateGraphicsPipeline(dx);

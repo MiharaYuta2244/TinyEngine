@@ -21,10 +21,7 @@ void Cage::Update(float deltaTime) {
 	render_->SetTime(time_);
 
 	// 当たり判定更新
-	Vector3 pos = transform_.translate;
-	Vector3 scale = transform_.scale;
-	collision_.max = {pos.x + scale.x, pos.y, pos.z + scale.z};
-	collision_.min = {pos.x - scale.x, pos.y, pos.z - scale.z};
+	collision_ = AABB::FromCenterAndHalfExtentsXZ(transform_.translate, transform_.scale);
 
 	// 描画用インスタンス更新
 	render_->Update(transform_);

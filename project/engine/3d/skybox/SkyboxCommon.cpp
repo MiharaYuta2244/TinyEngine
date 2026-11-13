@@ -4,7 +4,7 @@
 
 void SkyboxCommon::Initialize(DirectXCommon* dxCommon) {
 	dxCommon_ = dxCommon;
-	InitializeShaderCompiler();
+	DirectXUtils::InitializeShaderCompiler(dxcUtils_, dxcCompiler_, includeHandler_);
 	CreateGraphicsPipeline();
 }
 
@@ -48,12 +48,7 @@ void SkyboxCommon::CreateRootSignature() {
 	descriptionRootSignature.pStaticSamplers = staticSamplers;
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
-	ID3DBlob* signatureBlob = nullptr;
-	ID3DBlob* errorBlob = nullptr;
-	HRESULT hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	assert(SUCCEEDED(hr));
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
-	assert(SUCCEEDED(hr));
+	rootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), descriptionRootSignature);
 }
 
 void SkyboxCommon::CreateGraphicsPipeline() {
@@ -100,14 +95,5 @@ void SkyboxCommon::CreateGraphicsPipeline() {
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	HRESULT hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState_));
-	assert(SUCCEEDED(hr));
-}
-
-void SkyboxCommon::InitializeShaderCompiler() {
-	HRESULT hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
-	assert(SUCCEEDED(hr));
-	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
-	assert(SUCCEEDED(hr));
-	hr = dxcUtils_->CreateDefaultIncludeHandler(&includeHandler_);
 	assert(SUCCEEDED(hr));
 }

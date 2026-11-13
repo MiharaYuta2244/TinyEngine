@@ -46,7 +46,7 @@ void Object3dCommon::DrawSettingTransparent(TextureManager* textureManager){
 void Object3dCommon::Initialize(DirectXCommon* dxCommon) {
 	dxCommon_ = dxCommon;
 
-	InitializeShaderCompiler();
+	DirectXUtils::InitializeShaderCompiler(dxcUtils_, dxcCompiler_, includeHandler_);
 
 	// グラフィックスパイプラインの生成
 	CreateGraphicsPipeline();
@@ -96,8 +96,6 @@ void Object3dCommon::DrawImGuiLighting() {
 #endif // USE_IMGUI
 
 void Object3dCommon::CreateRootSignature() {
-	HRESULT hr;
-
 	D3D12_DESCRIPTOR_RANGE descriptorRange[2] = {};
 
 	// t0 モデルの2Dテクスチャ
@@ -170,17 +168,7 @@ void Object3dCommon::CreateRootSignature() {
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
 	// シリアライズしてバイナリにする
-	ID3DBlob* signatureBlob = nullptr;
-	ID3DBlob* errorBlob = nullptr;
-	hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hr)) {
-		Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()), LogLevel::Error);
-		assert(false);
-	}
-	// バイナリを元に生成
-	rootSignature_ = nullptr;
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
-	assert(SUCCEEDED(hr));
+	rootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), descriptionRootSignature);
 }
 
 void Object3dCommon::CreateGraphicsPipeline() {
@@ -297,19 +285,6 @@ void Object3dCommon::CreateGraphicsPipeline() {
 	assert(SUCCEEDED(hr));
 }
 
-void Object3dCommon::InitializeShaderCompiler() {
-
-	HRESULT hr;
-
-	// dxcCompilerを初期化
-	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
-	assert(SUCCEEDED(hr));
-	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
-	assert(SUCCEEDED(hr));
-	// 現時点でincludeはしないが、includeに対応するための設定を行っていく
-	hr = dxcUtils_->CreateDefaultIncludeHandler(&includeHandler_);
-	assert(SUCCEEDED(hr));
-}
 
 void Object3dCommon::UpdateGlobalLightingBuffers() {
 	// DirectionalLightの方向を正規化
@@ -540,17 +515,7 @@ void Object3dCommon::CreateSkinningGraphicsPipeline() {
 	descriptionRootSignature.pStaticSamplers = staticSamplers;
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
-	ComPtr<ID3DBlob> signatureBlob = nullptr;
-	ComPtr<ID3DBlob> errorBlob = nullptr;
-	hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hr)) {
-		if (errorBlob) {
-			Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()), LogLevel::Error);
-		}
-		assert(false);
-	}
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&skinningRootSignature_));
-	assert(SUCCEEDED(hr));
+	skinningRootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), descriptionRootSignature);
 
 	// シェーダーコンパイル
 	ComPtr<IDxcBlob> vsBlob = DirectXUtils::CompileShader(L"resources/shaders/Skinning.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
@@ -748,16 +713,7 @@ void Object3dCommon::CreateSkinningComputePipeline() {
 	rootSigDesc.pParameters = rootParameters;
 	rootSigDesc.NumParameters = _countof(rootParameters);
 
-	ComPtr<ID3DBlob> signatureBlob = nullptr;
-	ComPtr<ID3DBlob> errorBlob = nullptr;
-	hr = D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hr)) {
-		if (errorBlob)
-			Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()), LogLevel::Error);
-		assert(false);
-	}
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&skinningComputeRootSignature_));
-	assert(SUCCEEDED(hr));
+	skinningComputeRootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), rootSigDesc);
 
 	ComPtr<IDxcBlob> csBlob = DirectXUtils::CompileShader(L"resources/shaders/Skinning.CS.hlsl", L"cs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(csBlob != nullptr);

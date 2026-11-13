@@ -20,7 +20,7 @@ void GPUParticle::Initialize(EngineContext* ctx, const std::string& texturepath)
 	texturePath_ = texturepath;
 	textureFullPath_ = "resources/textures/" + texturepath;
 
-	InitializeShaderCompiler();
+	DirectXUtils::InitializeShaderCompiler(dxcUtils_, dxcCompiler_, includeHandler_);
 	CreateComputePipeline();
 	CreateEmitComputePipeline();
 	CreateUpdateComputePipeline();
@@ -96,15 +96,6 @@ void GPUParticle::Draw() {
 	commandList->DrawInstanced(6, kMaxParticles, 0, 0);
 }
 
-void GPUParticle::InitializeShaderCompiler() {
-	HRESULT hr;
-	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
-	assert(SUCCEEDED(hr));
-	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
-	assert(SUCCEEDED(hr));
-	hr = dxcUtils_->CreateDefaultIncludeHandler(&includeHandler_);
-	assert(SUCCEEDED(hr));
-}
 
 void GPUParticle::CreateComputePipeline() {
 	HRESULT hr;
@@ -127,13 +118,7 @@ void GPUParticle::CreateComputePipeline() {
 	rootSignatureDesc.pParameters = rootParameters;
 	rootSignatureDesc.NumParameters = _countof(rootParameters);
 
-	ComPtr<ID3DBlob> signatureBlob;
-	ComPtr<ID3DBlob> errorBlob;
-	hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	assert(SUCCEEDED(hr));
-
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&computeRootSignature_));
-	assert(SUCCEEDED(hr));
+	computeRootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), rootSignatureDesc);
 
 	// ComputeShaderのコンパイルとPipelineStateの作成
 	IDxcBlob* computeShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/InitializeParticle.CS.hlsl", L"cs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
@@ -206,13 +191,7 @@ void GPUParticle::CreateGraphicsPipeline() {
 	rootSignatureDesc.pStaticSamplers = staticSamplers;
 	rootSignatureDesc.NumStaticSamplers = _countof(staticSamplers);
 
-	ComPtr<ID3DBlob> signatureBlob;
-	ComPtr<ID3DBlob> errorBlob;
-	hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	assert(SUCCEEDED(hr));
-
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&graphicsRootSignature_));
-	assert(SUCCEEDED(hr));
+	graphicsRootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), rootSignatureDesc);
 
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = nullptr;
@@ -492,13 +471,7 @@ void GPUParticle::CreateEmitComputePipeline() {
 	rootSignatureDesc.pParameters = rootParameters;
 	rootSignatureDesc.NumParameters = _countof(rootParameters);
 
-	ComPtr<ID3DBlob> signatureBlob;
-	ComPtr<ID3DBlob> errorBlob;
-	hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	assert(SUCCEEDED(hr));
-
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&emitRootSignature_));
-	assert(SUCCEEDED(hr));
+	emitRootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), rootSignatureDesc);
 
 	IDxcBlob* emitShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/EmitParticle.CS.hlsl", L"cs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(emitShaderBlob != nullptr);
@@ -567,13 +540,7 @@ void GPUParticle::CreateUpdateComputePipeline() {
 	rootSignatureDesc.pParameters = rootParameters;
 	rootSignatureDesc.NumParameters = _countof(rootParameters);
 
-	ComPtr<ID3DBlob> signatureBlob;
-	ComPtr<ID3DBlob> errorBlob;
-	hr = D3D12SerializeRootSignature(&rootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	assert(SUCCEEDED(hr));
-
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&updateRootSignature_));
-	assert(SUCCEEDED(hr));
+	updateRootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), rootSignatureDesc);
 
 	// Shader compile
 	IDxcBlob* updateShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/UpdateParticle.CS.hlsl", L"cs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());

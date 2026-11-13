@@ -15,15 +15,13 @@ void ParticleCommon::DrawSettingCommon(ParticleBlendMode mode) {
 void ParticleCommon::Initialize(DirectXCommon* dxCommon) {
 	dxCommon_ = dxCommon;
 
-	InitializeShaderCompiler();
+	DirectXUtils::InitializeShaderCompiler(dxcUtils_, dxcCompiler_, includeHandler_);
 
 	// グラフィックスパイプラインの生成
 	CreateGraphicsPipeline();
 }
 
 void ParticleCommon::CreateRootSignature() {
-	HRESULT hr;
-
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	descriptorRange[0].BaseShaderRegister = 0;                                                   // 0から始まる
 	descriptorRange[0].NumDescriptors = 1;                                                       // 数は1つ
@@ -65,17 +63,7 @@ void ParticleCommon::CreateRootSignature() {
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
 	// シリアライズしてバイナリにする
-	ID3DBlob* signatureBlob = nullptr;
-	ID3DBlob* errorBlob = nullptr;
-	hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hr)) {
-		Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()), LogLevel::Error);
-		assert(false);
-	}
-	// バイナリを元に生成
-	rootSignature_ = nullptr;
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
-	assert(SUCCEEDED(hr));
+	rootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), descriptionRootSignature);
 }
 
 void ParticleCommon::CreateGraphicsPipeline() {
@@ -177,19 +165,5 @@ void ParticleCommon::CreateGraphicsPipeline() {
 	// デカール用のPSO生成
 	graphicsPipelineStateDesc.BlendState = decalBlendDesc;
 	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&decalPipelineState_));
-	assert(SUCCEEDED(hr));
-}
-
-void ParticleCommon::InitializeShaderCompiler() {
-
-	HRESULT hr;
-
-	// dxcCompilerを初期化
-	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
-	assert(SUCCEEDED(hr));
-	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
-	assert(SUCCEEDED(hr));
-	// 現時点でincludeはしないが、includeに対応するための設定を行っていく
-	hr = dxcUtils_->CreateDefaultIncludeHandler(&includeHandler_);
 	assert(SUCCEEDED(hr));
 }

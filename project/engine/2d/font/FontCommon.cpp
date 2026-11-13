@@ -1,6 +1,5 @@
 #include "FontCommon.h"
 #include "DirectXUtils.h"
-#include "Logger.h"
 #include <cassert>
 
 using namespace Microsoft::WRL;
@@ -8,7 +7,7 @@ using namespace Microsoft::WRL;
 void FontCommon::Initialize(DirectXCommon* dxCommon) {
 	dxCommon_ = dxCommon;
 
-	InitializeShaderCompiler();
+	DirectXUtils::InitializeShaderCompiler(dxcUtils_, dxcCompiler_, includeHandler_);
 	CreateGraphicsPipeline();
 }
 
@@ -19,8 +18,6 @@ void FontCommon::DrawSettingCommon() {
 }
 
 void FontCommon::CreateRootSignature() {
-	HRESULT hr;
-
 	// t0 : フォントアトラステクスチャ
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	descriptorRange[0].BaseShaderRegister = 0;
@@ -60,23 +57,7 @@ void FontCommon::CreateRootSignature() {
 	descriptionRootSignature.pStaticSamplers = staticSamplers;
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
-	ID3DBlob* signatureBlob = nullptr;
-	ID3DBlob* errorBlob = nullptr;
-	HRESULT hrSerialize = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hrSerialize)) {
-		if (errorBlob) {
-			Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()), LogLevel::Error);
-		}
-		assert(false);
-	}
-
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
-	assert(SUCCEEDED(hr));
-
-	if (signatureBlob)
-		signatureBlob->Release();
-	if (errorBlob)
-		errorBlob->Release();
+	rootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), descriptionRootSignature);
 }
 
 void FontCommon::CreateGraphicsPipeline() {
@@ -140,15 +121,5 @@ void FontCommon::CreateGraphicsPipeline() {
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
 	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState_));
-	assert(SUCCEEDED(hr));
-}
-
-void FontCommon::InitializeShaderCompiler() {
-	HRESULT hr;
-	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
-	assert(SUCCEEDED(hr));
-	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
-	assert(SUCCEEDED(hr));
-	hr = dxcUtils_->CreateDefaultIncludeHandler(&includeHandler_);
 	assert(SUCCEEDED(hr));
 }

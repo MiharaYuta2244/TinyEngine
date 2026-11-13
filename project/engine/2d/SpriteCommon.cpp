@@ -4,7 +4,7 @@
 void SpriteCommon::Initialize(DirectXCommon* dxCommon) { 
 	dxCommon_ = dxCommon;
 
-	InitializeShaderCompiler();
+	DirectXUtils::InitializeShaderCompiler(dxcUtils_, dxcCompiler_, includeHandler_);
 
 	// グラフィックスパイプラインの生成
 	CreateGraphicsPipeline();
@@ -21,8 +21,6 @@ void SpriteCommon::DrawSettingCommon()
 
 void SpriteCommon::CreateRootSignature()
 {
-	HRESULT hr;
-
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	descriptorRange[0].BaseShaderRegister = 0;                                                   // 0から始まる
 	descriptorRange[0].NumDescriptors = 1;                                                       // 数は1つ
@@ -61,17 +59,7 @@ void SpriteCommon::CreateRootSignature()
 	descriptionRootSignature.NumStaticSamplers = _countof(staticSamplers);
 
 	// シリアライズしてバイナリにする
-	ID3DBlob* signatureBlob = nullptr;
-	ID3DBlob* errorBlob = nullptr;
-	hr = D3D12SerializeRootSignature(&descriptionRootSignature, D3D_ROOT_SIGNATURE_VERSION_1, &signatureBlob, &errorBlob);
-	if (FAILED(hr)) {
-		Logger::Log(reinterpret_cast<char*>(errorBlob->GetBufferPointer()), LogLevel::Error);
-		assert(false);
-	}
-	// バイナリを元に生成
-	rootSignature_ = nullptr;
-	hr = dxCommon_->GetDevice()->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature_));
-	assert(SUCCEEDED(hr));
+	rootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), descriptionRootSignature);
 }
 
 void SpriteCommon::CreateGraphicsPipeline()
@@ -149,19 +137,5 @@ void SpriteCommon::CreateGraphicsPipeline()
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	// 実際に生成
 	hr = dxCommon_->GetDevice()->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState_));
-	assert(SUCCEEDED(hr));
-}
-
-void SpriteCommon::InitializeShaderCompiler() {
-
-	HRESULT hr;
-
-	// dxcCompilerを初期化
-	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils_));
-	assert(SUCCEEDED(hr));
-	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler_));
-	assert(SUCCEEDED(hr));
-	// 現時点でincludeはしないが、includeに対応するための設定を行っていく
-	hr = dxcUtils_->CreateDefaultIncludeHandler(&includeHandler_);
 	assert(SUCCEEDED(hr));
 }

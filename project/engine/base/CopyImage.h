@@ -104,9 +104,6 @@ public:
 	void SetGaussianSigma(float sigma) { gaussianParam_.sigma = sigma; }
 
 private:
-	// シェーダコンパイラの初期化
-	void InitializeShaderCompiler();
-
 	// グラフィックスパイプライン作成
 	void CreateGraphicsPipeline(DirectXCommon* dx);
 

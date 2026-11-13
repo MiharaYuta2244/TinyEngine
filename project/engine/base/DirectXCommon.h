@@ -95,7 +95,6 @@ private:
 	void CreateSwapChain();
 	void CreateDescriptorHeaps();
 	void CreateRTV();
-	void InitializeShaderCompiler();
 	void CreateDSV();
 	void CreateFence();
 

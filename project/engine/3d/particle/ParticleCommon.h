@@ -37,11 +37,6 @@ private:
 	/// </summary>
 	void CreateGraphicsPipeline();
 
-	/// <summary>
-	/// シェーダコンパイラの初期化
-	/// </summary>
-	void InitializeShaderCompiler();
-
 private:
 	DirectXCommon* dxCommon_;
 

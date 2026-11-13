@@ -77,7 +77,6 @@ public:
 	void DispatchUpdate();
 
 private:
-	void InitializeShaderCompiler();
 	void CreateComputePipeline();
 	void CreateGraphicsPipeline();
 	void CreateResources();

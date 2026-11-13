@@ -14,7 +14,6 @@ public:
 private:
 	void CreateRootSignature();
 	void CreateGraphicsPipeline();
-	void InitializeShaderCompiler();
 
 private:
 	DirectXCommon* dxCommon_ = nullptr;
