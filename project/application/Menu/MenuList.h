@@ -101,6 +101,9 @@ private:
 
 	// 背景サイズ
 	Vector2 selectorBgSize_ = {2000, 60};
+	static constexpr float kSelectorBgAnimationDuration = 0.18f;
+	static constexpr float kSelectorBgMinHeightScale = 0.2f;
+	float selectorBgAnimationTime_ = kSelectorBgAnimationDuration;
 
 	// チェックアイコンのXオフセット
 	float checkIconOffsetX_ = 400.0f;

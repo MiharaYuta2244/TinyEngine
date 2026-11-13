@@ -1,5 +1,7 @@
 #include "MenuList.h"
 #include "MathOperator.h"
+#include <cmath>
+#include <numbers>
 
 using namespace TinyEngine;
 
@@ -25,7 +27,8 @@ void MenuList::Initialize(EngineContext* ctx, const std::wstring& fontFamily, in
 	selectorBg_->Initialize(ctx_, "white.png");
 	selectorBg_->SetColor({1.0f, 1.0f, 1.0f, 0.2f});
 	selectorBg_->SetSize(selectorBgSize_);
-	selectorBg_->SetAnchorPoint({0.5f, 0.0f});
+	selectorBg_->SetAnchorPoint({0.5f, 0.5f});
+	selectorBgAnimationTime_ = kSelectorBgAnimationDuration;
 
 	// スクロールバーの生成&初期化
 	scrollTrack_ = std::make_unique<Sprite>();
@@ -114,6 +117,7 @@ void MenuList::Update(DirectInput* input, GamePad* gamePad, float deltaTime) {
 	}
 
 	// 決定アニメーション再生中は他の項目へ移動させない
+	const int indexBeforeInput = currentIndex_;
 	if (up && !isDecided_) {
 		currentIndex_ = (currentIndex_ - 1 + index) % index;
 		audioManager_->PlaySE("Select", 0.5f);
@@ -156,7 +160,20 @@ void MenuList::Update(DirectInput* input, GamePad* gamePad, float deltaTime) {
 	UpdateScrollBar();
 
 	// 背景スプライトの座標を選択中アイテムに合わせる
-	selectorBg_->SetPosition({startPos_.x, GetRowY(currentIndex_)});
+	if (currentIndex_ != indexBeforeInput) {
+		selectorBgAnimationTime_ = 0.0f;
+	}
+	selectorBgAnimationTime_ = std::min(selectorBgAnimationTime_ + deltaTime, kSelectorBgAnimationDuration);
+
+	// 高さだけを中央に向かって縮め、元の高さに戻す
+	float heightScale = 1.0f;
+	if (selectorBgAnimationTime_ < kSelectorBgAnimationDuration) {
+		const float progress = selectorBgAnimationTime_ / kSelectorBgAnimationDuration;
+		heightScale -= (1.0f - kSelectorBgMinHeightScale) * std::sin(progress * std::numbers::pi_v<float>);
+	}
+
+	selectorBg_->SetSize({selectorBgSize_.x, selectorBgSize_.y * heightScale});
+	selectorBg_->SetPosition({startPos_.x, GetRowY(currentIndex_) + selectorBgSize_.y * 0.5f});
 	selectorBg_->Update();
 
 	// 決定ボタン入力時エフェクト更新
