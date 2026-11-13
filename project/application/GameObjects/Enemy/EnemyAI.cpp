@@ -211,15 +211,18 @@ void EnemyAI::UpdateVigilance(
 			Vector3 toWaypoint = targetWaypoint - enemyPos;
 			toWaypoint.y = 0.0f;
 
-			if (toWaypoint.x * toWaypoint.x + toWaypoint.z * toWaypoint.z < 1.0f) {
-				// ウェイポイントに到着したら次のポイントへ
+			const float distance = std::sqrt(toWaypoint.x * toWaypoint.x + toWaypoint.z * toWaypoint.z);
+			const float moveDistance = 10.0f * deltaTime;
+			if (distance <= moveDistance) {
+				// 壁際で経路を外れないよう、ウェイポイントまで進んでから次へ
+				transform_->translate.x = targetWaypoint.x;
+				transform_->translate.z = targetWaypoint.z;
 				currentWaypointIndex_++;
 			} else {
 				// 次のポイントへ向かって移動
-				Vector3 moveDir = MathUtility::Normalize(toWaypoint);
-				float moveSpeed = 10.0f;
-				transform_->translate.x += moveDir.x * moveSpeed * deltaTime;
-				transform_->translate.z += moveDir.z * moveSpeed * deltaTime;
+				Vector3 moveDir = toWaypoint / distance;
+				transform_->translate.x += moveDir.x * moveDistance;
+				transform_->translate.z += moveDir.z * moveDistance;
 
 				// 見失って移動している間は進行方向を向かせる
 				LookatPlayer(deltaTime, enemyPos + moveDir, enemyPos);
