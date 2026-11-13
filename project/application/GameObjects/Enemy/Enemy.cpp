@@ -500,7 +500,7 @@ void Enemy::OnCollisionEnter(const CollisionEvent& event, const CollisionContext
 	}
 
 	if (event.other.CompareTag(CollisionTag::Barricade) && event.otherPart == CollisionPart::Thrown) {
-		// 
+		// バリケードに投げられると死亡
 		Kill();
 	} else if (event.other.CompareTag(CollisionTag::EnemyBullet)) {
 		// 敵の弾に当たったらダメージ
