@@ -107,6 +107,10 @@ void Stage::Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalM
             {0, 0, 0}
     });
 
+	molotovManager_ = std::make_unique<MolotovManager>();
+	molotovManager_->Initialize(ctx.engineContext, "MolotovEditor", stagePath + "Molotovs.json",
+	    Transform{{1, 1, 1}, {0, 0, 0}, {0, 0, 0}});
+
 	// 地面の生成&初期化
 	ground_ = std::make_unique<Ground>();
 	ground_->Initialize(ctx.engineContext);
@@ -147,6 +151,7 @@ void Stage::Update(float deltaTime, const Vector3& playerPos, Camera* camera) {
 	cageManager_->Update(deltaTime);
 	healAreaManager_->Update(deltaTime);
 	soapManager_->Update(deltaTime);
+	molotovManager_->Update(deltaTime);
 	ground_->Update();
 	goal_->Update(deltaTime);
 }
@@ -158,6 +163,7 @@ void Stage::Draw(Camera* camera) {
 	barricadeManager_->Draw();
 	cageManager_->Draw();
 	soapManager_->Draw();
+	molotovManager_->Draw();
 	goal_->Draw();
 	if (camera) {
 		DrawDecorations(*camera);
@@ -264,6 +270,7 @@ void Stage::DrawImGui() {
 	cageManager_->DrawImGui();
 	healAreaManager_->DrawImGui();
 	soapManager_->DrawImGui();
+	molotovManager_->DrawImGui();
 
 #ifdef USE_IMGUI
 	if (ImGui::Begin("Goal")) {

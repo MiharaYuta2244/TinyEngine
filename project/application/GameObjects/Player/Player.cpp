@@ -63,6 +63,7 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 
 void Player::Update(
     float deltaTime, DirectInput* input, GamePad* gamePad, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps,
+    const std::list<std::unique_ptr<Molotov>>& molotovs,
     const std::list<std::unique_ptr<Barricade>>& barricades) {
 	// RumbleManagerの初期化と更新
 	rumbleManager_->Initialize(gamePad);
@@ -161,14 +162,14 @@ void Player::Update(
 
 	PlayerGrab::Result grabResult;
 	if (!hp_->IsDead()) {
-		grabResult = grab_->Update(grabInput, grabCtx, enemyManager, soaps, barricades);
+		grabResult = grab_->Update(grabInput, grabCtx, enemyManager, soaps, molotovs, barricades);
 	}
 	if (wasHoldingBarricade || grabResult.grabbedBarricade) {
 		isAttackTriggered_ = false;
 	}
 
 	// GamePlaySceneがカメラシェイクに使う
-	if (grabResult.grabbedEnemy || grabResult.grabbedSoap || grabResult.grabbedBarricade) {
+	if (grabResult.grabbedEnemy || grabResult.grabbedItem || grabResult.grabbedBarricade) {
 		isGrabTriggered_ = true;
 	}
 

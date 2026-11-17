@@ -1,7 +1,7 @@
 #pragma once
 #include "AABB.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
-#include "GameObjects/PlaceableObject.h"
+#include "ThrowableItem.h"
 #include "GameTimer.h"
 #include <vector>
 
@@ -12,7 +12,7 @@ class Particle;
 /// <summary>
 /// プレイヤーが掴んで投げられるアイテム
 /// </summary>
-class Soap : public PlaceableObject {
+class Soap : public ThrowableItem {
 public:
 	CollisionTag GetTag() const override { return CollisionTag::Soap; }
 	void OnCollisionEnter(const CollisionEvent& event, const CollisionContext& context) override;
@@ -30,7 +30,7 @@ public:
 	void Draw() override;
 
 	// 投げ処理
-	void Throw(const Vector3& velocity);
+	void Throw(const Vector3& velocity) override;
 
 	// 本体の当たり判定Getter
 	AABB GetCollision() const { return collision_; }
@@ -44,15 +44,12 @@ public:
 	// 直接ぶつけて即ダウンさせられる勢いがあるか
 	bool IsDangerous() const;
 
-	// 座標のGetter/Setter
-	Vector3 GetPos() const { return transform_.translate; }
-	void SetPos(Vector3 pos) { transform_.translate = pos; }
-
 	// ギズモ用
 	std::string GetName() const override { return "Soap(" + std::to_string(id_) + ")"; }
 
 	// プレイヤーに掴まれた時の処理
-	void Grab();
+	void Grab() override;
+	bool CanGrab() const override { return !isBroken_; }
 
 	// 壁などにぶつかった時の処理
 	void Stop();

@@ -47,7 +47,7 @@ void CollisionManager::NotifyContact(CollisionObject& first, CollisionPart first
 }
 #pragma endregion 接触イベントの通知
 
-void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManager, EnemyBulletManager& bulletManager, EnemyBombManager& bombManager, Stage& stage, const CollisionContext& context) {
+void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManager, EnemyBulletManager& bulletManager, EnemyBombManager& bombManager, Stage& stage, const CollisionContext& context, float deltaTime) {
 #pragma region 当たり判定に使うオブジェクトの取得
 	using enum CollisionPart;
 	auto& enemies = enemyManager.GetEnemies();
@@ -246,7 +246,7 @@ void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManage
 #pragma region 石鹸と敵の当たり判定
 	for (const auto& soap : soaps) {
 		for (const auto& enemy : enemies) {
-			if (enemy->IsDead() || enemy->IsDown()) {
+			if (enemy->IsDead() || enemy->IsDown() || enemy->IsBurning()) {
 				continue;
 			}
 
@@ -265,6 +265,52 @@ void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManage
 	}
 	soapManager.RemoveObjectsIf([](const Soap& soap) { return soap.IsConsumed(); });
 #pragma endregion 石鹸と敵の当たり判定
+
+#pragma region 火炎瓶の着地と炎の当たり判定
+	auto& molotovManager = *stage.GetMolotovManager();
+	for (const auto& molotov : molotovManager.GetObjects()) {
+		const bool wasBurning = molotov->IsFireActive();
+		if (molotov->IsInFlight()) {
+			float closestHit = std::numeric_limits<float>::infinity();
+			for (const auto& obstacle : obstacles) {
+				float hitTime;
+				AABB bounds = obstacle.bounds;
+				// 壁などの地上オブジェクトは既存の当たり判定がXZ平面にある。
+				if (bounds.min.y == bounds.max.y) {
+					const auto& transform = static_cast<IGameObject&>(obstacle.object).GetTransform();
+					bounds.max.y += std::abs(transform.scale.y);
+				}
+				if (molotov->CheckThrowHit(bounds, hitTime)) {
+					closestHit = std::min(closestHit, hitTime);
+				}
+			}
+			if (closestHit <= 1.0f) {
+				molotov->BlockThrow(closestHit);
+			}
+			molotov->LandIfGrounded();
+		}
+
+		if (!molotov->IsFireActive()) {
+			continue;
+		}
+		for (const auto& enemy : enemies) {
+			if (!enemy->IsDead() && molotov->OverlapsFire(enemy->GetBodyCol())) {
+				enemy->Ignite();
+			}
+		}
+
+		const bool inside = !player.IsDead() && molotov->OverlapsFire(player.GetBodyCol());
+		if (molotov->UpdatePlayerExposure(inside, wasBurning ? deltaTime : 0.0f)) {
+			const float previousHP = player.GetCurrentHP();
+			player.Damage(1);
+			if (player.GetCurrentHP() < previousHP) {
+				molotov->MarkPlayerDamaged();
+				context.onPlayerHit();
+			}
+		}
+	}
+	molotovManager.RemoveObjectsIf([](const Molotov& molotov) { return molotov.IsFinished(); });
+#pragma endregion 火炎瓶の着地と炎の当たり判定
 
 #pragma region 次フレーム用の接触履歴の更新
 	previousContacts_.swap(currentContacts_);

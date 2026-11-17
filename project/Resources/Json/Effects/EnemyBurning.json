@@ -1,0 +1,183 @@
+{
+    "emitters": [
+        {
+            "blend": "Alpha",
+            "burst": false,
+            "count": 3,
+            "duration": 6.0,
+            "extent": {
+                "x": 0.2800000011920929,
+                "y": 0.27000001072883606,
+                "z": 0.2800000011920929
+            },
+            "frequency": 0.04500000178813934,
+            "loop": false,
+            "mesh": "Square",
+            "moduleType": "Generic",
+            "name": "Body flames",
+            "offset": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "params": {
+                "colorEase": 30,
+                "colorEnd": {
+                    "w": 0.0,
+                    "x": 0.6499999761581421,
+                    "y": 0.054999999701976776,
+                    "z": 0.014999999664723873
+                },
+                "colorStartA": {
+                    "w": 0.9200000166893005,
+                    "x": 1.0,
+                    "y": 0.6200000047683716,
+                    "z": 0.10000000149011612
+                },
+                "colorStartB": {
+                    "w": 0.8500000238418579,
+                    "x": 1.0,
+                    "y": 0.30000001192092896,
+                    "z": 0.02500000037252903
+                },
+                "damping": 1.0,
+                "direction": {
+                    "x": 0.0,
+                    "y": 1.0,
+                    "z": 0.0
+                },
+                "endScale": 0.3700000047683716,
+                "gravity": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "initialRotateDeg": {
+                    "x": 90.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "life": {
+                    "max": 0.46000000834465027,
+                    "min": 0.2199999988079071
+                },
+                "shape": "CircleXZ",
+                "sizeAxis": {
+                    "x": 0.7699999809265137,
+                    "y": 1.2799999713897705,
+                    "z": 1.0
+                },
+                "sizeEase": 30,
+                "speed": {
+                    "max": 0.25,
+                    "min": 0.05000000074505806
+                },
+                "spinDeg": {
+                    "max": 20.0,
+                    "min": -20.0
+                },
+                "spreadAngle": 180.0,
+                "startSize": {
+                    "max": 0.46000000834465027,
+                    "min": 0.23000000417232513
+                },
+                "useSpawnDirection": false,
+                "yVelocity": {
+                    "max": 2.0999999046325684,
+                    "min": 1.2999999523162842
+                }
+            },
+            "texture": "MolotovFlame.png"
+        },
+        {
+            "blend": "Additive",
+            "burst": false,
+            "count": 3,
+            "duration": 6.0,
+            "extent": {
+                "x": 0.3199999928474426,
+                "y": 0.3199999928474426,
+                "z": 0.3199999928474426
+            },
+            "frequency": 0.0949999988079071,
+            "loop": false,
+            "mesh": "Square",
+            "moduleType": "Generic",
+            "name": "Sparks",
+            "offset": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "params": {
+                "colorEase": 30,
+                "colorEnd": {
+                    "w": 0.0,
+                    "x": 0.800000011920929,
+                    "y": 0.10000000149011612,
+                    "z": 0.019999999552965164
+                },
+                "colorStartA": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 0.6600000262260437,
+                    "z": 0.12999999523162842
+                },
+                "colorStartB": {
+                    "w": 1.0,
+                    "x": 1.0,
+                    "y": 0.4399999976158142,
+                    "z": 0.05999999865889549
+                },
+                "damping": 1.0,
+                "direction": {
+                    "x": 0.0,
+                    "y": 1.0,
+                    "z": 0.0
+                },
+                "endScale": 0.30000001192092896,
+                "gravity": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "initialRotateDeg": {
+                    "x": 0.0,
+                    "y": 0.0,
+                    "z": 0.0
+                },
+                "life": {
+                    "max": 0.6499999761581421,
+                    "min": 0.25
+                },
+                "shape": "CircleXZ",
+                "sizeAxis": {
+                    "x": 1.0,
+                    "y": 1.0,
+                    "z": 1.0
+                },
+                "sizeEase": 30,
+                "speed": {
+                    "max": 1.100000023841858,
+                    "min": 0.20000000298023224
+                },
+                "spinDeg": {
+                    "max": 0.0,
+                    "min": 0.0
+                },
+                "spreadAngle": 180.0,
+                "startSize": {
+                    "max": 0.07500000298023224,
+                    "min": 0.02500000037252903
+                },
+                "useSpawnDirection": false,
+                "yVelocity": {
+                    "max": 3.799999952316284,
+                    "min": 1.600000023841858
+                }
+            },
+            "texture": "SolarGlow.png"
+        }
+    ],
+    "name": "EnemyBurning"
+}

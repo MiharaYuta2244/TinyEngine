@@ -7,6 +7,7 @@
 #include "GameObjects/StageObjects/Door/Door.h"
 #include "GameObjects/StageObjects/Glass/Glass.h"
 #include "Transform.h"
+#include <optional>
 #include <vector>
 
 class EnemyBulletManager;
@@ -34,7 +35,12 @@ public:
 
 	// 更新処理
 	void Update(
-	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager);
+	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager,
+	    const std::optional<Vector3>& distraction);
+
+	void Ignite();
+	bool IsBurning() const { return state_ == State::Burning; }
+	static constexpr float kBurnDuration = 6.0f;
 
 	// Getter
 	State GetState() const { return state_; }
@@ -55,6 +61,10 @@ public:
 
 	// 状態のSetter
 	void SetState(State state) {
+		if (IsBurning()) {
+			return;
+		}
+
 		// 状態が変わったら1発目扱いに戻す
 		if (state_ != state) {
 			isFirstShot_ = true;
@@ -112,6 +122,8 @@ private:
 	// プレーヤー方向に回転する
 	void LookatPlayer(float deltaTime, Vector3 playerPos, Vector3 enemyPos, float turnSpeed = 6.0f);
 
+	void UpdateBurning(float deltaTime, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager);
+
 	// 通常状態の更新処理
 	void UpdateNormal(float deltaTime, Player* player, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager);
 
@@ -137,6 +149,9 @@ private:
 
 	// 敵の状態
 	State state_ = State::Normal;
+	float burnTime_ = 0.0f;
+	float panicTurnTime_ = 0.0f;
+	float panicHeading_ = 0.0f;
 
 	// 視界のパラメータ
 	Visionparam visionParam_ = {20.0f, 30.0f};

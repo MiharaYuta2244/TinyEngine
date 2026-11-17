@@ -37,6 +37,7 @@ void EnemyAnimator::Play(EnemyAnim anim, float blendDuration) {
 
 EnemyAnim EnemyAnimator::Select(EnemyState state, bool isMoving) {
 	switch (state) {
+	case EnemyState::Burning:
 	case EnemyState::Vigilance:
 		// 警戒中は停止していても警戒歩きモーション
 		return EnemyAnim::VigilanceWalk;

@@ -588,6 +588,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Engine\2d\Font\FontCommon.h" />
     <ClInclude Include="Engine\2d\Font\TextSprite.h" />
     <ClInclude Include="Application\GameObjects\Item\Soap.h" />
+    <ClInclude Include="Application\GameObjects\Item\ThrowableItem.h" />
     <ClInclude Include="Engine\3d\particle\modules\GlassShardModule.h" />
     <ClInclude Include="Application\Utility\GameRumbleController.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Behavior\NormalBehavior.h" />

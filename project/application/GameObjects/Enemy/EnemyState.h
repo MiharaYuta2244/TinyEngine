@@ -8,4 +8,5 @@ enum class EnemyState {
 	Vigilance, // 警戒、プレイヤー追跡状態
 	Hold,      // プレイヤーに拘束されている状態
 	Down,      // ひるみ状態
+	Burning,   // 炎上して走り回る状態
 };

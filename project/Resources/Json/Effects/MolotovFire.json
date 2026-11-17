@@ -1,0 +1,275 @@
+{
+  "name": "MolotovFire",
+  "emitters": [
+    {
+      "name": "Ignition",
+      "texture": "MolotovFlame.png",
+      "duration": 0.1,
+      "count": 30,
+      "frequency": 0,
+      "extent": {
+        "x": 2.75,
+        "y": 0.06,
+        "z": 2.75
+      },
+      "offset": {
+        "x": 0,
+        "y": 0.48,
+        "z": 0
+      },
+      "params": {
+        "shape": "CircleXZ",
+        "initialRotateDeg": {
+          "x": 90,
+          "y": 0,
+          "z": 0
+        },
+        "life": {
+          "min": 0.45,
+          "max": 0.8
+        },
+        "speed": {
+          "min": 0.05,
+          "max": 0.25
+        },
+        "yVelocity": {
+          "min": 2.5,
+          "max": 4
+        },
+        "startSize": {
+          "min": 0.55,
+          "max": 1.05
+        },
+        "endScale": 0.37,
+        "sizeAxis": {
+          "x": 0.77,
+          "y": 1.28,
+          "z": 1
+        },
+        "spinDeg": {
+          "min": -20,
+          "max": 20
+        },
+        "colorStartA": {
+          "x": 1,
+          "y": 0.62,
+          "z": 0.1,
+          "w": 0.92
+        },
+        "colorStartB": {
+          "x": 1,
+          "y": 0.3,
+          "z": 0.025,
+          "w": 0.85
+        },
+        "colorEnd": {
+          "x": 0.65,
+          "y": 0.055,
+          "z": 0.015,
+          "w": 0
+        }
+      },
+      "blend": "Alpha",
+      "burst": true
+    },
+    {
+      "name": "Flames",
+      "texture": "MolotovFlame.png",
+      "duration": 5,
+      "count": 7,
+      "frequency": 0.075,
+      "extent": {
+        "x": 2.8,
+        "y": 0.13,
+        "z": 2.8
+      },
+      "offset": {
+        "x": 0,
+        "y": 0.46,
+        "z": 0
+      },
+      "params": {
+        "shape": "CircleXZ",
+        "initialRotateDeg": {
+          "x": 90,
+          "y": 0,
+          "z": 0
+        },
+        "life": {
+          "min": 0.45,
+          "max": 0.8
+        },
+        "speed": {
+          "min": 0.05,
+          "max": 0.25
+        },
+        "yVelocity": {
+          "min": 1.25,
+          "max": 2.4
+        },
+        "startSize": {
+          "min": 0.48,
+          "max": 0.85
+        },
+        "endScale": 0.37,
+        "sizeAxis": {
+          "x": 0.77,
+          "y": 1.28,
+          "z": 1
+        },
+        "spinDeg": {
+          "min": -20,
+          "max": 20
+        },
+        "colorStartA": {
+          "x": 1,
+          "y": 0.62,
+          "z": 0.1,
+          "w": 0.92
+        },
+        "colorStartB": {
+          "x": 1,
+          "y": 0.3,
+          "z": 0.025,
+          "w": 0.85
+        },
+        "colorEnd": {
+          "x": 0.65,
+          "y": 0.055,
+          "z": 0.015,
+          "w": 0
+        }
+      },
+      "blend": "Alpha",
+      "burst": false
+    },
+    {
+      "name": "Smoke",
+      "texture": "Dust.png",
+      "duration": 4.7,
+      "count": 3,
+      "frequency": 0.15,
+      "extent": {
+        "x": 2.65,
+        "y": 0.1,
+        "z": 2.65
+      },
+      "offset": {
+        "x": 0,
+        "y": 1,
+        "z": 0
+      },
+      "params": {
+        "shape": "CircleXZ",
+        "initialRotateDeg": {
+          "x": 90,
+          "y": 0,
+          "z": 0
+        },
+        "life": {
+          "min": 0.8,
+          "max": 1.4
+        },
+        "speed": {
+          "min": 0.18,
+          "max": 0.55
+        },
+        "yVelocity": {
+          "min": 1.4,
+          "max": 2.1
+        },
+        "startSize": {
+          "min": 0.32,
+          "max": 0.67
+        },
+        "endScale": 1.85,
+        "spinDeg": {
+          "min": -40,
+          "max": 40
+        },
+        "colorStartA": {
+          "x": 0.16,
+          "y": 0.12,
+          "z": 0.1,
+          "w": 0.33
+        },
+        "colorStartB": {
+          "x": 0.27,
+          "y": 0.22,
+          "z": 0.17,
+          "w": 0.42
+        },
+        "colorEnd": {
+          "x": 0.22,
+          "y": 0.2,
+          "z": 0.18,
+          "w": 0
+        }
+      },
+      "blend": "Alpha",
+      "burst": false
+    },
+    {
+      "name": "Embers",
+      "texture": "SolarGlow.png",
+      "duration": 5,
+      "count": 6,
+      "frequency": 0.12,
+      "extent": {
+        "x": 2.85,
+        "y": 0.12,
+        "z": 2.85
+      },
+      "offset": {
+        "x": 0,
+        "y": 0.38,
+        "z": 0
+      },
+      "params": {
+        "shape": "CircleXZ",
+        "initialRotateDeg": {
+          "x": 90,
+          "y": 0,
+          "z": 0
+        },
+        "life": {
+          "min": 0.4,
+          "max": 1
+        },
+        "speed": {
+          "min": 0.2,
+          "max": 1.1
+        },
+        "yVelocity": {
+          "min": 1.6,
+          "max": 3.8
+        },
+        "startSize": {
+          "min": 0.025,
+          "max": 0.075
+        },
+        "endScale": 0.3,
+        "colorStartA": {
+          "x": 1,
+          "y": 0.66,
+          "z": 0.13,
+          "w": 1
+        },
+        "colorStartB": {
+          "x": 1,
+          "y": 0.44,
+          "z": 0.06,
+          "w": 1
+        },
+        "colorEnd": {
+          "x": 0.8,
+          "y": 0.1,
+          "z": 0.02,
+          "w": 0
+        }
+      },
+      "blend": "Additive",
+      "burst": false
+    }
+  ]
+}

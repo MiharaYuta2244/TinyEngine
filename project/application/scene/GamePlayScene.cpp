@@ -181,7 +181,8 @@ void GamePlayScene::Update() {
 
 	// プレイヤーの更新処理
 	player_->Update(
-	    deltaTime, ctx_.keyboard, ctx_.gamePad, enemyManager_.get(), stage_->GetSoapManager()->GetObjects(), stage_->GetBarricadeManager()->GetObjects());
+	    deltaTime, ctx_.keyboard, ctx_.gamePad, enemyManager_.get(), stage_->GetSoapManager()->GetObjects(),
+	    stage_->GetMolotovManager()->GetObjects(), stage_->GetBarricadeManager()->GetObjects());
 
 	// 敵の更新処理
 	enemyManager_->Update(deltaTime, player_.get(), enemyBulletManager_.get(), stage_->GetSolidObstacles(), stage_->GetDoorManager(), stage_->GetGlassManager(), enemyBombManager_.get());
@@ -202,7 +203,7 @@ void GamePlayScene::Update() {
 	    [this](Glass& glass, const Vector3& direction) { OnGlassBreak(glass, direction); },
 	    [this] { TriggerPlayerHitEffect(); },
 	};
-	collisionManager_->CheckCollisions(*player_, *enemyManager_, *enemyBulletManager_, *enemyBombManager_, *stage_, collisionContext);
+	collisionManager_->CheckCollisions(*player_, *enemyManager_, *enemyBulletManager_, *enemyBombManager_, *stage_, collisionContext, deltaTime);
 
 	// 壊れた石鹸のエフェクト生成
 	for (auto& soap : stage_->GetSoapManager()->GetObjects()) {
@@ -312,6 +313,11 @@ void GamePlayScene::Update() {
 	}
 	for (auto& soap : stage_->GetSoapManager()->GetObjects()) {
 		editObjects.push_back(soap.get());
+	}
+	for (const auto& molotov : stage_->GetMolotovManager()->GetObjects()) {
+		if (molotov->CanGrab()) {
+			editObjects.push_back(molotov.get());
+		}
 	}
 
 	// シーンエディターの更新
@@ -598,6 +604,8 @@ IGameObject* GamePlayScene::SpawnObject(const SpawnRequest& request) {
 		return stage_->GetCageManager()->AddObject(request.position);
 	case SpawnType::HealArea:
 		return stage_->GetHealAreaManager()->AddObject(request.position);
+	case SpawnType::Molotov:
+		return stage_->GetMolotovManager()->AddObject(request.position);
 	case SpawnType::Soap:
 		return stage_->GetSoapManager()->AddObject(request.position);
 	case SpawnType::Enemy:

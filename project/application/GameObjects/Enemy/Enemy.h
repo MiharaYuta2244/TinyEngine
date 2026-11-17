@@ -37,7 +37,8 @@ public:
 
 	// 更新処理
 	void Update(
-	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager);
+	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager,
+	    const std::optional<Vector3>& distraction);
 
 	// 押し戻し完了後に呼ぶ最終更新処理
 	void PostUpdate();
@@ -130,6 +131,9 @@ public:
 	// ダウン状態かどうか
 	bool IsDown() const { return isDown_; }
 
+	void Ignite();
+	bool IsBurning() const { return ai_->IsBurning(); }
+
 	// 爆発エフェクト生成用の窓口
 	void PlayDeathEffect(std::list<std::unique_ptr<TinyEngine::Particle>>& container);
 
@@ -168,6 +172,7 @@ private:
 	void UpdateAnimation(Vector3 prevPos);
 
 private:
+	std::vector<std::unique_ptr<TinyEngine::Particle>> burnParticles_;
 	AABB bodyCol_{}; // 本体のAABB
 	bool enableMove_ = true;
 	bool isDead_ = false;

@@ -56,6 +56,14 @@ void EnemyManager::Update(
 	const float kActiveDistance = 30.0f; // 画面に収まる程度の距離
 	const float kActiveDistanceSq = kActiveDistance * kActiveDistance;
 
+	// AI更新前の座標を使い、敵の更新順で注意の対象が変わらないようにする。
+	std::vector<Vector3> burningPositions;
+	for (const auto& enemy : enemies_) {
+		if (enemy->IsBurning()) {
+			burningPositions.push_back(enemy->GetPos());
+		}
+	}
+
 	// 生きている敵をすべて更新
 	for (auto& enemy : enemies_) {
 		Vector3 enemyPos = enemy->GetPos();
@@ -65,9 +73,23 @@ void EnemyManager::Update(
 		float distSq = dx * dx + dy * dy + dz * dz;
 
 		// プレイヤーとの距離が一定範囲内の場合のみ更新を行う
-		if (distSq <= kActiveDistanceSq) {
+		if (distSq <= kActiveDistanceSq || enemy->IsBurning()) {
+			std::optional<Vector3> distraction;
+			constexpr float distractionRadius = 10.0f;
+			float nearestSq = distractionRadius * distractionRadius;
+			if (!enemy->IsBurning()) {
+				for (const auto& position : burningPositions) {
+					const float offsetX = position.x - enemyPos.x;
+					const float offsetZ = position.z - enemyPos.z;
+					const float distanceSq = offsetX * offsetX + offsetZ * offsetZ;
+					if (distanceSq < nearestSq) {
+						distraction = position;
+						nearestSq = distanceSq;
+					}
+				}
+			}
 			enemy->SetActive(true);
-			enemy->Update(deltaTime, player, enemyBulletManager, obstacles, doorManager, glassManager, enemyBombManager);
+			enemy->Update(deltaTime, player, enemyBulletManager, obstacles, doorManager, glassManager, enemyBombManager, distraction);
 		} else {
 			// 範囲外ならアクティブフラグをおろし、更新をスキップ
 			enemy->SetActive(false);

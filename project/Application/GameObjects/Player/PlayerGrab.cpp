@@ -2,6 +2,7 @@
 #include "GameObjects/Enemy/Enemy.h"
 #include "GameObjects/Enemy/EnemyManager.h"
 #include "GameObjects/Item/Soap.h"
+#include "GameObjects/Item/Molotov.h"
 #include "GameObjects/StageObjects/Barricade/Barricade.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
@@ -10,8 +11,22 @@
 
 PlayerGrab::Result PlayerGrab::Update(
     const Input& input, const Context& ctx, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps,
+    const std::list<std::unique_ptr<Molotov>>& molotovs,
     const std::list<std::unique_ptr<Barricade>>& barricades) {
+
 	Result result;
+
+	// エディターで削除されたアイテムや、炎上した敵を手放す。
+	const auto containsHeldItem = [this](const auto& items) {
+		return std::any_of(items.begin(), items.end(), [this](const auto& item) { return item.get() == heldItem_; });
+	};
+	if (heldItem_ && !containsHeldItem(soaps) && !containsHeldItem(molotovs)) {
+		heldItem_ = nullptr;
+	}
+	if (heldEnemy_ && heldEnemy_->IsBurning()) {
+		ReleaseEnemy();
+	}
+
 
 	if (heldBarricade_) {
 		if (heldBarricade_->IsShield() && input.attackPressed) {
@@ -29,7 +44,7 @@ PlayerGrab::Result PlayerGrab::Update(
 		return result;
 	}
 
-	const float nearestTarget = FindTargets(ctx, enemyManager, soaps);
+	const float nearestTarget = FindTargets(ctx, enemyManager, soaps, molotovs);
 	if (!IsHolding() && input.grabPressed) {
 		float nearest = std::min(nearestTarget, grabRange_);
 		for (const auto& barricade : barricades) {
@@ -50,7 +65,7 @@ PlayerGrab::Result PlayerGrab::Update(
 		}
 	}
 
-	UpdateSoap(input, ctx, result);
+	UpdateItem(input, ctx, result);
 	TryGrabEnemy(input, ctx, result);
 	UpdateHeldEnemy(input, ctx);
 	UpdateAttack(input, ctx, result);
@@ -58,9 +73,9 @@ PlayerGrab::Result PlayerGrab::Update(
 	return result;
 }
 
-float PlayerGrab::FindTargets(const Context& ctx, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps) {
+float PlayerGrab::FindTargets(const Context& ctx, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps, const std::list<std::unique_ptr<Molotov>>& molotovs) {
 	nearEnemy_ = nullptr;
-	nearSoap_ = nullptr;
+	nearItem_ = nullptr;
 
 	// 何かを掴んでいる間は新しいターゲットを探さない
 	if (IsHolding()) {
@@ -70,7 +85,7 @@ float PlayerGrab::FindTargets(const Context& ctx, EnemyManager* enemyManager, co
 	// 一番近い敵(3D距離)
 	float enemyMinDist = FLT_MAX;
 	for (auto& enemy : enemyManager->GetEnemies()) {
-		if (enemy->IsDead()) {
+		if (enemy->IsDead() || enemy->IsBurning()) {
 			continue;
 		}
 
@@ -81,33 +96,33 @@ float PlayerGrab::FindTargets(const Context& ctx, EnemyManager* enemyManager, co
 		}
 	}
 
-	// 一番近い石鹸
-	float soapMinDist = FLT_MAX;
-	for (const auto& soap : soaps) {
-		// 破壊済みの石鹸は掴めない
-		if (soap->IsBroken()) {
-			continue;
+	float itemMinDist = FLT_MAX;
+	const auto findNearestItem = [&](const auto& items) {
+		for (const auto& item : items) {
+			if (!item->CanGrab()) {
+				continue;
+			}
+			Vector3 diff = item->GetPos() - ctx.position;
+			diff.y = 0.0f;
+			const float distance = MathUtility::Length(diff);
+			if (distance < itemMinDist && distance < grabRange_) {
+				itemMinDist = distance;
+				nearItem_ = item.get();
+			}
 		}
-
-		Vector3 diff = soap->GetPos() - ctx.position;
-		diff.y = 0.0f;
-		float dist = MathUtility::Length(diff);
-
-		if (dist < soapMinDist && dist < grabRange_) {
-			soapMinDist = dist;
-			nearSoap_ = soap.get();
-		}
-	}
+	};
+	findNearestItem(soaps);
+	findNearestItem(molotovs);
 
 	// 両方ある場合は近い方を優先
-	if (nearSoap_ && nearEnemy_) {
-		if (soapMinDist < enemyMinDist) {
+	if (nearItem_ && nearEnemy_) {
+		if (itemMinDist < enemyMinDist) {
 			nearEnemy_ = nullptr;
 		} else {
-			nearSoap_ = nullptr;
+			nearItem_ = nullptr;
 		}
 	}
-	return std::min(soapMinDist, ctx.enableAttack ? enemyMinDist : FLT_MAX);
+	return std::min(itemMinDist, ctx.enableAttack ? enemyMinDist : FLT_MAX);
 }
 
 void PlayerGrab::ValidateBarricade(const std::list<std::unique_ptr<Barricade>>& barricades) {
@@ -140,36 +155,36 @@ bool PlayerGrab::IsHoldingShield() const {
 	return heldBarricade_ && heldBarricade_->IsShield();
 }
 
-void PlayerGrab::UpdateSoap(const Input& input, const Context& ctx, Result& result) {
+void PlayerGrab::UpdateItem(const Input& input, const Context& ctx, Result& result) {
 	const Vector3 forward = {ctx.forward.x, 0.0f, ctx.forward.y};
 
 	// 掴む
-	if (!IsHolding() && input.grabPressed && nearSoap_) {
-		heldSoap_ = nearSoap_;
-		heldSoap_->Grab();
-		result.grabbedSoap = true;
+	if (!IsHolding() && input.grabPressed && nearItem_) {
+		heldItem_ = nearItem_;
+		heldItem_->Grab();
+		result.grabbedItem = true;
 		result.stopMovement = true;
 	}
 
-	if (heldSoap_) {
+	if (heldItem_) {
 		if (input.attackPressed) {
-			// 掴んでいる石鹸を投げる
-			heldSoap_->Throw(forward);
-			heldSoap_ = nullptr;
+			// 掴んでいる投擲アイテムを投げる
+			heldItem_->Throw(forward);
+			heldItem_ = nullptr;
 			result.stopMovement = true;
 		} else if (input.grabHeld) {
 			// 掴んでいる間はプレイヤーの前方に固定
-			Vector3 holdPos = heldSoap_->GetPos();
+			Vector3 holdPos = heldItem_->GetPos();
 			holdPos.x = ctx.position.x + forward.x * holdOffset_;
 			holdPos.z = ctx.position.z + forward.z * holdOffset_;
-			heldSoap_->SetPos(holdPos);
+			heldItem_->SetPos(holdPos);
 		} else {
 			// 掴みボタンを離したらその場に置く
-			heldSoap_ = nullptr;
+			heldItem_ = nullptr;
 		}
-	} else if (nearSoap_ && input.attackPressed) {
+	} else if (!IsHolding() && nearItem_ && input.attackPressed) {
 		// 掴まずに直接突き飛ばす
-		nearSoap_->Throw(forward);
+		nearItem_->Throw(forward);
 		result.stopMovement = true;
 	}
 }
@@ -255,10 +270,10 @@ void PlayerGrab::ReleaseEnemyByGuard() {
 }
 
 bool PlayerGrab::GetPreviewParams(bool enableAttack, Vector3& outPos, float& outPower, float& outFriction) const {
-	if (heldSoap_) {
-		outPos = heldSoap_->GetPos();
-		outPower = heldSoap_->GetThrowSpeed();
-		outFriction = heldSoap_->GetFriction();
+	if (const auto* soap = dynamic_cast<const Soap*>(heldItem_)) {
+		outPos = soap->GetPos();
+		outPower = soap->GetThrowSpeed();
+		outFriction = soap->GetFriction();
 		return true;
 	}
 

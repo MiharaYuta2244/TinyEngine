@@ -430,6 +430,7 @@ void SceneEditor::UpdateSpawnPalette() {
         {SpawnType::Cage,     "Cage"    },
 	    {SpawnType::HealArea, "HealArea"},
         {SpawnType::Soap,     "Soap"    },
+        {SpawnType::Molotov,  "Molotov" },
         {SpawnType::Enemy,    "Enemy"   },
 	};
 

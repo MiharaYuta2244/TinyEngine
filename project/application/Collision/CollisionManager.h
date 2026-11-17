@@ -17,7 +17,7 @@ public:
 	// 全てのゲームオブジェクトの当たり判定の処理を回す
 	void CheckCollisions(
 	    Player& player, EnemyManager& enemyManager, EnemyBulletManager& bulletManager, EnemyBombManager& bombManager,
-	    Stage& stage, const CollisionContext& context);
+	    Stage& stage, const CollisionContext& context, float deltaTime);
 
 private:
 	using Contact = std::tuple<std::uint64_t, CollisionPart, std::uint64_t, CollisionPart>;

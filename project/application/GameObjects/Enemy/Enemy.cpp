@@ -1,4 +1,5 @@
 #include "Enemy.h"
+#include "EffectLibrary.h"
 #include "MathOperator.h"
 #include "ChargeModule.h"
 #include "ColorPalette.h"
@@ -55,7 +56,8 @@ void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalMan
 }
 
 void Enemy::Update(
-    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager) {
+    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager,
+    const std::optional<Vector3>& distraction) {
 	if (isDead_)
 		return;
 
@@ -87,6 +89,12 @@ void Enemy::Update(
 		return;
 	}
 
+	for (auto& particle : burnParticles_) {
+		particle->SetTranslate(transform_.translate + Vector3{0.0f, 0.8f, 0.0f});
+		particle->Update();
+	}
+	std::erase_if(burnParticles_, [](const auto& particle) { return particle->IsFinished(); });
+
 	// タイマーの更新(無敵・点滅)
 	UpdateTimers(deltaTime);
 
@@ -94,7 +102,7 @@ void Enemy::Update(
 	UpdateEffects(deltaTime);
 
 	// 停止状態の時は早期リターン
-	if (!isMove_) {
+	if (!isMove_ && !IsBurning()) {
 		return;
 	}
 
@@ -102,7 +110,7 @@ void Enemy::Update(
 	Vector3 prevPos = transform_.translate;
 
 	// AIインスタンス更新
-	ai_->Update(deltaTime, player, enemyBulletManager, obstacles, doorManager, glassManager, enemyBombManager);
+	ai_->Update(deltaTime, player, enemyBulletManager, obstacles, doorManager, glassManager, enemyBombManager, distraction);
 
 	// アニメーション更新処理
 	UpdateAnimation(prevPos);
@@ -182,6 +190,10 @@ void Enemy::Draw() {
 			piyoEffect_->Draw();
 		}
 
+		for (auto& particle : burnParticles_) {
+			particle->Draw();
+		}
+
 		// マズルフラッシュパーティクルの描画
 		for (auto& particle : muzzleParticles_) {
 			particle->Draw();
@@ -204,7 +216,7 @@ void Enemy::DrawVision() {
 		return;
 
 	// 視界の描画
-	if (enableMove_ && !isDown_) {
+	if (enableMove_ && !isDown_ && !IsBurning()) {
 		visionCone_->Draw();
 	}
 }
@@ -309,8 +321,27 @@ void Enemy::ApplyType(EnemyType type) {
 	}
 }
 
+void Enemy::Ignite() {
+	if (isDead_ || IsBurning()) {
+		return;
+	}
+
+	ai_->Ignite();
+	isDown_ = false;
+	piyoEffect_.reset();
+	exclamationMark_.reset();
+	chargeParticle_.reset();
+	chargeCylinderEffect_.reset();
+	StopKnockback();
+	burnParticles_.clear();
+	EffectLibrary::Get().Spawn(ctx_, "EnemyBurning", transform_.translate + Vector3{0.0f, 0.8f, 0.0f}, burnParticles_);
+	for (auto& particle : burnParticles_) {
+		particle->SetEmitMode(false, EnemyAI::kBurnDuration);
+	}
+}
+
 void Enemy::StartDown(float duration) {
-	if (isDead_ || isDown_) {
+	if (isDead_ || isDown_ || IsBurning()) {
 		return;
 	}
 

@@ -1,5 +1,6 @@
 #include "EnemyAI.h"
 #include "AStarPathfinder.h"
+#include "Collision.h"
 #include "GameObjects/Player/Player.h"
 #include "Gameobjects/Enemy/Weapon/EnemyBombManager.h"
 #include "Gameobjects/Enemy/Weapon/EnemyBulletManager.h"
@@ -7,6 +8,7 @@
 #include "MathUtility.h"
 #include "Random.h"
 #include <cmath>
+#include <numbers>
 
 using namespace TinyEngine;
 
@@ -19,8 +21,18 @@ void EnemyAI::Initialize(Transform* transform, EngineContext* ctx, IEnemyBehavio
 }
 
 void EnemyAI::Update(
-    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager) {
+    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager,
+    const std::optional<Vector3>& distraction) {
 	isShotThisFrame_ = false;
+
+	// 炎上した敵への注意より、プレイヤーの視認を優先する。
+	if (distraction && (state_ == State::Normal || state_ == State::Vigilance) &&
+	    !CheckPlayerInVision(player, obstacles, doorManager, glassManager)) {
+		LookatPlayer(deltaTime, *distraction, transform_->translate, hearTurnSpeed_);
+		canSeePlayer_ = false;
+		ResetShotTimer();
+		return;
+	}
 
 	// 状態に応じたUpdateを呼ぶ
 	switch (state_) {
@@ -33,9 +45,67 @@ void EnemyAI::Update(
 	case State::Hold:
 		UpdateHold(deltaTime, player, enemyBulletManager, enemyBombManager);
 		break;
+	case State::Burning:
+		UpdateBurning(deltaTime, obstacles, doorManager, glassManager);
+		break;
 	case State::Down:
 		// EnemyのUpdate側で早期returnするため何もしない
 		break;
+	}
+}
+
+void EnemyAI::Ignite() {
+	state_ = State::Burning;
+	burnTime_ = kBurnDuration;
+	panicTurnTime_ = 0.0f;
+	canSeePlayer_ = false;
+	currentPath_.clear();
+	pathUpdateTimer_ = 0.0f;
+	ResetShotTimer();
+}
+
+void EnemyAI::UpdateBurning(float deltaTime, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager) {
+	burnTime_ -= deltaTime;
+	if (burnTime_ <= 0.0f) {
+		state_ = State::Normal;
+		isPatrolWaiting_ = true;
+		patrolStateTimer_ = 0.0f;
+		return;
+	}
+
+	panicTurnTime_ -= deltaTime;
+	if (panicTurnTime_ <= 0.0f) {
+		panicHeading_ = RandomUtils::RangeFloat(-std::numbers::pi_v<float>, std::numbers::pi_v<float>);
+		panicTurnTime_ = RandomUtils::RangeFloat(0.25f, 0.55f);
+	}
+
+	constexpr float speed = 15.0f;
+	const Vector3 position = transform_->translate;
+	for (int attempt = 0; attempt < 8; ++attempt) {
+		const Vector3 direction{std::sin(panicHeading_), 0.0f, std::cos(panicHeading_)};
+		const Vector3 movement = direction * (speed * deltaTime);
+		const auto blocked = [&](AABB bounds) {
+			constexpr Vector3 padding{0.5f, 0.0f, 0.5f};
+			bounds.min = bounds.min - padding;
+			bounds.max = bounds.max + padding;
+			float hitTime;
+			return Collision::Intersect(Segment{position, movement}, bounds, hitTime) &&
+			    (hitTime > 0.0f || Collision::Intersect(bounds, position + movement));
+		};
+		const auto& doors = doorManager->GetObjects();
+		const auto& glasses = glassManager->GetObjects();
+		if (!std::any_of(obstacles.begin(), obstacles.end(), blocked) &&
+		    !std::any_of(doors.begin(), doors.end(), [&](const auto& door) {
+			    return !door->GetIsOpen() && blocked(door->GetCollision());
+		    }) &&
+		    !std::any_of(glasses.begin(), glasses.end(), [&](const auto& glass) {
+			    return glass->GetIsActive() && blocked(glass->GetCollision());
+		    })) {
+			transform_->translate += movement;
+			transform_->rotate.y = panicHeading_;
+			break;
+		}
+		panicHeading_ += std::numbers::pi_v<float> / 4.0f;
 	}
 }
 

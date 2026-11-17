@@ -4,6 +4,7 @@
 #include "GameObjects/StageObjects/Glass/GlassShardScatter.h"
 #include "GameObjects/GameObjectManager.h"
 #include "GameObjects/Item/Soap.h"
+#include "GameObjects/Item/Molotov.h"
 #include "GameObjects/StageObjects/Cage/Cage.h"
 #include "GameObjects/StageObjects/Glass/Glass.h"
 #include "GameObjects/StageObjects/HealArea/HealArea.h"
@@ -25,6 +26,7 @@ using CageManager = GameObjectManager<Cage>;
 using HealAreaManager = GameObjectManager<HealArea>;
 using GlassManager = GameObjectManager<Glass, TinyEngine::DecalManager*>;
 using SoapManager = GameObjectManager<Soap>;
+using MolotovManager = GameObjectManager<Molotov>;
 
 /// <summary>
 /// ステージ構成要素を統括するクラス
@@ -56,6 +58,7 @@ public:
 	CageManager* GetCageManager() const { return cageManager_.get(); }
 	HealAreaManager* GetHealAreaManager() const { return healAreaManager_.get(); }
 	SoapManager* GetSoapManager() const { return soapManager_.get(); }
+	MolotovManager* GetMolotovManager() const { return molotovManager_.get(); }
 	Goal* GetGoal() const { return goal_.get(); }
 	Ground* GetGround() const { return ground_.get(); }
 	GlassShardScatter* GetGlassShardScatter() const { return glassShardScatter_.get(); }
@@ -79,6 +82,7 @@ private:
 	std::unique_ptr<CageManager> cageManager_;
 	std::unique_ptr<HealAreaManager> healAreaManager_;
 	std::unique_ptr<SoapManager> soapManager_;
+	std::unique_ptr<MolotovManager> molotovManager_;
 	std::unique_ptr<Ground> ground_;
 	std::unique_ptr<Goal> goal_;
 	std::string goalPositionPath_;
