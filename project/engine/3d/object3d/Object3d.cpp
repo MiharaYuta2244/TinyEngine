@@ -209,7 +209,7 @@ void Object3d::Draw() {
 		commandList->SetGraphicsRootConstantBufferView(9, outlineResource_->GetGPUVirtualAddress());
 
 		if (model_) {
-			model_->Draw(textureFilePath_, isSkinning_ ? &skinCluster_ : nullptr);
+			model_->Draw(textureFilePath_, isSkinning_ ? &skinCluster_ : nullptr, 1, true);
 		}
 	}
 

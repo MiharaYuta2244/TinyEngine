@@ -29,6 +29,8 @@ public:
 	void SetIsSkinning(bool isSkinning) { object3d_->SetIsSkinning(isSkinning); }
 	void SetEnableLaser(bool enableLaser) { object3d_->SetEnableLaser(enableLaser); }
 	void SetModel(const std::string& filepath) { object3d_->SetModel(filepath); }
+	void SetOutlineColor(const Vector4& color) { object3d_->SetOutlineColor(color); }
+	void SetOutlineThickness(float thickness) { object3d_->SetOutlineThickness(thickness); }
 	void SetEnableOutline(bool isEnable) {
 		if (object3d_) {
 			object3d_->SetEnableOutline(isEnable);

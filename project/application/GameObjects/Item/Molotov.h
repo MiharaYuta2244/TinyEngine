@@ -1,4 +1,5 @@
 #pragma once
+#include "GameObjects/ObjectRender/InteractionOutline.h"
 #include "AABB.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "ThrowableItem.h"
@@ -16,6 +17,9 @@ public:
 	void Initialize(EngineContext* ctx, const Transform& transform);
 	void Update(float deltaTime);
 	void Draw() override;
+	void DrawExtraImGui() override { outline_.DrawImGui(); }
+	void ToExtraJson(Json& j) const override { outline_.Save(j); }
+	void FromExtraJson(const Json& j) override { outline_.Load(j); }
 	std::string GetName() const override { return "Molotov(" + std::to_string(GetCollisionId()) + ")"; }
 
 	bool CanGrab() const override { return !inFlight_ && !broken_; }
@@ -35,6 +39,10 @@ public:
 
 private:
 	void Ignite();
+
+private:
+	// アウトライン
+	InteractionOutline outline_;
 
 	static constexpr float kGroundY = 0.0f;
 	static constexpr float kFireRadius = 4.0f;

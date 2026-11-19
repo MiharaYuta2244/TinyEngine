@@ -112,6 +112,7 @@ bool Molotov::UpdatePlayerExposure(bool inside, float deltaTime) {
 }
 
 void Molotov::Draw() {
+	outline_.Apply(*render_, CanGrab());
 	if (!broken_) {
 		render_->Draw();
 	}

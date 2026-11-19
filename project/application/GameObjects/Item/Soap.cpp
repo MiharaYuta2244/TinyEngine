@@ -41,6 +41,7 @@ void Soap::Update(float deltaTime) {
 }
 
 void Soap::Draw() {
+	outline_.Apply(*render_, CanGrab() && !IsThrown());
 	// 本体描画
 	if (!isBroken_) {
 		render_->Draw();

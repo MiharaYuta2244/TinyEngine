@@ -398,6 +398,7 @@ void Object3dCommon::CreateOutlinePipeline() {
 	psoDesc.RasterizerState.FillMode = D3D12_FILL_MODE_SOLID;
 	// 前面をカリングし背面のみ描画
 	psoDesc.RasterizerState.CullMode = D3D12_CULL_MODE_FRONT;
+	psoDesc.RasterizerState.DepthClipEnable = TRUE;
 
 	// 入力レイアウト
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[] = {
@@ -409,7 +410,12 @@ void Object3dCommon::CreateOutlinePipeline() {
 
 	// その他の設定
 	psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	auto& outlineBlend = psoDesc.BlendState.RenderTarget[0];
+	outlineBlend.BlendEnable = TRUE;
+	outlineBlend.SrcBlend = D3D12_BLEND_SRC_ALPHA;
+	outlineBlend.DestBlend = D3D12_BLEND_INV_SRC_ALPHA;
 	psoDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	psoDesc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	psoDesc.SampleMask = UINT_MAX;
 	psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	psoDesc.NumRenderTargets = 1;

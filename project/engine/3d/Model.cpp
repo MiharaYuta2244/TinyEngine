@@ -11,6 +11,9 @@
 #include <assimp/scene.h>
 #include <fstream>
 #include <sstream>
+#include <map>
+#include <set>
+#include <tuple>
 
 using namespace Microsoft::WRL;
 
@@ -253,7 +256,7 @@ void Model::DispatchSkinning(ID3D12GraphicsCommandList* commandList, const SkinC
 	commandList->Dispatch(threadGroupCount, 1, 1);
 }
 
-void Model::Draw(const std::string& textureFilePath, const SkinCluster* skinCluster, UINT instanceCount) {
+void Model::Draw(const std::string& textureFilePath, const SkinCluster* skinCluster, UINT instanceCount, bool outline) {
 	auto commandList = modelCommon_->GetDxCommon()->GetCommandList();
 
 	if (skinCluster) {
@@ -266,6 +269,11 @@ void Model::Draw(const std::string& textureFilePath, const SkinCluster* skinClus
 		commandList->ResourceBarrier(1, &barrier);
 
 		commandList->IASetVertexBuffers(0, 1, &skinCluster->outputVertexBufferView);
+	} else if (outline) {
+		if (!outlineVertexResource_) {
+			CreateOutlineVertexData();
+		}
+		commandList->IASetVertexBuffers(0, 1, &outlineVertexBufferView_);
 	} else {
 		commandList->IASetVertexBuffers(0, 1, &vertexBufferView_);
 	}
@@ -460,6 +468,35 @@ MaterialData Model::LoadMaterialTemplateFile(const std::string& filename) {
 		}
 	}
 	return materialData;
+}
+
+void Model::CreateOutlineVertexData() {
+	// UV境界・ハードエッジで分割された頂点も同じ方向へ押し出し、輪郭の隙間を防ぐ
+	// 通常描画の法線は変更しない。必要な静的モデルだけ遅延生成する
+	using Key = std::tuple<float, float, float>;
+	std::map<Key, std::set<Key>> normals;
+	for (const auto& vertex : modelData_.vertices) {
+		normals[{vertex.position.x, vertex.position.y, vertex.position.z}].insert({vertex.normal.x, vertex.normal.y, vertex.normal.z});
+	}
+
+	auto vertices = modelData_.vertices;
+	for (auto& vertex : vertices) {
+		Vector3 sum{};
+		for (const auto& normal : normals.at({vertex.position.x, vertex.position.y, vertex.position.z})) {
+			sum += Vector3{std::get<0>(normal), std::get<1>(normal), std::get<2>(normal)};
+		}
+		if (MathUtility::LengthSquared(sum) > 0.000001f) {
+			vertex.normal = MathUtility::Normalize(sum);
+		}
+	}
+
+	const auto size = sizeof(VertexData) * vertices.size();
+	outlineVertexResource_ = DirectXUtils::CreateBufferResource(modelCommon_->GetDxCommon()->GetDevice(), size);
+	VertexData* mapped = nullptr;
+	outlineVertexResource_->Map(0, nullptr, reinterpret_cast<void**>(&mapped));
+	std::memcpy(mapped, vertices.data(), size);
+	outlineVertexResource_->Unmap(0, nullptr);
+	outlineVertexBufferView_ = {outlineVertexResource_->GetGPUVirtualAddress(), static_cast<UINT>(size), sizeof(VertexData)};
 }
 
 void Model::CreateVertexData() {

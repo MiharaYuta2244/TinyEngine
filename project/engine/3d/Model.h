@@ -67,7 +67,7 @@ public:
 	void Initialize(ModelCommon* modelCommon, TextureManager* textureManager, const std::string& filename);
 
 	// 描画関数
-	void Draw(const std::string& textureFilePath = "", const SkinCluster* skinCluster = nullptr, UINT instanceCount = 1);
+	void Draw(const std::string& textureFilePath = "", const SkinCluster* skinCluster = nullptr, UINT instanceCount = 1, bool outline = false);
 
 	// 更新関数
 	void Update();
@@ -113,6 +113,7 @@ private:
 	/// 頂点データ作成
 	/// </summary>
 	void CreateVertexData();
+	void CreateOutlineVertexData();
 
 	/// <summary>
 	/// インデックスデータ作成
@@ -136,6 +137,8 @@ private:
 
 	// VertexBufferView
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView_;
+	D3D12_VERTEX_BUFFER_VIEW outlineVertexBufferView_{};
+	Microsoft::WRL::ComPtr<ID3D12Resource> outlineVertexResource_;
 	D3D12_INDEX_BUFFER_VIEW indexBufferView_;
 
 	// Resource

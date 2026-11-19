@@ -152,6 +152,8 @@ void Barricade::DropShield() {
 }
 
 void Barricade::Draw() {
+	outline_.Apply(*render_, CanGrab() || IsPulling());
+
 	// 描画
 	render_->Draw();
 }

@@ -26,9 +26,11 @@ struct VertexShaderInput
 VertexShaderOutput main(VertexShaderInput input)
 {
     VertexShaderOutput output;
-    // 法線方向に押し出す
+    // ワールド単位で押し出す。非均一スケールでも幅を揃える
+    float3 worldNormal = normalize(mul(input.normal, (float3x3) gTransformationMatrix.WorldInverseTranspose));
+    float3 localOffset = mul(worldNormal, transpose((float3x3) gTransformationMatrix.WorldInverseTranspose));
     float4 offsetPosition = input.position;
-    offsetPosition.xyz += input.normal * gOutline.thickness;
+    offsetPosition.xyz += localOffset * gOutline.thickness;
     
     output.position = mul(offsetPosition, gTransformationMatrix.WVP);
     output.texcoord = input.texcoord;

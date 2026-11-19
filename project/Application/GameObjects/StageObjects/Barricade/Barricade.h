@@ -1,4 +1,5 @@
 #pragma once
+#include "GameObjects/ObjectRender/InteractionOutline.h"
 #include "AABB.h"
 #include "Collision.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
@@ -22,6 +23,9 @@ public:
 
 	// 描画処理
 	void Draw() override;
+	void DrawExtraImGui() override { outline_.DrawImGui(); }
+	void ToExtraJson(Json& j) const override { outline_.Save(j); }
+	void FromExtraJson(const Json& j) override { outline_.Load(j); }
 
 	// 当たり判定Getter
 	AABB GetCollision() const { return collision_; }
@@ -67,4 +71,7 @@ private:
 
 	// 描画用インスタンス
 	std::unique_ptr<ObjectRender> render_;
+
+	// アウトライン
+	InteractionOutline outline_;
 };

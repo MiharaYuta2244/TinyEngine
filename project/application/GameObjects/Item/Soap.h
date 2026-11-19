@@ -1,4 +1,5 @@
 #pragma once
+#include "GameObjects/ObjectRender/InteractionOutline.h"
 #include "AABB.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "ThrowableItem.h"
@@ -28,6 +29,9 @@ public:
 
 	// 描画処理
 	void Draw() override;
+	void DrawExtraImGui() override { outline_.DrawImGui(); }
+	void ToExtraJson(Json& j) const override { outline_.Save(j); }
+	void FromExtraJson(const Json& j) override { outline_.Load(j); }
 
 	// 投げ処理
 	void Throw(const Vector3& velocity) override;
@@ -128,4 +132,7 @@ private:
 	// 破壊された瞬間のフラグ
 	bool justBroken_ = false;
 	bool isConsumed_ = false;
+
+	// アウトライン
+	InteractionOutline outline_;
 };
