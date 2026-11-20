@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "DirectInput.h"
 #include "EngineContext.h"
 #include "GamePad.h"
@@ -25,6 +25,5 @@ private:
 	Vector2 PollMouseAim(DirectInput* input, EngineContext* ctx, const Vector3& playerPos) const;
 
 private:
-	float preLt_ = 0.0f;
-	float preRt_ = 0.0f;
+	bool previousGrabHeld_ = false;
 };

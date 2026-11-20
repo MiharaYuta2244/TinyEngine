@@ -1,5 +1,6 @@
 #include "AudioManager.h"
 #include "StringUtility.h"
+#include <algorithm>
 #include <mfapi.h>
 #include <mfidl.h>
 #include <mfobjects.h>
@@ -13,11 +14,13 @@ using namespace Microsoft::WRL;
 using namespace TinyEngine;
 
 AudioManager::~AudioManager() {
+	std::erase(instances_, this);
 	HRESULT result;
 
 	// 再生中のボイスを停止・破棄
 	StopBGM();
-	for (auto* voice : seVoices_) {
+	for (const auto& se : seVoices_) {
+		auto* voice = se.voice;
 		if (voice) {
 			voice->Stop();
 			voice->DestroyVoice();
@@ -28,6 +31,7 @@ AudioManager::~AudioManager() {
 	result = MFShutdown();
 	assert(SUCCEEDED(result));
 
+	if (masterVoice_) masterVoice_->DestroyVoice();
 	xAudio2_.Reset();
 
 	// マップ内のデータを全て解放
@@ -42,13 +46,12 @@ AudioManager::~AudioManager() {
 void AudioManager::Initialize() {
 	HRESULT result;
 
-	IXAudio2MasteringVoice* masterVoice;
-
 	result = XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
 	assert(SUCCEEDED(result));
 
-	result = xAudio2_->CreateMasteringVoice(&masterVoice);
+	result = xAudio2_->CreateMasteringVoice(&masterVoice_);
 	assert(SUCCEEDED(result));
+	instances_.push_back(this);
 
 	// Windows Media Foundation初期化
 	result = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
@@ -63,7 +66,8 @@ void AudioManager::Initialize() {
 
 void AudioManager::Update() {
 	// 再生が終了したSEのボイスをリストから削除・破棄する
-	seVoices_.remove_if([](IXAudio2SourceVoice* voice) {
+	seVoices_.remove_if([](const SEVoice& se) {
+		auto* voice = se.voice;
 		XAUDIO2_VOICE_STATE state;
 		voice->GetState(&state);
 		// バッファのキューが空＝再生終了
@@ -75,7 +79,7 @@ void AudioManager::Update() {
 	});
 
 	// FFT
-	fft_->GetSpectrum(spectrum_, *bgmVoice_, currentBgmTag_, soundData_);
+	if (bgmVoice_) fft_->GetSpectrum(spectrum_, *bgmVoice_, currentBgmTag_, soundData_);
 }
 
 void AudioManager::LoadWave(const std::string& tag, const std::string& filename) {
@@ -176,10 +180,9 @@ void AudioManager::PlayBGM(const std::string& tag, float volume) {
 
 	// 音声データの送信と再生
 	result = bgmVoice_->SubmitSourceBuffer(&buf);
+	bgmBaseVolume_ = volume;
+	bgmVoice_->SetVolume(volume * bgmVolume_);
 	result = bgmVoice_->Start();
-
-	// 音量設定
-	bgmVoice_->SetVolume(volume);
 }
 
 void AudioManager::StopBGM() {
@@ -218,11 +221,25 @@ void AudioManager::PlaySE(const std::string& tag, float volume) {
 
 	// 再生
 	result = pSourceVoice->SubmitSourceBuffer(&buf);
+	pSourceVoice->SetVolume(volume * seVolume_);
 	result = pSourceVoice->Start();
-	pSourceVoice->SetVolume(volume);
 
 	// リストに追加（Updateで終了監視するため）
-	seVoices_.push_back(pSourceVoice);
+	seVoices_.push_back({pSourceVoice, volume});
+}
+
+void AudioManager::SetBGMVolume(float volume) {
+	bgmVolume_ = std::clamp(volume, 0.0f, 1.0f);
+	for (auto* manager : instances_) {
+		if (manager->bgmVoice_) manager->bgmVoice_->SetVolume(manager->bgmBaseVolume_ * bgmVolume_);
+	}
+}
+
+void AudioManager::SetSEVolume(float volume) {
+	seVolume_ = std::clamp(volume, 0.0f, 1.0f);
+	for (auto* manager : instances_) {
+		for (const auto& se : manager->seVoices_) se.voice->SetVolume(se.volume * seVolume_);
+	}
 }
 
 void AudioManager::SoundUnLoad(SoundData* soundData) {

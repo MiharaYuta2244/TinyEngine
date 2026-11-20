@@ -171,6 +171,9 @@
     <ClCompile Include="Engine\input\GamePad.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\input\InputBindings.cpp">
+      <Filter>ソース ファイル\engine\input</Filter>
+    </ClCompile>
     <ClCompile Include="Engine\base\utility\timeManager\TimeManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
@@ -277,6 +280,15 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\Menu\MenuList.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Menu\MenuInputRepeat.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Menu\MenuLayout.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Menu\OptionMenu.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\GameObjects\Effect\FlashEffect.cpp">
@@ -448,6 +460,9 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\Utility\GameRumbleController.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\Utility\SettingsStorage.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\GameObjects\Enemy\Behavior\EnemyBehaviorBase.cpp">
@@ -703,6 +718,9 @@
     <ClInclude Include="Engine\input\GamePad.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="Engine\input\InputBindings.h">
+      <Filter>ヘッダー ファイル\engine\input</Filter>
+    </ClInclude>
     <ClInclude Include="Engine\base\utility\timeManager\TimeManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -854,6 +872,15 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\Menu\MenuList.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Menu\MenuInputRepeat.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Menu\MenuLayout.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Menu\OptionMenu.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObjects\Effect\FlashEffect.h">
@@ -1073,6 +1100,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\Utility\GameRumbleController.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Utility\SettingsStorage.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObjects\Enemy\Behavior\EnemyBehavior.h">

@@ -1,0 +1,1306 @@
+{
+    "menus": {
+        "option.audio": {
+            "adjustmentRepeatInterval": 0.03999999910593033,
+            "colors": {
+                "accent": [
+                    0.0,
+                    0.1568627506494522,
+                    0.1568627506494522,
+                    1.0
+                ],
+                "controlBackground": [
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    1.0
+                ],
+                "controlEmpty": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "controlText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "heading": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "help": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "inactiveControlText": [
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    1.0
+                ],
+                "rowBackground": [
+                    0.0,
+                    0.03921568766236305,
+                    0.03921568766236305,
+                    1.0
+                ],
+                "scrollThumb": [
+                    1.0,
+                    0.800000011920929,
+                    0.18000000715255737,
+                    1.0
+                ],
+                "scrollTrack": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.15000000596046448
+                ],
+                "selectedRowBackground": [
+                    0.7843137383460999,
+                    0.3921568691730499,
+                    0.0,
+                    1.0
+                ],
+                "selectedText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "selector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.20000000298023224
+                ],
+                "text": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "controlOffsetX": 500.0,
+            "controlSize": [
+                300.0,
+                28.0
+            ],
+            "headingPosition": [
+                260.0,
+                210.0
+            ],
+            "headingScale": 1.25,
+            "helpPosition": [
+                80.0,
+                650.0
+            ],
+            "helpScale": 1.7000000476837158,
+            "items": [
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                }
+            ],
+            "navigationRepeatInterval": 0.09000000357627869,
+            "position": [
+                260.0,
+                270.0
+            ],
+            "repeatDelay": 0.699999988079071,
+            "rowPanels": true,
+            "rowSpacing": 80.0,
+            "scrollBarOffsetX": 885.0,
+            "selectorOffset": [
+                420.0,
+                22.0
+            ],
+            "selectorSize": [
+                920.0,
+                44.0
+            ],
+            "textScale": 1.0,
+            "visibleCount": 3
+        },
+        "option.effects": {
+            "adjustmentRepeatInterval": 0.03999999910593033,
+            "colors": {
+                "accent": [
+                    0.0,
+                    0.1568627506494522,
+                    0.1568627506494522,
+                    1.0
+                ],
+                "controlBackground": [
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    1.0
+                ],
+                "controlEmpty": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "controlText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "heading": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "help": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "inactiveControlText": [
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    1.0
+                ],
+                "rowBackground": [
+                    0.0,
+                    0.03921568766236305,
+                    0.03921568766236305,
+                    1.0
+                ],
+                "scrollThumb": [
+                    1.0,
+                    0.800000011920929,
+                    0.18000000715255737,
+                    1.0
+                ],
+                "scrollTrack": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.15000000596046448
+                ],
+                "selectedRowBackground": [
+                    0.7843137383460999,
+                    0.3921568691730499,
+                    0.0,
+                    1.0
+                ],
+                "selectedText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "selector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.20000000298023224
+                ],
+                "text": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "controlOffsetX": 500.0,
+            "controlSize": [
+                316.0,
+                28.0
+            ],
+            "headingPosition": [
+                260.0,
+                210.0
+            ],
+            "headingScale": 1.25,
+            "helpPosition": [
+                80.0,
+                650.0
+            ],
+            "helpScale": 1.7000000476837158,
+            "items": [
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                }
+            ],
+            "navigationRepeatInterval": 0.09000000357627869,
+            "position": [
+                260.0,
+                270.0
+            ],
+            "repeatDelay": 0.699999988079071,
+            "rowPanels": true,
+            "rowSpacing": 48.0,
+            "scrollBarOffsetX": 925.0,
+            "selectorOffset": [
+                420.0,
+                22.0
+            ],
+            "selectorSize": [
+                920.0,
+                44.0
+            ],
+            "textScale": 1.0,
+            "visibleCount": 7
+        },
+        "option.gamepad": {
+            "adjustmentRepeatInterval": 0.03999999910593033,
+            "colors": {
+                "accent": [
+                    0.0,
+                    0.1568627506494522,
+                    0.1568627506494522,
+                    1.0
+                ],
+                "controlBackground": [
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    1.0
+                ],
+                "controlEmpty": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "controlText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "heading": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "help": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "inactiveControlText": [
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    1.0
+                ],
+                "rowBackground": [
+                    0.0,
+                    0.03921568766236305,
+                    0.03921568766236305,
+                    1.0
+                ],
+                "scrollThumb": [
+                    1.0,
+                    0.800000011920929,
+                    0.18000000715255737,
+                    1.0
+                ],
+                "scrollTrack": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.15000000596046448
+                ],
+                "selectedRowBackground": [
+                    0.7843137383460999,
+                    0.3921568691730499,
+                    0.0,
+                    1.0
+                ],
+                "selectedText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "selector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.20000000298023224
+                ],
+                "text": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "controlOffsetX": 500.0,
+            "controlSize": [
+                88.0,
+                32.0
+            ],
+            "headingPosition": [
+                260.0,
+                210.0
+            ],
+            "headingScale": 1.25,
+            "helpPosition": [
+                80.0,
+                650.0
+            ],
+            "helpScale": 1.7000000476837158,
+            "items": [
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                }
+            ],
+            "navigationRepeatInterval": 0.09000000357627869,
+            "position": [
+                260.0,
+                270.0
+            ],
+            "repeatDelay": 0.699999988079071,
+            "rowPanels": true,
+            "rowSpacing": 48.0,
+            "scrollBarOffsetX": 925.0,
+            "selectorOffset": [
+                420.0,
+                22.0
+            ],
+            "selectorSize": [
+                920.0,
+                44.0
+            ],
+            "textScale": 1.0,
+            "visibleCount": 7
+        },
+        "option.input": {
+            "adjustmentRepeatInterval": 0.03999999910593033,
+            "colors": {
+                "accent": [
+                    0.0,
+                    0.1568627506494522,
+                    0.1568627506494522,
+                    1.0
+                ],
+                "controlBackground": [
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    1.0
+                ],
+                "controlEmpty": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "controlText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "heading": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "help": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "inactiveControlText": [
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    1.0
+                ],
+                "rowBackground": [
+                    0.0,
+                    0.03921568766236305,
+                    0.03921568766236305,
+                    1.0
+                ],
+                "scrollThumb": [
+                    1.0,
+                    0.800000011920929,
+                    0.18000000715255737,
+                    1.0
+                ],
+                "scrollTrack": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.15000000596046448
+                ],
+                "selectedRowBackground": [
+                    0.7843137383460999,
+                    0.3921568691730499,
+                    0.0,
+                    1.0
+                ],
+                "selectedText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "selector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.20000000298023224
+                ],
+                "text": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "controlOffsetX": 500.0,
+            "controlSize": [
+                88.0,
+                32.0
+            ],
+            "headingPosition": [
+                260.0,
+                210.0
+            ],
+            "headingScale": 1.25,
+            "helpPosition": [
+                80.0,
+                650.0
+            ],
+            "helpScale": 1.7000000476837158,
+            "items": [
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                }
+            ],
+            "navigationRepeatInterval": 0.09000000357627869,
+            "position": [
+                260.0,
+                270.0
+            ],
+            "repeatDelay": 0.699999988079071,
+            "rowPanels": true,
+            "rowSpacing": 48.0,
+            "scrollBarOffsetX": 925.0,
+            "selectorOffset": [
+                420.0,
+                22.0
+            ],
+            "selectorSize": [
+                920.0,
+                44.0
+            ],
+            "textScale": 1.0,
+            "visibleCount": 3
+        },
+        "option.keyboard": {
+            "adjustmentRepeatInterval": 0.03999999910593033,
+            "colors": {
+                "accent": [
+                    0.0,
+                    0.1568627506494522,
+                    0.1568627506494522,
+                    1.0
+                ],
+                "controlBackground": [
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    1.0
+                ],
+                "controlEmpty": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "controlText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "heading": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "help": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "inactiveControlText": [
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    1.0
+                ],
+                "rowBackground": [
+                    0.0,
+                    0.03921568766236305,
+                    0.03921568766236305,
+                    1.0
+                ],
+                "scrollThumb": [
+                    1.0,
+                    0.800000011920929,
+                    0.18000000715255737,
+                    1.0
+                ],
+                "scrollTrack": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.15000000596046448
+                ],
+                "selectedRowBackground": [
+                    0.7843137383460999,
+                    0.3921568691730499,
+                    0.0,
+                    1.0
+                ],
+                "selectedText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "selector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.20000000298023224
+                ],
+                "text": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "controlOffsetX": 500.0,
+            "controlSize": [
+                88.0,
+                32.0
+            ],
+            "headingPosition": [
+                260.0,
+                210.0
+            ],
+            "headingScale": 1.25,
+            "helpPosition": [
+                80.0,
+                650.0
+            ],
+            "helpScale": 1.7000000476837158,
+            "items": [
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                }
+            ],
+            "navigationRepeatInterval": 0.09000000357627869,
+            "position": [
+                260.0,
+                270.0
+            ],
+            "repeatDelay": 0.699999988079071,
+            "rowPanels": true,
+            "rowSpacing": 48.0,
+            "scrollBarOffsetX": 925.0,
+            "selectorOffset": [
+                420.0,
+                22.0
+            ],
+            "selectorSize": [
+                920.0,
+                44.0
+            ],
+            "textScale": 1.0,
+            "visibleCount": 7
+        },
+        "option.root": {
+            "adjustmentRepeatInterval": 0.03999999910593033,
+            "colors": {
+                "accent": [
+                    0.0,
+                    0.1568627506494522,
+                    0.1568627506494522,
+                    1.0
+                ],
+                "controlBackground": [
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    1.0
+                ],
+                "controlEmpty": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "controlText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "heading": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "help": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "inactiveControlText": [
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    1.0
+                ],
+                "rowBackground": [
+                    0.0,
+                    0.03921568766236305,
+                    0.03921568766236305,
+                    1.0
+                ],
+                "scrollThumb": [
+                    1.0,
+                    0.800000011920929,
+                    0.18000000715255737,
+                    1.0
+                ],
+                "scrollTrack": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.15000000596046448
+                ],
+                "selectedRowBackground": [
+                    0.7843137383460999,
+                    0.3921568691730499,
+                    0.0,
+                    1.0
+                ],
+                "selectedText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "selector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.20000000298023224
+                ],
+                "text": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "controlOffsetX": 500.0,
+            "controlSize": [
+                88.0,
+                32.0
+            ],
+            "headingPosition": [
+                260.0,
+                210.0
+            ],
+            "headingScale": 1.25,
+            "helpPosition": [
+                80.0,
+                650.0
+            ],
+            "helpScale": 1.7000000476837158,
+            "items": [
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                }
+            ],
+            "navigationRepeatInterval": 0.09000000357627869,
+            "position": [
+                260.0,
+                270.0
+            ],
+            "repeatDelay": 0.699999988079071,
+            "rowPanels": true,
+            "rowSpacing": 48.0,
+            "scrollBarOffsetX": 885.0,
+            "selectorOffset": [
+                420.0,
+                22.0
+            ],
+            "selectorSize": [
+                920.0,
+                44.0
+            ],
+            "textScale": 1.0,
+            "visibleCount": 4
+        },
+        "pause": {
+            "adjustmentRepeatInterval": 0.03999999910593033,
+            "colors": {
+                "accent": [
+                    0.0,
+                    0.1568627506494522,
+                    0.1568627506494522,
+                    1.0
+                ],
+                "controlBackground": [
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    0.019607843831181526,
+                    1.0
+                ],
+                "controlEmpty": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "controlText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "heading": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "help": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "inactiveControlText": [
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    0.7843137383460999,
+                    1.0
+                ],
+                "rowBackground": [
+                    0.0,
+                    0.03921568766236305,
+                    0.03921568766236305,
+                    1.0
+                ],
+                "scrollThumb": [
+                    1.0,
+                    0.800000011920929,
+                    0.18000000715255737,
+                    1.0
+                ],
+                "scrollTrack": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.15000000596046448
+                ],
+                "selectedRowBackground": [
+                    0.7843137383460999,
+                    0.3921568691730499,
+                    0.0,
+                    1.0
+                ],
+                "selectedText": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "selector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.20000000298023224
+                ],
+                "text": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "controlOffsetX": 500.0,
+            "controlSize": [
+                88.0,
+                32.0
+            ],
+            "headingPosition": [
+                260.0,
+                210.0
+            ],
+            "headingScale": 1.25,
+            "helpPosition": [
+                80.0,
+                650.0
+            ],
+            "helpScale": 0.8500000238418579,
+            "items": [
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                }
+            ],
+            "navigationRepeatInterval": 0.09000000357627869,
+            "position": [
+                260.0,
+                270.0
+            ],
+            "repeatDelay": 0.699999988079071,
+            "rowPanels": true,
+            "rowSpacing": 48.0,
+            "scrollBarOffsetX": 885.0,
+            "selectorOffset": [
+                420.0,
+                22.0
+            ],
+            "selectorSize": [
+                920.0,
+                44.0
+            ],
+            "textScale": 1.0,
+            "visibleCount": 3
+        },
+        "title": {
+            "adjustmentRepeatInterval": 0.03999999910593033,
+            "colors": {
+                "accent": [
+                    1.0,
+                    0.800000011920929,
+                    0.18000000715255737,
+                    1.0
+                ],
+                "controlBackground": [
+                    0.28999999165534973,
+                    0.0,
+                    0.38999998569488525,
+                    1.0
+                ],
+                "controlEmpty": [
+                    1.0,
+                    0.9399999976158142,
+                    0.800000011920929,
+                    1.0
+                ],
+                "controlText": [
+                    0.28999999165534973,
+                    0.0,
+                    0.38999998569488525,
+                    1.0
+                ],
+                "heading": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "help": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "inactiveControlText": [
+                    0.6800000071525574,
+                    0.5799999833106995,
+                    0.6800000071525574,
+                    1.0
+                ],
+                "rowBackground": [
+                    1.0,
+                    0.9399999976158142,
+                    0.800000011920929,
+                    1.0
+                ],
+                "scrollThumb": [
+                    1.0,
+                    0.800000011920929,
+                    0.18000000715255737,
+                    1.0
+                ],
+                "scrollTrack": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.15000000596046448
+                ],
+                "selectedRowBackground": [
+                    1.0,
+                    0.9399999976158142,
+                    0.800000011920929,
+                    1.0
+                ],
+                "selectedText": [
+                    1.0,
+                    0.699999988079071,
+                    0.10000000149011612,
+                    1.0
+                ],
+                "selector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    0.20000000298023224
+                ],
+                "text": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "controlOffsetX": 500.0,
+            "controlSize": [
+                88.0,
+                32.0
+            ],
+            "headingPosition": [
+                260.0,
+                210.0
+            ],
+            "headingScale": 1.25,
+            "helpPosition": [
+                80.0,
+                650.0
+            ],
+            "helpScale": 0.8500000238418579,
+            "items": [
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                },
+                {
+                    "offset": [
+                        0.0,
+                        0.0
+                    ],
+                    "textScale": 1.0
+                }
+            ],
+            "navigationRepeatInterval": 0.09000000357627869,
+            "position": [
+                520.0,
+                350.0
+            ],
+            "repeatDelay": 0.699999988079071,
+            "rowPanels": false,
+            "rowSpacing": 90.0,
+            "scrollBarOffsetX": 885.0,
+            "selectorOffset": [
+                220.0,
+                35.0
+            ],
+            "selectorSize": [
+                760.0,
+                70.0
+            ],
+            "textScale": 1.0,
+            "visibleCount": 3
+        }
+    },
+    "version": 1
+}

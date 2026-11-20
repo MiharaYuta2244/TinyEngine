@@ -14,34 +14,34 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 
 	// メニューの生成&初期化
 	menu_ = std::make_unique<MenuList>();
-	menu_->Initialize(ctx.engineContext);
-	menu_->AddItem(L"Play", [this]() { ctx_.sceneTransition->ChangeScene("StageSelect", FadeStyle::Logo); });
-	menu_->AddItem(L"Option", [this]() {
+	menu_->Initialize(ctx.engineContext, L"Dela Gothic One", 48, true);
+	menu_->AddItem(L"ゲーム開始", [this]() { ctx_.sceneTransition->ChangeScene("StageSelect", FadeStyle::Logo); });
+	menu_->AddItem(L"オプション", [this]() {
 		menuState_ = TitleMenuState::Option;
 		optionMenu_->ResetState();
 	});
-	menu_->AddItem(L"Quit", [this]() {
+	menu_->AddItem(L"終了", [this]() {
 		finishTimer_ = std::make_unique<GameTimer>();
 		finishTimer_->Initialize(0.5f);
 	});
 	menu_->SetStartPos({520.0f, 350.0f});
+	menu_->BindLayout("title");
 
-	// オプションメニューの生成
-	optionMenu_ = std::make_unique<MenuList>();
-	optionMenu_->Initialize(ctx.engineContext);
-	optionMenu_->SetStartPos(titleLogoPos_ + Vector2{400.0f, 150.0f});
-	optionMenu_->SetOffsetY(65.0f);
-	optionMenu_->SetVisibleCount(6); // 6項目まで表示
+	// ポーズ画面に移動せずに、起動画面から同じレイアウトを編集できるようにする。
+	pausePreview_ = std::make_unique<MenuList>();
+	pausePreview_->Initialize(ctx.engineContext, L"Dela Gothic One", 30, true);
+	pausePreview_->AddItem(L"再開", []() {}, true);
+	pausePreview_->AddItem(L"オプション", []() {}, true);
+	pausePreview_->AddItem(L"タイトルへ戻る", []() {}, true);
+	pausePreview_->BindLayout("pause");
+	previewFont_ = std::make_unique<Font>();
+	previewFont_->Initialize(ctx.engineContext, L"Dela Gothic One", 20, Font::MakeJapaneseCharSet(true));
+	previewHeading_ = std::make_unique<TextSprite>();
+	previewHeading_->Initialize(ctx.engineContext, previewFont_.get(), L"ポーズ");
 
-	auto& pfx = commonData_->postEffectSettings;
-	optionMenu_->AddToggleItem(L"Vignette", &pfx.vignetteEnabled);
-	optionMenu_->AddToggleItem(L"RadialBlur", &pfx.radialBlurEnabled);
-	optionMenu_->AddToggleItem(L"Glitch", &pfx.glitchEnabled);
-	optionMenu_->AddToggleItem(L"Scanline", &pfx.scanlineEnabled);
-	optionMenu_->AddToggleItem(L"Fisheye", &pfx.barrelDistortionEnabled);
-	optionMenu_->AddToggleItem(L"Blur", &pfx.blurEnabled);
-	optionMenu_->AddToggleItem(L"DeathEffect", &pfx.deathEffectEnabled);
-	optionMenu_->AddItem(L"Back", [this]() {
+	// オプションの各カテゴリはタイトルとポーズで共通利用する。
+	optionMenu_ = std::make_unique<OptionMenu>();
+	optionMenu_->Initialize(ctx.engineContext, &commonData_->postEffectSettings, [this]() {
 		menuState_ = TitleMenuState::Main;
 		menu_->ResetState();
 	});
@@ -64,7 +64,7 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 	// シーンで使うエフェクトの宣言
 	ctx_.engineContext->postEffectPipeline->SetEffects({
 	    PostEffectType::Scanline,         // 走査線
-	    PostEffectType::BarrelDistortion, // 魚眼
+	    PostEffectType::BarrelDistortion, // ブラウン管風
 	    PostEffectType::Glitch,           // グリッチ
 	});
 
@@ -101,10 +101,21 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 
 void TitleScene::Update() {
 	float deltaTime = ctx_.timeManager->GetDeltaTime();
+	const auto preview = MenuLayoutStore::Get().DrawImGui();
+	previewPause_ = preview == "pause";
+	if (preview == "title") {
+		if (menuState_ != TitleMenuState::Main) {
+			menu_->ResetState();
+		}
+
+		menuState_ = TitleMenuState::Main;
+	} else if (optionMenu_->PreviewLayout(preview)) {
+		menuState_ = TitleMenuState::Option;
+	}
 
 #if defined(NDEBUG) || defined(_DEBUG)
 	// エフェクトエディタシーンへの遷移
-	if (ctx_.keyboard->KeyTriggered(DIK_F5)) {
+	if (menuState_ == TitleMenuState::Main && ctx_.keyboard->KeyTriggered(DIK_F5)) {
 		ctx_.sceneTransition->ChangeScene("EffectEditor", FadeStyle::Logo);
 	}
 #endif
@@ -151,7 +162,9 @@ void TitleScene::Update() {
 
 	// メニューの更新
 	if (!isFading && !skippedThisFrame) {
-		if (menuState_ == TitleMenuState::Main) {
+		if (previewPause_) {
+			pausePreview_->Update(ctx_.keyboard, ctx_.gamePad, deltaTime);
+		} else if (menuState_ == TitleMenuState::Main) {
 			menu_->Update(ctx_.keyboard, ctx_.gamePad, deltaTime);
 		} else {
 			optionMenu_->Update(ctx_.keyboard, ctx_.gamePad, deltaTime);
@@ -244,7 +257,15 @@ void TitleScene::Draw() {
 	background_->Draw();
 
 	// メニュー描画
-	if (menuState_ == TitleMenuState::Main) {
+	if (previewPause_) {
+		pausePreview_->Draw();
+		const auto& layout = MenuLayoutStore::Get().Layout("pause");
+		previewHeading_->SetPosition(layout.headingPosition);
+		previewHeading_->SetScale(layout.headingScale);
+		previewHeading_->SetColor(layout.colors.heading);
+		previewHeading_->Update();
+		previewHeading_->Draw();
+	} else if (menuState_ == TitleMenuState::Main) {
 		menu_->Draw();
 	} else {
 		optionMenu_->Draw();

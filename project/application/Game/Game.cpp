@@ -1,5 +1,8 @@
 #include "Game.h"
 #include "EffectLibrary.h"
+#include "Utility/SettingsStorage.h"
+#include "InputBindings.h"
+#include "Menu/MenuLayout.h"
 #include "Scene/EffectEditorScene.h"
 #include "Scene/GamePlayScene.h"
 #include "Scene/PauseScene.h"
@@ -27,6 +30,8 @@ void Game::Initialize() {
 	sceneTransition_ = std::make_unique<SceneTransition>();
 	sceneManager_->Initialize(&GetEngineContext(), GetKeyboard(), GetGamePad(), GetDebugCamera(), GetTimeManager(), fadeManager_.get(), sceneTransition_.get());
 	sceneTransition_->Initialize(sceneManager_.get(), fadeManager_.get());
+	SettingsStorage::Load(sceneManager_->GetCommonData()->postEffectSettings);
+	MenuLayoutStore::Get().Load();
 
 	// シーン追加
 	sceneManager_->AddScene("Title", std::make_unique<TitleScene>());
@@ -55,6 +60,7 @@ void Game::Update() {
 
 	// シーンマネージャー更新
 	sceneManager_->Update();
+	InputBindings::Get().EndFrame(GetGamePad());
 }
 
 void Game::Draw() {

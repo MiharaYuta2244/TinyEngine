@@ -1,4 +1,5 @@
 #include "GamePlayScene.h"
+#include "InputBindings.h"
 #include "MathUtility.h"
 #include "GameObjects/Effect/EffectGenerator.h"
 #include "SceneManager.h"
@@ -163,7 +164,7 @@ void GamePlayScene::Update() {
 	}
 
 	// ポーズ画面
-	if (ctx_.keyboard->KeyTriggered(DIK_TAB) || ctx_.gamePad->GetState().buttonsPressed.start) {
+	if (InputBindings::Get().Pressed(GameAction::Pause, ctx_.keyboard, ctx_.gamePad)) {
 		ctx_.sceneTransition->PushScene("Pause");
 		return;
 	}

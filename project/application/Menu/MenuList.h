@@ -4,8 +4,11 @@
 #include "DirectInput.h"
 #include "GameObjects/Effect/DecideEffect.h"
 #include "TextSprite.h"
+#include "MenuLayout.h"
+#include "MenuInputRepeat.h"
 #include <Sprite.h>
 #include <functional>
+#include <array>
 #include <string>
 
 struct MenuItem {
@@ -13,8 +16,14 @@ struct MenuItem {
 	std::function<void()> onSelect;
 	std::unique_ptr<TinyEngine::TextSprite> text;
 	bool* toggleValue = nullptr;
-	std::unique_ptr<TinyEngine::Sprite> checkIcon;
+	std::unique_ptr<TinyEngine::Sprite> panel, edge, track, background, fill;
+	std::unique_ptr<TinyEngine::TextSprite> valueText, offText;
+	std::function<float()> sliderValue;
+	std::function<void(float)> setSliderValue;
 	float wiggleTimer = 999.0f;
+	bool keepActive = false;
+	std::function<std::wstring()> dynamicLabel;
+	std::function<void(int)> onAdjust;
 };
 
 /// <summary>
@@ -26,10 +35,16 @@ public:
 	void Initialize(EngineContext* ctx, const std::wstring& fontFamily = L"Dela Gothic One", int fontPixelHeight = 48, bool useKanji = false);
 
 	// メニューの追加
-	void AddItem(const std::wstring& label, std::function<void()> onSelect);
+	void AddItem(const std::wstring& label, std::function<void()> onSelect, bool keepActive = false);
+	void SetDynamicLabel(std::function<std::wstring()> label) { items_.back().dynamicLabel = std::move(label); }
+	void SetAdjustment(std::function<void(int)> adjust) { items_.back().onAdjust = std::move(adjust); }
 
 	// ON/OFFを切り替えるトグル項目
 	void AddToggleItem(const std::wstring& label, bool* target);
+	void AddSliderItem(const std::wstring& label, std::function<float()> value, std::function<void(float)> changed);
+
+	// JSONの識別名と紐付け、編集値を描画と入力判定の両方に反映する。
+	void BindLayout(const std::string& key);
 
 	// 更新処理
 	void Update(DirectInput* input, GamePad* gamePad, float deltaTime);
@@ -44,12 +59,19 @@ public:
 	void SetOffsetY(float offset) { offsetY_ = offset; }
 
 	// 決定ロック状態をリセットする
-	void ResetState() { isDecided_ = false; }
+	void ResetState();
 
 	// 同時に表示する項目数(0ならスクロールなし・全表示)
 	void SetVisibleCount(int count) { maxVisibleCount_ = count; }
 
 private:
+	void ApplyLayout();
+	void CreateControl(MenuItem& item);
+	void CreateRowVisuals(MenuItem& item);
+	void DrawRowBackground(MenuItem& item, int index);
+	void DrawControl(MenuItem& item, int index);
+	Vector2 GetRowPosition(int index) const;
+
 	// スクロール更新
 	void UpdateScroll(float deltaTime);
 
@@ -59,7 +81,7 @@ private:
 	// スクロールバーを表示するか
 	bool HasScrollBar() const { return maxVisibleCount_ > 0 && static_cast<int>(items_.size()) > maxVisibleCount_; }
 
-	// 項目iのY座標(スクロール反映済み)
+	// 項目iのY座標
 	float GetRowY(int index) const { return startPos_.y + offsetY_ * (static_cast<float>(index) - scrollOffset_); }
 
 	// 項目iが表示範囲内か
@@ -67,6 +89,11 @@ private:
 
 private:
 	EngineContext* ctx_ = nullptr;
+	std::string layoutKey_;
+	MenuLayoutParameters* layout_ = nullptr;
+	Vector2 controlSize_ = {180.0f, 32.0f};
+	Vector2 selectorOffset_ = {0.0f, 30.0f};
+	int draggingSlider_ = -1;
 
 	// フォント
 	std::unique_ptr<TinyEngine::Font> font_;
@@ -86,9 +113,9 @@ private:
 	// 決定ボタン入力時のエフェクト
 	std::unique_ptr<DecideEffect> decideEffect_;
 
-	// スティックでの連続切り換え制御用変数
-	float stickCooldown_ = 0.0f;
-	bool stickInUse_ = false;
+	// 項目移動と音量調整は、独立した長押しタイマーで処理する。
+	MenuInputRepeat navigationRepeat_, adjustmentRepeat_;
+	int verticalStickDirection_ = 0, horizontalStickDirection_ = 0;
 
 	// オーディオマネージャー
 	std::unique_ptr<TinyEngine::AudioManager> audioManager_;
@@ -105,7 +132,7 @@ private:
 	static constexpr float kSelectorBgMinHeightScale = 0.2f;
 	float selectorBgAnimationTime_ = kSelectorBgAnimationDuration;
 
-	// チェックアイコンのXオフセット
+	// ON/OFFボタンと音量バーの横位置
 	float checkIconOffsetX_ = 400.0f;
 
 	// 前フレームの選択インデックス(選択変更の検知用)

@@ -236,6 +236,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Engine\base\Logger.cpp" />
     <ClCompile Include="Application\Game\Game.cpp" />
     <ClCompile Include="Engine\input\GamePad.cpp" />
+    <ClCompile Include="Engine\input\InputBindings.cpp" />
     <ClCompile Include="Engine\Framework\Framework.cpp" />
     <ClCompile Include="Application\Scene\GamePlayScene.cpp" />
     <ClCompile Include="Engine\audio\FFT.cpp" />
@@ -296,6 +297,9 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Application\GameObjects\StageObjects\Wall\Wall.cpp" />
     <ClCompile Include="Application\GameObjects\StageObjects\Barricade\Barricade.cpp" />
     <ClCompile Include="Application\Menu\MenuList.cpp" />
+    <ClCompile Include="Application\Menu\MenuInputRepeat.cpp" />
+    <ClCompile Include="Application\Menu\MenuLayout.cpp" />
+    <ClCompile Include="Application\Menu\OptionMenu.cpp" />
     <ClCompile Include="Application\Scene\PauseScene.cpp" />
     <ClCompile Include="Application\Scene\ResultScene.cpp" />
     <ClCompile Include="Application\GameObjects\ResultUI\Animation\SpriteScaleWipeAnimator.cpp" />
@@ -318,6 +322,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Engine\2d\Font\TextSprite.cpp" />
     <ClCompile Include="Application\GameObjects\Item\Soap.cpp" />
     <ClCompile Include="Application\Utility\GameRumbleController.cpp" />
+    <ClCompile Include="Application\Utility\SettingsStorage.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\Behavior\NormalBehavior.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\Behavior\ShotgunBehavior.cpp" />
     <ClCompile Include="Engine\3d\particle\modules\WoodShardModule.cpp" />
@@ -526,6 +531,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Engine\audio\AudioManager.h" />
     <ClInclude Include="Application\Game\Game.h" />
     <ClInclude Include="Engine\input\GamePad.h" />
+    <ClInclude Include="Engine\input\InputBindings.h" />
     <ClInclude Include="Engine\base\SrvManager.h" />
     <ClInclude Include="Engine\3d\particle\Particle.h" />
     <ClInclude Include="Engine\3d\particle\ParticleCommon.h" />
@@ -550,6 +556,9 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\GameObjects\StageObjects\Goal\Goal.h" />
     <ClInclude Include="Engine\tool\json\JsonManager.h" />
     <ClInclude Include="Application\Menu\MenuList.h" />
+    <ClInclude Include="Application\Menu\MenuInputRepeat.h" />
+    <ClInclude Include="Application\Menu\MenuLayout.h" />
+    <ClInclude Include="Application\Menu\OptionMenu.h" />
     <ClInclude Include="Application\GameObjects\Effect\FlashEffect.h" />
     <ClInclude Include="Application\GameObjects\Effect\LetterBox.h" />
     <ClInclude Include="Application\GameObjects\StageObjects\Ground\Ground.h" />
@@ -591,6 +600,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\GameObjects\Item\ThrowableItem.h" />
     <ClInclude Include="Engine\3d\particle\modules\GlassShardModule.h" />
     <ClInclude Include="Application\Utility\GameRumbleController.h" />
+    <ClInclude Include="Application\Utility\SettingsStorage.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Behavior\NormalBehavior.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Behavior\ShotgunBehavior.h" />
     <ClInclude Include="Application\GameObjects\Effect\FootprintManager.h" />

@@ -1,42 +1,23 @@
-#include "PlayerInput.h"
+﻿#include "PlayerInput.h"
+#include "InputBindings.h"
 #include "MathOperator.h"
 
 PlayerInputState PlayerInput::Poll(DirectInput* input, GamePad* gamePad, EngineContext* ctx, const Vector3& playerPos, bool isHold) {
 	PlayerInputState s;
 
-	if (input->KeyDown(DIK_D))
-		s.moveDir.x += 1.0f;
-	if (input->KeyDown(DIK_A))
-		s.moveDir.x -= 1.0f;
-	if (input->KeyDown(DIK_W))
-		s.moveDir.y += 1.0f;
-	if (input->KeyDown(DIK_S))
-		s.moveDir.y -= 1.0f;
+	const auto& bindings = InputBindings::Get();
+	s.moveDir.x = static_cast<float>(bindings.Down(GameAction::Right, input, gamePad)) - static_cast<float>(bindings.Down(GameAction::Left, input, gamePad));
+	s.moveDir.y = static_cast<float>(bindings.Down(GameAction::Up, input, gamePad)) - static_cast<float>(bindings.Down(GameAction::Down, input, gamePad));
+	s.grabHeld = bindings.Down(GameAction::Grab, input, gamePad);
+	s.grabPressed = bindings.Pressed(GameAction::Grab, input, gamePad);
+	s.grabReleased = previousGrabHeld_ && !s.grabHeld;
+	previousGrabHeld_ = s.grabHeld;
+	s.attackPressed = bindings.Pressed(GameAction::Attack, input, gamePad);
 
 	const bool padConnected = gamePad && gamePad->GetState().connected;
-	if (!padConnected) {
-		s.aimDir = PollMouseAim(input, ctx, playerPos);
-	}
-
-	s.grabHeld = input->MouseButtonDown(1);
-	s.grabReleased = input->MouseButtonReleased(1);
-	s.grabPressed = input->MouseButtonTriggered(1);
-	s.attackPressed = input->MouseButtonTriggered(0);
-
+	if (!padConnected) s.aimDir = PollMouseAim(input, ctx, playerPos);
 	if (padConnected) {
-		const auto& pad = gamePad->GetState();
 		const auto& padState = gamePad->GetState();
-
-		// 十字キー
-		if (padState.buttons.dpadRight)
-			s.moveDir.x += 1.0f;
-		if (padState.buttons.dpadLeft)
-			s.moveDir.x -= 1.0f;
-		if (padState.buttons.dpadUp)
-			s.moveDir.y += 1.0f;
-		if (padState.buttons.dpadDown)
-			s.moveDir.y -= 1.0f;
-
 		// 左スティック入力（デッドゾーンを超えていれば上書き）
 		if (std::abs(padState.axes.lx) > 0.1f || std::abs(padState.axes.ly) > 0.1f) {
 			s.moveDir.x = padState.axes.lx;
@@ -49,10 +30,6 @@ PlayerInputState PlayerInput::Poll(DirectInput* input, GamePad* gamePad, EngineC
 			s.aimDir.y = -padState.axes.ry;
 		}
 
-		preLt_ = pad.axes.lt;
-		preRt_ = pad.axes.rt;
-	} else {
-		preLt_ = preRt_ = 0.0f;
 	}
 
 	// 斜め入力のクランプ

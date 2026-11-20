@@ -44,6 +44,12 @@ public:
 	// SE再生
 	void PlaySE(const std::string& tag, float volume = 0.1f);
 
+	// 種類ごとの全体音量を、すべての管理インスタンスと再生中の音声へ即時反映する。
+	static void SetBGMVolume(float volume);
+	static void SetSEVolume(float volume);
+	static float GetBGMVolume() { return bgmVolume_; }
+	static float GetSEVolume() { return seVolume_; }
+
 	// スペクトラムのGetter
 	std::vector<float> GetSpectrum() const { return spectrum_; }
 
@@ -61,7 +67,13 @@ private:
 	IXAudio2SourceVoice* bgmVoice_ = nullptr;
 
 	// 再生中のSEボイスリスト
-	std::list<IXAudio2SourceVoice*> seVoices_;
+	struct SEVoice { IXAudio2SourceVoice* voice; float volume; };
+	std::list<SEVoice> seVoices_;
+	float bgmBaseVolume_ = 0.1f;
+	IXAudio2MasteringVoice* masterVoice_ = nullptr;
+	static inline float bgmVolume_ = 1.0f;
+	static inline float seVolume_ = 1.0f;
+	static inline std::vector<AudioManager*> instances_;
 
 	// 現在再生中のBGMのタグ
 	std::string currentBgmTag_;

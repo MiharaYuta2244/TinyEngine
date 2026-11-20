@@ -1,6 +1,7 @@
 #pragma once
 #include "BaseScene.h"
 #include "Menu/MenuList.h"
+#include "Menu/OptionMenu.h"
 #include "AudioManager.h"
 #include "GameTimer.h"
 
@@ -21,7 +22,11 @@ private:
 
 	// メニュー
 	std::unique_ptr<MenuList> menu_;
-	std::unique_ptr<MenuList> optionMenu_;
+	std::unique_ptr<OptionMenu> optionMenu_;
+	std::unique_ptr<MenuList> pausePreview_;
+	bool previewPause_ = false;
+	std::unique_ptr<TinyEngine::Font> previewFont_;
+	std::unique_ptr<TinyEngine::TextSprite> previewHeading_;
 
 	// タイトルロゴ
 	std::unique_ptr<TinyEngine::Sprite> titleLogo_;
@@ -37,7 +42,7 @@ private:
 
 	// ポストエフェクトパラメータ
 	ScanlineParam scanlineParam_;                 // 走査線
-	BarrelDistortionParam barrelDistortionParam_; // 魚眼
+	BarrelDistortionParam barrelDistortionParam_; // ブラウン管風
 	GlitchParam glitchParam_;                     // グリッチ
 
 	// オーディオマネージャーインスタンス

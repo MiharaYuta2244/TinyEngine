@@ -204,6 +204,9 @@ void Framework::Update() {
 	timeManager_->Update();
 	fps_ = 1.0f / timeManager_->GetDeltaTime();
 	input_->Update();
+	engineContext_.menuPointerPosition = input_->GetMousePosition();
+	engineContext_.menuPointerAvailable = true;
+	engineContext_.menuKeyboardAvailable = true;
 
 #ifdef USE_IMGUI
 	// ImGui前処理
@@ -215,6 +218,14 @@ void Framework::Update() {
 	ImVec2 panelSize = ImGui::GetContentRegionAvail();
 	ImTextureID gameTexId = (ImTextureID)srvManager_->GetGPUDescriptorHandle(gameViewRenderTexture_->GetSRVIndexColor()).ptr;
 	ImGui::Image(gameTexId, panelSize);
+	// ドッキングされたゲーム画面の拡縮を補正し、編集用ウィンドウへのクリックを除外する。
+	const auto imagePosition = ImGui::GetItemRectMin();
+	const auto mouse = ImGui::GetIO().MousePos;
+	engineContext_.menuPointerAvailable = ImGui::IsItemHovered() && panelSize.x > 0.0f && panelSize.y > 0.0f;
+	if (engineContext_.menuPointerAvailable) {
+		engineContext_.menuPointerPosition = {(mouse.x - imagePosition.x) * 1280.0f / panelSize.x, (mouse.y - imagePosition.y) * 720.0f / panelSize.y};
+	}
+	engineContext_.menuKeyboardAvailable = !ImGui::GetIO().WantCaptureKeyboard;
 	ImGui::End();
 #endif
 

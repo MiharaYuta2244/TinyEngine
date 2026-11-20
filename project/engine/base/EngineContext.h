@@ -22,4 +22,8 @@ struct EngineContext {
 	SkyboxCommon* skyboxCommon = nullptr;
 	PostEffectPipeline* postEffectPipeline = nullptr;
 	FontCommon* fontCommon = nullptr;
+	// メニューのマウス座標は、ゲーム画面内の1280×720を基準とする。
+	Vector2 menuPointerPosition{};
+	bool menuPointerAvailable = true;
+	bool menuKeyboardAvailable = true;
 };

@@ -2,6 +2,7 @@
 #include "BaseScene.h"
 #include "Font.h"
 #include "Menu/MenuList.h"
+#include "Menu/OptionMenu.h"
 #include "Sprite.h"
 #include "TextSprite.h"
 
@@ -21,6 +22,8 @@ public:
 private:
 	// メニュー
 	std::unique_ptr<MenuList> menuList_;
+	std::unique_ptr<OptionMenu> optionMenu_;
+	bool optionsOpen_ = false;
 
 	// 背景
 	std::unique_ptr<TinyEngine::Sprite> bgSprite_;
