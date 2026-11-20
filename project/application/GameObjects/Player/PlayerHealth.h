@@ -7,7 +7,7 @@
 class PlayerHealth {
 public:
 	// 初期化処理
-	void Initialize(float maxHP);
+	void Initialize(float maxHP, float initialHP);
 
 	// 更新処理
 	void Update(float deltaTime);

@@ -5,6 +5,7 @@
 #include "GameObjects/Enemy/Weapon/EnemyBulletManager.h"
 #include "GameObjects/Player/Player.h"
 #include "GameObjects/StageObjects/Stage.h"
+#include "MathOperator.h"
 #include <algorithm>
 #include <iterator>
 #include <limits>
@@ -76,12 +77,28 @@ void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManage
 		}
 	}
 
-	// プレイヤーの攻撃範囲とガラス
-	if (player.GetIsAttack()) {
-		for (const auto& glass : glasses) {
-			if (glass->GetIsActive() && Collision::Intersect(player.GetAttackCol(), glass->GetCollision())) {
-				NotifyContact(player, Attack, *glass, Body, context);
-				break;
+	if (player.GetIsAttack() && !player.IsDead()) {
+		// 攻撃範囲内で最も近い宝箱を1つ開ける。
+		TreasureChest* target = nullptr;
+		float closestDistance = std::numeric_limits<float>::infinity();
+		for (const auto& chest : stage.GetTreasureChestManager()->GetObjects()) {
+			if (!chest->IsOpen() && Collision::Intersect(player.GetAttackCol(), chest->GetCollision())) {
+				const float distance = MathUtility::LengthSquared(chest->GetCollision().center - player.GetPosition());
+				if (distance < closestDistance) {
+					closestDistance = distance;
+					target = chest.get();
+				}
+			}
+		}
+
+		if (target) {
+			NotifyContact(player, Attack, *target, Body, context);
+		} else {
+			for (const auto& glass : glasses) {
+				if (glass->GetIsActive() && Collision::Intersect(player.GetAttackCol(), glass->GetCollision())) {
+					NotifyContact(player, Attack, *glass, Body, context);
+					break;
+				}
 			}
 		}
 	}
@@ -210,14 +227,6 @@ void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManage
 		}
 	}
 #pragma endregion 敵と敵の弾の当たり判定
-
-#pragma region プレイヤーと回復エリアの当たり判定
-	for (const auto& healArea : stage.GetHealAreaManager()->GetObjects()) {
-		if (healArea->GetIsActive() && Collision::Intersect(player.GetBodyCol(), healArea->GetCollision())) {
-			NotifyContact(player, Body, *healArea, Body, context);
-		}
-	}
-#pragma endregion プレイヤーと回復エリアの当たり判定
 
 #pragma region プレイヤーと爆発範囲の当たり判定
 	for (const auto& bomb : bombManager.GetBombs()) {

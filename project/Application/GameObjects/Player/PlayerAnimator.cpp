@@ -4,7 +4,17 @@
 void PlayerAnimator::Initialize(ObjectRender* render) {
 	render_ = render;
 	current_ = PlayerAnim::Idle;
+	clothed_ = false;
 	actionTimer_ = 0.0f;
+}
+
+void PlayerAnimator::SetClothed(bool clothed) {
+	if (clothed_ == clothed) {
+		return;
+	}
+
+	clothed_ = clothed;
+	render_->SetModel(clothed_ ? "GorillaClothed.gltf" : ToFile(current_));
 }
 
 void PlayerAnimator::Update(float dt, bool isMoving, bool isHolding) {
@@ -24,7 +34,9 @@ void PlayerAnimator::Play(PlayerAnim anim) {
 
 	current_ = anim;
 	const char* file = ToFile(anim);
-	render_->SetModel(file);
+	if (!clothed_) {
+		render_->SetModel(file);
+	}
 	render_->GetObject3d()->PlayAnimation(AnimationLibrary::Get(file));
 }
 

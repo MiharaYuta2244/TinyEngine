@@ -12,10 +12,11 @@ struct CommonData;
 /// </summary>
 class GamePlayPostEffectController {
 public:
+	// 初期化処理
 	void Initialize(const SceneContext& ctx);
 
 	// 更新処理
-	void Update(float deltaTime, float playerHP, bool isPlayerDead);
+	void Update(float deltaTime, bool isPlayerDead);
 
 	void Finalize();
 
@@ -27,7 +28,6 @@ public:
 
 	// 当たり判定マネージャに渡すためのタイマー参照
 	float& GetGlitchTimer() { return glitchTimer_; }
-	float& GetDamageBlurTimer() { return damageBlurTimer_; }
 
 private:
 	void UpdateGlitch(float deltaTime);
@@ -40,9 +40,6 @@ private:
 	float glitchTimer_ = 0.0f;
 	float elapsedTime_ = 0.0f;
 	const float kGlitchDuration = 0.1f;
-
-	// ダメージブラー用タイマー
-	float damageBlurTimer_ = 0.0f;
 
 	// プレイヤー死亡時演出用RadialBlurのNumSamplesAnim
 	AnimationBundle<float> numSamplesAnim_;

@@ -147,7 +147,7 @@ void GamePlayScene::Update() {
 		enemyManager_->PostUpdate();
 		decalManager_->SetCamera(ctx_.currentCamera);
 		decalManager_->Update(deltaTime);
-		postEffectController_->Update(deltaTime, player_->GetCurrentHP(), player_->IsDead());
+		postEffectController_->Update(deltaTime, player_->IsDead());
 
 		// 演出用レターボックス更新
 		introLetterBox_->Update(deltaTime);
@@ -178,7 +178,7 @@ void GamePlayScene::Update() {
 	}
 
 	// ポストエフェクト更新
-	postEffectController_->Update(deltaTime, player_->GetCurrentHP(), player_->IsDead());
+	postEffectController_->Update(deltaTime, player_->IsDead());
 
 	// プレイヤーの更新処理
 	player_->Update(
@@ -309,8 +309,8 @@ void GamePlayScene::Update() {
 	for (auto& cage : stage_->GetCageManager()->GetObjects()) {
 		editObjects.push_back(cage.get());
 	}
-	for (auto& healArea : stage_->GetHealAreaManager()->GetObjects()) {
-		editObjects.push_back(healArea.get());
+	for (auto& chest : stage_->GetTreasureChestManager()->GetObjects()) {
+		editObjects.push_back(chest.get());
 	}
 	for (auto& soap : stage_->GetSoapManager()->GetObjects()) {
 		editObjects.push_back(soap.get());
@@ -505,7 +505,6 @@ void GamePlayScene::OnGlassBreak(Glass& glass, const Vector3& hitDirection) {
 
 void GamePlayScene::TriggerPlayerHitEffect() {
 	postEffectController_->GetGlitchTimer() = 0.5f;
-	postEffectController_->GetDamageBlurTimer() = 1.0f;
 }
 
 void GamePlayScene::GenerateEnemyDeathEffect(Enemy* enemy) {
@@ -603,8 +602,8 @@ IGameObject* GamePlayScene::SpawnObject(const SpawnRequest& request) {
 		return stage_->GetGlassManager()->AddObject(request.position);
 	case SpawnType::Cage:
 		return stage_->GetCageManager()->AddObject(request.position);
-	case SpawnType::HealArea:
-		return stage_->GetHealAreaManager()->AddObject(request.position);
+	case SpawnType::TreasureChest:
+		return stage_->GetTreasureChestManager()->AddObject(request.position);
 	case SpawnType::Molotov:
 		return stage_->GetMolotovManager()->AddObject(request.position);
 	case SpawnType::Soap:

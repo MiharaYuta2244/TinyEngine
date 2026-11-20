@@ -28,7 +28,7 @@ public:
 	static Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(Microsoft::WRL::ComPtr<ID3D12Device> device, size_t sizeBytes);
 
 	/// <summary>
-	/// ShaderをCompilerするユーティリティ関数
+	/// Shaderをコンパイルするユーティリティ関数
 	/// </summary>
 	/// <param name="filePath">CompilerするShaderファイルへのパス</param>
 	/// <param name="profile">Compilerに使用するProfile</param>

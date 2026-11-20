@@ -7,7 +7,7 @@
 #include "GameObjects/Item/Molotov.h"
 #include "GameObjects/StageObjects/Cage/Cage.h"
 #include "GameObjects/StageObjects/Glass/Glass.h"
-#include "GameObjects/StageObjects/HealArea/HealArea.h"
+#include "TreasureChest/TreasureChest.h"
 #include "Goal/Goal.h"
 #include "Ground/Ground.h"
 #include "SceneContext.h"
@@ -23,7 +23,7 @@ using DecorationManager = GameObjectManager<Decoration>;
 using BarricadeManager = GameObjectManager<Barricade>;
 using DoorManager = GameObjectManager<Door>;
 using CageManager = GameObjectManager<Cage>;
-using HealAreaManager = GameObjectManager<HealArea>;
+using TreasureChestManager = GameObjectManager<TreasureChest>;
 using GlassManager = GameObjectManager<Glass, TinyEngine::DecalManager*>;
 using SoapManager = GameObjectManager<Soap>;
 using MolotovManager = GameObjectManager<Molotov>;
@@ -56,7 +56,7 @@ public:
 	DoorManager* GetDoorManager() const { return doorManager_.get(); }
 	GlassManager* GetGlassManager() const { return glassManager_.get(); }
 	CageManager* GetCageManager() const { return cageManager_.get(); }
-	HealAreaManager* GetHealAreaManager() const { return healAreaManager_.get(); }
+	TreasureChestManager* GetTreasureChestManager() const { return treasureChestManager_.get(); }
 	SoapManager* GetSoapManager() const { return soapManager_.get(); }
 	MolotovManager* GetMolotovManager() const { return molotovManager_.get(); }
 	Goal* GetGoal() const { return goal_.get(); }
@@ -80,7 +80,7 @@ private:
 	std::unique_ptr<DoorManager> doorManager_;
 	std::unique_ptr<GlassManager> glassManager_;
 	std::unique_ptr<CageManager> cageManager_;
-	std::unique_ptr<HealAreaManager> healAreaManager_;
+	std::unique_ptr<TreasureChestManager> treasureChestManager_;
 	std::unique_ptr<SoapManager> soapManager_;
 	std::unique_ptr<MolotovManager> molotovManager_;
 	std::unique_ptr<Ground> ground_;

@@ -87,15 +87,9 @@ void Stage::Initialize(const SceneContext& ctx, TinyEngine::DecalManager* decalM
             {0, 0,  0}
     });
 
-	// 回復エリアの管理インスタンス生成&初期化
-	healAreaManager_ = std::make_unique<HealAreaManager>();
-	healAreaManager_->Initialize(
-	    ctx.engineContext, "HealAreaEditor", stagePath + "HealAreas.json",
-	    Transform{
-	        {1, 50, 1},
-            {0, 0,  0},
-            {0, 0,  0}
-    });
+	treasureChestManager_ = std::make_unique<TreasureChestManager>();
+	treasureChestManager_->Initialize(ctx.engineContext, "TreasureChestEditor", stagePath + "TreasureChests.json",
+	    Transform{{1, 1, 1}, {}, {}});
 
 	// SoapManagerの生成&初期化
 	soapManager_ = std::make_unique<SoapManager>();
@@ -149,7 +143,7 @@ void Stage::Update(float deltaTime, const Vector3& playerPos, Camera* camera) {
 	glassManager_->Update();
 	glassShardScatter_->Update(deltaTime);
 	cageManager_->Update(deltaTime);
-	healAreaManager_->Update(deltaTime);
+	treasureChestManager_->Update();
 	soapManager_->Update(deltaTime);
 	molotovManager_->Update(deltaTime);
 	ground_->Update();
@@ -162,6 +156,7 @@ void Stage::Draw(Camera* camera) {
 	wallManager_->Draw();
 	barricadeManager_->Draw();
 	cageManager_->Draw();
+	treasureChestManager_->Draw();
 	soapManager_->Draw();
 	molotovManager_->Draw();
 	goal_->Draw();
@@ -258,7 +253,6 @@ void Stage::DrawDecorations(Camera& camera) {
 
 void Stage::DrawTransparent() {
 	glassManager_->Draw();
-	healAreaManager_->Draw();
 }
 
 void Stage::DrawImGui() {
@@ -268,7 +262,7 @@ void Stage::DrawImGui() {
 	doorManager_->DrawImGui();
 	glassManager_->DrawImGui();
 	cageManager_->DrawImGui();
-	healAreaManager_->DrawImGui();
+	treasureChestManager_->DrawImGui();
 	soapManager_->DrawImGui();
 	molotovManager_->DrawImGui();
 

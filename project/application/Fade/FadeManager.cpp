@@ -9,8 +9,8 @@ using namespace TinyEngine;
 namespace {
 constexpr float kW = 1280.0f, kH = 720.0f;
 const Vector4 kCoverColor = {0.16f, 0.16f, 0.16f, 1.0f}; // 暗転の背景色
-constexpr float kLineHeight = 120.0f;                     // 横ラインの太さ
-constexpr float kBarWidth = 120.0f;                       // 縦バーの太さ
+constexpr float kLineHeight = 140.0f;                     // 横ラインの太さ
+constexpr float kBarWidth = 140.0f;                       // 縦バーの太さ
 constexpr float kBarHeight = 1000.0f;
 constexpr float kBarAngle = 0.17f; // 縦バーの傾き
 constexpr const char* kLogoTexture = "Title_Logo.png";
@@ -188,8 +188,8 @@ void FadeManager::InitializeLogoStyle(EngineContext* ctx) {
 
 	makeRect(coverL_, kCoverColor, {0.0f, 0.0f});
 	makeRect(coverR_, kCoverColor, {0.0f, 0.0f});
-	makeRect(line_, {1, 1, 1, 1}, {0.0f, 0.0f});
-	makeRect(bar_, {1, 1, 1, 1}, {0.5f, 0.5f});
+	makeRect(line_, ColorPalette::DarkYellow(), {0.0f, 0.0f});
+	makeRect(bar_, ColorPalette::DarkYellow(), {0.5f, 0.5f});
 	bar_->SetRotation(kBarAngle);
 
 	// シーン遷移時のロゴ生成&初期化
@@ -253,7 +253,8 @@ void FadeManager::ApplyLogoCrop(float visibleLeft, float alpha) {
 	logo_->SetSize({vw, dispH});
 	logo_->SetTextureLeftTop({(vl - left) / logoScale_, 0.0f});
 	logo_->SetTextureSize({vw / logoScale_, logoTexSize_.y});
-	logo_->SetColor({1.0f, 1.0f, 1.0f, alpha});
+	Vector4 color = ColorPalette::Yellow();
+	logo_->SetColor({color.x, color.y, color.z, alpha});
 }
 
 void FadeManager::DrawLogoStyle() {

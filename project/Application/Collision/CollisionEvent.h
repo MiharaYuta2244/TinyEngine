@@ -11,7 +11,7 @@ class Glass;
 
 // 当たり判定用のタグ
 enum class CollisionTag {
-	None, Player, Enemy, EnemyBullet, EnemyBomb, Wall, Barricade, Door, Glass, Cage, Goal, HealArea, Soap,
+	None, Player, Enemy, EnemyBullet, EnemyBomb, Wall, Barricade, Door, Glass, Cage, Goal, HealArea, Soap, TreasureChest,
 };
 
 // 同じオブジェクトの本体と判定範囲を別々の接触として扱う

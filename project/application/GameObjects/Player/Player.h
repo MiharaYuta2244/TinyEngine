@@ -137,6 +137,10 @@ private:
 	// 投げ軌道プレビューの更新
 	void UpdateThrowPreview(float deltaTime);
 
+	// HPに応じた帽子と、被弾で飛んだ帽子の描画位置を更新
+	void UpdateHealthHat();
+	bool HasHat() const { return hp_->GetCurrentHP() >= hp_->GetMaxHP(); }
+
 private:
 	Vector2 velocity_;
 	OBB attackCol_;
@@ -161,6 +165,15 @@ private:
 	std::unique_ptr<ThrowPreview> throwPreview_; // 軌道プレビュー用インスタンス
 	std::unique_ptr<PlayerGrab> grab_;           // プレイヤーアクション用インスタンス
 
+	struct HealthHat {
+		ObjectRender worn;
+		ObjectRender flying;
+		Transform launchTransform{};
+		float flightTimeRemaining = 0.0f;
+		bool launchPending = false;
+	};
+	HealthHat healthHat_;
+
 	// 現在移動中かどうかを保持するフラグ
 	bool isMoving_ = false;
 
@@ -169,7 +182,6 @@ private:
 
 	// 被弾時エフェクト
 	std::vector<std::unique_ptr<TinyEngine::Particle>> hitEffects_;
-	float preHP_ = maxHP_;
 
 	// 回復エフェクト
 	std::vector<std::unique_ptr<TinyEngine::Particle>> healEffects_;

@@ -9,6 +9,7 @@ class PlayerAnimator {
 public:
 	// 初期化関数
 	void Initialize(ObjectRender* render);
+	void SetClothed(bool clothed);
 
 	// 更新関数
 	void Update(float deltaTime, bool isMoving, bool isHolding);
@@ -26,5 +27,6 @@ private:
 private:
 	ObjectRender* render_ = nullptr;
 	PlayerAnim current_ = PlayerAnim::Idle;
+	bool clothed_ = false;
 	float actionTimer_ = 0.0f;
 };

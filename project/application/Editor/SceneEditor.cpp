@@ -10,8 +10,7 @@ void SceneEditor::Initialize() {
 	currentGizmoMode_ = ImGuizmo::LOCAL;
 }
 
-void SceneEditor::Update(
-    const SceneContext& ctx, const std::vector<IGameObject*>& objects, Player* player, EnemyManager* enemyManager, bool& isDebugCameraActive) {
+void SceneEditor::Update(const SceneContext& ctx, const std::vector<IGameObject*>& objects, Player* player, EnemyManager* enemyManager, bool& isDebugCameraActive) {
 	// 毎フレーム最新のオブジェクトリストを保持
 	objects_ = objects;
 
@@ -422,16 +421,16 @@ void SceneEditor::UpdateSpawnPalette() {
 	};
 
 	static const Item kItems[] = {
-	    {SpawnType::Wall,     "Wall"    },
-	    {SpawnType::Barricade, "Barricade"},
-	    {SpawnType::Decoration, "Decoration"},
-        {SpawnType::Door,     "Door"    },
-        {SpawnType::Glass,    "Glass"   },
-        {SpawnType::Cage,     "Cage"    },
-	    {SpawnType::HealArea, "HealArea"},
-        {SpawnType::Soap,     "Soap"    },
-        {SpawnType::Molotov,  "Molotov" },
-        {SpawnType::Enemy,    "Enemy"   },
+	    {SpawnType::Wall,          "Wall"         },
+        {SpawnType::Barricade,     "Barricade"    },
+        {SpawnType::Decoration,    "Decoration"   },
+        {SpawnType::Door,          "Door"         },
+	    {SpawnType::Glass,         "Glass"        },
+        {SpawnType::Cage,          "Cage"         },
+        {SpawnType::TreasureChest, "TreasureChest"},
+	    {SpawnType::Soap,          "Soap"         },
+        {SpawnType::Molotov,       "Molotov"      },
+        {SpawnType::Enemy,         "Enemy"        },
 	};
 
 	ImGui::Begin("Spawn Palette");

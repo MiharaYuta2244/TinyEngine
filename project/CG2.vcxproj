@@ -169,6 +169,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Application\Cinematic\CameraDeathZoomController.cpp" />
     <ClCompile Include="Application\GameObjects\Effect\DecideEffect.cpp" />
     <ClCompile Include="Application\GameObjects\StageObjects\Cage\Cage.cpp" />
+    <ClCompile Include="Application\GameObjects\StageObjects\TreasureChest\TreasureChest.cpp" />
     <ClCompile Include="Application\Collision\CollisionManager.cpp" />
     <ClCompile Include="Application\GameObjects\Effect\EffectGenerator.cpp" />
     <ClCompile Include="Application\GameObjects\ControlUI\ControlUI.cpp" />
@@ -316,7 +317,6 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Application\Editor\SceneEditor.cpp" />
     <ClCompile Include="Application\GameObjects\StageObjects\Stage.cpp" />
     <ClCompile Include="Application\GameObjects\StageObjects\Decoration\Decoration.cpp" />
-    <ClCompile Include="Application\GameObjects\StageObjects\HealArea\HealArea.cpp" />
     <ClCompile Include="Application\Menu\ResultScoreDisplay.cpp" />
     <ClCompile Include="Application\Scene\StageSelectScene.cpp" />
     <ClCompile Include="Engine\2d\Font\TextSprite.cpp" />
@@ -418,6 +418,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\Cinematic\CameraDeathZoomController.h" />
     <ClInclude Include="Application\GameObjects\Effect\DecideEffect.h" />
     <ClInclude Include="Application\GameObjects\StageObjects\Cage\Cage.h" />
+    <ClInclude Include="Application\GameObjects\StageObjects\TreasureChest\TreasureChest.h" />
     <ClInclude Include="Application\Collision\CollisionManager.h" />
     <ClInclude Include="Application\GameObjects\Effect\EffectGenerator.h" />
     <ClInclude Include="Application\GameObjects\ControlUI\ControlUI.h" />
@@ -583,7 +584,6 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\Editor\SceneEditor.h" />
     <ClInclude Include="Application\GameObjects\StageObjects\Stage.h" />
     <ClInclude Include="Application\GameObjects\StageObjects\Decoration\Decoration.h" />
-    <ClInclude Include="Application\GameObjects\StageObjects\HealArea\HealArea.h" />
     <ClInclude Include="Engine\3d\particle\GPUParticle.h" />
     <ClInclude Include="Engine\3d\particle\modules\HealCrossModule.h" />
     <ClInclude Include="Engine\3d\particle\modules\HealLineModule.h" />

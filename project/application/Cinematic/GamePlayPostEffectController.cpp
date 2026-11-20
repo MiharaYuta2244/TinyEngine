@@ -10,12 +10,8 @@ void GamePlayPostEffectController::Initialize(const SceneContext& ctx) {
 
 	// シーンで使うエフェクトの宣言
 	ctx_->engineContext->postEffectPipeline->SetEffects({
-	    PostEffectType::Vignette,         // ビネット
 	    PostEffectType::Glitch,           // グリッチ
 	    PostEffectType::DeathEffect,      // 死亡時エフェクト
-	    PostEffectType::Smoothing,        // スムージング
-	    PostEffectType::Gaussian,         // ガウシアン
-	    PostEffectType::RadialBlur,       // ラディアルブラー
 	    PostEffectType::Scanline,         // 走査線
 	    PostEffectType::BarrelDistortion, // 歪み
 	});
@@ -28,7 +24,6 @@ void GamePlayPostEffectController::Initialize(const SceneContext& ctx) {
 
 	glitchTimer_ = 0.0f;
 	elapsedTime_ = 0.0f;
-	damageBlurTimer_ = 0.0f;
 	isDeathAnimStarted_ = false;
 	isAnimPlaying_ = false;
 	barrelDistortionParam_.strength = 0.05f;
@@ -38,7 +33,7 @@ void GamePlayPostEffectController::Initialize(const SceneContext& ctx) {
 	scanlineParam_.time = 0.0f;
 }
 
-void GamePlayPostEffectController::Update(float deltaTime, float playerHP, bool isPlayerDead) {
+void GamePlayPostEffectController::Update(float deltaTime, bool isPlayerDead) {
 	const bool obscure = PlaytestConfig::obscureMode;
 
 	// グリッチノイズの更新
@@ -55,58 +50,19 @@ void GamePlayPostEffectController::Update(float deltaTime, float playerHP, bool 
 		barrel->SetFisheyeParam(barrelDistortionParam_);
 	}
 
-	// ダメージブラータイマーの減算
-	if (damageBlurTimer_ > 0.0f) {
-		damageBlurTimer_ -= deltaTime;
-		if (damageBlurTimer_ < 0.0f) {
-			damageBlurTimer_ = 0.0f;
-		}
-	}
-
 	// 死亡時アニメーションの更新
 	isAnimPlaying_ = numSamplesAnim_.anim.Update(deltaTime, numSamplesAnim_.temp);
 
-	// 各エフェクトパスの取得
-	auto* vignette = ctx_->engineContext->postEffectPipeline->GetPass(PostEffectType::Vignette);
-	auto* smoothing = ctx_->engineContext->postEffectPipeline->GetPass(PostEffectType::Smoothing);
-	auto* gaussian = ctx_->engineContext->postEffectPipeline->GetPass(PostEffectType::Gaussian);
-	auto* radialBlur = ctx_->engineContext->postEffectPipeline->GetPass(PostEffectType::RadialBlur);
+	// エフェクトパスの取得
 	auto* deathEffect = ctx_->engineContext->postEffectPipeline->GetPass(PostEffectType::DeathEffect);
-
-	const auto& pfx = commonData_->postEffectSettings;
 
 	if (!isPlayerDead) {
 		// 生存時のエフェクト更新
-		if (vignette) {
-			float intensity = playerHP <= 1.0f ? 0.5f : 0.0f;
-			vignette->SetVignetteIntensity(intensity);
-			vignette->SetVignetteColor({1.0f, 0.0f, 0.0f, 0.0f});
-		}
-		if (radialBlur) {
-			const bool lowHp = !obscure && playerHP <= 1.0f;
-			RadialBlurParam param;
-			param.blurWidth = lowHp ? 0.01f : 0.0f;
-			param.numSamples = lowHp ? 5.0f : 1.0f;
-			radialBlur->SetRadialBlurParam(param);
-		}
-		if (smoothing) {
-			SmoothingParam param;
-			param.radius = (!obscure && damageBlurTimer_ > 0.0f) ? 2 : 0;
-			smoothing->SetSmoothingParam(param);
-		}
-		if (gaussian) {
-			GaussianParam param;
-			param.radius = (!obscure && damageBlurTimer_ > 0.0f) ? 2 : 0;
-			gaussian->SetGaussianParam(param);
-		}
 		if (deathEffect) {
 			deathEffect->SetDeathEffectIntensity(0.0f);
 		}
 	} else {
 		// 死亡時のエフェクト更新
-		if (vignette) {
-			vignette->SetVignetteIntensity(0.0f);
-		}
 		if (deathEffect) {
 			deathEffect->SetDeathEffectIntensity(1.0f);
 		}

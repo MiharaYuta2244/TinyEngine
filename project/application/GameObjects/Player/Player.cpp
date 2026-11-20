@@ -8,8 +8,16 @@
 #include "GameObjects/PlayTestConfig.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
+#include <algorithm>
+#include <cmath>
 
 using namespace TinyEngine;
+
+namespace {
+constexpr float kHatFlightDuration = 0.85f;
+constexpr float kHealthHatScale = 0.27f;
+constexpr Vector4 kHealthHatColor = {1.0f, 0.78f, 0.36f, 1.0f};
+}
 
 void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecalManager) {
 	ctx_ = ctx;
@@ -33,7 +41,14 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 
 	// HP管理用インスタンス生成&初期化
 	hp_ = std::make_unique<PlayerHealth>();
-	hp_->Initialize(maxHP_);
+	hp_->Initialize(maxHP_, 1.0f);
+
+	healthHat_.worn.Initialize(ctx, "PlayerHealthHat.obj");
+	healthHat_.flying.Initialize(ctx, "PlayerHealthHat.obj");
+	healthHat_.worn.SetColor(kHealthHatColor);
+	healthHat_.flying.SetColor(kHealthHatColor);
+	healthHat_.flightTimeRemaining = 0.0f;
+	healthHat_.launchPending = false;
 
 	// 入力用インスタンス生成
 	input_ = std::make_unique<PlayerInput>();
@@ -127,6 +142,7 @@ void Player::Update(
 
 	// HP管理インスタンス更新
 	hp_->Update(deltaTime);
+	healthHat_.flightTimeRemaining = std::max(0.0f, healthHat_.flightTimeRemaining - deltaTime);
 
 	if (ctx_ && ctx_->object3dCommon) {
 		PointLight pointLight = ctx_->object3dCommon->GetPointLight();
@@ -226,7 +242,59 @@ void Player::PostUpdate() {
 	}
 
 	// 最後に描画用の更新を行う
+	const bool clothed = hp_->GetCurrentHP() >= 2.0f;
+	animator_->SetClothed(clothed);
+	render_->SetColor(clothed ? Vector4{1, 1, 1, 1} : color_);
 	render_->Update(transform_);
+	UpdateHealthHat();
+}
+
+void Player::UpdateHealthHat() {
+	auto& hat = healthHat_;
+	const bool worn = HasHat();
+
+	if (worn || hat.launchPending) {
+		auto* playerModel = render_->GetObject3d();
+		const auto& skeleton = playerModel->GetSkeleton();
+		const auto head = skeleton.jointMap.find("ボーン.004");
+		Vector3 crown = transform_.translate + Vector3{0.0f, 4.5f, 0.0f};
+
+		if (head != skeleton.jointMap.end()) {
+			// スキニング済みの頂点と同じように、モデルのルート変換も適用する
+			auto headWorld = skeleton.joints[head->second].skeletonSpaceMatrix *
+			    skeleton.joints[skeleton.root].localMatrix * playerModel->GetWorldMatrix();
+			Vector3 crownOffset = {0.0f, 2.20f, 0.14f};
+			crown = MathUtility::Transform(crownOffset, headWorld);
+		}
+
+		const Transform wornTransform = {
+		    {kHealthHatScale, kHealthHatScale, kHealthHatScale},
+		    {0.0f, transform_.rotate.y, 0.0f},
+		    crown,
+		};
+
+		if (worn) {
+			hat.worn.Update(wornTransform);
+		}
+
+		if (hat.launchPending) {
+			hat.launchTransform = wornTransform;
+			hat.flightTimeRemaining = kHatFlightDuration;
+			hat.launchPending = false;
+		}
+	}
+
+	if (hat.flightTimeRemaining > 0.0f) {
+		const float time = kHatFlightDuration - hat.flightTimeRemaining;
+		const float yaw = hat.launchTransform.rotate.y;
+		const Vector3 right = {std::cos(yaw), 0.0f, -std::sin(yaw)};
+		Transform flight = hat.launchTransform;
+		flight.translate += right * (4.5f * time);
+		flight.translate.y += (5.5f - 9.5f * time) * time;
+		flight.rotate += Vector3{8.0f, 5.0f, 7.0f} * time;
+		flight.scale = flight.scale * std::min(1.0f, hat.flightTimeRemaining / 0.2f);
+		hat.flying.Update(flight);
+	}
 }
 
 void Player::Draw() {
@@ -242,6 +310,13 @@ void Player::Draw() {
 
 	// 描画
 	render_->Draw();
+
+	if (HasHat()) {
+		healthHat_.worn.Draw();
+	}
+	if (healthHat_.flightTimeRemaining > 0.0f) {
+		healthHat_.flying.Draw();
+	}
 }
 
 bool Player::IsDead() const { return hp_->IsDead(); }
@@ -261,13 +336,18 @@ void Player::Damage(float value) {
 		return;
 
 	// ダメージ前のHPを保存
-	float beforeHP = hp_->GetCurrentHP();
+	const float beforeHP = hp_->GetCurrentHP();
+	const bool hadHat = HasHat();
 
 	// ダメージ処理
 	hp_->Damage(value);
 
-	// ダメージ後のHP
-	float afterHP = hp_->GetCurrentHP();
+	if (beforeHP == hp_->GetCurrentHP()) {
+		return;
+	}
+	if (hadHat && !HasHat()) {
+		healthHat_.launchPending = true;
+	}
 
 	// ヒットエフェクト生成
 	GenerateHitEffect();
@@ -344,13 +424,8 @@ void Player::UpdateCollision() {
 }
 
 void Player::GenerateHitEffect() {
-	if (preHP_ == hp_->GetCurrentHP())
-		return;
-
 	// エフェクトの生成
 	EffectGenerator::CreateHitEffect(ctx_, transform_.translate, hitEffects_);
-
-	preHP_ = hp_->GetCurrentHP();
 }
 
 void Player::AddBloodDecal(Vector3 scale) {
@@ -447,6 +522,11 @@ void Player::UpdateThrowPreview(float deltaTime) {
 }
 
 void Player::OnCollisionEnter(const CollisionEvent& event, const CollisionContext& context) {
+	if (event.selfPart == CollisionPart::Attack && event.other.CompareTag(CollisionTag::TreasureChest)) {
+		animator_->PlayAction(PlayerAnim::Push);
+		return;
+	}
+
 	if (event.selfPart != CollisionPart::Body) {
 		return;
 	}

@@ -2,10 +2,11 @@
 #include "Logger.h"
 #include "imGuiManager/ImGuiManager.h"
 
-void PlayerHealth::Initialize(float maxHP) {
+void PlayerHealth::Initialize(float maxHP, float initialHP) {
 	// HPの設定
 	maxHP_ = maxHP;
-	hp_ = maxHP;
+	hp_ = initialHP;
+	preHP_ = initialHP;
 }
 
 void PlayerHealth::Update(float deltaTime) {
