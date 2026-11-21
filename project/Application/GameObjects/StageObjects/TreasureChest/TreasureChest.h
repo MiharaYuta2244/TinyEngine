@@ -1,4 +1,5 @@
 #pragma once
+#include "GameObjects/ObjectRender/InteractionOutline.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "GameObjects/PlaceableObject.h"
 #include "OBB.h"
@@ -22,6 +23,9 @@ public:
 
 	// 描画関数
 	void Draw() override;
+	void DrawExtraImGui() override { outline_.DrawImGui(); }
+	void ToExtraJson(Json& j) const override { outline_.Save(j); }
+	void FromExtraJson(const Json& j) override { outline_.Load(j); }
 
 	const OBB& GetCollision() const { return collision_; }
 	bool IsOpen() const { return isOpen_; }
@@ -32,6 +36,7 @@ private:
 
 private:
 	ObjectRender render_;
+	InteractionOutline outline_;
 	OBB collision_{};
 	bool isOpen_ = false;
 };

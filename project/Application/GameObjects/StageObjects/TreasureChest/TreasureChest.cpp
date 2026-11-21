@@ -17,6 +17,7 @@ void TreasureChest::Update() {
 }
 
 void TreasureChest::Draw() {
+	outline_.Apply(render_, !IsOpen());
 	render_.Draw();
 }
 
