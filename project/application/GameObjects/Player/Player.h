@@ -166,6 +166,9 @@ private:
 	std::unique_ptr<PlayerGrab> grab_;           // プレイヤーアクション用インスタンス
 
 	struct HealthHat {
+		static constexpr Vector3 kDefaultLocalPosition = {0.0f, 2.20f, -1.15f};
+		Vector3 localPosition = kDefaultLocalPosition;
+		Vector3 scale = {0.5f, 0.5f, 0.5f};
 		ObjectRender worn;
 		ObjectRender flying;
 		Transform launchTransform{};

@@ -15,7 +15,6 @@ using namespace TinyEngine;
 
 namespace {
 constexpr float kHatFlightDuration = 0.85f;
-constexpr float kHealthHatScale = 0.27f;
 constexpr Vector4 kHealthHatColor = {1.0f, 0.78f, 0.36f, 1.0f};
 }
 
@@ -265,18 +264,23 @@ void Player::UpdateHealthHat() {
 		auto* playerModel = render_->GetObject3d();
 		const auto& skeleton = playerModel->GetSkeleton();
 		const auto head = skeleton.jointMap.find("ボーン.004");
-		Vector3 crown = transform_.translate + Vector3{0.0f, 4.5f, 0.0f};
+		Vector3 crown;
 
 		if (head != skeleton.jointMap.end()) {
 			// スキニング済みの頂点と同じように、モデルのルート変換も適用する
 			auto headWorld = skeleton.joints[head->second].skeletonSpaceMatrix *
 			    skeleton.joints[skeleton.root].localMatrix * playerModel->GetWorldMatrix();
-			Vector3 crownOffset = {0.0f, 2.20f, 0.14f};
-			crown = MathUtility::Transform(crownOffset, headWorld);
+			crown = MathUtility::Transform(hat.localPosition, headWorld);
+		} else {
+			// 頭ボーンがない場合は、従来の頭上位置を基準に編集分を反映する
+			auto playerWorld = MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+			auto positionOffset = hat.localPosition - HealthHat::kDefaultLocalPosition;
+			crown = MathUtility::Transform(positionOffset, playerWorld);
+			crown.y += 4.5f;
 		}
 
 		const Transform wornTransform = {
-		    {kHealthHatScale, kHealthHatScale, kHealthHatScale},
+		    hat.scale,
 		    {0.0f, transform_.rotate.y, 0.0f},
 		    crown,
 		};
@@ -497,6 +501,12 @@ void Player::GenerateHealEffect() {
 
 void Player::DrawImGui() {
 #ifdef USE_IMGUI
+	if (ImGui::Begin("Player Hat")) {
+		ImGui::DragFloat3("Local Position", &healthHat_.localPosition.x, 0.01f);
+		ImGui::DragFloat3("Scale", &healthHat_.scale.x, 0.01f);
+	}
+	ImGui::End();
+
 	ImGui::Begin("Player PointLight");
 
 	ImGui::DragFloat("Height Offset", &pointLightHeightOffset_, 0.1f, -5.0f, 10.0f);
