@@ -8,6 +8,7 @@
 #include "MathUtility.h"
 #include <cfloat>
 #include <algorithm>
+#include <cmath>
 
 PlayerGrab::Result PlayerGrab::Update(
     const Input& input, const Context& ctx, EnemyManager* enemyManager, const std::list<std::unique_ptr<Soap>>& soaps,
@@ -141,9 +142,21 @@ void PlayerGrab::ReleaseBarricade() {
 	}
 }
 
-void PlayerGrab::PlaceShield(const Vector3& position, const Vector2& forward, float yaw) {
+void PlayerGrab::AlignBarricadePull(Transform& transform, const Vector3& gripOffset) const {
+	const Vector2 outward = heldBarricade_->GetPullDirection();
+	transform.rotate = {0.0f, std::atan2(-outward.x, -outward.y), 0.0f};
+	auto rotationAndScale = MathUtility::MakeAffineMatrix(transform.scale, transform.rotate, Vector3{});
+	Vector3 palmOffset = gripOffset;
+	const Vector3 position = heldBarricade_->GetPullGripPosition() - MathUtility::Transform(palmOffset, rotationAndScale);
+
+	// 足元の高さを保ちながら、取っ手に向いた姿勢で両手を合わせる
+	transform.translate.x = position.x;
+	transform.translate.z = position.z;
+}
+
+void PlayerGrab::PlaceShield(const Vector3& handPosition, float yaw) {
 	if (IsHoldingShield()) {
-		heldBarricade_->PlaceShield(position, forward, yaw);
+		heldBarricade_->PlaceShield(handPosition, yaw);
 	}
 }
 

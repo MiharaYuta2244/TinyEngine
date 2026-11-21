@@ -8,18 +8,20 @@ enum class PlayerAnim { Idle, Walk, HoldIdle, HoldWalk, Hold, Push };
 class PlayerAnimator {
 public:
 	// 初期化関数
-	void Initialize(ObjectRender* render);
+	void Initialize(ObjectRender* render, ModelManager* modelManager);
 	void SetClothed(bool clothed);
 
 	// 更新関数
-	void Update(float deltaTime, bool isMoving, bool isHolding);
+	void Update(float deltaTime, bool isMoving, bool isHolding, bool isPullingBarricade);
 
 	// アニメーションを一定時間再生
 	void PlayAction(PlayerAnim anim, float duration = 0.2f);
 
+	const Vector3& GetBarricadeGripOffset() const { return barricadeGripOffset_; }
+
 private:
 	// 再生処理
-	void Play(PlayerAnim anim);
+	void Play(PlayerAnim anim, float blendDuration = 0.1f);
 
 	// 状態に応じたファイルパスを返す関数
 	static const char* ToFile(PlayerAnim anim);
@@ -29,4 +31,5 @@ private:
 	PlayerAnim current_ = PlayerAnim::Idle;
 	bool clothed_ = false;
 	float actionTimer_ = 0.0f;
+	Vector3 barricadeGripOffset_{};
 };

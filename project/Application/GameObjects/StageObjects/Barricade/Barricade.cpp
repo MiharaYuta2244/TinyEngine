@@ -1,5 +1,6 @@
 #include "Barricade.h"
 #include "MathOperator.h"
+#include "MathUtility.h"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -7,9 +8,17 @@
 namespace {
 constexpr float kPullStageTime = 0.4f;
 constexpr int kPullStages = 3;
-constexpr Vector4 kBarricadeColor = {0.55f, 0.32f, 0.16f, 1.0f};
+constexpr float kPullTravel = 0.5f;
+constexpr float kGripHeight = 1.44f;
+constexpr float kGripDepth = 2.0f;
 constexpr float kThrowSpeed = 30.0f;
 constexpr float kThrowRange = 24.0f;
+
+Vector3 GetGripOffset(const Transform& pose, float side) {
+	auto matrix = MathUtility::MakeAffineMatrix(pose.scale, pose.rotate, Vector3{});
+	Vector3 grip = {0.0f, kGripHeight, side * kGripDepth};
+	return MathUtility::Transform(grip, matrix);
+}
 
 Vector3 GetYawHalfExtent(const Transform& pose) {
 	const float c = std::abs(std::cos(pose.rotate.y));
@@ -30,26 +39,15 @@ void Barricade::Initialize(EngineContext* ctx, const Transform& transform) {
 
 	// 描画用インスタンス生成&初期化
 	render_ = std::make_unique<ObjectRender>();
-	render_->Initialize(ctx, "Cube.obj");
+	render_->Initialize(ctx, "Barricade.obj");
 	render_->SetTransform(transform_);
-	render_->SetColor(kBarricadeColor);
 	render_->SetEnableLighting(true);
 }
 
 void Barricade::Update(float deltaTime) {
 	if (IsSolid()) {
 		UpdateCollision();
-		Transform pose = transform_;
-		if (IsPulling()) {
-			const int stage = std::min(static_cast<int>(pullTime_ / kPullStageTime), kPullStages - 1);
-			pose.translate.x += pullDirection_.x * 0.25f * stage;
-			pose.translate.z += pullDirection_.y * 0.25f * stage;
-			pose.rotate.x += pullDirection_.y * 0.12f * stage;
-			pose.rotate.z -= pullDirection_.x * 0.12f * stage;
-		}
-
-		render_->Update(pose);
-
+		render_->Update(IsPulling() ? GetPullPose() : transform_);
 	} else if (IsThrown()) {
 		const float step = std::min(kThrowSpeed * deltaTime, throwDistanceLeft_);
 		throwStep_ = {shieldPose_.translate, {throwDirection_.x * step, 0.0f, throwDirection_.y * step}};
@@ -66,8 +64,9 @@ void Barricade::Update(float deltaTime) {
 }
 
 void Barricade::UpdateCollision() {
-	const Vector3 pos = transform_.translate;
-	const Vector3 half = GetYawHalfExtent(transform_);
+	const Transform pose = IsPulling() ? GetPullPose() : transform_;
+	const Vector3 pos = pose.translate;
+	const Vector3 half = GetYawHalfExtent(pose);
 	collision_.max = {pos.x + half.x, pos.y, pos.z + half.z};
 	collision_.min = {pos.x - half.x, pos.y, pos.z - half.z};
 }
@@ -79,20 +78,25 @@ Vector2 Barricade::GetGrabOffset(const Vector3& playerPos) const {
 }
 
 void Barricade::Grab(const Vector3& playerPos) {
-	const Vector2 offset = GetGrabOffset(playerPos);
-	const float distance = std::hypot(offset.x, offset.y);
-
-	if (distance > 0.0f) {
-		pullDirection_ = {offset.x / distance, offset.y / distance};
-	} else {
-		// 押し出し前に内側から掴んだ場合は、板の表裏の近い方へ引く
-		const Vector2 normal = {std::sin(transform_.rotate.y), std::cos(transform_.rotate.y)};
-		const float side = (playerPos.x - transform_.translate.x) * normal.x + (playerPos.z - transform_.translate.z) * normal.y;
-		pullDirection_ = side < 0.0f ? Vector2{-normal.x, -normal.y} : normal;
-	}
-
+	const Vector2 normal = {std::sin(transform_.rotate.y), std::cos(transform_.rotate.y)};
+	const Vector3 offset = playerPos - transform_.translate;
+	gripSide_ = offset.x * normal.x + offset.z * normal.y < 0.0f ? -1.0f : 1.0f;
+	pullDirection_ = {normal.x * gripSide_, normal.y * gripSide_};
 	pullTime_ = 0.0f;
 	state_ = State::Pulling;
+}
+
+Transform Barricade::GetPullPose() const {
+	Transform pose = transform_;
+	const float travel = kPullTravel * std::clamp(pullTime_ / (kPullStageTime * kPullStages), 0.0f, 1.0f);
+	pose.translate.x += pullDirection_.x * travel;
+	pose.translate.z += pullDirection_.y * travel;
+	return pose;
+}
+
+Vector3 Barricade::GetPullGripPosition() const {
+	const Transform pose = GetPullPose();
+	return pose.translate + GetGripOffset(pose, gripSide_);
 }
 
 void Barricade::Pull(const Vector2& moveDir, float deltaTime) {
@@ -108,9 +112,9 @@ void Barricade::Pull(const Vector2& moveDir, float deltaTime) {
 	}
 }
 
-void Barricade::PlaceShield(const Vector3& playerPos, const Vector2& forward, float yaw) {
-	shieldPose_.translate = {playerPos.x + forward.x * 1.5f, playerPos.y + 1.0f, playerPos.z + forward.y * 1.5f};
+void Barricade::PlaceShield(const Vector3& handPosition, float yaw) {
 	shieldPose_.rotate = {0.0f, yaw, 0.0f};
+	shieldPose_.translate = handPosition - GetGripOffset(shieldPose_, -1.0f);
 	render_->Update(shieldPose_);
 }
 

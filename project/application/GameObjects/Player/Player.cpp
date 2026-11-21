@@ -55,7 +55,7 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 
 	// アニメーション用インスタンス生成
 	animator_ = std::make_unique<PlayerAnimator>();
-	animator_->Initialize(render_.get());
+	animator_->Initialize(render_.get(), ctx->modelManager);
 
 	// 血痕の管理インスタンスポインタ
 	bloodDecalManager_ = bloodDecalManager;
@@ -132,8 +132,9 @@ void Player::Update(
 		}
 
 		// 移動更新
-		const Vector2 moveDir = grab_->IsPullingBarricade() && in.grabHeld ? Vector2{} : in.moveDir;
-		move_->Update(&transform_, moveDir, in.aimDir, deltaTime, speedMultiplier_, grab_->IsHolding());
+		if (!grab_->IsPullingBarricade() || !in.grabHeld) {
+			move_->Update(&transform_, in.moveDir, in.aimDir, deltaTime, speedMultiplier_, grab_->IsHolding());
+		}
 
 		// 攻撃等に使うベクトルの更新
 		lastMoveDirection_.x = std::sinf(transform_.rotate.y);
@@ -143,23 +144,6 @@ void Player::Update(
 	// HP管理インスタンス更新
 	hp_->Update(deltaTime);
 	healthHat_.flightTimeRemaining = std::max(0.0f, healthHat_.flightTimeRemaining - deltaTime);
-
-	if (ctx_ && ctx_->object3dCommon) {
-		PointLight pointLight = ctx_->object3dCommon->GetPointLight();
-
-		// パラメータ
-		pointLight.position = transform_.translate;
-		pointLight.position.y += pointLightHeightOffset_;
-		pointLight.color = pointLightColor_;
-		pointLight.intensity = pointLightIntensity_;
-		pointLight.radius = pointLightRadius_;
-		pointLight.decay = pointLightDecay_;
-
-		ctx_->object3dCommon->SetPointLightParam(pointLight);
-	}
-
-	// 衝突判定のために、移動後の座標で仮のAABBの更新
-	UpdateCollision();
 
 	// 掴み、攻撃の入力フラグ
 	PlayerGrab::Input grabInput;
@@ -184,12 +168,20 @@ void Player::Update(
 		isAttackTriggered_ = false;
 	}
 
+	const bool isPullingBarricade = grab_->IsPullingBarricade() && !hp_->IsDead();
+	if (isPullingBarricade) {
+		grab_->AlignBarricadePull(transform_, animator_->GetBarricadeGripOffset());
+		lastMoveDirection_ = {std::sin(transform_.rotate.y), std::cos(transform_.rotate.y)};
+	}
+
+	UpdateCollision();
+
 	// GamePlaySceneがカメラシェイクに使う
 	if (grabResult.grabbedEnemy || grabResult.grabbedItem || grabResult.grabbedBarricade) {
 		isGrabTriggered_ = true;
 	}
 
-	if (grabResult.grabbedEnemy || grabResult.grabbedBarricade) {
+	if (grabResult.grabbedEnemy) {
 		animator_->PlayAction(PlayerAnim::Hold);
 	}
 
@@ -203,7 +195,7 @@ void Player::Update(
 	}
 
 	// アニメーションの更新
-	animator_->Update(deltaTime, isMoving_, grab_->IsHolding());
+	animator_->Update(deltaTime, isMoving_, grab_->IsHolding(), isPullingBarricade);
 
 	// ヒットエフェクトの更新
 	for (auto& particle : hitEffects_) {
@@ -236,9 +228,25 @@ void Player::PostUpdate() {
 	// 押し戻しによってtransform_が変更された場合、それに合わせてAABBも最終的な正しい位置に合わせる
 	UpdateCollision();
 
-	grab_->PlaceShield(transform_.translate, lastMoveDirection_, transform_.rotate.y);
 	if (hp_->IsDead()) {
 		grab_->ReleaseBarricade();
+	}
+
+	if (grab_->IsHoldingShield()) {
+		auto world = MathUtility::MakeAffineMatrix(transform_.scale, transform_.rotate, transform_.translate);
+		Vector3 gripOffset = animator_->GetBarricadeGripOffset();
+		grab_->PlaceShield(MathUtility::Transform(gripOffset, world), transform_.rotate.y);
+	}
+
+	if (ctx_ && ctx_->object3dCommon) {
+		PointLight pointLight = ctx_->object3dCommon->GetPointLight();
+		pointLight.position = transform_.translate;
+		pointLight.position.y += pointLightHeightOffset_;
+		pointLight.color = pointLightColor_;
+		pointLight.intensity = pointLightIntensity_;
+		pointLight.radius = pointLightRadius_;
+		pointLight.decay = pointLightDecay_;
+		ctx_->object3dCommon->SetPointLightParam(pointLight);
 	}
 
 	// 最後に描画用の更新を行う

@@ -10,6 +10,7 @@ class Soap;
 class Molotov;
 class ThrowableItem;
 class Barricade;
+struct Transform;
 
 /// <summary>
 /// プレイヤーの「掴む・投げる・突き飛ばす」を担当するクラス
@@ -51,7 +52,8 @@ public:
 
 	void ValidateBarricade(const std::list<std::unique_ptr<Barricade>>& barricades);
 	void ReleaseBarricade();
-	void PlaceShield(const Vector3& position, const Vector2& forward, float yaw);
+	void AlignBarricadePull(Transform& transform, const Vector3& gripOffset) const;
+	void PlaceShield(const Vector3& handPosition, float yaw);
 	bool IsPullingBarricade() const;
 	bool IsHoldingShield() const;
 	bool IsHoldingBarricade() const { return heldBarricade_ != nullptr; }

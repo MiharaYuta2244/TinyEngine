@@ -37,7 +37,9 @@ public:
 	Vector2 GetGrabOffset(const Vector3& playerPos) const;
 	void Grab(const Vector3& playerPos);
 	void Pull(const Vector2& moveDir, float deltaTime);
-	void PlaceShield(const Vector3& playerPos, const Vector2& forward, float yaw);
+	Vector3 GetPullGripPosition() const;
+	Vector2 GetPullDirection() const { return pullDirection_; }
+	void PlaceShield(const Vector3& handPosition, float yaw);
 	void Release();
 
 	void Throw(const Vector3& playerPos, const Vector2& forward, float yaw);
@@ -53,11 +55,13 @@ private:
 	enum class State { Attached, Pulling, Shield, Thrown, Dropped };
 
 	void UpdateCollision();
+	Transform GetPullPose() const;
 	void DropShield();
 
 private:
 	State state_ = State::Attached;
 	Vector2 pullDirection_{};
+	float gripSide_ = 1.0f;
 	float pullTime_ = 0.0f;
 	Transform shieldPose_{{1.0f, 1.25f, 0.18f}, {}, {}};
 	Vector2 throwDirection_{};

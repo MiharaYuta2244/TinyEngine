@@ -1,11 +1,31 @@
 #include "PlayerAnimator.h"
 #include "AnimationLibrary.h"
+#include "MathOperator.h"
+#include "MathUtility.h"
+#include "ModelManager.h"
 
-void PlayerAnimator::Initialize(ObjectRender* render) {
+void PlayerAnimator::Initialize(ObjectRender* render, ModelManager* modelManager) {
 	render_ = render;
 	current_ = PlayerAnim::Idle;
 	clothed_ = false;
 	actionTimer_ = 0.0f;
+
+	// 掴み続けるポーズの両手の中心を、描画と同じモデル座標で求める
+	const char* file = ToFile(PlayerAnim::HoldIdle);
+	auto* model = modelManager->FindModel(file);
+	const auto& root = model->GetModelData().rootNode;
+	auto skeleton = model->CreateSkeleton(root);
+	model->ApplyAnimation(skeleton, AnimationLibrary::Get(file), 0.0f);
+	model->UpdateSkeleton(skeleton);
+
+	const auto palm = [&](const char* jointName) {
+		const auto& joint = skeleton.joints[skeleton.jointMap.at(jointName)];
+		auto jointMatrix = joint.skeletonSpaceMatrix * root.localMatrix;
+		Vector3 palmOffset = {0.0f, 0.55f, 0.0f};
+		return MathUtility::Transform(palmOffset, jointMatrix);
+	};
+
+	barricadeGripOffset_ = (palm("ボーン.009") + palm("ボーン.018")) * 0.5f;
 }
 
 void PlayerAnimator::SetClothed(bool clothed) {
@@ -17,7 +37,13 @@ void PlayerAnimator::SetClothed(bool clothed) {
 	render_->SetModel(clothed_ ? "GorillaClothed.gltf" : ToFile(current_));
 }
 
-void PlayerAnimator::Update(float dt, bool isMoving, bool isHolding) {
+void PlayerAnimator::Update(float dt, bool isMoving, bool isHolding, bool isPullingBarricade) {
+	if (isPullingBarricade) {
+		actionTimer_ = 0.0f;
+		Play(PlayerAnim::HoldIdle, 0.0f);
+		return;
+	}
+
 	if (actionTimer_ > 0.0f) {
 		actionTimer_ -= dt;
 		return; // アクション中は上書きしない
@@ -28,7 +54,7 @@ void PlayerAnimator::Update(float dt, bool isMoving, bool isHolding) {
 	Play(target);
 }
 
-void PlayerAnimator::Play(PlayerAnim anim) {
+void PlayerAnimator::Play(PlayerAnim anim, float blendDuration) {
 	if (anim == current_)
 		return;
 
@@ -37,7 +63,7 @@ void PlayerAnimator::Play(PlayerAnim anim) {
 	if (!clothed_) {
 		render_->SetModel(file);
 	}
-	render_->GetObject3d()->PlayAnimation(AnimationLibrary::Get(file));
+	render_->GetObject3d()->PlayAnimation(AnimationLibrary::Get(file), blendDuration);
 }
 
 void PlayerAnimator::PlayAction(PlayerAnim anim, float duration) {
