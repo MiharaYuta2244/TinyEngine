@@ -11,6 +11,23 @@
 
 using namespace TinyEngine;
 
+namespace {
+const char* GetEnemyModel(EnemyType type) {
+	switch (type) {
+	case EnemyType::Shotgun:
+		return "EnemyShotgun.gltf";
+	case EnemyType::Bomber:
+		return "EnemyBomber.gltf";
+	case EnemyType::Assault:
+		return "EnemyAssault.gltf";
+	default:
+		return "EnemyNormal.gltf";
+	}
+}
+
+const char* GetGunModel(EnemyType type) { return type == EnemyType::Shotgun ? "EnemyShotgunGun.obj" : "EnemyPistol.obj"; }
+} // namespace
+
 int Enemy::index = 0;
 
 Enemy::Enemy() { id_ = index++; }
@@ -20,16 +37,15 @@ void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalMan
 	audioManager_ = audioManager;
 	ApplyType(type);
 
-	transform_.scale = {0.2f, 0.2f, 0.2f};
+	transform_.scale = {0.4f, 0.4f, 0.4f};
 	transform_.rotate = {0.0f, 0.0f, 0.0f};
 	transform_.translate = pos;
 
 	// 描画用インスタンスの生成&初期化
 	render_ = std::make_unique<ObjectRender>();
-	render_->Initialize(ctx, "HumanIdle.gltf");
+	render_->Initialize(ctx, GetEnemyModel(GetEnemyType()));
 	render_->SetTransform(transform_);
 	render_->SetEnvScale(envScale_);
-	render_->SetColor(color_);
 	render_->SetIsSkinning(true);
 
 	// アニメーターの初期化
@@ -37,10 +53,9 @@ void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalMan
 
 	// 銃モデルの生成&初期化
 	renderGun_ = std::make_unique<ObjectRender>();
-	renderGun_->Initialize(ctx, "Cube.obj");
+	renderGun_->Initialize(ctx, GetGunModel(GetEnemyType()));
 	renderGun_->SetTransform(transform_);
 	renderGun_->SetEnvScale(envScale_);
-	renderGun_->SetColor(gunColor_);
 
 	// AIインスタンス生成&初期化
 	ai_ = std::make_unique<EnemyAI>();
@@ -152,6 +167,17 @@ void Enemy::Update(
 }
 
 void Enemy::PostUpdate() {
+	// エディターでの変更は、次のスキニング処理を記録する前に反映する
+	if (appearanceDirty_) {
+		const EnemyType type = GetEnemyType();
+		render_->SetModel(GetEnemyModel(type));
+		const char* gunModel = GetGunModel(type);
+		if (renderGun_->GetFilepath() != gunModel) {
+			renderGun_->SetModel(gunModel);
+		}
+		appearanceDirty_ = false;
+	}
+
 	// 押し戻しを反映したAABBの再計算
 	UpdateCollision();
 
@@ -161,15 +187,9 @@ void Enemy::PostUpdate() {
 	// ボーン座標が最新になった後で足跡を置く
 	UpdateFootprint();
 
-	Transform gunTransform;
-	gunTransform.scale = {0.7f, 0.2f, 0.1f};
-	float gunYaw = transform_.rotate.y - (std::numbers::pi_v<float> / 2.0f);
-	gunTransform.rotate = {-std::numbers::pi_v<float> / 2.0f, gunYaw, 0.0f};
-
-	// 手のボーン座標に追従
-	gunTransform.translate = render_->GetBonePos(L"ボーン.007");
-
-	renderGun_->Update(gunTransform);
+	// 銃はグリップを原点にし、銃口をローカルの +Z に向けている
+	const Vector3 hand = render_->GetObject3d()->GetBonePos(L"ボーン.007", /*includeModelRoot=*/true);
+	renderGun_->Update({transform_.scale, {0.0f, transform_.rotate.y, 0.0f}, hand});
 }
 
 void Enemy::Draw() {
@@ -308,13 +328,12 @@ void Enemy::AddBloodDecal() {
 }
 
 void Enemy::ApplyType(EnemyType type) {
+	if (render_ && GetEnemyType() != type) {
+		appearanceDirty_ = true;
+	}
+
 	behavior_ = EnemyBehaviorFactory::Create(type);
 	hp_ = behavior_->GetMaxHP();
-	color_ = behavior_->GetColor();
-
-	if (render_) {
-		render_->SetColor(color_);
-	}
 
 	if (ai_) {
 		ai_->SetBehavior(behavior_.get());

@@ -187,6 +187,7 @@ private:
 	float knockBackFriction_ = 7.0f;
 
 	std::unique_ptr<ObjectRender> render_;               // 描画用インスタンス
+	bool appearanceDirty_ = false;
 	std::unique_ptr<ObjectRender> renderGun_;            // 武器描画用インスタンス
 	std::unique_ptr<EnemyAI> ai_;                        // AI
 	std::unique_ptr<TinyEngine::VisionCone> visionCone_; // 視界
@@ -216,9 +217,6 @@ private:
 	// HP
 	int hp_ = 1;
 
-	// 色
-	Vector4 color_ = {1, 1, 1, 1};
-
 	// 点滅用変数
 	float damageBlinkTimer_ = 0.0f;
 	bool isBlinkVisible_ = true;
@@ -235,9 +233,6 @@ private:
 
 	// オーディオマネージャーポインタ
 	TinyEngine::AudioManager* audioManager_ = nullptr;
-
-	// 銃の色
-	Vector4 gunColor_ = {0.0f, 0.1f, 0.5f, 1.0f};
 
 	// アクティブフラグ
 	bool isActive_ = true;

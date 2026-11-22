@@ -91,7 +91,7 @@ public:
 	const std::string& GetName() const { return name_; }
 	const std::string& GetFilepath() const { return currentFilepath_; }
 	const Skeleton& GetSkeleton() const { return skeleton_; }
-	Vector3 GetBonePos(const std::wstring boneName);
+	Vector3 GetBonePos(const std::wstring boneName, bool includeModelRoot = false);
 
 private:
 	/// <summary>

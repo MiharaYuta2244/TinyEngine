@@ -34,9 +34,6 @@ public:
 	// 最大HPGetter
 	virtual int GetMaxHP() const = 0;
 
-	// 色のGetter
-	virtual Vector4 GetColor() const = 0;
-
 	// 弾の発射インターバルGetter
 	virtual float GetShotInterval() const { return 1.5f; }
 

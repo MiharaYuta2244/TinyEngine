@@ -391,7 +391,7 @@ void Object3d::CreateOutlineData() {
 	*outlineData_ = outline_;
 }
 
-Vector3 Object3d::GetBonePos(const std::wstring boneName) {
+Vector3 Object3d::GetBonePos(const std::wstring boneName, bool includeModelRoot) {
 	Vector3 bonePos{};
 	const Skeleton& skeleton = GetSkeleton();
 
@@ -406,7 +406,7 @@ Vector3 Object3d::GetBonePos(const std::wstring boneName) {
 
 		// 座標の取得
 		Matrix4x4 boneMatrix = legJoint.skeletonSpaceMatrix;
-		Matrix4x4 worldMatrix = GetWorldMatrix();
+		const Matrix4x4 worldMatrix = includeModelRoot ? modelData_.rootNode.localMatrix * worldMatrix_ : worldMatrix_;
 		Matrix4x4 boneWorldMatrix = MathUtility::Multiply(boneMatrix, worldMatrix);
 		bonePos = {boneWorldMatrix.m[3][0], boneWorldMatrix.m[3][1], boneWorldMatrix.m[3][2]};
 	}

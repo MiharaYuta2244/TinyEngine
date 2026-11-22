@@ -8,7 +8,6 @@ class BomberBehavior : public EnemyBehaviorBase {
 public:
 	EnemyType GetType() const override { return EnemyType::Bomber; }
 	int GetMaxHP() const override { return 1; }
-	Vector4 GetColor() const override { return {0, 0, 1, 1}; }
 
 	float GetDeathBlastRadius() const override { return 5.0f; }
 
