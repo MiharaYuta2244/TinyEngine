@@ -1,7 +1,7 @@
 #include "SceneEditor.h"
 #include "Collision.h"
 #include "MathUtility.h"
-#include "SceneManager.h"
+#include "Scene/SceneManager.h"
 #include <Windows.h>
 
 void SceneEditor::Initialize() {

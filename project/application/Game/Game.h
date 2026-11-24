@@ -1,6 +1,6 @@
 #pragma once
 #include "Framework.h"
-#include "SceneManager.h"
+#include "Scene/SceneManager.h"
 #include "Fade/FadeManager.h"
 #include "Fade/SceneTransition.h"
 #include <memory>

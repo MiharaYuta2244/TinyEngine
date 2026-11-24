@@ -1,6 +1,6 @@
 #include "GamePlayPostEffectController.h"
 #include "GameObjects/PlayTestConfig.h"
-#include "SceneManager.h"
+#include "Scene/SceneManager.h"
 
 using namespace TinyEngine;
 

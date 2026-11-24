@@ -1,6 +1,6 @@
 #include "SceneTransition.h"
 #include "Fade/FadeManager.h"
-#include "SceneManager.h"
+#include "Scene/SceneManager.h"
 
 void SceneTransition::Initialize(SceneManager* sceneManager, FadeManager* fadeManager) {
 	sceneManager_ = sceneManager;

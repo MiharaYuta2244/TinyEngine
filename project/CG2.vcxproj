@@ -80,7 +80,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir)Externals;$(ProjectDir)Externals\imguizmo;$(ProjectDir)Externals\imgui;$(ProjectDir)Externals\DirectXTex;$(ProjectDir)Resources\Shaders;$(ProjectDir)Engine\Math;$(ProjectDir)Engine\Input;$(ProjectDir)Engine\Base;$(ProjectDir)Engine\Audio;$(ProjectDir)Engine\3D;$(ProjectDir)Engine\2D;$(ProjectDir)Engine;$(ProjectDir)Engine\Collision;$(WindowsSdkDir)Include\10.0.26100.0\um;$(ProjectDir)Engine\Base\Utility\Easing;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Base\Utility\ScreenSpaceUtility;$(ProjectDir)Engine\Base\Utility\GameTimer;$(ProjectDir)Application;$(ProjectDir)Engine\Math\MathLib;$(ProjectDir)Engine\Base\ImGuiManager;$(ProjectDir)Engine\Base\Utility\deltaTime;$(ProjectDir)Engine\Framework;$(ProjectDir)Engine\Base\Utility\Random;$(ProjectDir)Engine\Scene;$(ProjectDir)Externals\assimp\include;$(ProjectDir)Engine\Tool\Json;$(ProjectDir)Engine\Base\Utility\TimeManager;$(ProjectDir)Engine\3D\Skybox;$(ProjectDir)Engine\3D\Object3d;$(ProjectDir)Engine\3D\Particle\Modules;$(ProjectDir)Engine\3D\Particle;$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Tool\LevelDataLoader;$(ProjectDir)Engine\3D\Primitive;$(ProjectDir)Engine\3D\Decal;$(ProjectDir)\Engine\Base\Utility;$(ProjectDir)Engine\2D\Font</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Externals;$(ProjectDir)Externals\imguizmo;$(ProjectDir)Externals\imgui;$(ProjectDir)Externals\DirectXTex;$(ProjectDir)Resources\Shaders;$(ProjectDir)Engine\Math;$(ProjectDir)Engine\Input;$(ProjectDir)Engine\Base;$(ProjectDir)Engine\Audio;$(ProjectDir)Engine\3D;$(ProjectDir)Engine\2D;$(ProjectDir)Engine;$(ProjectDir)Engine\Collision;$(WindowsSdkDir)Include\10.0.26100.0\um;$(ProjectDir)Engine\Base\Utility\Easing;$(ProjectDir)Engine\Utility;$(ProjectDir)Engine\Base\Utility\ScreenSpaceUtility;$(ProjectDir)Engine\Base\Utility\GameTimer;$(ProjectDir)Application;$(ProjectDir)Engine\Math\MathLib;$(ProjectDir)Engine\Base\ImGuiManager;$(ProjectDir)Engine\Framework;$(ProjectDir)Engine\Base\Utility\Random;$(ProjectDir)Engine\Scene;$(ProjectDir)Externals\assimp\include;$(ProjectDir)Engine\Tool\Json;$(ProjectDir)Engine\Base\Utility\TimeManager;$(ProjectDir)Engine\3D\Skybox;$(ProjectDir)Engine\3D\Object3d;$(ProjectDir)Engine\3D\Particle\Modules;$(ProjectDir)Engine\3D\Particle;$(ProjectDir)Engine\Animation;$(ProjectDir)Engine\Tool\LevelDataLoader;$(ProjectDir)Engine\3D\Primitive;$(ProjectDir)Engine\3D\Decal;$(ProjectDir)\Engine\Base\Utility;$(ProjectDir)Engine\2D\Font</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <DisableLanguageExtensions>false</DisableLanguageExtensions>
     </ClCompile>
@@ -199,7 +199,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Engine\Base\Utility\Easing\EasingEditor.cpp" />
     <ClCompile Include="Engine\Utility\DirectXUtils.cpp" />
     <ClCompile Include="Engine\Collision\Collision.cpp" />
-    <ClCompile Include="Engine\Scene\SceneManager.cpp" />
+    <ClCompile Include="Application\Scene\SceneManager.cpp" />
     <ClCompile Include="Engine\Base\Utility\Easing\Easing.cpp" />
     <ClCompile Include="Engine\3D\Particle\Modules\DustModule.cpp" />
     <ClCompile Include="Engine\3D\Particle\Modules\ShockWaveModule.cpp" />
@@ -309,7 +309,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Engine\Base\RenderTexture.cpp" />
     <ClCompile Include="Application\Scene\TestScene.cpp" />
     <ClCompile Include="Engine\3D\Particle\Modules\UVScrollModule.cpp" />
-    <ClCompile Include="Engine\3D\Primitive\VisionCone.cpp" />
+    <ClCompile Include="Application\GameObjects\Enemy\VisionCone.cpp" />
     <ClCompile Include="Engine\Base\PostEffectPipeline.cpp" />
     <ClCompile Include="Engine\3D\Particle\Modules\MuzzleFlashModule.cpp" />
     <ClCompile Include="Engine\3D\Particle\Modules\MuzzleSparkModule.cpp" />
@@ -469,9 +469,9 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Engine\Base\Utility\Easing\EasingAnimation.h" />
     <ClInclude Include="Engine\Base\Node.h" />
     <ClInclude Include="Engine\Base\Utility\Easing\AnimationBundle.h" />
-    <ClInclude Include="Engine\Scene\BaseScene.h" />
+    <ClInclude Include="Application\Scene\BaseScene.h" />
     <ClInclude Include="Engine\Collision\Collision.h" />
-    <ClInclude Include="Engine\Scene\SceneManager.h" />
+    <ClInclude Include="Application\Scene\SceneManager.h" />
     <ClInclude Include="Engine\Base\SpotLight.h" />
     <ClInclude Include="Engine\Base\Utility\Easing\Easing.h" />
     <ClInclude Include="Engine\3D\Particle\Modules\DustModule.h" />
@@ -573,7 +573,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Engine\Tool\LevelDataLoader\LevelDataLoader.h" />
     <ClInclude Include="Application\Scene\TestScene.h" />
     <ClInclude Include="Engine\3D\Particle\Modules\UVScrollModule.h" />
-    <ClInclude Include="Engine\3D\Primitive\VisionCone.h" />
+    <ClInclude Include="Application\GameObjects\Enemy\VisionCone.h" />
     <ClInclude Include="Engine\Base\PostEffectPipeline.h" />
     <ClInclude Include="Engine\3D\Particle\Modules\HitSparkModule.h" />
     <ClInclude Include="Engine\3D\Particle\Modules\HitFlashModule.h" />
