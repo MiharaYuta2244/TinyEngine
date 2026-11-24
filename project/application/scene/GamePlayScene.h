@@ -7,9 +7,9 @@
 #include "DecalManager.h"
 #include "Editor/SceneEditor.h"
 #include "Font.h"
-#include "GameObjects/ControlUI/ControlUI.h"
-#include "GameObjects/Effect/FlashEffect.h"
-#include "GameObjects/Effect/LetterBox.h"
+#include "UI/ControlUI/ControlUI.h"
+#include "Effect/FlashEffect.h"
+#include "Effect/LetterBox.h"
 #include "GameObjects/Enemy/EnemyManager.h"
 #include "GameObjects/Player/Player.h"
 #include "GameObjects/StageObjects/Stage.h"
@@ -17,7 +17,7 @@
 #include "Gameobjects/Enemy/Weapon/EnemyBulletManager.h"
 #include "Particle.h"
 #include "TextSprite.h"
-#include "GameObjects/Effect/StageClearCutIn.h"
+#include "Effect/StageClearCutIn.h"
 #include <memory>
 
 // ゲーム開始時カメラ演出用

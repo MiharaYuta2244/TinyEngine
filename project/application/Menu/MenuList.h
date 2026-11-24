@@ -2,7 +2,7 @@
 #include "AnimationBundle.h"
 #include "AudioManager.h"
 #include "DirectInput.h"
-#include "GameObjects/Effect/DecideEffect.h"
+#include "Effect/DecideEffect.h"
 #include "TextSprite.h"
 #include "MenuLayout.h"
 #include "MenuInputRepeat.h"

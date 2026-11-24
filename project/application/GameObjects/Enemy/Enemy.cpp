@@ -3,7 +3,7 @@
 #include "MathOperator.h"
 #include "ChargeModule.h"
 #include "ColorPalette.h"
-#include "GameObjects/Effect/EffectGenerator.h"
+#include "Effect/EffectGenerator.h"
 #include "GameObjects/PlayTestConfig.h"
 #include "GameObjects/Player/Player.h"
 #include "Gameobjects/Enemy/Behavior/EnemyBehaviorFactory.h"

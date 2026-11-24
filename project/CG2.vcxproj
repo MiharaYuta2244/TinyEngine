@@ -167,12 +167,12 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Application\GameObjects\IGameObject.cpp" />
     <ClCompile Include="Application\GameObjects\StageObjects\Door\Door.cpp" />
     <ClCompile Include="Application\Cinematic\CameraDeathZoomController.cpp" />
-    <ClCompile Include="Application\GameObjects\Effect\DecideEffect.cpp" />
+    <ClCompile Include="Application\Effect\DecideEffect.cpp" />
     <ClCompile Include="Application\GameObjects\StageObjects\Cage\Cage.cpp" />
     <ClCompile Include="Application\GameObjects\StageObjects\TreasureChest\TreasureChest.cpp" />
     <ClCompile Include="Application\Collision\CollisionManager.cpp" />
-    <ClCompile Include="Application\GameObjects\Effect\EffectGenerator.cpp" />
-    <ClCompile Include="Application\GameObjects\ControlUI\ControlUI.cpp" />
+    <ClCompile Include="Application\Effect\EffectGenerator.cpp" />
+    <ClCompile Include="Application\UI\ControlUI\ControlUI.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\Weapon\EnemyBomb.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\Weapon\EnemyBombManager.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\Behavior\EnemyBehaviorBase.cpp" />
@@ -180,8 +180,8 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Application\GameObjects\Enemy\Behavior\BomberBehavior.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\Behavior\EnemyBehaviorFactory.cpp" />
     <ClCompile Include="Application\Scene\EffectEditorScene.cpp" />
-    <ClCompile Include="Application\GameObjects\ResultUI\Button\Button.cpp" />
-    <ClCompile Include="Application\GameObjects\ResultUI\Button\ButtonGroup.cpp" />
+    <ClCompile Include="Application\UI\ResultUI\Button\Button.cpp" />
+    <ClCompile Include="Application\UI\ResultUI\Button\ButtonGroup.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\EnemyAnimator.cpp" />
     <ClCompile Include="Engine\3D\Particle\EffectLibrary.cpp" />
     <ClCompile Include="Engine\3D\Particle\EffectBuilder.cpp" />
@@ -246,8 +246,8 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Engine\Base\Utility\GameTimer\GameTimer.cpp" />
     <ClCompile Include="Application\GameObjects\StageObjects\Goal\Goal.cpp" />
     <ClCompile Include="Engine\Tool\Json\JsonManager.cpp" />
-    <ClCompile Include="Application\GameObjects\Effect\FlashEffect.cpp" />
-    <ClCompile Include="Application\GameObjects\Effect\LetterBox.cpp" />
+    <ClCompile Include="Application\Effect\FlashEffect.cpp" />
+    <ClCompile Include="Application\Effect\LetterBox.cpp" />
     <ClCompile Include="Application\GameObjects\StageObjects\Ground\Ground.cpp" />
     <ClCompile Include="Engine\Tool\LevelDataLoader\LevelDataLoader.cpp" />
     <ClCompile Include="Engine\3D\Particle\Modules\HitSparkModule.cpp" />
@@ -262,7 +262,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Engine\2D\Font\Font.cpp" />
     <ClCompile Include="Engine\2D\Font\FontCommon.cpp" />
     <ClCompile Include="Engine\3D\Particle\Modules\GlassShardModule.cpp" />
-    <ClCompile Include="Application\GameObjects\Effect\FootprintManager.cpp" />
+    <ClCompile Include="Application\Effect\FootprintManager.cpp" />
     <ClCompile Include="Engine\3D\Particle\Modules\GenericModule.cpp" />
     <ClCompile Include="Application\GameObjects\StageObjects\Glass\GlassShardScatter.cpp" />
     <ClCompile Include="main.cpp">
@@ -303,7 +303,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Application\Menu\OptionMenu.cpp" />
     <ClCompile Include="Application\Scene\PauseScene.cpp" />
     <ClCompile Include="Application\Scene\ResultScene.cpp" />
-    <ClCompile Include="Application\GameObjects\ResultUI\Animation\SpriteScaleWipeAnimator.cpp" />
+    <ClCompile Include="Application\UI\ResultUI\Animation\SpriteScaleWipeAnimator.cpp" />
     <ClCompile Include="Engine\3D\Skybox\SkyboxCommon.cpp" />
     <ClCompile Include="Engine\3D\Skybox\Skybox.cpp" />
     <ClCompile Include="Engine\Base\RenderTexture.cpp" />
@@ -330,7 +330,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Application\GameObjects\StageMiniature\StageMiniature.cpp" />
     <ClCompile Include="Application\Fade\SceneTransition.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\PiyoEffect.cpp" />
-    <ClCompile Include="Application\GameObjects\Effect\StageClearCutIn.cpp" />
+    <ClCompile Include="Application\Effect\StageClearCutIn.cpp" />
     <ClCompile Include="Application\GameObjects\Player\PlayerInput.cpp" />
     <ClCompile Include="Application\GameObjects\Player\PlayerAnimator.cpp" />
     <ClCompile Include="Application\GameObjects\Player\ThrowPreview.cpp" />
@@ -403,6 +403,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Application\Collision\CollisionEvent.h" />
     <ClInclude Include="Application\Fade\FadeStyle.h" />
     <ClInclude Include="Application\GameObjects\PlayTestConfig.h" />
     <ClInclude Include="Engine\Animation\AnimationLibrary.h" />
@@ -416,12 +417,12 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\GameObjects\IGameObject.h" />
     <ClInclude Include="Application\GameObjects\StageObjects\Door\Door.h" />
     <ClInclude Include="Application\Cinematic\CameraDeathZoomController.h" />
-    <ClInclude Include="Application\GameObjects\Effect\DecideEffect.h" />
+    <ClInclude Include="Application\Effect\DecideEffect.h" />
     <ClInclude Include="Application\GameObjects\StageObjects\Cage\Cage.h" />
     <ClInclude Include="Application\GameObjects\StageObjects\TreasureChest\TreasureChest.h" />
     <ClInclude Include="Application\Collision\CollisionManager.h" />
-    <ClInclude Include="Application\GameObjects\Effect\EffectGenerator.h" />
-    <ClInclude Include="Application\GameObjects\ControlUI\ControlUI.h" />
+    <ClInclude Include="Application\Effect\EffectGenerator.h" />
+    <ClInclude Include="Application\UI\ControlUI\ControlUI.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Weapon\EnemyBomb.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Weapon\EnemyBombManager.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Behavior\EnemyBehaviorBase.h" />
@@ -429,8 +430,8 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\GameObjects\Enemy\Behavior\BomberBehavior.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Behavior\EnemyBehaviorFactory.h" />
     <ClInclude Include="Application\Scene\EffectEditorScene.h" />
-    <ClInclude Include="Application\GameObjects\ResultUI\Button\Button.h" />
-    <ClInclude Include="Application\GameObjects\ResultUI\Button\ButtonGroup.h" />
+    <ClInclude Include="Application\UI\ResultUI\Button\Button.h" />
+    <ClInclude Include="Application\UI\ResultUI\Button\ButtonGroup.h" />
     <ClInclude Include="Application\GameObjects\Enemy\EnemyAnimator.h" />
     <ClInclude Include="Engine\3D\Particle\EffectLibrary.h" />
     <ClInclude Include="Engine\3D\Particle\EffectBuilder.h" />
@@ -560,12 +561,12 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\Menu\MenuInputRepeat.h" />
     <ClInclude Include="Application\Menu\MenuLayout.h" />
     <ClInclude Include="Application\Menu\OptionMenu.h" />
-    <ClInclude Include="Application\GameObjects\Effect\FlashEffect.h" />
-    <ClInclude Include="Application\GameObjects\Effect\LetterBox.h" />
+    <ClInclude Include="Application\Effect\FlashEffect.h" />
+    <ClInclude Include="Application\Effect\LetterBox.h" />
     <ClInclude Include="Application\GameObjects\StageObjects\Ground\Ground.h" />
     <ClInclude Include="Application\Scene\PauseScene.h" />
     <ClInclude Include="Application\Scene\ResultScene.h" />
-    <ClInclude Include="Application\GameObjects\ResultUI\Animation\SpriteScaleWipeAnimator.h" />
+    <ClInclude Include="Application\UI\ResultUI\Animation\SpriteScaleWipeAnimator.h" />
     <ClInclude Include="Engine\3D\Skybox\SkyboxCommon.h" />
     <ClInclude Include="Engine\3D\Skybox\Skybox.h" />
     <ClInclude Include="Engine\Base\RenderTexture.h" />
@@ -603,14 +604,14 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\Utility\SettingsStorage.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Behavior\NormalBehavior.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Behavior\ShotgunBehavior.h" />
-    <ClInclude Include="Application\GameObjects\Effect\FootprintManager.h" />
+    <ClInclude Include="Application\Effect\FootprintManager.h" />
     <ClInclude Include="Engine\3D\Particle\Modules\WoodShardModule.h" />
     <ClInclude Include="Engine\3D\Particle\Modules\GenericModule.h" />
     <ClInclude Include="Application\GameObjects\Item\Molotov.h" />
     <ClInclude Include="Application\GameObjects\StageMiniature\StageMiniature.h" />
     <ClInclude Include="Application\Fade\SceneTransition.h" />
     <ClInclude Include="Application\GameObjects\Enemy\PiyoEffect.h" />
-    <ClInclude Include="Application\GameObjects\Effect\StageClearCutIn.h" />
+    <ClInclude Include="Application\Effect\StageClearCutIn.h" />
     <ClInclude Include="Application\GameObjects\Player\PlayerInput.h" />
     <ClInclude Include="Application\GameObjects\Player\PlayerAnimator.h" />
     <ClInclude Include="Application\GameObjects\Player\ThrowPreview.h" />

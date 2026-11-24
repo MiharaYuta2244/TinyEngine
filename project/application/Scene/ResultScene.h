@@ -4,7 +4,7 @@
 #include "Font.h"
 #include "Menu/ResultScoreDisplay.h"
 #include "TextSprite.h"
-#include "GameObjects/ResultUI/Button/ButtonGroup.h"
+#include "UI/ResultUI/Button/ButtonGroup.h"
 
 /// <summary>
 /// リザルトシーン

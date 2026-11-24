@@ -1,5 +1,5 @@
 #include "BomberBehavior.h"
-#include "GameObjects/Effect/EffectGenerator.h"
+#include "Effect/EffectGenerator.h"
 #include "GameObjects/Enemy/Weapon/EnemyBombManager.h"
 
 void BomberBehavior::Shot(const ShotContext& c) {

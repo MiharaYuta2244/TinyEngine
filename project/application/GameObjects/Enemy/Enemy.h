@@ -7,7 +7,7 @@
 #include "EnemyAnimator.h"
 #include "EnemyType.h"
 #include "ExclamationMark.h"
-#include "GameObjects/Effect/FootprintManager.h"
+#include "Effect/FootprintManager.h"
 #include "GameObjects/IGameObject.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
 #include "GameTimer.h"

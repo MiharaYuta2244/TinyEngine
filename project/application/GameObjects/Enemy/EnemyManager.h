@@ -1,7 +1,7 @@
 #pragma once
 #include "AudioManager.h"
 #include "Enemy.h"
-#include "GameObjects/Effect/FootprintManager.h"
+#include "Effect/FootprintManager.h"
 #include <list>
 #include <memory>
 #include <string>

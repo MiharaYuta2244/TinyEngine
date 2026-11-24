@@ -1,7 +1,7 @@
 #pragma once
 #include "EngineContext.h"
 #include "Font.h"
-#include "GameObjects/ResultUI/Animation/SpriteScaleWipeAnimator.h"
+#include "UI/ResultUI/Animation/SpriteScaleWipeAnimator.h"
 #include "GameTimer.h"
 #include "Sprite.h"
 #include "TextSprite.h"

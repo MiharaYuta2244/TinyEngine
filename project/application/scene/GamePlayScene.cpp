@@ -1,7 +1,7 @@
 #include "GamePlayScene.h"
 #include "InputBindings.h"
 #include "MathUtility.h"
-#include "GameObjects/Effect/EffectGenerator.h"
+#include "Effect/EffectGenerator.h"
 #include "SceneManager.h"
 
 using namespace TinyEngine;

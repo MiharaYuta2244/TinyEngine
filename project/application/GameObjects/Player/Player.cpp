@@ -2,7 +2,7 @@
 #include "DebugCamera.h"
 #include "GameObjects/Enemy/Weapon/EnemyBomb.h"
 #include "ColorPalette.h"
-#include "GameObjects/Effect/EffectGenerator.h"
+#include "Effect/EffectGenerator.h"
 #include "GameObjects/Enemy/EnemyManager.h"
 #include "GameObjects/PlayTestConfig.h"
 #include "MathOperator.h"

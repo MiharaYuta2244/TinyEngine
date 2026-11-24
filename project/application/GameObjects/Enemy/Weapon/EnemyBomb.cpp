@@ -1,5 +1,5 @@
 #include "EnemyBomb.h"
-#include "GameObjects/Effect/EffectGenerator.h"
+#include "Effect/EffectGenerator.h"
 #include "Particle.h"
 
 EnemyBomb::~EnemyBomb() = default;

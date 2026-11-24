@@ -291,10 +291,10 @@
     <ClCompile Include="Application\Menu\OptionMenu.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Application\GameObjects\Effect\FlashEffect.cpp">
+    <ClCompile Include="Application\Effect\FlashEffect.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Application\GameObjects\Effect\LetterBox.cpp">
+    <ClCompile Include="Application\Effect\LetterBox.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\GameObjects\StageObjects\Ground\Ground.cpp">
@@ -306,7 +306,7 @@
     <ClCompile Include="Application\Scene\ResultScene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Application\GameObjects\ResultUI\Animation\SpriteScaleWipeAnimator.cpp">
+    <ClCompile Include="Application\UI\ResultUI\Animation\SpriteScaleWipeAnimator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3D\Skybox\SkyboxCommon.cpp">
@@ -351,7 +351,7 @@
     <ClCompile Include="Application\Cinematic\CameraDeathZoomController.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Application\GameObjects\Effect\DecideEffect.cpp">
+    <ClCompile Include="Application\Effect\DecideEffect.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3D\Particle\Modules\HitSparkModule.cpp">
@@ -408,7 +408,7 @@
     <ClCompile Include="Application\Collision\CollisionManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Application\GameObjects\Effect\EffectGenerator.cpp">
+    <ClCompile Include="Application\Effect\EffectGenerator.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3D\Particle\GPUParticle.cpp">
@@ -423,7 +423,7 @@
     <ClCompile Include="Engine\3D\Particle\Modules\HealSphereModule.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Application\GameObjects\ControlUI\ControlUI.cpp">
+    <ClCompile Include="Application\UI\ControlUI\ControlUI.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\GameObjects\Enemy\Weapon\EnemyBomb.cpp">
@@ -483,7 +483,7 @@
     <ClCompile Include="Application\GameObjects\Enemy\Behavior\EnemyBehaviorFactory.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Application\GameObjects\Effect\FootprintManager.cpp">
+    <ClCompile Include="Application\Effect\FootprintManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3D\Particle\Modules\WoodShardModule.cpp">
@@ -510,10 +510,10 @@
     <ClCompile Include="Application\Fade\SceneTransition.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Application\GameObjects\ResultUI\Button\Button.cpp">
+    <ClCompile Include="Application\UI\ResultUI\Button\Button.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Application\GameObjects\ResultUI\Button\ButtonGroup.cpp">
+    <ClCompile Include="Application\UI\ResultUI\Button\ButtonGroup.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Animation\AnimationLibrary.cpp">
@@ -525,7 +525,7 @@
     <ClCompile Include="Application\GameObjects\Enemy\PiyoEffect.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Application\GameObjects\Effect\StageClearCutIn.cpp">
+    <ClCompile Include="Application\Effect\StageClearCutIn.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\GameObjects\Player\PlayerInput.cpp">
@@ -883,10 +883,10 @@
     <ClInclude Include="Application\Menu\OptionMenu.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObjects\Effect\FlashEffect.h">
+    <ClInclude Include="Application\Effect\FlashEffect.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObjects\Effect\LetterBox.h">
+    <ClInclude Include="Application\Effect\LetterBox.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObjects\StageObjects\Ground\Ground.h">
@@ -901,7 +901,7 @@
     <ClInclude Include="Application\Scene\ResultScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObjects\ResultUI\Animation\SpriteScaleWipeAnimator.h">
+    <ClInclude Include="Application\UI\ResultUI\Animation\SpriteScaleWipeAnimator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3D\Skybox\SkyboxCommon.h">
@@ -970,7 +970,7 @@
     <ClInclude Include="Application\GameObjects\IGameObject.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObjects\Effect\DecideEffect.h">
+    <ClInclude Include="Application\Effect\DecideEffect.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3D\Particle\Modules\HitSparkModule.h">
@@ -1027,7 +1027,7 @@
     <ClInclude Include="Application\Collision\CollisionManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObjects\Effect\EffectGenerator.h">
+    <ClInclude Include="Application\Effect\EffectGenerator.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3D\Particle\GPUParticle.h">
@@ -1048,7 +1048,7 @@
     <ClInclude Include="Engine\Base\Utility\ColorPalette.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObjects\ControlUI\ControlUI.h">
+    <ClInclude Include="Application\UI\ControlUI\ControlUI.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObjects\Enemy\Weapon\EnemyBomb.h">
@@ -1126,7 +1126,7 @@
     <ClInclude Include="Application\GameObjects\Enemy\Behavior\EnemyBehaviorFactory.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObjects\Effect\FootprintManager.h">
+    <ClInclude Include="Application\Effect\FootprintManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3D\Particle\Modules\WoodShardModule.h">
@@ -1168,10 +1168,10 @@
     <ClInclude Include="Application\Fade\SceneTransition.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObjects\ResultUI\Button\Button.h">
+    <ClInclude Include="Application\UI\ResultUI\Button\Button.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObjects\ResultUI\Button\ButtonGroup.h">
+    <ClInclude Include="Application\UI\ResultUI\Button\ButtonGroup.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Animation\AnimationLibrary.h">
@@ -1192,7 +1192,7 @@
     <ClInclude Include="Application\GameObjects\PlayTestConfig.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObjects\Effect\StageClearCutIn.h">
+    <ClInclude Include="Application\Effect\StageClearCutIn.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObjects\Player\PlayerInput.h">
@@ -1208,6 +1208,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObjects\StageObjects\Glass\GlassShardScatter.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\Collision\CollisionEvent.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
