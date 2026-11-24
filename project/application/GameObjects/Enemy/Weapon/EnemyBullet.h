@@ -1,64 +1,38 @@
 #pragma once
-#include "AABB.h"
+#include "AnimationBundle.h"
 #include "Collision/CollisionEvent.h"
 #include "GameObjects/ObjectRender/ObjectRender.h"
-#include "OBB.h"
-#include "Rect.h"
-#include "AnimationBundle.h"
 
 /// <summary>
-/// 敵の弾クラス
+/// 銃口を起点に、命中するか最大射程に達するまで伸びる敵のビーム
 /// </summary>
 class EnemyBullet : public CollisionObject {
 public:
 	CollisionTag GetTag() const override { return CollisionTag::EnemyBullet; }
 
-	// 初期化処理
-	void Initialize(EngineContext* ctx, Vector2 dir, Vector3 pos);
-
-	// 更新処理
+	void Initialize(EngineContext* ctx, const Vector3& muzzle, const Vector3& direction, std::uint64_t shooterId);
 	void Update(float deltaTime);
-
-	// 描画処理
 	void Draw();
 
-	// 削除用の関数
-	bool IsDead(const Rect<float>& rect) const;
-
-	// 座標のGetter
-	Vector3 GetPosition() const { return transform_.translate; }
-
-	// 当たり判定Getter
-	OBB GetCollision() const { return col_; }
-
-	// 当たり判定が有効かどうかGetter
-	bool IsCollisionActive() const { return aliveFrameCount_ <= 1; }
+	bool IsDead() const { return deathTimer_ >= kLifeTime; }
+	const Vector3& GetDirection() const { return direction_; }
+	std::uint64_t GetShooterId() const { return shooterId_; }
+	Vector3 GetTip() const;
+	float GetGrowthDistance(float deltaTime) const;
+	void Extend(float distance, bool hit);
 
 private:
-	Transform transform_;
+	static constexpr float kLifeTime = 0.5f;
+	static constexpr float kMaxLength = 30.0f;
+	static constexpr float kGrowthSpeed = 180.0f;
 
-	// 描画用インスタンス
+	Transform transform_{};
 	std::unique_ptr<ObjectRender> render_;
-
-	// 方向
-	Vector2 direction_;
-
-	// AABB当たり判定
-	OBB col_;
-
-	// 生存時間管理用の変数
-	float deathTimer_ = 0.0f;      // 経過時間タイマー
-	const float kLifeTime_ = 0.5f; // 消滅までの時間
-
-	// 敵と弾の余白
-	float margin_ = 6.5f;
-
-	// レーザー用のタイマー
-	float laserTimer_ = 0.0f;
-
-	// スケールアニメーション用変数
+	Vector3 muzzle_{};
+	Vector3 direction_{};
+	std::uint64_t shooterId_ = 0;
+	float length_ = 0.0f;
+	float deathTimer_ = 0.0f;
+	bool hasHit_ = false;
 	AnimationBundle<Vector2> scaleXYAnim_;
-
-	// 生成されてからのフレーム数
-	int aliveFrameCount_ = 0;
 };

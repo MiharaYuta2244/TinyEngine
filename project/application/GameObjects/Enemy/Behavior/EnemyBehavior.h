@@ -1,6 +1,7 @@
 #pragma once
 #include "EngineContext.h"
 #include "GameObjects/Enemy/EnemyType.h"
+#include <cstdint>
 #include <memory>
 #include <list>
 
@@ -16,7 +17,9 @@ struct ShotContext {
 	Vector3 origin;   // 敵の座標
 	Vector3 toTarget; // 発射方向
 	Vector3 lastKnownPlayerPos;
-	float bulletMargin;
+	Vector3 muzzle;
+	Vector3 beamDirection;
+	std::uint64_t shooterId;
 	EnemyBulletManager* bullets;
 	EnemyBombManager* bombs;
 };

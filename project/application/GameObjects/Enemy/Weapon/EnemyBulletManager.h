@@ -1,6 +1,5 @@
 #pragma once
 #include "EnemyBullet.h"
-#include "Rect.h"
 #include <list>
 #include <memory>
 
@@ -24,7 +23,4 @@ public:
 private:
 	// 弾のリスト
 	std::list<std::unique_ptr<EnemyBullet>> bullets_;
-
-	// 弾が生存できる範囲
-	Rect<float> bulletActiveArea_ = {100.0f, -100.0f, 100.0f, -100.0f};
 };

@@ -2,8 +2,6 @@
 #include "AStarPathfinder.h"
 #include "Collision.h"
 #include "GameObjects/Player/Player.h"
-#include "Gameobjects/Enemy/Weapon/EnemyBombManager.h"
-#include "Gameobjects/Enemy/Weapon/EnemyBulletManager.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
 #include "Random.h"
@@ -21,13 +19,10 @@ void EnemyAI::Initialize(Transform* transform, EngineContext* ctx, IEnemyBehavio
 }
 
 void EnemyAI::Update(
-    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager,
-    const std::optional<Vector3>& distraction) {
-	isShotThisFrame_ = false;
-
-	// 炎上した敵への注意より、プレイヤーの視認を優先する。
-	if (distraction && (state_ == State::Normal || state_ == State::Vigilance) &&
-	    !CheckPlayerInVision(player, obstacles, doorManager, glassManager)) {
+    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager,
+    EnemyBombManager* enemyBombManager, const std::optional<Vector3>& distraction) {
+	// 炎上した敵への注意より、プレイヤーの視認を優先する
+	if (distraction && (state_ == State::Normal || state_ == State::Vigilance) && !CheckPlayerInVision(player, obstacles, doorManager, glassManager)) {
 		LookatPlayer(deltaTime, *distraction, transform_->translate, hearTurnSpeed_);
 		canSeePlayer_ = false;
 		ResetShotTimer();
@@ -89,22 +84,19 @@ void EnemyAI::UpdateBurning(float deltaTime, const std::vector<AABB>& obstacles,
 			bounds.min = bounds.min - padding;
 			bounds.max = bounds.max + padding;
 			float hitTime;
-			return Collision::Intersect(Segment{position, movement}, bounds, hitTime) &&
-			    (hitTime > 0.0f || Collision::Intersect(bounds, position + movement));
+			return Collision::Intersect(Segment{position, movement}, bounds, hitTime) && (hitTime > 0.0f || Collision::Intersect(bounds, position + movement));
 		};
+
 		const auto& doors = doorManager->GetObjects();
 		const auto& glasses = glassManager->GetObjects();
 		if (!std::any_of(obstacles.begin(), obstacles.end(), blocked) &&
-		    !std::any_of(doors.begin(), doors.end(), [&](const auto& door) {
-			    return !door->GetIsOpen() && blocked(door->GetCollision());
-		    }) &&
-		    !std::any_of(glasses.begin(), glasses.end(), [&](const auto& glass) {
-			    return glass->GetIsActive() && blocked(glass->GetCollision());
-		    })) {
+		    !std::any_of(doors.begin(), doors.end(), [&](const auto& door) { return !door->GetIsOpen() && blocked(door->GetCollision()); }) &&
+		    !std::any_of(glasses.begin(), glasses.end(), [&](const auto& glass) { return glass->GetIsActive() && blocked(glass->GetCollision()); })) {
 			transform_->translate += movement;
 			transform_->rotate.y = panicHeading_;
 			break;
 		}
+
 		panicHeading_ += std::numbers::pi_v<float> / 4.0f;
 	}
 }
@@ -212,7 +204,8 @@ void EnemyAI::UpdateNormal(float deltaTime, Player* player, const std::vector<AA
 }
 
 void EnemyAI::UpdateVigilance(
-    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager) {
+    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager,
+    EnemyBombManager* enemyBombManager) {
 	Vector3 playerPos = player->GetPosition();
 	Vector3 enemyPos = transform_->translate;
 
@@ -236,7 +229,6 @@ void EnemyAI::UpdateVigilance(
 
 		// 警戒状態時は基本的に射撃を行う
 		Vector3 toTarget = playerPos - enemyPos;
-		toTarget.y = 0.0f;
 		shotTimer_ += deltaTime;
 
 		// 弾の発射処理
@@ -247,7 +239,6 @@ void EnemyAI::UpdateVigilance(
 			// SE再生
 			audioManager_->PlaySE("Shot", 0.3f);
 		}
-
 	} else {
 		// shotTimerをリセット
 		shotTimer_ = 0.0f;
@@ -319,7 +310,7 @@ void EnemyAI::UpdateHold(float deltaTime, Player* player, EnemyBulletManager* en
 	if (burstDuration <= 0.0f) {
 		shotTimer_ += deltaTime;
 		if (shotTimer_ >= GetHoldChargeTime()) {
-			Shot(playerDirection, enemyBulletManager, enemyBombManager);
+			Shot(playerDirection, enemyBulletManager, enemyBombManager, false);
 			audioManager_->PlaySE("Shot", 0.3f);
 			isShotHoldState_ = false;
 			hasShotInHold_ = true;
@@ -346,7 +337,7 @@ void EnemyAI::UpdateHold(float deltaTime, Player* player, EnemyBulletManager* en
 
 	if (holdBurstShotTimer_ >= interval) {
 		holdBurstShotTimer_ -= interval;
-		Shot(playerDirection, enemyBulletManager, enemyBombManager);
+		Shot(playerDirection, enemyBulletManager, enemyBombManager, false);
 		audioManager_->PlaySE("Shot", 0.2f);
 	}
 
@@ -463,12 +454,30 @@ bool EnemyAI::IsSegmentIntersectAABB(const Vector3& start, const Vector3& end, c
 	return true; // 交差している
 }
 
-void EnemyAI::Shot(Vector3 toTarget, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager) {
-	isShotThisFrame_ = true;
+void EnemyAI::Shot(Vector3 toTarget, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager, bool aimAtTarget) {
 	isFirstShot_ = false; // 以降は通常の連射間隔
-	shotDirection_ = MathUtility::Normalize(toTarget);
 	shotTimer_ = 0.0f;
-	behavior_->Shot({ctx_, transform_->translate, toTarget, lastKnownPlayerPos_, bulletMargin_, enemyBulletManager, enemyBombManager});
+	pendingShot_ = ShotContext{ctx_, transform_->translate, toTarget, lastKnownPlayerPos_, {}, {}, 0, enemyBulletManager, enemyBombManager};
+	aimPendingShotAtTarget_ = aimAtTarget;
+}
+
+std::optional<Vector3> EnemyAI::FirePendingShot(const Vector3& muzzle, std::uint64_t shooterId) {
+	if (!pendingShot_) {
+		return std::nullopt;
+	}
+
+	ShotContext shot = *pendingShot_;
+	pendingShot_.reset();
+	shot.muzzle = muzzle;
+	shot.shooterId = shooterId;
+	Vector3 aim = aimPendingShotAtTarget_ ? shot.origin + shot.toTarget - muzzle : shot.toTarget;
+
+	// 通常時も掴まれているときと同じく、銃口の高さで水平に撃つ
+	aim.y = 0.0f;
+	const float yaw = transform_->rotate.y;
+	shot.beamDirection = MathUtility::LengthSquared(aim) > 1e-6f ? MathUtility::Normalize(aim) : Vector3{std::sin(yaw), 0.0f, std::cos(yaw)};
+	behavior_->Shot(shot);
+	return shot.beamDirection;
 }
 
 bool EnemyAI::IsCharging() const {

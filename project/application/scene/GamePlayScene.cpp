@@ -188,9 +188,6 @@ void GamePlayScene::Update() {
 	// 敵の更新処理
 	enemyManager_->Update(deltaTime, player_.get(), enemyBulletManager_.get(), stage_->GetSolidObstacles(), stage_->GetDoorManager(), stage_->GetGlassManager(), enemyBombManager_.get());
 
-	// 敵の弾の更新処理
-	enemyBulletManager_->Update(deltaTime);
-
 	// 敵の爆弾の更新処理
 	enemyBombManager_->Update(deltaTime);
 
@@ -204,7 +201,7 @@ void GamePlayScene::Update() {
 	    [this](Glass& glass, const Vector3& direction) { OnGlassBreak(glass, direction); },
 	    [this] { TriggerPlayerHitEffect(); },
 	};
-	collisionManager_->CheckCollisions(*player_, *enemyManager_, *enemyBulletManager_, *enemyBombManager_, *stage_, collisionContext, deltaTime);
+	collisionManager_->CheckCollisions(*player_, *enemyManager_, *enemyBombManager_, *stage_, collisionContext, deltaTime);
 
 	// 壊れた石鹸のエフェクト生成
 	for (auto& soap : stage_->GetSoapManager()->GetObjects()) {
@@ -216,6 +213,10 @@ void GamePlayScene::Update() {
 	// 押し戻し完了後の最終的な座標で、描画更新&AABB更新
 	player_->PostUpdate();
 	enemyManager_->PostUpdate();
+
+	// 銃口と盾の描画位置が確定してから、ビームを伸ばす。
+	collisionManager_->CheckEnemyBeams(*player_, *enemyManager_, *enemyBulletManager_, *stage_, collisionContext, deltaTime);
+	enemyBulletManager_->Update(deltaTime);
 
 	// ゴールしていたらフラッシュ開始
 	if (stage_->GetGoal()->GetIsGoal()) {

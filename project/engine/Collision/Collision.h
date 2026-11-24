@@ -50,6 +50,7 @@ bool Intersect(const OBB& obb, const AABB& aabb);
 
 // 線分とAABBの交差を判定し、最初の交差位置を線分上の割合でoutTに返す
 bool Intersect(const Segment& segment, const AABB& aabb, float& outT);
+bool Intersect(const Segment& segment, const OBB& obb, float& outT);
 
 // レイとAABBの交差を判定し、最初の交差位置のレイパラメータをoutDistanceに返す
 bool Intersect(const Ray& ray, const AABB& aabb, float& outDistance);

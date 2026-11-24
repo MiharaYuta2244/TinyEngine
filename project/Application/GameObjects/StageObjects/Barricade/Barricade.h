@@ -29,6 +29,7 @@ public:
 
 	// 当たり判定Getter
 	AABB GetCollision() const { return collision_; }
+	bool CheckBeamHit(const Segment& segment, float& hitTime) const;
 	bool IsSolid() const { return CanGrab() || IsPulling(); }
 
 	bool CanGrab() const { return state_ == State::Attached; }
@@ -68,6 +69,7 @@ private:
 	float throwDistanceLeft_ = 0.0f;
 	Segment throwStep_{};
 	AABB collision_{}; // 当たり判定
+	const Model* model_ = nullptr;
 
 	// オブジェクト数カウント用
 	static int index;

@@ -16,8 +16,12 @@ class CollisionManager {
 public:
 	// 全てのゲームオブジェクトの当たり判定の処理を回す
 	void CheckCollisions(
-	    Player& player, EnemyManager& enemyManager, EnemyBulletManager& bulletManager, EnemyBombManager& bombManager,
+	    Player& player, EnemyManager& enemyManager, EnemyBombManager& bombManager,
 	    Stage& stage, const CollisionContext& context, float deltaTime);
+
+	void CheckEnemyBeams(
+	    Player& player, EnemyManager& enemyManager, EnemyBulletManager& bulletManager, Stage& stage,
+	    const CollisionContext& context, float deltaTime);
 
 private:
 	using Contact = std::tuple<std::uint64_t, CollisionPart, std::uint64_t, CollisionPart>;
@@ -26,6 +30,7 @@ private:
 	    CollisionObject& first, CollisionPart firstPart, CollisionObject& second, CollisionPart secondPart,
 	    const CollisionContext& context);
 
+private:
 	std::set<Contact> previousContacts_;
 	std::set<Contact> currentContacts_;
 };

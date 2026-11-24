@@ -147,9 +147,6 @@ private:
 	// プレイヤー発見時「!」マークの生成
 	void GenerateExMark();
 
-	// マズルフラッシュ生成関数
-	void GenerateMuzzleFlash(const Vector3& direction);
-
 	// 血痕の生成
 	void AddBloodDecal();
 

@@ -7,19 +7,52 @@
 #include "GameObjects/StageObjects/Stage.h"
 #include "MathOperator.h"
 #include <algorithm>
+#include <cmath>
 #include <iterator>
 #include <limits>
 #include <utility>
 #include <vector>
 
 namespace {
+// キャラクターモデルの足元から頭部までの高さ（モデル空間）
+constexpr float kEnemyModelHeight = 8.6f;
+constexpr float kPlayerModelHeight = 2.45f;
+
 // 判定に使う範囲と、押し戻しの対象を保持する
 struct Obstacle {
-	CollisionObject& object;
+	IGameObject& object;
 	AABB bounds;
 	bool blocksPlayer;
 	bool blocksEnemy;
 };
+
+std::vector<Obstacle> CollectObstacles(Stage& stage) {
+	std::vector<Obstacle> obstacles;
+	const auto appendObstacles = [&](const auto& objects, bool blocksEnemy) {
+		for (const auto& object : objects) {
+			obstacles.push_back({*object, object->GetCollision(), true, blocksEnemy});
+		}
+	};
+
+	appendObstacles(stage.GetWallManager()->GetObjects(), true);
+	appendObstacles(stage.GetDecorationManager()->GetObjects(), true);
+	for (const auto& barricade : stage.GetBarricadeManager()->GetObjects()) {
+		if (barricade->IsSolid()) {
+			obstacles.push_back({*barricade, barricade->GetCollision(), true, true});
+		}
+	}
+
+	// ドアはプレイヤーの接近で開き、閉じている間は敵の移動を妨げる
+	for (const auto& door : stage.GetDoorManager()->GetObjects()) {
+		if (!door->GetIsOpen()) {
+			obstacles.push_back({*door, door->GetCollision(), false, true});
+		}
+	}
+
+	appendObstacles(stage.GetGlassManager()->GetObjects(), false);
+	appendObstacles(stage.GetCageManager()->GetObjects(), false);
+	return obstacles;
+}
 } // namespace
 
 #pragma region 接触イベントの通知
@@ -48,24 +81,19 @@ void CollisionManager::NotifyContact(CollisionObject& first, CollisionPart first
 }
 #pragma endregion 接触イベントの通知
 
-void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManager, EnemyBulletManager& bulletManager, EnemyBombManager& bombManager, Stage& stage, const CollisionContext& context, float deltaTime) {
+void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManager, EnemyBombManager& bombManager, Stage& stage, const CollisionContext& context, float deltaTime) {
+	// 前フレームのビームも含め、接触履歴を更新する
+	previousContacts_.swap(currentContacts_);
+	currentContacts_.clear();
+
 #pragma region 当たり判定に使うオブジェクトの取得
 	using enum CollisionPart;
 	auto& enemies = enemyManager.GetEnemies();
-	const auto& bullets = bulletManager.GetBullets();
 	auto& glassManager = *stage.GetGlassManager();
 	auto& soapManager = *stage.GetSoapManager();
 	const auto& glasses = glassManager.GetObjects();
 	const auto& soaps = soapManager.GetObjects();
 #pragma endregion 当たり判定に使うオブジェクトの取得
-
-#pragma region 敵の弾がプレイヤーに当たった時の処理
-	for (const auto& bullet : bullets) {
-		if (bullet->IsCollisionActive() && Collision::Intersect(player.GetBodyCol(), bullet->GetCollision())) {
-			NotifyContact(player, Body, *bullet, Body, context);
-		}
-	}
-#pragma endregion 敵の弾がプレイヤーに当たった時の処理
 
 #pragma region プレイヤーの攻撃範囲当たり判定
 	player.SetEnableAttack(false);
@@ -78,7 +106,7 @@ void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManage
 	}
 
 	if (player.GetIsAttack() && !player.IsDead()) {
-		// 攻撃範囲内で最も近い宝箱を1つ開ける。
+		// 攻撃範囲内で最も近い宝箱を1つ開ける
 		TreasureChest* target = nullptr;
 		float closestDistance = std::numeric_limits<float>::infinity();
 		for (const auto& chest : stage.GetTreasureChestManager()->GetObjects()) {
@@ -107,30 +135,7 @@ void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManage
 #pragma endregion プレイヤーの攻撃範囲当たり判定
 
 #pragma region 障害物の収集
-	std::vector<Obstacle> obstacles;
-	const auto appendObstacles = [&](const auto& objects, bool blocksEnemy) {
-		for (const auto& object : objects) {
-			obstacles.push_back({*object, object->GetCollision(), true, blocksEnemy});
-		}
-	};
-
-	appendObstacles(stage.GetWallManager()->GetObjects(), true);
-	appendObstacles(stage.GetDecorationManager()->GetObjects(), true);
-	for (const auto& barricade : stage.GetBarricadeManager()->GetObjects()) {
-		if (barricade->IsSolid()) {
-			obstacles.push_back({*barricade, barricade->GetCollision(), true, true});
-		}
-	}
-
-	// ドアはプレイヤーの接近で開き、閉じている間は敵の移動を妨げる
-	for (const auto& door : stage.GetDoorManager()->GetObjects()) {
-		if (!door->GetIsOpen()) {
-			obstacles.push_back({*door, door->GetCollision(), false, true});
-		}
-	}
-
-	appendObstacles(glasses, false);
-	appendObstacles(stage.GetCageManager()->GetObjects(), false);
+	const auto obstacles = CollectObstacles(stage);
 #pragma endregion 障害物の収集
 
 #pragma region 障害物からの押し戻しとプレイヤーへの適用
@@ -216,18 +221,6 @@ void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManage
 	}
 #pragma endregion 敵同士の当たり判定
 
-#pragma region 敵と敵の弾の当たり判定
-	if (player.GetGrabbedEnemy()) {
-		for (const auto& enemy : enemies) {
-			for (const auto& bullet : bullets) {
-				if (!enemy->IsDead() && bullet->IsCollisionActive() && Collision::Intersect(enemy->GetBodyCol(), bullet->GetCollision())) {
-					NotifyContact(*enemy, Body, *bullet, Body, context);
-				}
-			}
-		}
-	}
-#pragma endregion 敵と敵の弾の当たり判定
-
 #pragma region プレイヤーと爆発範囲の当たり判定
 	for (const auto& bomb : bombManager.GetBombs()) {
 		if (bomb->IsExploded() && Collision::Intersect(player.GetBodyCol(), bomb->GetBombCollision())) {
@@ -284,9 +277,9 @@ void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManage
 			for (const auto& obstacle : obstacles) {
 				float hitTime;
 				AABB bounds = obstacle.bounds;
-				// 壁などの地上オブジェクトは既存の当たり判定がXZ平面にある。
+				// 壁などの地上オブジェクトは既存の当たり判定がXZ平面にある
 				if (bounds.min.y == bounds.max.y) {
-					const auto& transform = static_cast<IGameObject&>(obstacle.object).GetTransform();
+					const auto& transform = obstacle.object.GetTransform();
 					bounds.max.y += std::abs(transform.scale.y);
 				}
 				if (molotov->CheckThrowHit(bounds, hitTime)) {
@@ -321,8 +314,87 @@ void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManage
 	molotovManager.RemoveObjectsIf([](const Molotov& molotov) { return molotov.IsFinished(); });
 #pragma endregion 火炎瓶の着地と炎の当たり判定
 
-#pragma region 次フレーム用の接触履歴の更新
-	previousContacts_.swap(currentContacts_);
-	currentContacts_.clear();
-#pragma endregion 次フレーム用の接触履歴の更新
+}
+
+void CollisionManager::CheckEnemyBeams(
+    Player& player, EnemyManager& enemyManager, EnemyBulletManager& bulletManager, Stage& stage, const CollisionContext& context, float deltaTime) {
+	const auto& bullets = bulletManager.GetBullets();
+	if (bullets.empty()) {
+		return;
+	}
+
+	const auto obstacles = CollectObstacles(stage);
+	for (const auto& bullet : bullets) {
+		const float distance = bullet->GetGrowthDistance(deltaTime);
+		if (distance <= 0.0f) {
+			continue;
+		}
+
+		// 先端が今回進む区間から、一番手前の接触だけを選ぶ
+		const Segment segment{bullet->GetTip(), bullet->GetDirection() * distance};
+		float closestHit = std::numeric_limits<float>::infinity();
+		CollisionObject* hitObject = nullptr;
+		const auto recordHit = [&](CollisionObject& object, float hitTime) {
+			if (hitTime < closestHit) {
+				closestHit = hitTime;
+				hitObject = &object;
+			}
+		};
+		const auto test = [&](CollisionObject& object, const auto& bounds) {
+			float hitTime;
+			if (Collision::Intersect(segment, bounds, hitTime)) {
+				recordHit(object, hitTime);
+			}
+		};
+		const auto testCharacter = [&](auto& character, float modelHeight) {
+			// 移動用の判定は足元にあるため、ビームには胴体と頭部の高さも含める。
+			AABB bounds = character.GetBodyCol();
+			const auto& pose = character.GetTransform();
+			bounds.max.y = std::max(bounds.max.y, pose.translate.y + modelHeight * std::abs(pose.scale.y));
+			test(character, bounds);
+		};
+
+		for (const auto& obstacle : obstacles) {
+			// バリケードは構えている盾も含めて、現在の描画姿勢で判定する
+			if (obstacle.object.CompareTag(CollisionTag::Barricade)) {
+				continue;
+			}
+			AABB bounds = obstacle.bounds;
+			if (bounds.min.y == bounds.max.y) {
+				const float halfHeight = std::abs(obstacle.object.GetTransform().scale.y);
+				bounds.min.y -= halfHeight;
+				bounds.max.y += halfHeight;
+			}
+			test(obstacle.object, bounds);
+		}
+
+		for (const auto& barricade : stage.GetBarricadeManager()->GetObjects()) {
+			float hitTime;
+			if (barricade->CheckBeamHit(segment, hitTime)) {
+				recordHit(*barricade, hitTime);
+			}
+		}
+
+		for (const auto& chest : stage.GetTreasureChestManager()->GetObjects()) {
+			test(*chest, chest->GetCollision());
+		}
+
+		for (const auto& enemy : enemyManager.GetEnemies()) {
+			if (!enemy->IsDead() && enemy->GetCollisionId() != bullet->GetShooterId()) {
+				testCharacter(*enemy, kEnemyModelHeight);
+			}
+		}
+
+		if (!player.IsDead()) {
+			testCharacter(player, kPlayerModelHeight);
+		}
+
+		bullet->Extend(hitObject ? distance * closestHit : distance, hitObject != nullptr);
+		if (hitObject == &player) {
+			NotifyContact(player, CollisionPart::Body, *bullet, CollisionPart::Body, context);
+		} else if (hitObject && hitObject == player.GetGrabbedEnemy()) {
+			NotifyContact(*hitObject, CollisionPart::Body, *bullet, CollisionPart::Body, context);
+			player.ReleaseGrabbedEnemy();
+		}
+	}
 }

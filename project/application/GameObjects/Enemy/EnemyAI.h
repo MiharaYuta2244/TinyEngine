@@ -35,8 +35,8 @@ public:
 
 	// 更新処理
 	void Update(
-	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager,
-	    const std::optional<Vector3>& distraction);
+	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager,
+	    EnemyBombManager* enemyBombManager, const std::optional<Vector3>& distraction);
 
 	void Ignite();
 	bool IsBurning() const { return state_ == State::Burning; }
@@ -45,8 +45,7 @@ public:
 	// Getter
 	State GetState() const { return state_; }
 	Visionparam GetVisionParam() const { return visionParam_; }
-	bool IsShotThisFrame() const { return isShotThisFrame_; }
-	Vector3 GetShotDirection() const { return shotDirection_; }
+	std::optional<Vector3> FirePendingShot(const Vector3& muzzle, std::uint64_t shooterId);
 
 	// 掴み状態かどうかのSetter
 	void SetShotHoldState(bool isShotHoldState) {
@@ -96,9 +95,6 @@ public:
 		return isFirstShot_ ? shotIntervalFirst_ : shotIntervalNormal_;
 	}
 
-	// 撃たれた瞬間を返すGetter
-	bool GetIsShot() const { return isShotThisFrame_; }
-
 	// 発射タイマーの進行度Getter
 	float GetShotProgress() const {
 		float interval = GetShotInterval();
@@ -129,7 +125,8 @@ private:
 
 	// 警戒状態の更新処理
 	void UpdateVigilance(
-	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager);
+	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager,
+	    EnemyBombManager* enemyBombManager);
 
 	// 拘束状態の更新処理
 	void UpdateHold(float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager);
@@ -141,7 +138,7 @@ private:
 	bool IsSegmentIntersectAABB(const Vector3& start, const Vector3& end, const AABB& aabb);
 
 	// 弾の発射処理
-	void Shot(Vector3 toTarget, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager);
+	void Shot(Vector3 toTarget, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager, bool aimAtTarget = true);
 
 private:
 	Transform* transform_ = nullptr;
@@ -163,11 +160,10 @@ private:
 	float shotTimer_ = 0.0f;          // 射撃までの残り時間タイマー
 	float shotIntervalNormal_ = 1.5f; // 射撃間隔(通常時)
 	float shotIntervalHold_ = 1.0f;   // 射撃間隔(拘束時)
-	float bulletMargin_ = 10.0f;      // 敵と弾の間隔
-	bool isShotThisFrame_ = false;
 	bool isShotHoldState_ = true;
 	bool hasShotInHold_ = false; // 拘束時に1度でも射撃したかどうかのフラグ
-	Vector3 shotDirection_ = {0.0f, 0.0f, 1.0f};
+	std::optional<ShotContext> pendingShot_;
+	bool aimPendingShotAtTarget_ = true;
 	float shotTimerMultiPlier_ = 0.5f; // 拘束時の発射速度を早めるための変数
 	float shotIntervalFirst_ = 1.5f;   // 1発目の射撃間隔
 	bool isFirstShot_ = true;          // 警戒開始後まだ撃っていないか

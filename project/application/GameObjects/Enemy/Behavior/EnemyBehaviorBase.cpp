@@ -1,13 +1,13 @@
 #include "EnemyBehaviorBase.h"
 #include "GameObjects/Enemy/Weapon/EnemyBulletManager.h"
+#include <cmath>
 
-void EnemyBehaviorBase::FireBullet(const ShotContext& c, Vector2 dir2D) {
-	// 弾の発射
+void EnemyBehaviorBase::FireBullet(const ShotContext& c, float yawOffset) {
+	const float sinYaw = std::sin(yawOffset);
+	const float cosYaw = std::cos(yawOffset);
+	const Vector3& aim = c.beamDirection;
+	const Vector3 direction{aim.x * cosYaw + aim.z * sinYaw, aim.y, aim.z * cosYaw - aim.x * sinYaw};
 	auto bullet = std::make_unique<EnemyBullet>();
-	Vector3 pos = c.origin;
-	pos.x += dir2D.x * c.bulletMargin;
-	pos.z += dir2D.y * c.bulletMargin;
-	pos.y += 1.0f;
-	bullet->Initialize(c.engine, dir2D, pos);
+	bullet->Initialize(c.engine, c.muzzle, direction, c.shooterId);
 	c.bullets->AddBullet(std::move(bullet));
 }

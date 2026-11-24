@@ -1,6 +1,5 @@
 #include "Player.h"
 #include "DebugCamera.h"
-#include "GameObjects/Enemy/Weapon/EnemyBullet.h"
 #include "GameObjects/Enemy/Weapon/EnemyBomb.h"
 #include "ColorPalette.h"
 #include "GameObjects/Effect/EffectGenerator.h"
@@ -568,37 +567,13 @@ void Player::OnCollisionEnter(const CollisionEvent& event, const CollisionContex
 	if (!event.other.CompareTag(CollisionTag::EnemyBullet)) {
 		return;
 	}
-	const auto& bullet = static_cast<const EnemyBullet&>(event.other);
 
-	// レーザーの進行方向の逆を攻撃元とする。
-	const Vector3 direction = bullet.GetCollision().orientations[2];
-	bool guarded = BlocksWithShield({-direction.x, 0.0f, -direction.z});
 	if (!context.camera.GetIsShake()) {
 		context.camera.StartShake(0.1f, 0.1f);
 	}
 
-	// 敵を盾にしたとき
-	if (Enemy* shieldEnemy = GetGrabbedEnemy()) {
-		const Vector3 toBullet = MathUtility::Normalize(bullet.GetPosition() - GetPosition());
-		const Vector2 facing = GetDirection();
-		if (facing.x * toBullet.x + facing.y * toBullet.z < 0.0f) {
-			guarded = true;
-			const bool wasAlive = !shieldEnemy->IsDead();
-			shieldEnemy->Damage();
-			if (wasAlive && shieldEnemy->IsDead()) {
-				context.onEnemyDeath(*shieldEnemy);
-			}
-
-			// 敵ポインタを破棄
-			ReleaseGrabbedEnemy();
-		}
-	}
-
-	// ガードできなかった時はダメージ処理
-	if (!guarded) {
-		Damage(1);
-		context.onPlayerHit();
-	}
+	Damage(1);
+	context.onPlayerHit();
 }
 
 void Player::OnCollisionStay(const CollisionEvent& event, const CollisionContext&) {

@@ -1,6 +1,7 @@
 #include "Barricade.h"
 #include "MathOperator.h"
 #include "MathUtility.h"
+#include "ModelManager.h"
 #include <algorithm>
 #include <cmath>
 #include <numbers>
@@ -40,6 +41,7 @@ void Barricade::Initialize(EngineContext* ctx, const Transform& transform) {
 	// 描画用インスタンス生成&初期化
 	render_ = std::make_unique<ObjectRender>();
 	render_->Initialize(ctx, "Barricade.obj");
+	model_ = ctx->modelManager->FindModel("Barricade.obj");
 	render_->SetTransform(transform_);
 	render_->SetEnableLighting(true);
 }
@@ -61,6 +63,22 @@ void Barricade::Update(float deltaTime) {
 
 	// ギズモ用当たり判定更新
 	UpdateAABBForGizmo();
+}
+
+bool Barricade::CheckBeamHit(const Segment& segment, float& hitTime) const {
+	const Transform pose = IsPulling() ? GetPullPose() : (CanGrab() ? transform_ : shieldPose_);
+	if (!model_ || pose.scale.x == 0.0f || pose.scale.y == 0.0f || pose.scale.z == 0.0f) {
+		return false;
+	}
+
+	// 描画と同じ姿勢を使い、斜めに構えた盾もローカル空間で判定する
+	const auto world = model_->GetModelData().rootNode.localMatrix * MathUtility::MakeAffineMatrix(pose.scale, pose.rotate, pose.translate);
+	auto inverseWorld = MathUtility::Inverse(world);
+	Vector3 start = segment.origin;
+	Vector3 end = segment.origin + segment.diff;
+	start = MathUtility::Transform(start, inverseWorld);
+	end = MathUtility::Transform(end, inverseWorld);
+	return Collision::Intersect(Segment{start, end - start}, model_->GetLocalBounds(), hitTime);
 }
 
 void Barricade::UpdateCollision() {

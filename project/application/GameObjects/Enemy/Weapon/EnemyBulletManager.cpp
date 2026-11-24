@@ -6,7 +6,7 @@ void EnemyBulletManager::Update(float deltaTime) {
 	}
 
 	// 弾の削除
-	std::erase_if(bullets_, [this](const std::unique_ptr<EnemyBullet>& b) { return b->IsDead(bulletActiveArea_); });
+	std::erase_if(bullets_, [](const std::unique_ptr<EnemyBullet>& b) { return b->IsDead(); });
 }
 
 void EnemyBulletManager::Draw() {

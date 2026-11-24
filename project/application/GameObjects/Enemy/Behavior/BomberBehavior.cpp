@@ -4,9 +4,8 @@
 
 void BomberBehavior::Shot(const ShotContext& c) {
 	float distSq = c.toTarget.x * c.toTarget.x + c.toTarget.z * c.toTarget.z;
-	Vector3 d = MathUtility::Normalize(c.toTarget);
 	if (!c.bombs || distSq <= 15.0f * 15.0f) {
-		FireBullet(c, {d.x, d.z});
+		FireBullet(c);
 	} else {
 		auto bomb = std::make_unique<EnemyBomb>();
 		bomb->Initialize(c.engine, c.origin, c.lastKnownPlayerPos);

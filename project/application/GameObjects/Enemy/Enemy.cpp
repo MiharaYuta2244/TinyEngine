@@ -130,11 +130,6 @@ void Enemy::Update(
 	// アニメーション更新処理
 	UpdateAnimation(prevPos);
 
-	// マズルフラッシュの生成
-	if (ai_->IsShotThisFrame()) {
-		GenerateMuzzleFlash(ai_->GetShotDirection());
-	}
-
 	// プレイヤー発見時に「!」マークの生成
 	if (lastState != ai_->GetState() && ai_->GetState() == EnemyAI::State::Vigilance) {
 		GenerateExMark();
@@ -187,9 +182,21 @@ void Enemy::PostUpdate() {
 	// ボーン座標が最新になった後で足跡を置く
 	UpdateFootprint();
 
-	// 銃はグリップを原点にし、銃口をローカルの +Z に向けている
-	const Vector3 hand = render_->GetObject3d()->GetBonePos(L"ボーン.007", /*includeModelRoot=*/true);
-	renderGun_->Update({transform_.scale, {0.0f, transform_.rotate.y, 0.0f}, hand});
+	// 銃はグリップを原点にし、銃口をローカルの+Zに向けている
+	const Vector3 hand = render_->GetObject3d()->GetBonePos(L"ボーン.007", true);
+	const Transform gunPose{transform_.scale, {0.0f, transform_.rotate.y, 0.0f}, hand};
+	renderGun_->Update(gunPose);
+
+	if (!IsDead()) {
+		// OBJの銃口面の中心。ショットガンは左右の銃口の間を射線の起点にする
+		Vector3 muzzleOffset = GetEnemyType() == EnemyType::Shotgun ? Vector3{0.0f, 0.49f, 3.38f} : Vector3{0.0f, 0.45f, 1.57f};
+		auto gunWorld = MathUtility::MakeAffineMatrix(gunPose.scale, gunPose.rotate, gunPose.translate);
+		const Vector3 muzzle = MathUtility::Transform(muzzleOffset, gunWorld);
+
+		if (const auto direction = ai_->FirePendingShot(muzzle, GetCollisionId())) {
+			EffectGenerator::CreateMuzzleFlash(ctx_, muzzle, *direction, muzzleParticles_);
+		}
+	}
 }
 
 void Enemy::Draw() {
@@ -301,13 +308,6 @@ void Enemy::GenerateExMark() {
 	exclamationMark_ = std::make_unique<ExclamationMark>();
 	Vector3 pos = {transform_.translate.x, transform_.translate.y + 1.0f, transform_.translate.z};
 	exclamationMark_->Initialize(ctx_, transform_.translate);
-}
-
-void Enemy::GenerateMuzzleFlash(const Vector3& direction) {
-	Vector3 muzzlePos = transform_.translate + direction * 1.2f;
-
-	// エフェクトの生成
-	EffectGenerator::CreateMuzzleFlash(ctx_, muzzlePos, direction, muzzleParticles_);
 }
 
 void Enemy::SetAIState(EnemyAI::State state) {

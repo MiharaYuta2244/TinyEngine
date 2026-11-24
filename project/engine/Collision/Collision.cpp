@@ -1,4 +1,5 @@
 #include "Collision.h"
+#include "MathOperator.h"
 #include "MathUtility.h"
 #include <algorithm>
 #include <cmath>
@@ -140,6 +141,18 @@ bool Collision::Intersect(const AABB& aabb, const OBB& obb) {
 }
 
 bool Collision::Intersect(const OBB& obb, const AABB& aabb) { return Intersect(aabb, obb); }
+
+bool Collision::Intersect(const Segment& segment, const OBB& obb, float& outT) {
+	const auto toLocal = [&](const Vector3& vector) {
+		return Vector3{
+		    MathUtility::Dot(vector, obb.orientations[0]),
+		    MathUtility::Dot(vector, obb.orientations[1]),
+		    MathUtility::Dot(vector, obb.orientations[2]),
+		};
+	};
+	const AABB localBounds{obb.size * -1.0f, obb.size};
+	return Intersect(Segment{toLocal(segment.origin - obb.center), toLocal(segment.diff)}, localBounds, outT);
+}
 
 bool Collision::Intersect(const Segment& segment, const AABB& aabb, float& outT) {
 	float tMin = 0.0f;
