@@ -4,7 +4,7 @@
 #include "GameObjects/IGameObject.h"
 #include "GameObjects/Player/Player.h"
 #include "ImGuizmo.h"
-#include "SceneContext.h"
+#include "Scene/SceneContext.h"
 #include "SpawnRequest.h"
 #include <deque>
 #include <optional>

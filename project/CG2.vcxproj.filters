@@ -81,7 +81,7 @@
     <ClCompile Include="main.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\StringUtility.cpp">
+    <ClCompile Include="Engine\Platform\Windows\StringUtility.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Math\MathUtility.cpp">
@@ -108,37 +108,37 @@
     <ClCompile Include="Externals\imgui\imgui_widgets.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\WinApp.cpp">
+    <ClCompile Include="Engine\Platform\Windows\WinApp.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\D3DResourceLeakChecker.cpp">
+    <ClCompile Include="Engine\Rendering\DirectX12\D3DResourceLeakChecker.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\DebugCamera.cpp">
+    <ClCompile Include="Engine\Rendering\Camera\DebugCamera.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Input\DirectInput.cpp">
       <Filter>ソース ファイル\engine\input</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\ImGuiManager\ImGuiManager.cpp">
+    <ClCompile Include="Engine\Editor\ImGuiManager\ImGuiManager.cpp">
       <Filter>ソース ファイル\engine\imgui</Filter>
     </ClCompile>
     <ClCompile Include="Externals\imguizmo\ImGuizmo.cpp">
       <Filter>ソース ファイル\engine\imgui</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\DirectXCommon.cpp">
+    <ClCompile Include="Engine\Rendering\DirectX12\DirectXCommon.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\Logger.cpp">
+    <ClCompile Include="Engine\Utility\Logger.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\MeshData.cpp">
+    <ClCompile Include="Engine\Rendering\Geometry\MeshData.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\SphereMeshGenerator.cpp">
+    <ClCompile Include="Engine\Rendering\Geometry\SphereMeshGenerator.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\TextureManager.cpp">
+    <ClCompile Include="Engine\Rendering\Texture\TextureManager.cpp">
       <Filter>ソース ファイル\engine\base</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Audio\AudioManager.cpp">
@@ -150,13 +150,13 @@
     <ClCompile Include="Engine\2D\Sprite.cpp">
       <Filter>ソース ファイル\engine\2d</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\3D\Model.cpp">
+    <ClCompile Include="Engine\3D\Model\Model.cpp">
       <Filter>ソース ファイル\engine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\3D\ModelCommon.cpp">
+    <ClCompile Include="Engine\3D\Model\ModelCommon.cpp">
       <Filter>ソース ファイル\engine\3d</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\3D\ModelManager.cpp">
+    <ClCompile Include="Engine\3D\Model\ModelManager.cpp">
       <Filter>ソース ファイル\engine\3d</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3D\Object3d\Object3d.cpp">
@@ -174,10 +174,10 @@
     <ClCompile Include="Engine\Input\InputBindings.cpp">
       <Filter>ソース ファイル\engine\input</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\Utility\TimeManager\TimeManager.cpp">
+    <ClCompile Include="Engine\Time\TimeManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\SrvManager.cpp">
+    <ClCompile Include="Engine\Rendering\DirectX12\SrvManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Collision\Collision.cpp">
@@ -189,7 +189,7 @@
     <ClCompile Include="Engine\3D\Particle\ParticleCommon.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\Utility\Random\Random.cpp">
+    <ClCompile Include="Engine\Utility\Random\Random.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Engine\3D\Particle\Modules\ShockWaveModule.cpp">
@@ -207,7 +207,7 @@
     <ClCompile Include="Engine\Framework\Framework.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\Utility\Easing\Easing.cpp">
+    <ClCompile Include="Engine\Animation\Easing\Easing.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\Scene\GamePlayScene.cpp">
@@ -216,13 +216,13 @@
     <ClCompile Include="Application\Scene\SceneManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\Utility\ScreenSpaceUtility\ScreenSpaceUtility.cpp">
+    <ClCompile Include="Engine\Rendering\Camera\ScreenSpaceUtility.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Audio\FFT.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Utility\DirectXUtils.cpp">
+    <ClCompile Include="Engine\Rendering\DirectX12\DirectXUtils.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\Fade\FadeStates.cpp">
@@ -255,7 +255,7 @@
     <ClCompile Include="Application\GameObjects\Player\PlayerHealth.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\Utility\GameTimer\GameTimer.cpp">
+    <ClCompile Include="Engine\Time\GameTimer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\GameObjects\Enemy\Weapon\EnemyBulletManager.cpp">
@@ -273,7 +273,7 @@
     <ClCompile Include="Application\GameObjects\Enemy\EnemyManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\Utility\Easing\EasingEditor.cpp">
+    <ClCompile Include="Engine\Editor\Easing\EasingEditor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Tool\Json\JsonManager.cpp">
@@ -315,10 +315,10 @@
     <ClCompile Include="Engine\3D\Skybox\Skybox.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\RenderTexture.cpp">
+    <ClCompile Include="Engine\Rendering\DirectX12\RenderTexture.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\CopyImage.cpp">
+    <ClCompile Include="Engine\Rendering\PostEffect\CopyImage.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Engine\Animation\KeyframeAnimation.cpp">
@@ -345,7 +345,7 @@
     <ClCompile Include="Application\GameObjects\StageObjects\Door\Door.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Engine\Base\PostEffectPipeline.cpp">
+    <ClCompile Include="Engine\Rendering\PostEffect\PostEffectPipeline.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\Cinematic\CameraDeathZoomController.cpp">
@@ -571,7 +571,7 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Engine\Base\StringUtility.h">
+    <ClInclude Include="Engine\Platform\Windows\StringUtility.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\MathUtility.h">
@@ -604,7 +604,7 @@
     <ClInclude Include="Externals\imgui\imstb_truetype.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\WinApp.h">
+    <ClInclude Include="Engine\Platform\Windows\WinApp.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\MathLib\Matrix3x3.h">
@@ -622,61 +622,61 @@
     <ClInclude Include="Engine\Math\MathLib\Vector4.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\VertexData.h">
+    <ClInclude Include="Engine\Rendering\Geometry\VertexData.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\CameraForGPU.h">
+    <ClInclude Include="Engine\Rendering\Camera\CameraForGPU.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\D3DResourceLeakChecker.h">
+    <ClInclude Include="Engine\Rendering\DirectX12\D3DResourceLeakChecker.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\DebugCamera.h">
+    <ClInclude Include="Engine\Rendering\Camera\DebugCamera.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Input\DirectInput.h">
       <Filter>ヘッダー ファイル\engine\input</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\DirectionalLight.h">
+    <ClInclude Include="Engine\Rendering\Lighting\DirectionalLight.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\DirectXCommon.h">
+    <ClInclude Include="Engine\Rendering\DirectX12\DirectXCommon.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\FogParam.h">
+    <ClInclude Include="Engine\3D\Object3d\FogParam.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\IMeshGenerator.h">
+    <ClInclude Include="Engine\Rendering\Geometry\IMeshGenerator.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\ImGuiManager\ImGuiManager.h">
+    <ClInclude Include="Engine\Editor\ImGuiManager\ImGuiManager.h">
       <Filter>ヘッダー ファイル\engine\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Externals\imguizmo\ImGuizmo.h">
       <Filter>ヘッダー ファイル\engine\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Logger.h">
+    <ClInclude Include="Engine\Utility\Logger.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Material.h">
+    <ClInclude Include="Engine\Rendering\Material\Material.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\MaterialData.h">
+    <ClInclude Include="Engine\3D\Model\MaterialData.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\MathOperator.h">
       <Filter>ヘッダー ファイル\engine\math</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\MeshData.h">
+    <ClInclude Include="Engine\Rendering\Geometry\MeshData.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\3D\Model.h">
+    <ClInclude Include="Engine\3D\Model\Model.h">
       <Filter>ヘッダー ファイル\engine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\3D\ModelCommon.h">
+    <ClInclude Include="Engine\3D\Model\ModelCommon.h">
       <Filter>ヘッダー ファイル\engine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\3D\ModelManager.h">
+    <ClInclude Include="Engine\3D\Model\ModelManager.h">
       <Filter>ヘッダー ファイル\engine\3d</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3D\Object3d\Object3d.h">
@@ -685,10 +685,10 @@
     <ClInclude Include="Engine\3D\Object3d\Object3dCommon.h">
       <Filter>ヘッダー ファイル\engine\3d</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\3D\ModelData.h">
+    <ClInclude Include="Engine\3D\Model\ModelData.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\SphereMeshGenerator.h">
+    <ClInclude Include="Engine\Rendering\Geometry\SphereMeshGenerator.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Engine\2D\Sprite.h">
@@ -700,16 +700,16 @@
     <ClInclude Include="Engine\Audio\AudioManager.h">
       <Filter>ヘッダー ファイル\engine\audio</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\TextureData.h">
+    <ClInclude Include="Engine\Rendering\Texture\TextureData.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\TextureManager.h">
+    <ClInclude Include="Engine\Rendering\Texture\TextureManager.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\TimeParam.h">
+    <ClInclude Include="Engine\3D\Object3d\TimeParam.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\TransformationMatrix.h">
+    <ClInclude Include="Engine\Rendering\Geometry\TransformationMatrix.h">
       <Filter>ヘッダー ファイル\engine\base</Filter>
     </ClInclude>
     <ClInclude Include="Application\Game\Game.h">
@@ -721,10 +721,10 @@
     <ClInclude Include="Engine\Input\InputBindings.h">
       <Filter>ヘッダー ファイル\engine\input</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Utility\TimeManager\TimeManager.h">
+    <ClInclude Include="Engine\Time\TimeManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\SrvManager.h">
+    <ClInclude Include="Engine\Rendering\DirectX12\SrvManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Collision\Collision.h">
@@ -742,13 +742,13 @@
     <ClInclude Include="Engine\3D\Particle\ParticleCommon.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Utility\Random\Random.h">
+    <ClInclude Include="Engine\Utility\Random\Random.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\ParticleForGPU.h">
+    <ClInclude Include="Engine\3D\Particle\ParticleForGPU.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\EngineContext.h">
+    <ClInclude Include="Engine\Framework\EngineContext.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3D\Particle\Modules\ShockWaveModule.h">
@@ -769,13 +769,13 @@
     <ClInclude Include="Engine\Framework\Framework.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\PointLight.h">
+    <ClInclude Include="Engine\Rendering\Lighting\PointLight.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Utility\Easing\Easing.h">
+    <ClInclude Include="Engine\Animation\Easing\Easing.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\SpotLight.h">
+    <ClInclude Include="Engine\Rendering\Lighting\SpotLight.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\GamePlayScene.h">
@@ -787,28 +787,28 @@
     <ClInclude Include="Application\Scene\SceneManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Node.h">
+    <ClInclude Include="Engine\3D\Model\Node.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Utility\Easing\EasingAnimation.h">
+    <ClInclude Include="Engine\Animation\Easing\EasingAnimation.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Utility\Easing\EaseType.h">
+    <ClInclude Include="Engine\Animation\Easing\EaseType.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Utility\Easing\AnimationBundle.h">
+    <ClInclude Include="Engine\Animation\Easing\AnimationBundle.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Outline.h">
+    <ClInclude Include="Engine\3D\Object3d\Outline.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Utility\ScreenSpaceUtility\ScreenSpaceUtility.h">
+    <ClInclude Include="Engine\Rendering\Camera\ScreenSpaceUtility.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Audio\FFT.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Utility\DirectXUtils.h">
+    <ClInclude Include="Engine\Rendering\DirectX12\DirectXUtils.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\Fade\IFadeState.h">
@@ -844,7 +844,7 @@
     <ClInclude Include="Application\GameObjects\Player\PlayerHealth.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Utility\GameTimer\GameTimer.h">
+    <ClInclude Include="Engine\Time\GameTimer.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\MathLib\Rect.h">
@@ -865,7 +865,7 @@
     <ClInclude Include="Application\GameObjects\Enemy\EnemyManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Utility\Easing\EasingEditor.h">
+    <ClInclude Include="Engine\Editor\Easing\EasingEditor.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Tool\Json\JsonManager.h">
@@ -892,7 +892,7 @@
     <ClInclude Include="Application\GameObjects\StageObjects\Ground\Ground.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\SceneContext.h">
+    <ClInclude Include="Application\Scene\SceneContext.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\Scene\PauseScene.h">
@@ -910,10 +910,10 @@
     <ClInclude Include="Engine\3D\Skybox\Skybox.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\RenderTexture.h">
+    <ClInclude Include="Engine\Rendering\DirectX12\RenderTexture.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\CopyImage.h">
+    <ClInclude Include="Engine\Rendering\PostEffect\CopyImage.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Animation\KeyframeAnimation.h">
@@ -922,7 +922,7 @@
     <ClInclude Include="Engine\Math\MathLib\Quaternion.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\PostEffectTypes.h">
+    <ClInclude Include="Engine\Rendering\PostEffect\PostEffectTypes.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Tool\LevelDataLoader\LevelDataLoader.h">
@@ -955,10 +955,10 @@
     <ClInclude Include="Application\GameObjects\StageObjects\Door\Door.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\PostEffectPass.h">
+    <ClInclude Include="Engine\Rendering\PostEffect\PostEffectPass.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\PostEffectPipeline.h">
+    <ClInclude Include="Engine\Rendering\PostEffect\PostEffectPipeline.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\Math\MathLib\OBB.h">
@@ -1042,10 +1042,10 @@
     <ClInclude Include="Engine\3D\Particle\Modules\HealSphereModule.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\ParticleMaterial.h">
+    <ClInclude Include="Engine\Rendering\Material\ParticleMaterial.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Utility\ColorPalette.h">
+    <ClInclude Include="Engine\Utility\ColorPalette.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\UI\ControlUI\ControlUI.h">
@@ -1075,7 +1075,7 @@
     <ClInclude Include="Application\Scene\StageSelectScene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\PostEffectSetting.h">
+    <ClInclude Include="Application\Utility\PostEffectSetting.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\2D\Font\GlyphInfo.h">
@@ -1141,7 +1141,7 @@
     <ClInclude Include="Engine\3D\Particle\ParticleState.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Engine\Base\Utility\Easing\EaseNames.h">
+    <ClInclude Include="Engine\Editor\Easing\EaseNames.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Engine\3D\Particle\EffectData.h">

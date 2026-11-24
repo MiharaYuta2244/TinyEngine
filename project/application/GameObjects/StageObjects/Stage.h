@@ -10,7 +10,7 @@
 #include "TreasureChest/TreasureChest.h"
 #include "Goal/Goal.h"
 #include "Ground/Ground.h"
-#include "SceneContext.h"
+#include "Scene/SceneContext.h"
 #include "Wall/Wall.h"
 #include "TransformationMatrix.h"
 #include <map>

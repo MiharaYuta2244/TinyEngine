@@ -1,6 +1,6 @@
 #include "PlayerHealth.h"
 #include "Logger.h"
-#include "imGuiManager/ImGuiManager.h"
+#include "ImGuiManager.h"
 
 void PlayerHealth::Initialize(float maxHP, float initialHP) {
 	// HPの設定
