@@ -19,8 +19,8 @@ void MenuList::Initialize(EngineContext* ctx, const std::wstring& fontFamily, in
 	// オーディオマネージャー生成&初期化
 	audioManager_ = std::make_unique<AudioManager>();
 	audioManager_->Initialize();
-	audioManager_->LoadWave("Select", "resources/sounds/se/Select.mp3");
-	audioManager_->LoadWave("Decide", "resources/sounds/se/Decide.mp3");
+	audioManager_->LoadWave("Select", "Resources/Sounds/SE/Select.mp3");
+	audioManager_->LoadWave("Decide", "Resources/Sounds/SE/Decide.mp3");
 
 	// 選択中背景スプライトの生成&初期化
 	selectorBg_ = std::make_unique<Sprite>();

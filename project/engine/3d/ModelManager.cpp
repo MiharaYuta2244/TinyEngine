@@ -47,7 +47,7 @@ std::vector<std::string> ModelManager::GetObjModelNames() const {
 }
 
 void ModelManager::AllModelLoad(){
-	std::string directoryPath = "resources/models/";
+	std::string directoryPath = "Resources/Models/";
 
 	for (const auto& entry : fs::directory_iterator(directoryPath)) {
 		if (entry.is_regular_file()) {

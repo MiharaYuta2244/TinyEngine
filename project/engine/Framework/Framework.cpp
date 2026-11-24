@@ -193,7 +193,7 @@ void Framework::Initialize() {
 	input_->Initialize(winApp_.get());
 
 	// フォントの登録
-	TinyEngine::Font::LoadFontFile(L"resources/fonts/DelaGothicOne-Regular.ttf");
+	TinyEngine::Font::LoadFontFile(L"Resources/Fonts/DelaGothicOne-Regular.ttf");
 
 	// ログファイルの作成
 	Logger::Initialize();

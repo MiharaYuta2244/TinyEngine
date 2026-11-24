@@ -225,7 +225,7 @@ void VisionCone::Update(const std::vector<AABB>& obstacles, const std::list<std:
 void VisionCone::Draw(const std::string& texturePath) {
 	auto commandList = ctx_->object3dCommon->GetDxCommon()->GetCommandList();
 	ctx_->object3dCommon->DrawSettingTransparent(ctx_->textureManager);
-	std::string path = texturePath.empty() ? "resources/textures/white.png" : texturePath; // 任意のデフォルト白テクスチャ
+	std::string path = texturePath.empty() ? "Resources/Textures/white.png" : texturePath; // 任意のデフォルト白テクスチャ
 	commandList->SetGraphicsRootDescriptorTable(2, ctx_->textureManager->GetSrvHandleGPU(path));
 	commandList->SetGraphicsRootConstantBufferView(1, wvpResource_->GetGPUVirtualAddress());
 	commandList->SetGraphicsRootConstantBufferView(0, materialResource_->GetGPUVirtualAddress());

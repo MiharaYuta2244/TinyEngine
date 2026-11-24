@@ -20,10 +20,10 @@ void EnemyManager::Initialize(EngineContext* ctx, DecalManager* bloodDecalManage
 	// オーディオマネージャー生成&初期化
 	audioManager_ = std::make_unique<AudioManager>();
 	audioManager_->Initialize();
-	audioManager_->LoadWave("Cymbal", "resources/sounds/se/Cymbal.mp3");
-	audioManager_->LoadWave("Snare", "resources/sounds/se/Snare.mp3");
-	audioManager_->LoadWave("Shot", "resources/sounds/se/Shot.mp3");
-	audioManager_->LoadWave("Piyo", "resources/sounds/se/PiyoPiyo.mp3");
+	audioManager_->LoadWave("Cymbal", "Resources/Sounds/SE/Cymbal.mp3");
+	audioManager_->LoadWave("Snare", "Resources/Sounds/SE/Snare.mp3");
+	audioManager_->LoadWave("Shot", "Resources/Sounds/SE/Shot.mp3");
+	audioManager_->LoadWave("Piyo", "Resources/Sounds/SE/PiyoPiyo.mp3");
 
 	// JSON読み込み
 	jsonPath_ = stagePath + "Enemies.json";

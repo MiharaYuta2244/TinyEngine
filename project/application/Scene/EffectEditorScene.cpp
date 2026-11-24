@@ -135,7 +135,7 @@ void EffectEditorScene::UpdatePreview(float deltaTime) {
 
 void EffectEditorScene::RefreshTextureList() {
 	textureNames_.clear();
-	for (const auto& entry : std::filesystem::directory_iterator("resources/textures/")) {
+	for (const auto& entry : std::filesystem::directory_iterator("Resources/Textures/")) {
 		if (!entry.is_regular_file()) {
 			continue;
 		}

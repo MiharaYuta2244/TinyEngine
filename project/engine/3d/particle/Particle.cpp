@@ -206,7 +206,7 @@ ModelData Particle::CreatePrimitive(const std::string& texturePath) {
           .normal = {0.0f, 0.0f, 1.0f}
     }); // 右下
 
-	modelData.materials[0].textureFilePath = "resources/textures/" + texturePath;
+	modelData.materials[0].textureFilePath = "Resources/Textures/" + texturePath;
 
 	return modelData;
 }
@@ -254,7 +254,7 @@ ModelData TinyEngine::Particle::CreateRingPrimitive(const std::string& texturePa
 		modelData.vertices.push_back({.position = pOut2, .texcoord = uvOut2, .normal = normal});
 	}
 
-	modelData.materials[0].textureFilePath = "resources/textures/" + texturePath;
+	modelData.materials[0].textureFilePath = "Resources/Textures/" + texturePath;
 
 	return modelData;
 }
@@ -320,7 +320,7 @@ ModelData TinyEngine::Particle::CreateCylinderPrimitive(const std::string& textu
         });
 	}
 
-	modelData.materials[0].textureFilePath = "resources/textures/" + texturePath;
+	modelData.materials[0].textureFilePath = "Resources/Textures/" + texturePath;
 	return modelData;
 }
 

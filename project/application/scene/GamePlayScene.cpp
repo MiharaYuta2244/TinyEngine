@@ -121,8 +121,8 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	// オーディオマネージャーの生成&初期化
 	audioManager_ = std::make_unique<AudioManager>();
 	audioManager_->Initialize();
-	audioManager_->LoadWave("GameSceneBGM", "resources/sounds/bgm/GameScene.mp3");
-	audioManager_->LoadWave("GlassBreak", "resources/sounds/se/GlassBreak.mp3");
+	audioManager_->LoadWave("GameSceneBGM", "Resources/Sounds/BGM/GameScene.mp3");
+	audioManager_->LoadWave("GlassBreak", "Resources/Sounds/SE/GlassBreak.mp3");
 	audioManager_->PlayBGM("GameSceneBGM");
 
 	// ステージ開始演出用レターボックスの生成&初期化

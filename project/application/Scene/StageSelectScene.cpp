@@ -131,9 +131,9 @@ void StageSelectScene::Initialize(const SceneContext& ctx) {
 	// オーディオマネージャーの生成&初期化
 	audioManager_ = std::make_unique<AudioManager>();
 	audioManager_->Initialize();
-	audioManager_->LoadWave("Select", "resources/sounds/se/Select.mp3");
-	audioManager_->LoadWave("Decide", "resources/sounds/se/Decide.mp3");
-	audioManager_->LoadWave("Error", "resources/sounds/se/Error.mp3");
+	audioManager_->LoadWave("Select", "Resources/Sounds/SE/Select.mp3");
+	audioManager_->LoadWave("Decide", "Resources/Sounds/SE/Decide.mp3");
+	audioManager_->LoadWave("Error", "Resources/Sounds/SE/Error.mp3");
 
 	// ポストエフェクトの設定
 	ctx_.engineContext->postEffectPipeline->SetEffects({

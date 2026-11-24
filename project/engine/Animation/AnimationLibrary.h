@@ -12,7 +12,7 @@ public:
 	/// <summary>
 	/// クリップを取得する
 	/// </summary>
-	/// <param name="file">resources/models/からの相対パス</param>
+	/// <param name="file">Resources/Models/からの相対パス</param>
 	/// <returns>キャッシュ済みクリップ</returns>
 	static const Animation& Get(const std::string& file);
 

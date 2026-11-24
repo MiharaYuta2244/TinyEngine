@@ -188,7 +188,7 @@ MenuLayoutStore& MenuLayoutStore::Get() {
 	return store;
 }
 
-const char* MenuLayoutStore::FilePath() { return "resources/json/UI/MenuLayout.json"; }
+const char* MenuLayoutStore::FilePath() { return "Resources/Json/UI/MenuLayout.json"; }
 
 MenuLayoutParameters& MenuLayoutStore::Register(const std::string& key, const MenuLayoutParameters& defaults) {
 	defaults_.try_emplace(key, defaults);

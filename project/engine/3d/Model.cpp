@@ -310,7 +310,7 @@ ModelData Model::LoadModelFile(const std::string& filename) {
 	std::string line;               // ファイルから読んだ1行を格納するもの
 
 	Assimp::Importer importer;
-	std::string filePath = "resources/models/" + filename;
+	std::string filePath = "Resources/Models/" + filename;
 	// 三角形化とUV/向きの調整に加えて、法線がない場合の自動生成フラグ（aiProcess_GenNormals）を追加
 	const aiScene* scene = importer.ReadFile(filePath.c_str(), aiProcess_Triangulate | aiProcess_FlipWindingOrder | aiProcess_FlipUVs | aiProcess_GenNormals);
 	assert(scene && scene->HasMeshes()); // シーン・メッシュがないのは対応しない
@@ -319,7 +319,7 @@ ModelData Model::LoadModelFile(const std::string& filename) {
 	for (uint32_t materialIndex = 0; materialIndex < scene->mNumMaterials; ++materialIndex) {
 		aiMaterial* material = scene->mMaterials[materialIndex];
 		MaterialData matData;
-		matData.textureFilePath = "resources/models/white.png";
+		matData.textureFilePath = "Resources/Models/white.png";
 
 		if (material->GetTextureCount(aiTextureType_DIFFUSE) != 0) {
 			aiString textureFilePath;
@@ -347,7 +347,7 @@ ModelData Model::LoadModelFile(const std::string& filename) {
 							auto pos = baseName.find_last_of('.');
 							if (pos != std::string::npos)
 								baseName = baseName.substr(0, pos);
-							std::string outPath = "resources/models/" + baseName + "_embedded" + std::to_string(texIndex) + ".png";
+							std::string outPath = "Resources/Models/" + baseName + "_embedded" + std::to_string(texIndex) + ".png";
 
 							// バイナリ書き出し
 							std::ofstream ofs(outPath, std::ios::binary);
@@ -366,7 +366,7 @@ ModelData Model::LoadModelFile(const std::string& filename) {
 					}
 				} else {
 					// 通常のファイルパスをそのまま利用（既存の処理）
-					matData.textureFilePath = "resources/models/" + texStr;
+					matData.textureFilePath = "Resources/Models/" + texStr;
 				}
 			}
 		}
@@ -451,7 +451,7 @@ ModelData Model::LoadModelFile(const std::string& filename) {
 MaterialData Model::LoadMaterialTemplateFile(const std::string& filename) {
 	MaterialData materialData;                          // 構築するMaterialData
 	std::string line;                                   // ファイルから読んだ1行を格納するもの
-	std::ifstream file("resources/models/" + filename); // ファイルを開く
+	std::ifstream file("Resources/Models/" + filename); // ファイルを開く
 	assert(file.is_open());                             // とりあえず開けなかったら止める
 
 	while (std::getline(file, line)) {
@@ -464,7 +464,7 @@ MaterialData Model::LoadMaterialTemplateFile(const std::string& filename) {
 			std::string textureFilename;
 			s >> textureFilename;
 			// 連結してファイルパスにする
-			materialData.textureFilePath = "resources/models/" + textureFilename;
+			materialData.textureFilePath = "Resources/Models/" + textureFilename;
 		}
 	}
 	return materialData;

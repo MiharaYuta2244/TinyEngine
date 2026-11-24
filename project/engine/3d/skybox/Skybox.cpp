@@ -6,7 +6,7 @@ using namespace TinyEngine;
 
 void Skybox::Initialize(EngineContext* ctx, const std::string& textureFilePath) {
 	ctx_ = ctx;
-	textureFilePath_ = "resources/textures/" + textureFilePath;
+	textureFilePath_ = "Resources/Textures/" + textureFilePath;
 
 	CreateVertexAndIndexData();
 	CreateTransformationData();

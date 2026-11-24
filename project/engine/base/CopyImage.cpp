@@ -14,10 +14,10 @@ void CopyImage::CreateGraphicsPipeline(DirectXCommon* dx) {
 	assert(device);
 
 	// シェーダーコンパイル
-	IDxcBlob* vsBlob = DirectXUtils::CompileShader(L"resources/shaders/PostEffect/FullScreen.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* vsBlob = DirectXUtils::CompileShader(L"Resources/Shaders/PostEffect/FullScreen.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(vsBlob != nullptr);
 	IDxcBlob* psBlob = DirectXUtils::CompileShader(
-	    L"resources/shaders/PostEffect/" + effectMetaMap_.at(postEffectType_).shaderName + L".PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	    L"Resources/Shaders/PostEffect/" + effectMetaMap_.at(postEffectType_).shaderName + L".PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(psBlob != nullptr);
 
 	// ルートシグネチャを作成
@@ -180,7 +180,7 @@ void CopyImage::Draw(DirectXCommon* dx, SrvManager* srv, uint32_t srvIndex, uint
 	if (postEffectType_ == PostEffectType::DepthOutline) {
 		cmd->SetGraphicsRootDescriptorTable(2, srv->GetGPUDescriptorHandle(depthSrvIndex));
 	} else if (postEffectType_ == PostEffectType::Dissolve) {
-		std::string path = "resources/textures/noise0.png";
+		std::string path = "Resources/Textures/noise0.png";
 		cmd->SetGraphicsRootDescriptorTable(2, srv->GetGPUDescriptorHandle(textureManager_->GetSrvIndex(path)));
 	}
 

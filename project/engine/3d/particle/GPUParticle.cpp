@@ -18,7 +18,7 @@ void GPUParticle::Initialize(EngineContext* ctx, const std::string& texturepath)
 	ctx_ = ctx;
 	dxCommon_ = ctx->particleCommon->GetDxCommon();
 	texturePath_ = texturepath;
-	textureFullPath_ = "resources/textures/" + texturepath;
+	textureFullPath_ = "Resources/Textures/" + texturepath;
 
 	DirectXUtils::InitializeShaderCompiler(dxcUtils_, dxcCompiler_, includeHandler_);
 	CreateComputePipeline();
@@ -121,7 +121,7 @@ void GPUParticle::CreateComputePipeline() {
 	computeRootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), rootSignatureDesc);
 
 	// ComputeShaderのコンパイルとPipelineStateの作成
-	IDxcBlob* computeShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/InitializeParticle.CS.hlsl", L"cs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* computeShaderBlob = DirectXUtils::CompileShader(L"Resources/Shaders/InitializeParticle.CS.hlsl", L"cs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(computeShaderBlob != nullptr);
 
 	D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineDesc{};
@@ -198,8 +198,8 @@ void GPUParticle::CreateGraphicsPipeline() {
 	inputLayoutDesc.NumElements = 0;
 
 	// ShaderコンパイルとPipelineStateの作成
-	IDxcBlob* vertexShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/GPUParticle.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
-	IDxcBlob* pixelShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/Particle.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* vertexShaderBlob = DirectXUtils::CompileShader(L"Resources/Shaders/GPUParticle.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* pixelShaderBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Particle.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 
 	D3D12_BLEND_DESC blendDesc{};
 	blendDesc.AlphaToCoverageEnable = FALSE;
@@ -473,7 +473,7 @@ void GPUParticle::CreateEmitComputePipeline() {
 
 	emitRootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), rootSignatureDesc);
 
-	IDxcBlob* emitShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/EmitParticle.CS.hlsl", L"cs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* emitShaderBlob = DirectXUtils::CompileShader(L"Resources/Shaders/EmitParticle.CS.hlsl", L"cs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(emitShaderBlob != nullptr);
 
 	D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineDesc{};
@@ -543,7 +543,7 @@ void GPUParticle::CreateUpdateComputePipeline() {
 	updateRootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), rootSignatureDesc);
 
 	// Shader compile
-	IDxcBlob* updateShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/UpdateParticle.CS.hlsl", L"cs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* updateShaderBlob = DirectXUtils::CompileShader(L"Resources/Shaders/UpdateParticle.CS.hlsl", L"cs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(updateShaderBlob != nullptr);
 
 	D3D12_COMPUTE_PIPELINE_STATE_DESC computePipelineDesc{};

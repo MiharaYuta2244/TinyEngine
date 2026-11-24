@@ -42,7 +42,7 @@ void DecalManager::Initialize(EngineContext* ctx) {
 
 DecalManager::DecalData* DecalManager::AddDecal(
     const std::string& texturePath, const Vector3& position, const Vector3& rotation, const Vector3& scale, const Vector4& color, float lifeTime, float fadeTime, int drawOrder) {
-	std::string fullPath = "resources/textures/" + texturePath;
+	std::string fullPath = "Resources/Textures/" + texturePath;
 	ctx_->textureManager->LoadTexture(texturePath);
 
 	// グループが存在しない場合は新規作成し、個別のGPUバッファとSRVを確保する

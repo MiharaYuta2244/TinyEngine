@@ -7,7 +7,7 @@ Animation KeyframeAnimation::LoadAnimationFile(const std::string& filename) {
 	Animation animation;
 	animation.name = filename;
 	Assimp::Importer importer;
-	std::string fullpath = "resources/models/" + filename;
+	std::string fullpath = "Resources/Models/" + filename;
 	const aiScene* scene = importer.ReadFile(fullpath.c_str(), 0);
 	assert(scene->mNumAnimations != 0);                                                        // アニメーションがない
 	aiAnimation* animationAssimp = scene->mAnimations[0];                                      // 最初のアニメーションだけ採用。

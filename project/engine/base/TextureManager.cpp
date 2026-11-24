@@ -28,9 +28,9 @@ void TextureManager::Initialize(DirectXCommon* directXCommon, SrvManager* srvMan
 void TextureManager::LoadTexture(const std::string& filePath) {
 	std::string fullPath;
 
-	// すでにresources/が含まれているかチェック
-	if (filePath.find("resources/") == std::string::npos) {
-		fullPath = "resources/textures/" + filePath;
+	// すでにResources/が含まれているかチェック
+	if (filePath.find("Resources/") == std::string::npos) {
+		fullPath = "Resources/Textures/" + filePath;
 	} else {
 		fullPath = filePath;
 	}
@@ -97,7 +97,7 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 }
 
 void TextureManager::AllTextureLoad() {
-	std::string directoryPath = "resources/textures/";
+	std::string directoryPath = "Resources/Textures/";
 
 	for (const auto& entry : fs::directory_iterator(directoryPath)) {
 		if (entry.is_regular_file()) {
@@ -215,9 +215,9 @@ std::string TextureManager::ResolveKey(const std::string& filePath) const {
 	if (textureDatas_.contains(filePath)) {
 		return filePath;
 	}
-	// ファイル名のみ指定された場合はresources/textures/を補う
-	if (filePath.find("resources/") == std::string::npos) {
-		return "resources/textures/" + filePath;
+	// ファイル名のみ指定された場合はResources/Textures/を補う
+	if (filePath.find("Resources/") == std::string::npos) {
+		return "Resources/Textures/" + filePath;
 	}
 	return filePath;
 }

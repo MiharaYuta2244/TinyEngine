@@ -68,7 +68,7 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 	// オーディオマネージャー
 	audioManager_ = std::make_unique<AudioManager>();
 	audioManager_->Initialize();
-	audioManager_->LoadWave("Heal", "resources/sounds/se/Heal.mp3");
+	audioManager_->LoadWave("Heal", "Resources/Sounds/SE/Heal.mp3");
 
 	// 振動マネージャーの生成
 	rumbleManager_ = std::make_unique<GameRumbleController>();

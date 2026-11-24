@@ -77,7 +77,7 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 	// オーディオマネージャーの生成&初期化
 	audioManager_ = std::make_unique<AudioManager>();
 	audioManager_->Initialize();
-	audioManager_->LoadWave("TitleBGM", "resources/sounds/bgm/TitleScene.mp3");
+	audioManager_->LoadWave("TitleBGM", "Resources/Sounds/BGM/TitleScene.mp3");
 	audioManager_->PlayBGM("TitleBGM");
 
 	// 黒背景生成&初期化

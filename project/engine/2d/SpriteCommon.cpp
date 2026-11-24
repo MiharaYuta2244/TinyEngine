@@ -102,10 +102,10 @@ void SpriteCommon::CreateGraphicsPipeline()
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	// Shaderをコンパイルする
-	IDxcBlob* vertexShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/Sprite.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* vertexShaderBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Sprite.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(vertexShaderBlob != nullptr);
 
-	IDxcBlob* pixelShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/Sprite.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* pixelShaderBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Sprite.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定

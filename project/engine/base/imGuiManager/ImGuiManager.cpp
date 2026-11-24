@@ -23,7 +23,7 @@ void ImGuiManager::Initialize(HWND hwnd, ComPtr<ID3D12Device> device, ComPtr<ID3
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 	// 日本語フォント
-	const char* fontPath = "resources/fonts/NotoSansJP-VariableFont_wght.ttf";
+	const char* fontPath = "Resources/Fonts/NotoSansJP-VariableFont_wght.ttf";
 	const float fontSize = 18.0f;
 
 	ImFont* font = io.Fonts->AddFontFromFileTTF(fontPath, fontSize, nullptr, io.Fonts->GetGlyphRangesJapanese());

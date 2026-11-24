@@ -15,7 +15,7 @@ public:
 
 	// 任意の型をJsonファイルに保存
 	template<typename T> static bool Save(const std::string& filepath, const T& data) {
-		auto fullpath = "resources/json/" + filepath;
+		auto fullpath = "Resources/Json/" + filepath;
 
 		try {
 			json j = data;
@@ -53,7 +53,7 @@ public:
 
 	// Jsonファイルから任意の型にデータを読み込む
 	template<typename T> static bool Load(const std::string& filepath, T& outData) {
-		auto fullpath = "resources/json/" + filepath;
+		auto fullpath = "Resources/Json/" + filepath;
 
 		try {
 

@@ -13,7 +13,7 @@ Sprite::~Sprite() {}
 
 void Sprite::Initialize(EngineContext* ctx, std::string textureFilePath) {
 	ctx_ = ctx;
-	textureFilePath_ = "resources/textures/" + textureFilePath;
+	textureFilePath_ = "Resources/Textures/" + textureFilePath;
 
 	// 頂点データ作成
 	CreateVertexData();
@@ -174,7 +174,7 @@ void Sprite::CreateTransformationData() {
 void Sprite::SetSrvHandle(D3D12_GPU_DESCRIPTOR_HANDLE srvHandle) { srvHandle_ = srvHandle; }
 
 void Sprite::SetTexture(const std::string& texturePath) {
-	textureFilePath_ = "resources/textures/" + texturePath;
+	textureFilePath_ = "Resources/Textures/" + texturePath;
 	textureIndex_ = ctx_->textureManager->GetSrvIndex(texturePath);
 }
 

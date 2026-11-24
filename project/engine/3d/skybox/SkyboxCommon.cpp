@@ -71,8 +71,8 @@ void SkyboxCommon::CreateGraphicsPipeline() {
 	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
-	IDxcBlob* vertexShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/Skybox.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
-	IDxcBlob* pixelShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/Skybox.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* vertexShaderBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Skybox.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* pixelShaderBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Skybox.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 	depthStencilDesc.DepthEnable = true;

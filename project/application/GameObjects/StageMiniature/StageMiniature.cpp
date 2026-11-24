@@ -274,7 +274,7 @@ void StageMiniature::DrawLayers(bool transparent) {
 			continue;
 		}
 
-		cmd->SetGraphicsRootDescriptorTable(2, ctx_->textureManager->GetSrvHandleGPU("resources/textures/white.png"));
+		cmd->SetGraphicsRootDescriptorTable(2, ctx_->textureManager->GetSrvHandleGPU("Resources/Textures/white.png"));
 		cmd->SetGraphicsRootConstantBufferView(0, L.materialRes->GetGPUVirtualAddress());
 		cmd->SetGraphicsRootConstantBufferView(1, wvpRes_->GetGPUVirtualAddress());
 		cmd->SetGraphicsRootConstantBufferView(4, cameraRes_->GetGPUVirtualAddress());

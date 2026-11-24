@@ -5,7 +5,7 @@
 namespace fs = std::filesystem;
 
 namespace {
-const std::string kDir = "resources/json/Effects";
+const std::string kDir = "Resources/Json/Effects";
 std::string RelPath(const std::string& name) { return "Effects/" + name + ".json"; }
 } // namespace
 

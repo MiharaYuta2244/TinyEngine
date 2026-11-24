@@ -21,7 +21,7 @@ void Object3dCommon::DrawSettingCommon(TextureManager* textureManager, bool inst
 	// スポットライトCBufferの場所を指定
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(8, globalSpotLightResource_->GetGPUVirtualAddress());
 	// 環境マップ
-	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(10, textureManager->GetSrvHandleGPU("resources/textures/rostock_laage_airport_4k.dds"));
+	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(10, textureManager->GetSrvHandleGPU("Resources/Textures/rostock_laage_airport_4k.dds"));
 }
 
 void Object3dCommon::DrawSettingOutline() {
@@ -40,7 +40,7 @@ void Object3dCommon::DrawSettingTransparent(TextureManager* textureManager){
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(3, globalDirectionalLightResource_->GetGPUVirtualAddress());
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(7, globalPointLightResource_->GetGPUVirtualAddress());
 	dxCommon_->GetCommandList()->SetGraphicsRootConstantBufferView(8, globalSpotLightResource_->GetGPUVirtualAddress());
-	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(10, textureManager->GetSrvHandleGPU("resources/textures/rostock_laage_airport_4k.dds"));
+	dxCommon_->GetCommandList()->SetGraphicsRootDescriptorTable(10, textureManager->GetSrvHandleGPU("Resources/Textures/rostock_laage_airport_4k.dds"));
 }
 
 void Object3dCommon::Initialize(DirectXCommon* dxCommon) {
@@ -252,10 +252,10 @@ void Object3dCommon::CreateGraphicsPipeline() {
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	// Shaderをコンパイルする
-	IDxcBlob* vertexShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/Object3d.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* vertexShaderBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Object3d.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(vertexShaderBlob != nullptr);
 
-	IDxcBlob* pixelShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/Object3d.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* pixelShaderBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Object3d.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -291,7 +291,7 @@ void Object3dCommon::CreateGraphicsPipeline() {
 
 	ComPtr<IDxcBlob> instancedVS;
 	instancedVS.Attach(DirectXUtils::CompileShader(
-	    L"resources/shaders/Object3dInstanced.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get()));
+	    L"Resources/Shaders/Object3dInstanced.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get()));
 	assert(instancedVS);
 	graphicsPipelineStateDesc.VS = {instancedVS->GetBufferPointer(), instancedVS->GetBufferSize()};
 	graphicsPipelineStateDesc.InputLayout.NumElements = 3; // POSITION, TEXCOORD, NORMAL
@@ -386,8 +386,8 @@ void Object3dCommon::CreateOutlinePipeline() {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
 
 	// シェーダーのセット
-	auto vsBlob = DirectXUtils::CompileShader(L"resources/shaders/Outline.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
-	auto psBlob = DirectXUtils::CompileShader(L"resources/shaders/Outline.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	auto vsBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Outline.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	auto psBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Outline.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	psoDesc.VS = {vsBlob->GetBufferPointer(), vsBlob->GetBufferSize()};
 	psoDesc.PS = {psBlob->GetBufferPointer(), psBlob->GetBufferSize()};
 
@@ -538,10 +538,10 @@ void Object3dCommon::CreateSkinningGraphicsPipeline() {
 	skinningRootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), descriptionRootSignature);
 
 	// シェーダーコンパイル
-	ComPtr<IDxcBlob> vsBlob = DirectXUtils::CompileShader(L"resources/shaders/Skinning.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	ComPtr<IDxcBlob> vsBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Skinning.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(vsBlob != nullptr);
 
-	ComPtr<IDxcBlob> psBlob = DirectXUtils::CompileShader(L"resources/shaders/Object3d.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	ComPtr<IDxcBlob> psBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Object3d.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(psBlob != nullptr);
 
 	// InputLayout
@@ -673,10 +673,10 @@ void Object3dCommon::CreateTransparentGraphicsPipeline(){
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	// Shaderをコンパイルする
-	IDxcBlob* vertexShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/Object3d.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* vertexShaderBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Object3d.VS.hlsl", L"vs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(vertexShaderBlob != nullptr);
 
-	IDxcBlob* pixelShaderBlob = DirectXUtils::CompileShader(L"resources/shaders/Object3d.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	IDxcBlob* pixelShaderBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Object3d.PS.hlsl", L"ps_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(pixelShaderBlob != nullptr);
 
 	// DepthStencilStateの設定
@@ -735,7 +735,7 @@ void Object3dCommon::CreateSkinningComputePipeline() {
 
 	skinningComputeRootSignature_ = DirectXUtils::CreateRootSignature(dxCommon_->GetDevice().Get(), rootSigDesc);
 
-	ComPtr<IDxcBlob> csBlob = DirectXUtils::CompileShader(L"resources/shaders/Skinning.CS.hlsl", L"cs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
+	ComPtr<IDxcBlob> csBlob = DirectXUtils::CompileShader(L"Resources/Shaders/Skinning.CS.hlsl", L"cs_6_0", dxcUtils_.Get(), dxcCompiler_.Get(), includeHandler_.Get());
 	assert(csBlob != nullptr);
 
 	D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc{};

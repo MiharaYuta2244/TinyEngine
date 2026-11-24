@@ -308,7 +308,7 @@ void Object3d::SetColor(Vector4 color) {
 }
 
 void TinyEngine::Object3d::SetTexture(const std::string& filePath) {
-	textureFilePath_ = "resources/textures/" + filePath;
+	textureFilePath_ = "Resources/Textures/" + filePath;
 
 	// 指定されたテクスチャがまだ読み込まれていなければ、自動でロードする
 	if (ctx_ && ctx_->textureManager) {
