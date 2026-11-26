@@ -1,4 +1,5 @@
 #include "StageSelectScene.h"
+#include "Game/GameAudio.h"
 #include "SceneManager.h"
 #include <algorithm>
 #include <cmath>
@@ -128,13 +129,6 @@ void StageSelectScene::Initialize(const SceneContext& ctx) {
 	killCountText_->SetPosition({kScreenshotPos.x, textY + 70.0f});
 	killCountText_->SetScale(0.7f);
 
-	// オーディオマネージャーの生成&初期化
-	audioManager_ = std::make_unique<AudioManager>();
-	audioManager_->Initialize();
-	audioManager_->LoadWave("Select", "Resources/Sounds/SE/Select.mp3");
-	audioManager_->LoadWave("Decide", "Resources/Sounds/SE/Decide.mp3");
-	audioManager_->LoadWave("Error", "Resources/Sounds/SE/Error.mp3");
-
 	// ポストエフェクトの設定
 	ctx_.engineContext->postEffectPipeline->SetEffects({
 	    PostEffectType::Scanline,
@@ -170,9 +164,6 @@ void StageSelectScene::Update() {
 
 	// マーカーの色を毎フレーム反映
 	ApplyMarkerColors();
-
-	// オーディオマネージャーの更新
-	audioManager_->Update();
 
 	// 入力処理
 	HandleInput();
@@ -315,11 +306,11 @@ void StageSelectScene::HandleInput() {
 	if (decide) {
 		// 未開放ステージには入れない
 		if (!commonData_->IsStageUnlocked(selected_ + 1)) {
-			audioManager_->PlaySE("Error", 0.5f);
+			TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Error, 0.5f);
 			return;
 		}
 
-		audioManager_->PlaySE("Decide", 0.5f);
+		TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Decide, 0.5f);
 		StartDecideAnimation();
 		isDecided_ = true;
 	} else if (back) {
@@ -343,7 +334,7 @@ void StageSelectScene::ChangeSelection(int delta) {
 	screenshotAlpha_ = 0.0f;
 
 	// SE再生
-	audioManager_->PlaySE("Select", 0.5f);
+	TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Select, 0.5f);
 }
 
 void StageSelectScene::UpdateCamera(float deltaTime) {

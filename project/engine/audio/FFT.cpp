@@ -1,17 +1,10 @@
 #include "FFT.h"
 #include "AudioManager.h"
 
-void FFT::GetSpectrum(std::vector<float>& output, IXAudio2SourceVoice& bgmVoice, const std::string& currentBgmTag, std::unordered_map<std::string, SoundData>& soundData) {
+void FFT::GetSpectrum(std::vector<float>& output, IXAudio2SourceVoice& bgmVoice, const SoundData& data) {
 	// データサイズ定義
 	const size_t fftSize = 128;
 	output.assign(fftSize / 2, 0.0f); // 出力は半分で良い
-
-	// BGMが再生されていない、またはデータが無い場合は終了
-	if (currentBgmTag.empty() || soundData.find(currentBgmTag) == soundData.end()) {
-		return;
-	}
-
-	SoundData& data = soundData[currentBgmTag];
 
 	// 現在の再生位置を取得
 	XAUDIO2_VOICE_STATE state;
@@ -20,11 +13,13 @@ void FFT::GetSpectrum(std::vector<float>& output, IXAudio2SourceVoice& bgmVoice,
 	// バッファ情報
 	const WAVEFORMATEXTENSIBLE& wfex = data.wfex;
 	const int channels = wfex.Format.nChannels;
-	const int bytesPerSample = wfex.Format.wBitsPerSample / 8;
+	if (wfex.Format.wBitsPerSample != 16 || channels == 0) return;
 	const int blockAlign = wfex.Format.nBlockAlign; // 1フレームあたりのバイト数
 
 	// 全サンプル数（フレーム数）
+	if (blockAlign < channels * sizeof(int16_t)) return;
 	size_t totalSamples = data.buffer.size() / blockAlign;
+	if (totalSamples == 0) return;
 
 	// 現在の再生サンプル位置
 	size_t currentSampleIndex = state.SamplesPlayed % totalSamples;
@@ -38,7 +33,7 @@ void FFT::GetSpectrum(std::vector<float>& output, IXAudio2SourceVoice& bgmVoice,
 		size_t byteOffset = index * blockAlign;
 
 		// データ読み取り
-		int16_t* pSample = reinterpret_cast<int16_t*>(&data.buffer[byteOffset]);
+		const auto* pSample = reinterpret_cast<const int16_t*>(&data.buffer[byteOffset]);
 
 		// ステレオの場合はL+Rを平均化してモノラルにする
 		float sampleValue = 0.0f;

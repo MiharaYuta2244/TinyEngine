@@ -2,16 +2,15 @@
 #include <cmath>
 #include <complex>
 #include <vector>
-#include <unordered_map>
 
 struct SoundData;
 struct IXAudio2SourceVoice;
-class XAudio;
 
 /// <summary>
 /// FFTクラス
 /// </summary>
 class FFT {
 public:
-	void GetSpectrum(std::vector<float>& output, IXAudio2SourceVoice& bgmVoice, const std::string& currentBgmTag, std::unordered_map<std::string, SoundData>& soundData);
+	// BGMの再生位置付近のPCMをFFTで解析し、周波数成分を出力する。
+	void GetSpectrum(std::vector<float>& output, IXAudio2SourceVoice& bgmVoice, const SoundData& data);
 };

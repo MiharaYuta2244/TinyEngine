@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "Game/GameAudio.h"
 #include "DebugCamera.h"
 #include "GameObjects/Enemy/Weapon/EnemyBomb.h"
 #include "ColorPalette.h"
@@ -65,11 +66,6 @@ void Player::Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecal
 	// プレイヤーアクション用インスタンスの生成
 	grab_ = std::make_unique<PlayerGrab>();
 
-	// オーディオマネージャー
-	audioManager_ = std::make_unique<AudioManager>();
-	audioManager_->Initialize();
-	audioManager_->LoadWave("Heal", "Resources/Sounds/SE/Heal.mp3");
-
 	// 振動マネージャーの生成
 	rumbleManager_ = std::make_unique<GameRumbleController>();
 }
@@ -81,9 +77,6 @@ void Player::Update(
 	// RumbleManagerの初期化と更新
 	rumbleManager_->Initialize(gamePad);
 	rumbleManager_->Update(deltaTime);
-
-	// 音声更新
-	audioManager_->Update();
 
 	// 入力の取得
 	grab_->ValidateBarricade(barricades);
@@ -388,7 +381,7 @@ void Player::Heal(float value) {
 		GenerateHealEffect();
 
 		// 音声再生
-		audioManager_->PlaySE("Heal", 1.0f);
+		TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Heal, 1.0f);
 	}
 }
 
@@ -407,7 +400,7 @@ void Player::AllHeal() {
 		GenerateHealEffect();
 
 		// 音声再生
-		audioManager_->PlaySE("Heal", 0.3f);
+		TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Heal, 0.3f);
 	}
 }
 

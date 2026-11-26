@@ -1,4 +1,5 @@
 #include "GamePlayScene.h"
+#include "Game/GameAudio.h"
 #include "InputBindings.h"
 #include "MathUtility.h"
 #include "Effect/EffectGenerator.h"
@@ -115,12 +116,7 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 		controlUI_->AddHoldUIDecal({2, 2, 2});
 	}
 
-	// オーディオマネージャーの生成&初期化
-	audioManager_ = std::make_unique<AudioManager>();
-	audioManager_->Initialize();
-	audioManager_->LoadWave("GameSceneBGM", "Resources/Sounds/BGM/GameScene.mp3");
-	audioManager_->LoadWave("GlassBreak", "Resources/Sounds/SE/GlassBreak.mp3");
-	audioManager_->PlayBGM("GameSceneBGM");
+	TinyEngine::AudioManager::Get().PlayBGM(GameAudio::BGM::Game);
 
 	// ステージ開始演出用レターボックスの生成&初期化
 	introLetterBox_ = std::make_unique<LetterBox>();
@@ -132,9 +128,6 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 
 void GamePlayScene::Update() {
 	float deltaTime = ctx_.timeManager->GetDeltaTime();
-
-	// 音声更新
-	audioManager_->Update();
 
 	// カメラの動きだけを進める
 	if (isIntroPlaying_) {
@@ -468,7 +461,7 @@ void GamePlayScene::Finalize() {
 	}
 
 	// BGM停止
-	audioManager_->StopBGM();
+	TinyEngine::AudioManager::Get().StopBGM();
 }
 
 void GamePlayScene::OnEnemyDeath(Enemy& enemy) {
@@ -578,7 +571,7 @@ void GamePlayScene::GenerateGlassBreakEffect(const Vector3& pos, const Vector3& 
 	EffectGenerator::CreateGlassBreakEffect(ctx_.engineContext, pos, extent, glassBreakEffect_);
 
 	// SE再生
-	audioManager_->PlaySE("GlassBreak", 0.4f);
+	TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::GlassBreak, 0.4f);
 }
 
 void GamePlayScene::GenerateSoapBreakEffect(const Vector3& pos) { EffectGenerator::CreateSoapBreakEffect(ctx_.engineContext, {pos.x, pos.y + 0.5f, pos.z}, soapBreakEffect_); }

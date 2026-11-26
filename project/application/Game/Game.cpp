@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "GameAudio.h"
 #include "EffectLibrary.h"
 #include "Utility/SettingsStorage.h"
 #include "InputBindings.h"
@@ -16,6 +17,10 @@ using namespace TinyEngine;
 void Game::Initialize() {
 	// 基底クラスの初期化処理
 	Framework::Initialize();
+
+	// シーンを開始する前に共有の音声システムを初期化し、SEを先読みする
+	AudioManager::Lifecycle::Initialize();
+	GameAudio::PreloadSE();
 
 	// 起動時時に全エフェクトを読み込み
 	EffectLibrary::Get().LoadAll();
@@ -60,6 +65,8 @@ void Game::Update() {
 
 	// シーンマネージャー更新
 	sceneManager_->Update();
+	// そのフレームのシーン更新後に、再生が終わったSEボイスを回収する
+	AudioManager::Lifecycle::Update();
 	InputBindings::Get().EndFrame(GetGamePad());
 }
 
@@ -86,6 +93,9 @@ void Game::Draw() {
 void Game::Finalize() {
 	// シーンマネージャー終了処理
 	sceneManager_->Finalize();
+
+	// シーンの終了処理を済ませ、FrameworkがCOMを終了する前に音声を解放する
+	AudioManager::Lifecycle::Finalize();
 
 	// 基底クラスの終了処理
 	Framework::Finalize();

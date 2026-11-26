@@ -1,4 +1,5 @@
 #include "EnemyAI.h"
+#include "Game/GameAudio.h"
 #include "AStarPathfinder.h"
 #include "Collision.h"
 #include "GameObjects/Player/Player.h"
@@ -10,10 +11,9 @@
 
 using namespace TinyEngine;
 
-void EnemyAI::Initialize(Transform* transform, EngineContext* ctx, IEnemyBehavior* behavior, AudioManager* audioManager) {
+void EnemyAI::Initialize(Transform* transform, EngineContext* ctx, IEnemyBehavior* behavior) {
 	transform_ = transform;
 	ctx_ = ctx;
-	audioManager_ = audioManager;
 	behavior_ = behavior;
 	shotIntervalNormal_ = behavior_->GetShotInterval();
 }
@@ -235,7 +235,7 @@ void EnemyAI::UpdateVigilance(
 			Shot(toTarget, enemyWeapons);
 
 			// SE再生
-			audioManager_->PlaySE("Shot", 0.3f);
+			TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Shot, 0.3f);
 		}
 	} else {
 		// shotTimerをリセット
@@ -309,7 +309,7 @@ void EnemyAI::UpdateHold(float deltaTime, Player* player, EnemyWeaponManager& en
 		shotTimer_ += deltaTime;
 		if (shotTimer_ >= GetHoldChargeTime()) {
 			Shot(playerDirection, enemyWeapons, false);
-			audioManager_->PlaySE("Shot", 0.3f);
+			TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Shot, 0.3f);
 			isShotHoldState_ = false;
 			hasShotInHold_ = true;
 		}
@@ -336,7 +336,7 @@ void EnemyAI::UpdateHold(float deltaTime, Player* player, EnemyWeaponManager& en
 	if (holdBurstShotTimer_ >= interval) {
 		holdBurstShotTimer_ -= interval;
 		Shot(playerDirection, enemyWeapons, false);
-		audioManager_->PlaySE("Shot", 0.2f);
+		TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Shot, 0.2f);
 	}
 
 	// 連射時間が終わったら完了

@@ -1,4 +1,5 @@
 #include "ResultScene.h"
+#include "Game/GameAudio.h"
 #include "SceneManager.h"
 
 using namespace TinyEngine;
@@ -29,14 +30,7 @@ void ResultScene::Initialize(const SceneContext& ctx) {
 	scanlineParam_.intensity = 0.7f;
 	scanlineParam_.speed = 5.0f;
 
-	// オーディオマネージャーの生成&初期化
-	audioManager_ = std::make_unique<AudioManager>();
-	audioManager_->Initialize();
-	audioManager_->LoadWave("ResultBGM", "Resources/Sounds/BGM/ResultScene.mp3");
-	audioManager_->LoadWave("Select", "Resources/Sounds/SE/Select.mp3");
-	audioManager_->LoadWave("Decide", "Resources/Sounds/SE/Decide.mp3");
-	audioManager_->LoadWave("Error", "Resources/Sounds/SE/Error.mp3");
-	audioManager_->PlayBGM("ResultBGM");
+	TinyEngine::AudioManager::Get().PlayBGM(GameAudio::BGM::Result);
 
 	// フォントの生成&初期化
 	font_ = std::make_unique<Font>();
@@ -57,7 +51,7 @@ void ResultScene::Initialize(const SceneContext& ctx) {
 
 	// ボタングループの生成&初期化
 	buttons_ = std::make_unique<ButtonGroup>();
-	buttons_->Initialize(ButtonGroup::Layout::Horizontal, audioManager_.get());
+	buttons_->Initialize(ButtonGroup::Layout::Horizontal);
 	buttons_->Add(ctx.engineContext, font_.get(), L"リトライ", {240.0f, 580.0f}, [this]() { ctx_.sceneTransition->ChangeScene(commonData_->currentStageKey, FadeStyle::Logo); });
 	buttons_->Add(ctx.engineContext, font_.get(), L"タイトル", {625.0f, 580.0f}, [this]() { ctx_.sceneTransition->ChangeScene("Title", FadeStyle::Logo); });
 	buttons_->Add(ctx.engineContext, font_.get(), L"次のステージ", {1030.0f, 580.0f}, [this]() {
@@ -71,9 +65,6 @@ void ResultScene::Initialize(const SceneContext& ctx) {
 
 void ResultScene::Update() {
 	float deltaTime = ctx_.timeManager->GetDeltaTime();
-
-	// 音声更新
-	audioManager_->Update();
 
 	// 歪みのパラメータにDeltaTime加算
 	glitchParam_.time += deltaTime;
@@ -124,4 +115,4 @@ void ResultScene::Draw() {
 	buttons_->Draw();
 }
 
-void ResultScene::Finalize() { audioManager_->StopBGM(); }
+void ResultScene::Finalize() { TinyEngine::AudioManager::Get().StopBGM(); }

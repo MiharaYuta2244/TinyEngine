@@ -1,6 +1,5 @@
 #pragma once
 #include "AABB.h"
-#include "AudioManager.h"
 #include "Behavior/EnemyBehavior.h"
 #include "DecalManager.h"
 #include "EnemyAI.h"
@@ -33,7 +32,7 @@ public:
 	Enemy();
 
 	// 初期化処理
-	void Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, TinyEngine::DecalManager* bloodDecalManager, TinyEngine::AudioManager* audioManager);
+	void Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, TinyEngine::DecalManager* bloodDecalManager);
 
 	// 更新処理
 	void Update(
@@ -227,9 +226,6 @@ private:
 	// オブジェクト数カウント用
 	static int index;
 	int id_ = 0;
-
-	// オーディオマネージャーポインタ
-	TinyEngine::AudioManager* audioManager_ = nullptr;
 
 	// アクティブフラグ
 	bool isActive_ = true;

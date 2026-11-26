@@ -1,4 +1,5 @@
 #include "Enemy.h"
+#include "Game/GameAudio.h"
 #include "EffectLibrary.h"
 #include "MathOperator.h"
 #include "ChargeModule.h"
@@ -31,9 +32,8 @@ int Enemy::index = 0;
 
 Enemy::Enemy() { id_ = index++; }
 
-void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalManager* bloodDecalManager, AudioManager* audioManager) {
+void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalManager* bloodDecalManager) {
 	ctx_ = ctx;
-	audioManager_ = audioManager;
 	ApplyType(type);
 
 	transform_.scale = {0.4f, 0.4f, 0.4f};
@@ -58,7 +58,7 @@ void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalMan
 
 	// AIインスタンス生成&初期化
 	ai_ = std::make_unique<EnemyAI>();
-	ai_->Initialize(&transform_, ctx, behavior_.get(), audioManager_);
+	ai_->Initialize(&transform_, ctx, behavior_.get());
 
 	// 視界インスタンス生成&初期化
 	visionCone_ = std::make_unique<VisionCone>();
@@ -379,9 +379,7 @@ void Enemy::StartDown(float duration) {
 	velocity_ = {0.0f, 0.0f, 0.0f};
 
 	// ダウン開始時にピヨピヨSEを再生
-	if (audioManager_) {
-		audioManager_->PlaySE("Piyo", 0.3f);
-	}
+	TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Piyo, 0.3f);
 
 	// ピヨピヨ演出の開始
 	piyoEffect_ = std::make_unique<PiyoEffect>();

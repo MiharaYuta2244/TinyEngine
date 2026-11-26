@@ -2,7 +2,6 @@
 #include "BaseScene.h"
 #include "Menu/MenuList.h"
 #include "Menu/OptionMenu.h"
-#include "AudioManager.h"
 #include "GameTimer.h"
 
 class TitleScene : public BaseScene {
@@ -44,9 +43,6 @@ private:
 	ScanlineParam scanlineParam_;                 // 走査線
 	BarrelDistortionParam barrelDistortionParam_; // ブラウン管風
 	GlitchParam glitchParam_;                     // グリッチ
-
-	// オーディオマネージャーインスタンス
-	std::unique_ptr<TinyEngine::AudioManager> audioManager_;
 
 	// ゲーム終了までのタイマー
 	std::unique_ptr<GameTimer> finishTimer_;

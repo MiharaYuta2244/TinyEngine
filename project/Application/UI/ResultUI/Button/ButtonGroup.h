@@ -1,5 +1,4 @@
 #pragma once
-#include "AudioManager.h"
 #include "Button.h"
 #include "DirectInput.h"
 #include "GamePad.h"
@@ -13,7 +12,7 @@ public:
 	enum class Layout { Horizontal, Vertical };
 
 	// 初期化処理
-	void Initialize(Layout layout, TinyEngine::AudioManager* audioManager);
+	void Initialize(Layout layout);
 
 	// ボタンの追加
 	void Add(EngineContext* ctx, TinyEngine::Font* font, const std::wstring& label, const Vector2& center, std::function<void()> onDecide);
@@ -43,9 +42,6 @@ private:
 
 	// レイアウト
 	Layout layout_ = Layout::Horizontal;
-
-	// オーディオマネージャーポインタ
-	TinyEngine::AudioManager* audio_ = nullptr;
 
 	// 選択インデックス
 	int selectedIndex_ = 0;

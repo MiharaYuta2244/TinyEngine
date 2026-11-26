@@ -1,4 +1,5 @@
 #include "EnemyManager.h"
+#include "Game/GameAudio.h"
 #include "JsonManager.h"
 #include "GameObjects/Player/Player.h"
 #include "Behavior/EnemyBehaviorFactory.h"
@@ -16,14 +17,6 @@ void EnemyManager::Initialize(EngineContext* ctx, DecalManager* bloodDecalManage
 	// 足跡管理インスタンス生成&初期化
 	footprintManager_ = std::make_unique<FootprintManager>();
 	footprintManager_->Initialize(bloodDecalManager);
-
-	// オーディオマネージャー生成&初期化
-	audioManager_ = std::make_unique<AudioManager>();
-	audioManager_->Initialize();
-	audioManager_->LoadWave("Cymbal", "Resources/Sounds/SE/Cymbal.mp3");
-	audioManager_->LoadWave("Snare", "Resources/Sounds/SE/Snare.mp3");
-	audioManager_->LoadWave("Shot", "Resources/Sounds/SE/Shot.mp3");
-	audioManager_->LoadWave("Piyo", "Resources/Sounds/SE/PiyoPiyo.mp3");
 
 	// JSON読み込み
 	jsonPath_ = stagePath + "Enemies.json";
@@ -47,8 +40,8 @@ void EnemyManager::Update(
 
 	// 数が減ったらSEを再生
 	if (beforeCount > afterCount) {
-		audioManager_->PlaySE("Cymbal", 0.2f);
-		audioManager_->PlaySE("Snare", 0.2f);
+		TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Cymbal, 0.2f);
+		TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Snare, 0.2f);
 	}
 
 	// 距離判定用の設定
@@ -95,9 +88,6 @@ void EnemyManager::Update(
 			enemy->SetActive(false);
 		}
 	}
-
-	// 音声更新
-	audioManager_->Update();
 }
 
 void EnemyManager::PostUpdate() {
@@ -214,7 +204,7 @@ void EnemyManager::LoadFromJson(const std::string& filepath) {
 
 	for (const auto& data : enemyDatas) {
 		auto enemy = std::make_unique<Enemy>();
-		enemy->Initialize(ctx_, data.pos, static_cast<EnemyType>(data.type), bloodDecalManager_, audioManager_.get());
+		enemy->Initialize(ctx_, data.pos, static_cast<EnemyType>(data.type), bloodDecalManager_);
 		enemy->SetPos(data.pos);
 		enemy->SetRotate(data.rot);
 		enemy->SetIsMove(data.isMove);
@@ -246,7 +236,7 @@ void EnemyManager::AllDead() {
 
 Enemy* EnemyManager::AddEnemy(const Vector3& pos, EnemyType type) {
 	auto enemy = std::make_unique<Enemy>();
-	enemy->Initialize(ctx_, pos, type, bloodDecalManager_, audioManager_.get());
+	enemy->Initialize(ctx_, pos, type, bloodDecalManager_);
 	enemy->SetPos(pos);
 	enemy->SetRotate({0.0f, 0.0f, 0.0f});
 	enemy->SetIsMove(false);

@@ -82,8 +82,8 @@ void OptionMenu::Initialize(EngineContext* ctx, PostEffectSettings* effects, std
 
 	// スライダーの操作を種類ごとの全体音量に即時反映する。
 	auto& audio = Menu(Page::Audio);
-	audio.AddSliderItem(L"BGM", []() { return TinyEngine::AudioManager::GetBGMVolume(); }, [](float value) { TinyEngine::AudioManager::SetBGMVolume(value); });
-	audio.AddSliderItem(L"SE", []() { return TinyEngine::AudioManager::GetSEVolume(); }, [](float value) { TinyEngine::AudioManager::SetSEVolume(value); });
+	audio.AddSliderItem(L"BGM", []() { return TinyEngine::AudioManager::Get().GetBGMVolume(); }, [](float value) { TinyEngine::AudioManager::Get().SetBGMVolume(value); });
+	audio.AddSliderItem(L"SE", []() { return TinyEngine::AudioManager::Get().GetSEVolume(); }, [](float value) { TinyEngine::AudioManager::Get().SetSEVolume(value); });
 	audio.AddItem(L"戻る", [this]() { Enter(Page::Root); });
 
 	font_ = std::make_unique<TinyEngine::Font>();

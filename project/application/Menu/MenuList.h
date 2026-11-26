@@ -1,6 +1,5 @@
 #pragma once
 #include "AnimationBundle.h"
-#include "AudioManager.h"
 #include "DirectInput.h"
 #include "Effect/DecideEffect.h"
 #include "TextSprite.h"
@@ -116,9 +115,6 @@ private:
 	// 項目移動と音量調整は、独立した長押しタイマーで処理する。
 	MenuInputRepeat navigationRepeat_, adjustmentRepeat_;
 	int verticalStickDirection_ = 0, horizontalStickDirection_ = 0;
-
-	// オーディオマネージャー
-	std::unique_ptr<TinyEngine::AudioManager> audioManager_;
 
 	// 選択中の背後に表示する矩形スプライト
 	std::unique_ptr<TinyEngine::Sprite> selectorBg_;

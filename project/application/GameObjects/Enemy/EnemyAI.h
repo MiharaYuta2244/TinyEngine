@@ -1,6 +1,5 @@
 #pragma once
 #include "AABB.h"
-#include "AudioManager.h"
 #include "Behavior/EnemyBehavior.h"
 #include "EnemyState.h"
 #include "GameObjects/GameObjectManager.h"
@@ -30,7 +29,7 @@ public:
 	using State = EnemyState;
 
 	// 初期化
-	void Initialize(Transform* transform, EngineContext* ctx, IEnemyBehavior* behavior, TinyEngine::AudioManager* audioManager);
+	void Initialize(Transform* transform, EngineContext* ctx, IEnemyBehavior* behavior);
 
 	// 更新処理
 	void Update(
@@ -180,9 +179,6 @@ private:
 	// 聴覚用パラメータ
 	float hearingRadius_ = 8.0f; // 足音が聞こえる距離
 	float hearTurnSpeed_ = 8.0f; // 足音に反応して振り向く速度
-
-	// オーディオマネージャーポインタ
-	TinyEngine::AudioManager* audioManager_ = nullptr;
 
 	// 敵の挙動ポインタ
 	IEnemyBehavior* behavior_ = nullptr;

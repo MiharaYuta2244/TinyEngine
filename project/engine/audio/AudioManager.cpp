@@ -1,248 +1,249 @@
 #include "AudioManager.h"
+#include "FFT.h"
+#include "Logger.h"
 #include "StringUtility.h"
 #include <algorithm>
+#include <cstring>
+#include <format>
 #include <mfapi.h>
+#include <mferror.h>
 #include <mfidl.h>
-#include <mfobjects.h>
 #include <mfreadwrite.h>
+#include <utility>
 
 #pragma comment(lib, "mfplat.lib")
 #pragma comment(lib, "Mfreadwrite.lib")
 #pragma comment(lib, "mfuuid.lib")
 
-using namespace Microsoft::WRL;
+using Microsoft::WRL::ComPtr;
 using namespace TinyEngine;
 
-AudioManager::~AudioManager() {
-	std::erase(instances_, this);
-	HRESULT result;
+namespace {
+// Media Foundationで音声ファイルをデコードし、XAudio2に渡せるPCMデータを作る
+HRESULT DecodeSound(const std::string& filename, SoundData& sound) {
+	ComPtr<IMFSourceReader> reader;
+	HRESULT result = MFCreateSourceReaderFromURL(StringUtility::ConvertString(filename).c_str(), nullptr, &reader);
+	if (FAILED(result)) return result;
 
-	// 再生中のボイスを停止・破棄
-	StopBGM();
-	for (const auto& se : seVoices_) {
-		auto* voice = se.voice;
-		if (voice) {
-			voice->Stop();
-			voice->DestroyVoice();
+	// 最初の音声ストリームを非圧縮のPCMとして読み出す
+	ComPtr<IMFMediaType> pcmType;
+	result = MFCreateMediaType(&pcmType);
+	if (FAILED(result)) return result;
+
+	result = pcmType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
+	if (FAILED(result)) return result;
+
+	result = pcmType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
+	if (FAILED(result)) return result;
+
+	constexpr DWORD stream = MF_SOURCE_READER_FIRST_AUDIO_STREAM;
+	result = reader->SetCurrentMediaType(stream, nullptr, pcmType.Get());
+	if (FAILED(result)) return result;
+
+	ComPtr<IMFMediaType> outputType;
+	result = reader->GetCurrentMediaType(stream, &outputType);
+	if (FAILED(result)) return result;
+
+	// デコーダーが決定したサンプルレートやチャンネル数を再生用の書式に変換する
+	WAVEFORMATEX* format = nullptr;
+	UINT32 formatSize = 0;
+	result = MFCreateWaveFormatExFromMFMediaType(outputType.Get(), &format, &formatSize);
+	if (FAILED(result)) return result;
+
+	const std::unique_ptr<WAVEFORMATEX, decltype(&CoTaskMemFree)> formatOwner(format, CoTaskMemFree);
+	if (formatSize > sizeof(sound.wfex)) return MF_E_INVALIDMEDIATYPE;
+
+	// PCMのWAVEFORMATEXはWAVEFORMATEXTENSIBLEより短い場合がある
+	std::memcpy(&sound.wfex, formatOwner.get(), formatSize);
+
+	// ファイルの末尾までPCMの断片を読み取り、1つの再生バッファにつなげる
+	while (true) {
+		ComPtr<IMFSample> sample;
+		DWORD flags = 0;
+		result = reader->ReadSample(stream, 0, nullptr, &flags, nullptr, &sample);
+		if (FAILED(result)) return result;
+		if (flags & (MF_SOURCE_READERF_ERROR | MF_SOURCE_READERF_CURRENTMEDIATYPECHANGED)) return MF_E_INVALIDMEDIATYPE;
+
+		if (sample) {
+			ComPtr<IMFMediaBuffer> buffer;
+			result = sample->ConvertToContiguousBuffer(&buffer);
+			if (FAILED(result)) return result;
+
+			DWORD length = 0;
+			result = buffer->GetCurrentLength(&length);
+			if (FAILED(result)) return result;
+			if (length > XAUDIO2_MAX_BUFFER_BYTES - sound.buffer.size()) return E_INVALIDARG;
+
+			if (length != 0) {
+				const size_t offset = sound.buffer.size();
+				sound.buffer.resize(offset + length);
+				BYTE* bytes = nullptr;
+				result = buffer->Lock(&bytes, nullptr, nullptr);
+				if (FAILED(result)) return result;
+
+				std::memcpy(sound.buffer.data() + offset, bytes, length);
+				buffer->Unlock();
+			}
+		}
+
+		if (flags & MF_SOURCE_READERF_ENDOFSTREAM) {
+			break;
 		}
 	}
-	seVoices_.clear();
 
-	result = MFShutdown();
-	assert(SUCCEEDED(result));
+	return sound.buffer.empty() ? MF_E_INVALIDMEDIATYPE : S_OK;
+}
+} // namespace
 
-	if (masterVoice_) masterVoice_->DestroyVoice();
-	xAudio2_.Reset();
-
-	// マップ内のデータを全て解放
-	for (auto& pair : soundData_) {
-		SoundUnLoad(&pair.second);
-	}
-	soundData_.clear();
-
-	spectrum_.clear();
+AudioManager& AudioManager::Get() {
+	static AudioManager instance;
+	return instance;
 }
 
+AudioManager::~AudioManager() { Finalize(); }
+
 void AudioManager::Initialize() {
-	HRESULT result;
+	if (masterVoice_) return;
 
-	result = XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
-	assert(SUCCEEDED(result));
+	HRESULT result = XAudio2Create(&xAudio2_, 0, XAUDIO2_DEFAULT_PROCESSOR);
+	if (SUCCEEDED(result)) {
+		result = xAudio2_->CreateMasteringVoice(&masterVoice_);
+	}
+	if (SUCCEEDED(result)) {
+		result = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
+		if (SUCCEEDED(result)) return;
 
-	result = xAudio2_->CreateMasteringVoice(&masterVoice_);
-	assert(SUCCEEDED(result));
-	instances_.push_back(this);
+		// デコード機能の初期化に失敗した場合は、先に確保した出力ボイスを解放する
+		masterVoice_->DestroyVoice();
+		masterVoice_ = nullptr;
+	}
 
-	// Windows Media Foundation初期化
-	result = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
-	assert(SUCCEEDED(result));
+	xAudio2_.Reset();
+	Logger::Log(std::format("Audio initialization failed ({:#010x})", static_cast<unsigned long>(result)), LogLevel::Error);
+}
 
-	// FFT
-	fft_ = std::make_unique<FFT>();
+void AudioManager::Finalize() {
+	if (!masterVoice_) return;
 
-	// スペクトラムのリサイズ
-	spectrum_.resize(64);
+	// 再生ボイスはキャッシュ内のPCMを参照しているため、先に破棄する
+	StopBGM();
+	seVoices_.clear();
+	soundData_.clear();
+
+	masterVoice_->DestroyVoice();
+	masterVoice_ = nullptr;
+	xAudio2_.Reset();
+	MFShutdown();
 }
 
 void AudioManager::Update() {
-	// 再生が終了したSEのボイスをリストから削除・破棄する
 	seVoices_.remove_if([](const SEVoice& se) {
-		auto* voice = se.voice;
-		XAUDIO2_VOICE_STATE state;
-		voice->GetState(&state);
-		// バッファのキューが空＝再生終了
-		if (state.BuffersQueued == 0) {
-			voice->DestroyVoice();
-			return true; // リストから削除
-		}
-		return false; // リストに残す
+		XAUDIO2_VOICE_STATE state{};
+		se.voice->GetState(&state, XAUDIO2_VOICE_NOSAMPLESPLAYED);
+
+		// リストから削除すると、Voiceのデリーターが再生ボイスを破棄する
+		return state.BuffersQueued == 0;
 	});
-
-	// FFT
-	if (bgmVoice_) fft_->GetSpectrum(spectrum_, *bgmVoice_, currentBgmTag_, soundData_);
 }
 
-void AudioManager::LoadWave(const std::string& tag, const std::string& filename) {
-	// 既に同じタグがあれば読み込まない
-	if (soundData_.find(tag) != soundData_.end()) {
-		return;
+const SoundData* AudioManager::GetOrLoadSound(const std::string& filename) {
+	if (!masterVoice_) return nullptr;
+	if (const auto it = soundData_.find(filename); it != soundData_.end()) return &it->second;
+
+	// 未読込のファイルだけをデコードし、成功したデータをキャッシュに登録する
+	SoundData sound;
+	const HRESULT result = DecodeSound(filename, sound);
+	if (FAILED(result)) {
+		Logger::Log(std::format("Audio load failed ({:#010x}): {}", static_cast<unsigned long>(result), filename), LogLevel::Error);
+		return nullptr;
 	}
 
-	// フルパスをワイド文字列に変換
-	std::wstring filePathW = StringUtility::ConvertString(filename);
-	HRESULT result;
+	return &soundData_.try_emplace(filename, std::move(sound)).first->second;
+}
 
-	// SourceReader作成
-	ComPtr<IMFSourceReader> pReader;
-	result = MFCreateSourceReaderFromURL(filePathW.c_str(), nullptr, &pReader);
-	assert(SUCCEEDED(result));
+void AudioManager::Preload(const std::string& filename) { GetOrLoadSound(filename); }
 
-	// PCM形式にフォーマット指定する
-	ComPtr<IMFMediaType> pPCMType;
-	MFCreateMediaType(&pPCMType);
-	pPCMType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);
-	pPCMType->SetGUID(MF_MT_SUBTYPE, MFAudioFormat_PCM);
-	result = pReader->SetCurrentMediaType((DWORD)MF_SOURCE_READER_FIRST_AUDIO_STREAM, nullptr, pPCMType.Get());
-	assert(SUCCEEDED(result));
+AudioManager::Voice AudioManager::StartVoice(const SoundData& data, float volume, bool loop) {
+	IXAudio2SourceVoice* source = nullptr;
+	HRESULT result = xAudio2_->CreateSourceVoice(&source, &data.wfex.Format);
+	Voice voice(source);
+	if (SUCCEEDED(result)) {
+		XAUDIO2_BUFFER buffer{};
 
-	// 実際にセットされたメディアタイプを取得する
-	ComPtr<IMFMediaType> pOutType;
-	pReader->GetCurrentMediaType((DWORD)MF_SOURCE_READER_FIRST_AUDIO_STREAM, &pOutType);
+		// PCMをコピーせず、キャッシュ内のバッファを再生ボイスから参照する
+		buffer.pAudioData = data.buffer.data();
+		buffer.AudioBytes = static_cast<UINT32>(data.buffer.size());
+		buffer.Flags = XAUDIO2_END_OF_STREAM;
+		buffer.LoopCount = loop ? XAUDIO2_LOOP_INFINITE : 0;
 
-	// Waveフォーマットを取得する
-	WAVEFORMATEX* waveFormat = nullptr;
-	MFCreateWaveFormatExFromMFMediaType(pOutType.Get(), &waveFormat, nullptr);
-
-	// データを一時保管
-	SoundData soundData = {};
-	soundData.wfex = *(WAVEFORMATEXTENSIBLE*)waveFormat;
-
-	// 生成したwaveフォーマットを開放
-	CoTaskMemFree(waveFormat);
-
-	// PCMデータのバッファを構築
-	while (true) {
-		ComPtr<IMFSample> pSample;
-		DWORD streamIndex = 0, flags = 0;
-		LONGLONG llTimeStamp = 0;
-		// サンプルを読み込む
-		result = pReader->ReadSample(MF_SOURCE_READER_FIRST_AUDIO_STREAM, 0, &streamIndex, &flags, &llTimeStamp, &pSample);
-		// ストリームの末尾に達したら抜ける
-		if (flags & MF_SOURCE_READERF_ENDOFSTREAM)
-			break;
-
-		if (pSample) {
-			ComPtr<IMFMediaBuffer> pBuffer;
-			// サンプルに含まれるサウンドデータのバッファを一繋ぎにして取得
-			pSample->ConvertToContiguousBuffer(&pBuffer);
-
-			BYTE* pData = nullptr; // データ読み取りポインタ
-			DWORD maxLength = 0, currentLength = 0;
-			// バッファ読み込み用にロック
-			pBuffer->Lock(&pData, &maxLength, &currentLength);
-			// バッファの末尾にデータを追加
-			soundData.buffer.insert(soundData.buffer.end(), pData, pData + currentLength);
-			pBuffer->Unlock();
+		result = voice->SubmitSourceBuffer(&buffer);
+		if (SUCCEEDED(result)) {
+			result = voice->SetVolume(volume);
+		}
+		if (SUCCEEDED(result)) {
+			result = voice->Start();
 		}
 	}
 
-	// マップに登録
-	soundData_[tag] = soundData;
+	if (FAILED(result)) {
+		Logger::Log(std::format("Audio playback failed ({:#010x})", static_cast<unsigned long>(result)), LogLevel::Error);
+		return {};
+	}
+	return voice;
 }
 
-void AudioManager::PlayBGM(const std::string& tag, float volume) {
-	// タグが見つからなければ何もしない
-	if (soundData_.find(tag) == soundData_.end()) {
-		return;
-	}
+void AudioManager::PlayBGM(const std::string& filename, float volume) {
+	const SoundData* sound = GetOrLoadSound(filename);
+	if (!sound) return;
 
-	// 既に再生中のBGMがあれば停止・破棄
-	StopBGM();
+	Voice voice = StartVoice(*sound, volume * bgmVolume_, true);
+	if (!voice) return;
 
-	// 現在のタグを保存
-	currentBgmTag_ = tag;
-
-	HRESULT result;
-	SoundData& data = soundData_[tag];
-
-	// SourceVoiceの生成
-	result = xAudio2_->CreateSourceVoice(&bgmVoice_, &data.wfex.Format);
-	assert(SUCCEEDED(result));
-
-	// バッファの設定
-	XAUDIO2_BUFFER buf{};
-	buf.pAudioData = data.buffer.data();
-	buf.AudioBytes = static_cast<UINT32>(data.buffer.size());
-	buf.Flags = XAUDIO2_END_OF_STREAM;
-
-	// ★BGM用に無限ループ設定
-	buf.LoopCount = XAUDIO2_LOOP_INFINITE;
-
-	// 音声データの送信と再生
-	result = bgmVoice_->SubmitSourceBuffer(&buf);
+	// 新しい曲の再生開始に成功した時点で、既存のBGMボイスを破棄して差し替える
+	bgmVoice_ = std::move(voice);
 	bgmBaseVolume_ = volume;
-	bgmVoice_->SetVolume(volume * bgmVolume_);
-	result = bgmVoice_->Start();
+	currentBgm_ = sound;
 }
 
 void AudioManager::StopBGM() {
-	if (bgmVoice_) {
-		bgmVoice_->Stop();
-		bgmVoice_->DestroyVoice();
-		bgmVoice_ = nullptr;
-	}
-
-	// タグ情報をクリア
-	currentBgmTag_.clear();
+	bgmVoice_.reset();
+	currentBgm_ = nullptr;
 }
 
-void AudioManager::PlaySE(const std::string& tag, float volume) {
-	// タグが見つからなければ何もしない
-	if (soundData_.find(tag) == soundData_.end()) {
-		return;
+void AudioManager::PlaySE(const std::string& filename, float volume) {
+	if (const SoundData* sound = GetOrLoadSound(filename)) {
+		Voice voice = StartVoice(*sound, volume * seVolume_, false);
+
+		// SEごとにボイスを保持して重ね再生を行い、終了後はUpdateで回収する
+		if (voice) {
+			seVoices_.push_back({std::move(voice), volume});
+		}
 	}
-
-	HRESULT result;
-	SoundData& data = soundData_[tag];
-
-	// SourceVoiceの生成（SEは毎回新しく作る）
-	IXAudio2SourceVoice* pSourceVoice = nullptr;
-	result = xAudio2_->CreateSourceVoice(&pSourceVoice, &data.wfex.Format);
-	assert(SUCCEEDED(result));
-
-	// バッファの設定
-	XAUDIO2_BUFFER buf{};
-	buf.pAudioData = data.buffer.data();
-	buf.AudioBytes = static_cast<UINT32>(data.buffer.size());
-	buf.Flags = XAUDIO2_END_OF_STREAM;
-
-	// SEはループしない (LoopCount = 0)
-	buf.LoopCount = 0;
-
-	// 再生
-	result = pSourceVoice->SubmitSourceBuffer(&buf);
-	pSourceVoice->SetVolume(volume * seVolume_);
-	result = pSourceVoice->Start();
-
-	// リストに追加（Updateで終了監視するため）
-	seVoices_.push_back({pSourceVoice, volume});
 }
 
 void AudioManager::SetBGMVolume(float volume) {
 	bgmVolume_ = std::clamp(volume, 0.0f, 1.0f);
-	for (auto* manager : instances_) {
-		if (manager->bgmVoice_) manager->bgmVoice_->SetVolume(manager->bgmBaseVolume_ * bgmVolume_);
+
+	// 曲ごとの音量に、設定画面で変更するBGM全体音量を掛けて反映する
+	if (bgmVoice_) {
+		bgmVoice_->SetVolume(bgmBaseVolume_ * bgmVolume_);
 	}
 }
 
 void AudioManager::SetSEVolume(float volume) {
 	seVolume_ = std::clamp(volume, 0.0f, 1.0f);
-	for (auto* manager : instances_) {
-		for (const auto& se : manager->seVoices_) se.voice->SetVolume(se.volume * seVolume_);
+	// 各SEの再生時に指定した音量を基準に、SE全体音量を反映する
+	for (const auto& se : seVoices_) {
+		se.voice->SetVolume(se.volume * seVolume_);
 	}
 }
 
-void AudioManager::SoundUnLoad(SoundData* soundData) {
-	soundData->buffer.clear();
-	soundData->wfex = {};
+std::vector<float> AudioManager::GetSpectrum() const {
+	std::vector<float> spectrum(64);
+
+	// スペクトラムは取得されたときにだけ、現在のBGMの再生位置から計算する
+	if (bgmVoice_) {
+		FFT{}.GetSpectrum(spectrum, *bgmVoice_, *currentBgm_);
+	}
+	return spectrum;
 }

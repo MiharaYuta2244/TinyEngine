@@ -1,10 +1,10 @@
 #include "ButtonGroup.h"
+#include "Game/GameAudio.h"
 #include <algorithm>
 #include <cmath>
 
-void ButtonGroup::Initialize(Layout layout, TinyEngine::AudioManager* audioManager) {
+void ButtonGroup::Initialize(Layout layout) {
 	layout_ = layout;
-	audio_ = audioManager;
 	selectedIndex_ = 0;
 	stickInUse_ = false;
 	isDecided_ = false;
@@ -39,23 +39,17 @@ void ButtonGroup::Update(DirectInput* input, GamePad* gamePad) {
 			if (next != selectedIndex_) {
 				selectedIndex_ = next;
 
-				if (audio_) {
-					audio_->PlaySE("Select", 0.5f);
-				}
+				TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Select, 0.5f);
 			}
 		}
 
 		if (PollDecide(input, gamePad)) {
 			if (!buttons_[selectedIndex_].IsEnabled()) {
-				if (audio_) {
-					audio_->PlaySE("Error", 0.5f);
-				}
+				TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Error, 0.5f);
 			} else {
 				isDecided_ = true;
 
-				if (audio_) {
-					audio_->PlaySE("Decide", 0.5f);
-				}
+				TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Decide, 0.5f);
 
 				buttons_[selectedIndex_].Execute();
 			}

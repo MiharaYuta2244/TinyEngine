@@ -1,4 +1,5 @@
 #include "TitleScene.h"
+#include "Game/GameAudio.h"
 #include "GameObjects/PlaytestConfig.h"
 #include "SceneManager.h"
 
@@ -74,11 +75,7 @@ void TitleScene::Initialize(const SceneContext& ctx) {
 	scanlineParam_.intensity = 0.7f;
 	scanlineParam_.speed = 5.0f;
 
-	// オーディオマネージャーの生成&初期化
-	audioManager_ = std::make_unique<AudioManager>();
-	audioManager_->Initialize();
-	audioManager_->LoadWave("TitleBGM", "Resources/Sounds/BGM/TitleScene.mp3");
-	audioManager_->PlayBGM("TitleBGM");
+	TinyEngine::AudioManager::Get().PlayBGM(GameAudio::BGM::Title);
 
 	// 黒背景生成&初期化
 	blackBg_ = std::make_unique<Sprite>();
@@ -119,9 +116,6 @@ void TitleScene::Update() {
 		ctx_.sceneTransition->ChangeScene("EffectEditor", FadeStyle::Logo);
 	}
 #endif
-
-	// 音声更新
-	audioManager_->Update();
 
 	// 黒背景＆コントローラー画像のフェードアウト処理
 	float totalFadeTime = fadeWaitDuration_ + fadeOutDuration_;
@@ -286,4 +280,4 @@ void TitleScene::Draw() {
 	}
 }
 
-void TitleScene::Finalize() { audioManager_->StopBGM(); }
+void TitleScene::Finalize() { TinyEngine::AudioManager::Get().StopBGM(); }

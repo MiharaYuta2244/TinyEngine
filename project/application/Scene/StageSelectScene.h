@@ -1,6 +1,5 @@
 #pragma once
 #include "AnimationBundle.h"
-#include "AudioManager.h"
 #include "BaseScene.h"
 #include "DecalManager.h"
 #include "EasingAnimation.h"
@@ -114,8 +113,6 @@ private:
 	std::unique_ptr<TinyEngine::Font> font_;                // フォント
 	std::unique_ptr<TinyEngine::TextSprite> clearTimeText_; // クリアテキスト
 	std::unique_ptr<TinyEngine::TextSprite> killCountText_; // 敵を倒した数テキスト
-
-	std::unique_ptr<TinyEngine::AudioManager> audioManager_; // オーディオマネージャー
 
 	// ポストエフェクトパラメータ
 	ScanlineParam scanlineParam_;                 // 走査線

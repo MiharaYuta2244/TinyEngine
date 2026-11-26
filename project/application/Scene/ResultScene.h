@@ -1,5 +1,4 @@
 #pragma once
-#include "AudioManager.h"
 #include "BaseScene.h"
 #include "Font.h"
 #include "Menu/ResultScoreDisplay.h"
@@ -31,9 +30,6 @@ private:
 	ScanlineParam scanlineParam_;                 // 走査線
 	BarrelDistortionParam barrelDistortionParam_; // 歪み
 	GlitchParam glitchParam_;                     // グリッチ
-
-	// オーディオマネージャーインスタンス
-	std::unique_ptr<TinyEngine::AudioManager> audioManager_;
 
 	// フォント
 	std::unique_ptr<TinyEngine::Font> font_;

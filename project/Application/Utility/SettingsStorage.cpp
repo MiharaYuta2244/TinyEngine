@@ -27,7 +27,7 @@ std::string Serialize(const PostEffectSettings& pfx) {
 	out << '\n';
 	for (int code : InputBindings::Get().pad)
 		out << code << ' ';
-	out << '\n' << TinyEngine::AudioManager::GetBGMVolume() << ' ' << TinyEngine::AudioManager::GetSEVolume() << '\n';
+	out << '\n' << TinyEngine::AudioManager::Get().GetBGMVolume() << ' ' << TinyEngine::AudioManager::Get().GetSEVolume() << '\n';
 	out << pfx.vignetteEnabled << ' ' << pfx.outlineEnabled << ' ' << pfx.radialBlurEnabled << ' ' << pfx.glitchEnabled << ' ' << pfx.scanlineEnabled << ' ' << pfx.barrelDistortionEnabled << ' '
 	    << pfx.blurEnabled << ' ' << pfx.deathEffectEnabled << '\n';
 
@@ -96,7 +96,7 @@ void Load(PostEffectSettings& pfx) {
 	InputBindings::Get().keyboard = keyboard;
 	InputBindings::Get().pad = pad;
 	pfx = effects;
-	TinyEngine::AudioManager::SetBGMVolume(bgm);
-	TinyEngine::AudioManager::SetSEVolume(se);
+	TinyEngine::AudioManager::Get().SetBGMVolume(bgm);
+	TinyEngine::AudioManager::Get().SetSEVolume(se);
 }
 } // namespace SettingsStorage

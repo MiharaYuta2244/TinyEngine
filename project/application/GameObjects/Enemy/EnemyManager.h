@@ -1,5 +1,4 @@
 #pragma once
-#include "AudioManager.h"
 #include "Enemy.h"
 #include "Effect/FootprintManager.h"
 #include <list>
@@ -71,9 +70,6 @@ private:
 
 	// 血痕管理クラスポインタ
 	TinyEngine::DecalManager* bloodDecalManager_ = nullptr;
-
-	// オーディオマネージャーインスタンス
-	std::unique_ptr<TinyEngine::AudioManager> audioManager_;
 
 	// 足跡管理インスタンス
 	std::unique_ptr<FootprintManager> footprintManager_;

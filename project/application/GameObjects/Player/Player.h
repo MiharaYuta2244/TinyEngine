@@ -1,6 +1,5 @@
 #pragma once
 #include "AABB.h"
-#include "AudioManager.h"
 #include "DecalManager.h"
 #include "DirectInput.h"
 #include "GameObjects/IGameObject.h"
@@ -213,9 +212,6 @@ private:
 	float pointLightIntensity_ = 0.0f;                   // 輝度
 	float pointLightRadius_ = 7.0f;                      // 影響半径
 	float pointLightDecay_ = 0.7f;                       // 減衰率
-
-	// オーディオマネージャー
-	std::unique_ptr<TinyEngine::AudioManager> audioManager_;
 
 	// 振動マネージャー
 	std::unique_ptr<GameRumbleController> rumbleManager_;

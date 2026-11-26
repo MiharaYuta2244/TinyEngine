@@ -1,4 +1,5 @@
 #include "MenuList.h"
+#include "Game/GameAudio.h"
 #include "MathOperator.h"
 #include <cmath>
 #include <numbers>
@@ -15,12 +16,6 @@ void MenuList::Initialize(EngineContext* ctx, const std::wstring& fontFamily, in
 	// 決定ボタン入力時のエフェクト
 	decideEffect_ = std::make_unique<DecideEffect>();
 	decideEffect_->Initialize(ctx, startPos_);
-
-	// オーディオマネージャー生成&初期化
-	audioManager_ = std::make_unique<AudioManager>();
-	audioManager_->Initialize();
-	audioManager_->LoadWave("Select", "Resources/Sounds/SE/Select.mp3");
-	audioManager_->LoadWave("Decide", "Resources/Sounds/SE/Decide.mp3");
 
 	// 選択中背景スプライトの生成&初期化
 	selectorBg_ = std::make_unique<Sprite>();
@@ -326,7 +321,7 @@ void MenuList::Update(DirectInput* input, GamePad* gamePad, float deltaTime) {
 						const float buttonWidth = (width - std::min(8.0f, width * 0.1f)) * 0.5f;
 						if (mouse.x <= controlX + buttonWidth || mouse.x >= controlX + width - buttonWidth) {
 							*items_[i].toggleValue = mouse.x < controlX + width * 0.5f;
-							audioManager_->PlaySE("Decide", 0.5f);
+							TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Decide, 0.5f);
 						}
 					} else
 						decide = true;
@@ -345,7 +340,7 @@ void MenuList::Update(DirectInput* input, GamePad* gamePad, float deltaTime) {
 
 	if (!isDecided_ && navigation != 0) {
 		currentIndex_ = ((currentIndex_ + navigation) % index + index) % index;
-		audioManager_->PlaySE("Select", 0.5f);
+		TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Select, 0.5f);
 	}
 
 	if (!isDecided_ && items_[currentIndex_].onAdjust && adjustment != 0) {
@@ -355,13 +350,13 @@ void MenuList::Update(DirectInput* input, GamePad* gamePad, float deltaTime) {
 		const float after = item.sliderValue ? item.sliderValue() : (item.toggleValue ? static_cast<float>(*item.toggleValue) : -2.0f);
 		// 音量が0や100に達した後は、選択音を鳴らし続けない。
 		if (before != after)
-			audioManager_->PlaySE("Select", 0.5f);
+			TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Select, 0.5f);
 	}
 
 	// 決定処理
 	if (decide && !isDecided_) {
 		items_[currentIndex_].onSelect();
-		audioManager_->PlaySE("Decide", 0.5f);
+		TinyEngine::AudioManager::Get().PlaySE(GameAudio::SE::Decide, 0.5f);
 
 		if (items_[currentIndex_].toggleValue || items_[currentIndex_].keepActive) {
 			// トグル項目はロックせず即座に再入力可能にする
@@ -413,9 +408,6 @@ void MenuList::Update(DirectInput* input, GamePad* gamePad, float deltaTime) {
 
 	// 選択中メニューの座標をエフェクトに適用
 	decideEffect_->SetPos(rowPosition);
-
-	// 音声更新
-	audioManager_->Update();
 }
 
 void MenuList::Draw() {
