@@ -55,11 +55,8 @@ void GamePlayScene::Initialize(const SceneContext& ctx) {
 	enemyManager_ = std::make_unique<EnemyManager>();
 	enemyManager_->Initialize(ctx_.engineContext, decalManager_.get(), stagePath_);
 
-	// 敵の弾管理インスタンス生成
-	enemyBulletManager_ = std::make_unique<EnemyBulletManager>();
-
-	// 敵の爆弾管理インスタンス生成
-	enemyBombManager_ = std::make_unique<EnemyBombManager>();
+	// 敵の武器管理インスタンス生成
+	enemyWeaponManager_ = std::make_unique<EnemyWeaponManager>();
 
 	// フラッシュエフェクトの生成&初期化
 	flashEffect_ = std::make_unique<FlashEffect>();
@@ -186,10 +183,10 @@ void GamePlayScene::Update() {
 	    stage_->GetMolotovManager()->GetObjects(), stage_->GetBarricadeManager()->GetObjects());
 
 	// 敵の更新処理
-	enemyManager_->Update(deltaTime, player_.get(), enemyBulletManager_.get(), stage_->GetSolidObstacles(), stage_->GetDoorManager(), stage_->GetGlassManager(), enemyBombManager_.get());
+	enemyManager_->Update(deltaTime, player_.get(), *enemyWeaponManager_, stage_->GetSolidObstacles(), stage_->GetDoorManager(), stage_->GetGlassManager());
 
 	// 敵の爆弾の更新処理
-	enemyBombManager_->Update(deltaTime);
+	enemyWeaponManager_->UpdateBombs(deltaTime);
 
 	// ステージオブジェクトの更新
 	stage_->Update(deltaTime, player_->GetPosition(), ctx_.currentCamera);
@@ -201,7 +198,7 @@ void GamePlayScene::Update() {
 	    [this](Glass& glass, const Vector3& direction) { OnGlassBreak(glass, direction); },
 	    [this] { TriggerPlayerHitEffect(); },
 	};
-	collisionManager_->CheckCollisions(*player_, *enemyManager_, *enemyBombManager_, *stage_, collisionContext, deltaTime);
+	collisionManager_->CheckCollisions(*player_, *enemyManager_, *enemyWeaponManager_, *stage_, collisionContext, deltaTime);
 
 	// 壊れた石鹸のエフェクト生成
 	for (auto& soap : stage_->GetSoapManager()->GetObjects()) {
@@ -215,8 +212,8 @@ void GamePlayScene::Update() {
 	enemyManager_->PostUpdate();
 
 	// 銃口と盾の描画位置が確定してから、ビームを伸ばす。
-	collisionManager_->CheckEnemyBeams(*player_, *enemyManager_, *enemyBulletManager_, *stage_, collisionContext, deltaTime);
-	enemyBulletManager_->Update(deltaTime);
+	collisionManager_->CheckEnemyBeams(*player_, *enemyManager_, *enemyWeaponManager_, *stage_, collisionContext, deltaTime);
+	enemyWeaponManager_->UpdateBullets(deltaTime);
 
 	// ゴールしていたらフラッシュ開始
 	if (stage_->GetGoal()->GetIsGoal()) {
@@ -425,11 +422,8 @@ void GamePlayScene::Draw() {
 	// 血痕描画
 	decalManager_->Draw();
 
-	// 敵の弾の描画処理
-	enemyBulletManager_->Draw();
-
-	// 敵の爆弾の描画処理
-	enemyBombManager_->Draw();
+	// 敵の弾と爆弾の描画処理
+	enemyWeaponManager_->Draw();
 
 	// プレイヤーの描画処理
 	player_->Draw();

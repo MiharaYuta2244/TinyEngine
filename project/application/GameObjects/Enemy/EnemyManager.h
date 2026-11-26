@@ -7,7 +7,7 @@
 #include <string>
 
 class Player;
-class EnemyBulletManager;
+class EnemyWeaponManager;
 
 using DoorManager = GameObjectManager<Door>;
 
@@ -41,7 +41,7 @@ class EnemyManager {
 public:
 	void Initialize(EngineContext* ctx, TinyEngine::DecalManager* bloodDecalManager, const std::string& stagePath);
 	void Update(
-	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager);
+	    float deltaTime, Player* player, EnemyWeaponManager& enemyWeapons, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager);
 	void PostUpdate();
 	void Draw();
 	void DrawVision();

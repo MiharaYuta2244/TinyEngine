@@ -31,7 +31,7 @@ void EnemyManager::Initialize(EngineContext* ctx, DecalManager* bloodDecalManage
 }
 
 void EnemyManager::Update(
-    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager) {
+    float deltaTime, Player* player, EnemyWeaponManager& enemyWeapons, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager) {
 
 	// 敵がアクティブかどうかに関わらず、足跡は毎フレーム更新
 	footprintManager_->Update(deltaTime);
@@ -89,7 +89,7 @@ void EnemyManager::Update(
 				}
 			}
 			enemy->SetActive(true);
-			enemy->Update(deltaTime, player, enemyBulletManager, obstacles, doorManager, glassManager, enemyBombManager, distraction);
+			enemy->Update(deltaTime, player, enemyWeapons, obstacles, doorManager, glassManager, distraction);
 		} else {
 			// 範囲外ならアクティブフラグをおろし、更新をスキップ
 			enemy->SetActive(false);

@@ -15,7 +15,7 @@
 #include "VisionCone.h"
 #include "PiyoEffect.h"
 
-class EnemyBulletManager;
+class EnemyWeaponManager;
 class Player;
 
 using DoorManager = GameObjectManager<Door>;
@@ -37,7 +37,7 @@ public:
 
 	// 更新処理
 	void Update(
-	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager,
+	    float deltaTime, Player* player, EnemyWeaponManager& enemyWeapons, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager,
 	    const std::optional<Vector3>& distraction);
 
 	// 押し戻し完了後に呼ぶ最終更新処理

@@ -13,8 +13,7 @@
 #include "GameObjects/Enemy/EnemyManager.h"
 #include "GameObjects/Player/Player.h"
 #include "GameObjects/StageObjects/Stage.h"
-#include "Gameobjects/Enemy/Weapon/EnemyBombManager.h"
-#include "Gameobjects/Enemy/Weapon/EnemyBulletManager.h"
+#include "GameObjects/Enemy/Weapon/EnemyWeaponManager.h"
 #include "Particle.h"
 #include "TextSprite.h"
 #include "Effect/StageClearCutIn.h"
@@ -73,11 +72,8 @@ private:
 	// 敵
 	std::unique_ptr<EnemyManager> enemyManager_;
 
-	// 敵の弾を管理するインスタンス
-	std::unique_ptr<EnemyBulletManager> enemyBulletManager_;
-
-	// 敵の爆弾を管理するインスタンス
-	std::unique_ptr<EnemyBombManager> enemyBombManager_;
+	// 敵の弾と爆弾
+	std::unique_ptr<EnemyWeaponManager> enemyWeaponManager_;
 
 	// 死亡パーティクルリスト
 	std::list<std::unique_ptr<TinyEngine::Particle>> enemyDeathEffect_;

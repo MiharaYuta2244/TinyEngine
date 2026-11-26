@@ -7,7 +7,6 @@
 #include "GameObjects/PlayTestConfig.h"
 #include "GameObjects/Player/Player.h"
 #include "Gameobjects/Enemy/Behavior/EnemyBehaviorFactory.h"
-#include "Gameobjects/Enemy/Weapon/EnemyBulletManager.h"
 
 using namespace TinyEngine;
 
@@ -71,7 +70,7 @@ void Enemy::Initialize(EngineContext* ctx, Vector3 pos, EnemyType type, DecalMan
 }
 
 void Enemy::Update(
-    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, EnemyBombManager* enemyBombManager,
+    float deltaTime, Player* player, EnemyWeaponManager& enemyWeapons, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager,
     const std::optional<Vector3>& distraction) {
 	if (isDead_)
 		return;
@@ -125,7 +124,7 @@ void Enemy::Update(
 	Vector3 prevPos = transform_.translate;
 
 	// AIインスタンス更新
-	ai_->Update(deltaTime, player, enemyBulletManager, obstacles, doorManager, glassManager, enemyBombManager, distraction);
+	ai_->Update(deltaTime, player, enemyWeapons, obstacles, doorManager, glassManager, distraction);
 
 	// アニメーション更新処理
 	UpdateAnimation(prevPos);

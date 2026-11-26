@@ -1,8 +1,9 @@
 #include "CollisionManager.h"
 #include "Collision.h"
 #include "GameObjects/Enemy/EnemyManager.h"
-#include "GameObjects/Enemy/Weapon/EnemyBombManager.h"
-#include "GameObjects/Enemy/Weapon/EnemyBulletManager.h"
+#include "GameObjects/Enemy/Weapon/EnemyBomb.h"
+#include "GameObjects/Enemy/Weapon/EnemyBullet.h"
+#include "GameObjects/Enemy/Weapon/EnemyWeaponManager.h"
 #include "GameObjects/Player/Player.h"
 #include "GameObjects/StageObjects/Stage.h"
 #include "MathOperator.h"
@@ -81,7 +82,7 @@ void CollisionManager::NotifyContact(CollisionObject& first, CollisionPart first
 }
 #pragma endregion 接触イベントの通知
 
-void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManager, EnemyBombManager& bombManager, Stage& stage, const CollisionContext& context, float deltaTime) {
+void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManager, const EnemyWeaponManager& enemyWeapons, Stage& stage, const CollisionContext& context, float deltaTime) {
 	// 前フレームのビームも含め、接触履歴を更新する
 	previousContacts_.swap(currentContacts_);
 	currentContacts_.clear();
@@ -222,7 +223,7 @@ void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManage
 #pragma endregion 敵同士の当たり判定
 
 #pragma region プレイヤーと爆発範囲の当たり判定
-	for (const auto& bomb : bombManager.GetBombs()) {
+	for (const auto& bomb : enemyWeapons.GetBombs()) {
 		if (bomb->IsExploded() && Collision::Intersect(player.GetBodyCol(), bomb->GetBombCollision())) {
 			NotifyContact(player, Body, *bomb, Explosion, context);
 		}
@@ -317,8 +318,8 @@ void CollisionManager::CheckCollisions(Player& player, EnemyManager& enemyManage
 }
 
 void CollisionManager::CheckEnemyBeams(
-    Player& player, EnemyManager& enemyManager, EnemyBulletManager& bulletManager, Stage& stage, const CollisionContext& context, float deltaTime) {
-	const auto& bullets = bulletManager.GetBullets();
+    Player& player, EnemyManager& enemyManager, const EnemyWeaponManager& enemyWeapons, Stage& stage, const CollisionContext& context, float deltaTime) {
+	const auto& bullets = enemyWeapons.GetBullets();
 	if (bullets.empty()) {
 		return;
 	}

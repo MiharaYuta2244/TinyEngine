@@ -19,8 +19,7 @@ void EnemyAI::Initialize(Transform* transform, EngineContext* ctx, IEnemyBehavio
 }
 
 void EnemyAI::Update(
-    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager,
-    EnemyBombManager* enemyBombManager, const std::optional<Vector3>& distraction) {
+    float deltaTime, Player* player, EnemyWeaponManager& enemyWeapons, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, const std::optional<Vector3>& distraction) {
 	// 炎上した敵への注意より、プレイヤーの視認を優先する
 	if (distraction && (state_ == State::Normal || state_ == State::Vigilance) && !CheckPlayerInVision(player, obstacles, doorManager, glassManager)) {
 		LookatPlayer(deltaTime, *distraction, transform_->translate, hearTurnSpeed_);
@@ -35,10 +34,10 @@ void EnemyAI::Update(
 		UpdateNormal(deltaTime, player, obstacles, doorManager, glassManager);
 		break;
 	case State::Vigilance:
-		UpdateVigilance(deltaTime, player, enemyBulletManager, obstacles, doorManager, glassManager, enemyBombManager);
+		UpdateVigilance(deltaTime, player, enemyWeapons, obstacles, doorManager, glassManager);
 		break;
 	case State::Hold:
-		UpdateHold(deltaTime, player, enemyBulletManager, enemyBombManager);
+		UpdateHold(deltaTime, player, enemyWeapons);
 		break;
 	case State::Burning:
 		UpdateBurning(deltaTime, obstacles, doorManager, glassManager);
@@ -204,8 +203,7 @@ void EnemyAI::UpdateNormal(float deltaTime, Player* player, const std::vector<AA
 }
 
 void EnemyAI::UpdateVigilance(
-    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager,
-    EnemyBombManager* enemyBombManager) {
+    float deltaTime, Player* player, EnemyWeaponManager& enemyWeapons, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager) {
 	Vector3 playerPos = player->GetPosition();
 	Vector3 enemyPos = transform_->translate;
 
@@ -234,7 +232,7 @@ void EnemyAI::UpdateVigilance(
 		// 弾の発射処理
 		if (shotTimer_ >= GetShotInterval()) {
 			// 射撃
-			Shot(toTarget, enemyBulletManager, enemyBombManager);
+			Shot(toTarget, enemyWeapons);
 
 			// SE再生
 			audioManager_->PlaySE("Shot", 0.3f);
@@ -297,7 +295,7 @@ void EnemyAI::UpdateVigilance(
 	float distSq = toTarget.x * toTarget.x + toTarget.z * toTarget.z;
 }
 
-void EnemyAI::UpdateHold(float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager) {
+void EnemyAI::UpdateHold(float deltaTime, Player* player, EnemyWeaponManager& enemyWeapons) {
 	if (!isShotHoldState_ || hasShotInHold_)
 		return;
 
@@ -310,7 +308,7 @@ void EnemyAI::UpdateHold(float deltaTime, Player* player, EnemyBulletManager* en
 	if (burstDuration <= 0.0f) {
 		shotTimer_ += deltaTime;
 		if (shotTimer_ >= GetHoldChargeTime()) {
-			Shot(playerDirection, enemyBulletManager, enemyBombManager, false);
+			Shot(playerDirection, enemyWeapons, false);
 			audioManager_->PlaySE("Shot", 0.3f);
 			isShotHoldState_ = false;
 			hasShotInHold_ = true;
@@ -337,7 +335,7 @@ void EnemyAI::UpdateHold(float deltaTime, Player* player, EnemyBulletManager* en
 
 	if (holdBurstShotTimer_ >= interval) {
 		holdBurstShotTimer_ -= interval;
-		Shot(playerDirection, enemyBulletManager, enemyBombManager, false);
+		Shot(playerDirection, enemyWeapons, false);
 		audioManager_->PlaySE("Shot", 0.2f);
 	}
 
@@ -454,10 +452,10 @@ bool EnemyAI::IsSegmentIntersectAABB(const Vector3& start, const Vector3& end, c
 	return true; // 交差している
 }
 
-void EnemyAI::Shot(Vector3 toTarget, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager, bool aimAtTarget) {
+void EnemyAI::Shot(Vector3 toTarget, EnemyWeaponManager& enemyWeapons, bool aimAtTarget) {
 	isFirstShot_ = false; // 以降は通常の連射間隔
 	shotTimer_ = 0.0f;
-	pendingShot_ = ShotContext{ctx_, transform_->translate, toTarget, lastKnownPlayerPos_, {}, {}, 0, enemyBulletManager, enemyBombManager};
+	pendingShot_.emplace(ShotContext{ctx_, transform_->translate, toTarget, lastKnownPlayerPos_, {}, {}, 0, enemyWeapons});
 	aimPendingShotAtTarget_ = aimAtTarget;
 }
 

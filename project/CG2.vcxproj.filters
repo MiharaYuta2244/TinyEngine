@@ -258,7 +258,7 @@
     <ClCompile Include="Engine\Time\GameTimer.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Application\GameObjects\Enemy\Weapon\EnemyBulletManager.cpp">
+    <ClCompile Include="Application\GameObjects\Enemy\Weapon\EnemyWeaponManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\GameObjects\StageObjects\Wall\Wall.cpp">
@@ -427,9 +427,6 @@
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\GameObjects\Enemy\Weapon\EnemyBomb.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
-    <ClCompile Include="Application\GameObjects\Enemy\Weapon\EnemyBombManager.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
     <ClCompile Include="Application\Editor\EditorCommand.cpp">
@@ -850,7 +847,7 @@
     <ClInclude Include="Engine\Math\MathLib\Rect.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Application\GameObjects\Enemy\Weapon\EnemyBulletManager.h">
+    <ClInclude Include="Application\GameObjects\Enemy\Weapon\EnemyWeaponManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObjects\StageObjects\Wall\Wall.h">
@@ -1052,9 +1049,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObjects\Enemy\Weapon\EnemyBomb.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Application\GameObjects\Enemy\Weapon\EnemyBombManager.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Application\GameObjects\PlaceableObject.h">

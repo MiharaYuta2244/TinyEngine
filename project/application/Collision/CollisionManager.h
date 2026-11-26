@@ -5,8 +5,7 @@
 
 class Player;
 class EnemyManager;
-class EnemyBulletManager;
-class EnemyBombManager;
+class EnemyWeaponManager;
 class Stage;
 
 /// <summary>
@@ -16,11 +15,11 @@ class CollisionManager {
 public:
 	// 全てのゲームオブジェクトの当たり判定の処理を回す
 	void CheckCollisions(
-	    Player& player, EnemyManager& enemyManager, EnemyBombManager& bombManager,
+	    Player& player, EnemyManager& enemyManager, const EnemyWeaponManager& enemyWeapons,
 	    Stage& stage, const CollisionContext& context, float deltaTime);
 
 	void CheckEnemyBeams(
-	    Player& player, EnemyManager& enemyManager, EnemyBulletManager& bulletManager, Stage& stage,
+	    Player& player, EnemyManager& enemyManager, const EnemyWeaponManager& enemyWeapons, Stage& stage,
 	    const CollisionContext& context, float deltaTime);
 
 private:

@@ -5,8 +5,7 @@
 #include <memory>
 #include <list>
 
-class EnemyBulletManager;
-class EnemyBombManager;
+class EnemyWeaponManager;
 
 namespace TinyEngine {
 class Particle;
@@ -20,8 +19,7 @@ struct ShotContext {
 	Vector3 muzzle;
 	Vector3 beamDirection;
 	std::uint64_t shooterId;
-	EnemyBulletManager* bullets;
-	EnemyBombManager* bombs;
+	EnemyWeaponManager& weapons;
 };
 
 /// <summary>

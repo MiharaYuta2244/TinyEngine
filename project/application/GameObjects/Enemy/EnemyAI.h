@@ -10,8 +10,7 @@
 #include <optional>
 #include <vector>
 
-class EnemyBulletManager;
-class EnemyBombManager;
+class EnemyWeaponManager;
 class Player;
 
 using DoorManager = GameObjectManager<Door>;
@@ -35,8 +34,7 @@ public:
 
 	// 更新処理
 	void Update(
-	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager,
-	    EnemyBombManager* enemyBombManager, const std::optional<Vector3>& distraction);
+	    float deltaTime, Player* player, EnemyWeaponManager& enemyWeapons, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager, const std::optional<Vector3>& distraction);
 
 	void Ignite();
 	bool IsBurning() const { return state_ == State::Burning; }
@@ -125,11 +123,10 @@ private:
 
 	// 警戒状態の更新処理
 	void UpdateVigilance(
-	    float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager,
-	    EnemyBombManager* enemyBombManager);
+	    float deltaTime, Player* player, EnemyWeaponManager& enemyWeapons, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager);
 
 	// 拘束状態の更新処理
-	void UpdateHold(float deltaTime, Player* player, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager);
+	void UpdateHold(float deltaTime, Player* player, EnemyWeaponManager& enemyWeapons);
 
 	// プレイヤーが視界内にいるか判定する
 	bool CheckPlayerInVision(Player* player, const std::vector<AABB>& obstacles, DoorManager* doorManager, GlassManager* glassManager);
@@ -138,7 +135,7 @@ private:
 	bool IsSegmentIntersectAABB(const Vector3& start, const Vector3& end, const AABB& aabb);
 
 	// 弾の発射処理
-	void Shot(Vector3 toTarget, EnemyBulletManager* enemyBulletManager, EnemyBombManager* enemyBombManager, bool aimAtTarget = true);
+	void Shot(Vector3 toTarget, EnemyWeaponManager& enemyWeapons, bool aimAtTarget = true);
 
 private:
 	Transform* transform_ = nullptr;

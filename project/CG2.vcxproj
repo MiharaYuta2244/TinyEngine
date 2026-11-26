@@ -174,7 +174,6 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Application\Effect\EffectGenerator.cpp" />
     <ClCompile Include="Application\UI\ControlUI\ControlUI.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\Weapon\EnemyBomb.cpp" />
-    <ClCompile Include="Application\GameObjects\Enemy\Weapon\EnemyBombManager.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\Behavior\EnemyBehaviorBase.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\Behavior\AssaultBehavior.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\Behavior\BomberBehavior.cpp" />
@@ -193,7 +192,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClCompile Include="Application\GameObjects\Enemy\Enemy.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\EnemyAI.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\Weapon\EnemyBullet.cpp" />
-    <ClCompile Include="Application\GameObjects\Enemy\Weapon\EnemyBulletManager.cpp" />
+    <ClCompile Include="Application\GameObjects\Enemy\Weapon\EnemyWeaponManager.cpp" />
     <ClCompile Include="Application\GameObjects\Enemy\EnemyManager.cpp" />
     <ClCompile Include="Engine\Rendering\PostEffect\CopyImage.cpp" />
     <ClCompile Include="Engine\Editor\Easing\EasingEditor.cpp" />
@@ -424,7 +423,6 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\Effect\EffectGenerator.h" />
     <ClInclude Include="Application\UI\ControlUI\ControlUI.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Weapon\EnemyBomb.h" />
-    <ClInclude Include="Application\GameObjects\Enemy\Weapon\EnemyBombManager.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Behavior\EnemyBehaviorBase.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Behavior\AssaultBehavior.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Behavior\BomberBehavior.h" />
@@ -448,7 +446,7 @@ xcopy /Y "$(windowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDi
     <ClInclude Include="Application\GameObjects\Enemy\Enemy.h" />
     <ClInclude Include="Application\GameObjects\Enemy\EnemyAI.h" />
     <ClInclude Include="Application\GameObjects\Enemy\Weapon\EnemyBullet.h" />
-    <ClInclude Include="Application\GameObjects\Enemy\Weapon\EnemyBulletManager.h" />
+    <ClInclude Include="Application\GameObjects\Enemy\Weapon\EnemyWeaponManager.h" />
     <ClInclude Include="Application\GameObjects\Enemy\EnemyManager.h" />
     <ClInclude Include="Engine\Rendering\PostEffect\CopyImage.h" />
     <ClInclude Include="Engine\Rendering\Material\ParticleMaterial.h" />
